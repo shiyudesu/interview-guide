@@ -1,19 +1,92 @@
-# AI Interview Platform Agent Rules
+# AI Interview Platform Agent Guide
 
-Spring Boot 4.1.0 + Java 25 + Spring AI 2.0.0 + React 面试平台。
+## Project State
 
-本文件是跨工具 Agent 入口，只放长期有效、代码里不容易直接推断、猜错会影响结果的规则。更细的目录规则放在 `.claude/rules/`，需要时再读取。
+This repository is migrating its backend from Java/Spring to Python/FastAPI. The
+complete migration contract and phase gates are defined in
+`docs/MIGRATION_PLAN.md`; treat that document as the source of truth.
 
-## Tech Stack
+- `app/` is the current Java implementation and the behavior reference during
+  migration.
+- `backend/` is the target Python backend. Create and migrate code there.
+- `frontend/` remains the React application and should not require business
+  changes for the backend migration.
+- Do not remove Java, Gradle, Flyway, or JVM-related files until every final
+  gate in `docs/MIGRATION_PLAN.md` passes.
+- Migration tasks replace implementation only. Record existing defects
+  separately instead of fixing or redesigning behavior while porting it.
 
-- Backend: Spring Boot 4.1.0 / Java 25 / Gradle / Spring AI 2.0.0
-- Database: PostgreSQL + pgvector，向量维度 1024，距离类型 COSINE
-- Cache & async: Redis / Redisson / Redis Stream
-- Storage & parsing: RustFS/S3 / Apache Tika
-- Mapping & export: MapStruct / iText 8 / SpringDoc OpenAPI
-- Frontend: React 18 / TypeScript / Vite / TailwindCSS 4，代码在 `frontend/`
+## Compatibility Is the Primary Requirement
 
-## Commands
+The Python implementation must preserve all externally observable behavior:
+
+- REST paths, methods, request parameters, response fields, defaults, error
+  codes, error messages, null handling, ordering, and date-time formats.
+- HTTP 200 responses for ordinary business errors, except for existing file,
+  SSE, and WebSocket behavior.
+- PostgreSQL tables, column types, constraints, indexes, state machines, and
+  transaction boundaries.
+- Redis keys, TTLs, Streams, message fields, retry counts, reclaim/ACK order,
+  idempotency, and rate-limit semantics.
+- Prompt text, Skill resources, provider selection, model parameters,
+  structured output, retries, and fallback order.
+- SSE framing and WebSocket message types, ordering, timeouts, pause/resume,
+  ASR, and TTS behavior.
+- File validation, parsing output, hashes, object keys, download headers, and
+  visible PDF content.
+
+Use contract tests and golden-master fixtures to prove equivalence. Do not rely
+on a new implementation merely appearing reasonable.
+
+## Target Stack
+
+- Python 3.13, uv, FastAPI, Uvicorn, Pydantic v2.
+- SQLAlchemy 2.0, psycopg 3, Alembic, PostgreSQL, pgvector.
+- LangGraph, langchain-openai, and a project-owned LLM adapter.
+- redis-py asyncio with direct Redis Stream consumer-group operations.
+- APScheduler in a separate single-instance scheduler process.
+- boto3 for RustFS/S3-compatible storage.
+- python-magic, pdfminer.six/pypdf, python-docx, and antiword or LibreOffice for
+  document parsing; no JVM-based parser.
+- ReportLab for PDF generation.
+- pytest, pytest-asyncio, pytest-mock, Ruff, and mypy.
+- React 18, TypeScript, Vite, Tailwind CSS 4, and pnpm in `frontend/`.
+
+PostgreSQL/pgvector, Redis, Redis Stream, RustFS/S3, API port `8080`, and the
+React frontend remain part of the architecture.
+
+## Repository Layout
+
+```text
+app/                    Current Java behavior reference
+backend/                Target Python API, worker, scheduler, and tests
+frontend/               Existing React frontend
+docs/MIGRATION_PLAN.md  Migration phases, invariants, and completion gates
+docker-compose.dev.yml  Local PostgreSQL, Redis, and RustFS dependencies
+.github/workflows/      Repository CI
+.githooks/              Optional local Git hooks
+```
+
+The target Python package is `backend/src/interview_guide/`:
+
+- `common/`: API response, errors, config, database, Redis, AI, and evaluation.
+- `infrastructure/`: document parsing, export, storage, and mapping.
+- `modules/`: business modules, each owning its API/service/repository layers.
+- `main.py`: FastAPI application.
+- `worker.py`: Redis Stream consumers.
+- `scheduler.py`: scheduled recovery and expiration jobs.
+- `backend/resources/`: prompts, Skills, scripts, fonts, and static resources.
+
+## Development Commands
+
+Start local dependencies:
+
+```bash
+cp .env.example .env
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Current Java baseline:
 
 ```bash
 ./gradlew :app:compileJava
@@ -21,89 +94,125 @@ Spring Boot 4.1.0 + Java 25 + Spring AI 2.0.0 + React 面试平台。
 ./gradlew :app:bootRun
 ```
 
-```bash
-cd frontend && pnpm run dev
-cd frontend && pnpm run build
-```
+Python backend, after `backend/pyproject.toml` is introduced:
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d
+cd backend
+uv sync --frozen
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src
+uv run pytest
+uv run uvicorn interview_guide.main:app --host 0.0.0.0 --port 8080
 ```
 
-## Project Structure
+Frontend:
 
-- `app/src/main/java/interview/guide/common/`: 通用能力，包括限流、AI 调用、异步模板、配置、异常、统一响应。
-- `app/src/main/java/interview/guide/infrastructure/`: 技术基础设施，包括文件、导出、Redis、MapStruct 映射。
-- `app/src/main/java/interview/guide/modules/`: 业务模块，每个模块自包含 MVC 分层。
-- `app/src/main/resources/prompts/`: StringTemplate Prompt 模板。
-- `frontend/src/`: React 前端页面、组件、API 客户端和类型定义。
+```bash
+cd frontend
+pnpm install --frozen-lockfile
+pnpm run dev
+pnpm run build
+```
 
-## Architecture
+Stop local dependencies with
+`docker compose -f docker-compose.dev.yml down`. Use `down -v` only when
+intentionally discarding local development data.
 
-- 后端遵循 `Controller -> Service -> Repository`，Controller 只做路由、校验和委托。
-- Service 承担业务编排；`@Transactional` 只放 Service 层，并保持事务范围最小。
-- Repository 继承 Spring Data JPA `JpaRepository`，自定义查询用方法名或 `@Query`。
-- 基础设施能力优先放在 `common/` 或 `infrastructure/`，不要散落到业务 Service。
-- 对外响应统一使用 `Result<T>`，禁止直接返回 Entity。
+## Migration Workflow
 
-## Backend Rules
+1. Freeze the current Java behavior with contract fixtures before porting a
+   module.
+2. Implement the equivalent Python module under `backend/`.
+3. Add unit, integration, and Java/Python comparison tests.
+4. Verify the existing frontend flow without changing its business behavior.
+5. Keep the Java reference until the relevant module and final migration gates
+   pass.
 
-- 业务异常必须使用 `BusinessException(ErrorCode.XXX, "描述信息")`。
-- 全局异常处理器返回 HTTP 200 + `Result.error(code, message)`。
-- 请求体优先用不可变 `record`，命名后缀使用 `XxxRequest` / `XxxResponse` / `XxxDTO` / `XxxEntity`。
-- Entity 到 DTO/Response 的映射优先使用 MapStruct。
-- 使用构造器注入，优先配合 Lombok `@RequiredArgsConstructor`。
-- 代码使用 2 空格缩进、无通配符导入、避免内联全限定类名。
-- 日志使用 SLF4J 占位符，异常必须作为最后一个参数传入。
+Migrate modules in the risk order defined in `docs/MIGRATION_PLAN.md`. Preserve
+the `app` Compose service name even after its implementation becomes Python.
 
-## AI And Async Rules
+## Python Architecture and Style
 
-- 获取聊天模型统一走 `LlmProviderRegistry.getChatClientOrDefault(provider)`。
-- 结构化输出统一走 `StructuredOutputInvoker`，不要在业务代码里复制重试逻辑。
-- Prompt 模板放在 `resources/prompts/`，使用 StringTemplate `.st`。
-- LLM、S3、外部 HTTP 调用不得放在数据库事务内。
-- Redis Stream 生产/消费使用 `AbstractStreamProducer` / `AbstractStreamConsumer` 模板。
-- 异步处理前先校验实体是否存在；实体已删除时 ACK 丢弃。
-- 限流使用可重复 `@RateLimit`，不要手写散落的 Redis 限流逻辑。
+- Keep FastAPI routes thin: parse/validate, delegate, and translate the result.
+- Put business orchestration in services and persistence in repositories.
+- Use Pydantic models for API boundaries and SQLAlchemy models for persistence;
+  never return ORM entities directly.
+- Emit camelCase API fields and preserve the current null and time behavior.
+- Raise project `BusinessException` values backed by `ErrorCode`; translate
+  validation and business failures through the global exception layer.
+- Keep transactions short. Never perform LLM, S3, document parsing, or external
+  HTTP calls inside a database transaction.
+- Use explicit type annotations. Pass Ruff formatting/linting and mypy without
+  broad ignores or unsafe casts.
+- Do not use bare `except`, silently swallow failures, or return success-shaped
+  fallbacks for unexpected errors.
+- Avoid per-row database calls; use batch queries and writes.
+- Use dependency injection through FastAPI dependencies or explicit
+  constructors; do not create infrastructure clients inside business methods.
 
-## Config And Data
+## AI, LangGraph, and Async Rules
 
-- 配置集中在 `application.yml`、`.env` 和 `@ConfigurationProperties` 类中。
-- API Key、数据库密码等敏感信息只放 `.env`，不得提交到 Git。
-- 不要在 Service 中散落 `@Value`。
-- 本地默认后端端口是 `8080`：`server.port: ${SERVER_PORT:8080}`。
-- 开发环境 `ddl-auto` 可为 `update`，生产环境不能依赖自动建表。
+- Obtain all model and embedding clients through the Python
+  `LlmProviderRegistry`.
+- Route every single model call through the shared LLM adapter.
+- Use LangGraph only for multi-step, branching, parallel, or fallback workflows
+  listed in the migration plan; do not wrap simple calls in one-node graphs.
+- Disable hidden SDK, LangChain, and LangGraph retries. Implement only the
+  existing retry and fallback behavior.
+- Keep prompts and Skill/reference files byte-for-byte compatible and cover the
+  renderer with snapshots.
+- Do not place WebSocket lifecycle, ASR, TTS, or audio chunk transport inside
+  LangGraph.
+- Implement Redis Streams directly with consumer groups, reclaim, retry,
+  republish, and ACK order matching the Java baseline. Do not replace them with
+  Celery, RQ, pub/sub, or an in-memory queue.
+- Before async work, verify the referenced entity still exists. ACK and discard
+  messages for entities that were intentionally deleted.
+
+## Data, Files, and Configuration
+
+- Treat the current PostgreSQL catalog as authoritative; do not modernize enum,
+  JSON, timezone, cascade, constraint, or index choices during migration.
+- Keep pgvector dimension `1024` and cosine distance semantics.
+- Manage schema changes with Alembic in Python. Compare actual PostgreSQL
+  catalogs, not only ORM declarations.
+- Preserve current file size limits, MIME allowlists, text cleaning, SHA-256
+  deduplication, object key generation, and response headers.
+- Configuration belongs in typed settings loaded from environment variables and
+  supported config files. Do not scatter environment reads through services.
+- Store API keys, database passwords, and other secrets only in local `.env` or
+  secret stores. Never commit credentials or log unmasked secrets.
 
 ## Frontend Rules
 
-- API 调用集中在 `frontend/src/api/`，复用 `request.ts` 的 Axios 实例。
-- 类型定义放在 `frontend/src/types/`，不要在页面里重复定义共享接口。
-- 页面放在 `frontend/src/pages/`，可复用 UI 放在 `frontend/src/components/`。
-- 路由常量放在 `frontend/src/constants/routes.ts`。
-- 组件交互优先使用现有设计语言和 `lucide-react` 图标。
+- Keep API clients in `frontend/src/api/` and reuse its shared Axios instance.
+- Keep shared interfaces in `frontend/src/types/`, pages in
+  `frontend/src/pages/`, reusable UI in `frontend/src/components/`, and route
+  constants in `frontend/src/constants/routes.ts`.
+- Reuse the existing design language and `lucide-react` icons.
+- Backend migration must not trigger unrelated UI redesign or API reshaping.
 
-## Testing
+## Testing and Completion
 
-- 后端测试使用 JUnit 5 + Mockito + AssertJ。
-- 测试意图用中文 `@DisplayName` 描述，复杂场景用 `@Nested` 分组。
-- 集成测试使用 H2 配置；限流相关测试需要真实 Redis。
-- 改后端公共能力时至少运行 `./gradlew :app:test --no-daemon`。
-- 改前端时至少运行 `cd frontend && pnpm run build`。
+- Add or update tests for every migrated behavior, including failure,
+  retry/reclaim, idempotency, timeout, and interrupted-stream cases.
+- Run the smallest relevant checks while iterating, then the full checks for the
+  touched backend or frontend before completion.
+- Changes to shared backend infrastructure require the complete backend test
+  suite for the implementation being changed.
+- Frontend changes require `pnpm run build` and the relevant package scripts.
+- Java removal is allowed only after REST, schema, Redis, prompt/model, SSE,
+  WebSocket, frontend, and performance compatibility gates all pass.
 
-## Never Do
+## Git and CI
 
-- 不要 `throw new RuntimeException(...)`，业务失败必须用 `BusinessException`。
-- 不要直接返回 Entity 给前端。
-- 不要把 `@Value` 散落在 Service 中。
-- 不要在事务内调用 LLM、S3 或外部 HTTP。
-- 不要同类内部调用 `@Transactional` 方法。
-- 不要 `catch (Exception e) {}` 静默忽略。
-- 不要循环调用 DB，优先批量查询或批量写入。
-- 不要硬编码密钥、Token、数据库密码。
-- 不要使用 `Executors.newXxxThreadPool()`，需要线程池时显式配置 `ThreadPoolExecutor`。
-
-## More Rules
-
-- 后端 Java 细则：`.claude/rules/backend.md`
-- AI、限流、异步细则：`.claude/rules/ai-and-async.md`
-- 前端细则：`.claude/rules/frontend.md`
+- The default branch is `main`.
+- Commit subjects follow Conventional Commits:
+  `type(optional-scope): summary`. The summary language is unrestricted.
+- Enable local hooks with `git config core.hooksPath .githooks`.
+- `.github/workflows/ci.yml` runs the Java baseline while `app/` exists, runs
+  Python checks once `backend/pyproject.toml` exists, and always validates the
+  frontend and repository hooks.
+- Update CI, Compose, README, and this file when migration commands become
+  executable or Java is finally removed.

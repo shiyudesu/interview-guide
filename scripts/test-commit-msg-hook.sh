@@ -8,7 +8,7 @@ TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
 if [[ ! -x "$HOOK" ]]; then
-  echo "FAIL: commit-msg Hook 不存在或不可执行: $HOOK" >&2
+  echo "FAIL: commit-msg hook is missing or not executable: $HOOK" >&2
   exit 1
 fi
 
@@ -18,7 +18,7 @@ assert_accepts() {
   local file="$TEMP_DIR/$name.txt"
   printf '%s\n' "$message" > "$file"
   if ! "$HOOK" "$file" >/dev/null 2>&1; then
-    echo "FAIL: 应接受提交消息: $name" >&2
+    echo "FAIL: expected commit message to pass: $name" >&2
     return 1
   fi
 }
@@ -29,24 +29,26 @@ assert_rejects() {
   local file="$TEMP_DIR/$name.txt"
   printf '%s\n' "$message" > "$file"
   if "$HOOK" "$file" >/dev/null 2>&1; then
-    echo "FAIL: 应拒绝提交消息: $name" >&2
+    echo "FAIL: expected commit message to fail: $name" >&2
     return 1
   fi
 }
 
-assert_accepts "valid-feature" $'feat: 新增面试题导入\n\n- 增加题库文件解析流程\n- 补充导入失败的提示信息'
-assert_accepts "valid-scope" $'fix(question): 修复题目导入失败\n\n- 兼容空标签的题目数据'
+assert_accepts "english-subject" "feat: add interview question import"
+assert_accepts "chinese-subject" "docs(migration): 更新迁移检查清单"
+assert_accepts "scope-and-body" $'fix(api): preserve legacy response fields\n\nExplain the compatibility impact.\n\nRefs: #12'
+assert_accepts "breaking-change" $'refactor(backend)!: replace the backend runtime\n\nBREAKING CHANGE: implementation runtime changed without changing the API.'
+assert_accepts "git-trailer" $'test: add contract coverage\n\nAdd Java and Python golden-master cases.\n\nSigned-off-by: Example <example@example.com>'
 assert_accepts "generated-merge" "Merge branch 'main'"
-assert_accepts "generated-revert" 'Revert "feat: 新增面试题导入"'
-assert_accepts "generated-fixup" "fixup! feat: 新增面试题导入"
-assert_accepts "generated-squash" "squash! feat: 新增面试题导入"
-assert_accepts "generated-amend" "amend! feat: 新增面试题导入"
+assert_accepts "generated-revert" 'Revert "feat: add interview question import"'
+assert_accepts "generated-fixup" "fixup! feat: add interview question import"
+assert_accepts "generated-squash" "squash! feat: add interview question import"
+assert_accepts "generated-amend" "amend! feat: add interview question import"
 
-assert_rejects "english-subject" $'feat: add interview question import\n\n- 增加题库导入流程'
-assert_rejects "unsupported-type" $'feature: 增加面试题导入\n\n- 增加题库导入流程'
-assert_rejects "missing-body" "feat: 增加面试题导入"
-assert_rejects "missing-blank-line" $'feat: 增加面试题导入\n- 增加题库文件解析流程'
-assert_rejects "non-bullet-body" $'feat: 增加面试题导入\n\n增加题库文件解析流程'
-assert_rejects "english-bullet" $'feat: 增加面试题导入\n\n- add question import'
+assert_rejects "unsupported-type" "feature: add interview question import"
+assert_rejects "missing-summary" "feat: "
+assert_rejects "missing-space" "feat:add interview question import"
+assert_rejects "invalid-scope" "fix(api server): preserve response fields"
+assert_rejects "missing-blank-line" $'feat: add interview question import\nExplain the compatibility impact.'
 
-echo "PASS: commit-msg Hook 格式校验通过"
+echo "PASS: commit-msg hook validation passed"

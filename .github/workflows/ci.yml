@@ -3,10 +3,11 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,24 +17,90 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: Backend tests
+  repository-policy:
+    name: Repository policy
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Test commit message hook
+        run: bash scripts/test-commit-msg-hook.sh
+
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Detect backend implementations
+        id: backend
+        shell: bash
+        run: |
+          if [[ -f app/build.gradle ]]; then
+            echo "java=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "java=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ -f backend/pyproject.toml ]]; then
+            echo "python=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "python=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ ! -f app/build.gradle && ! -f backend/pyproject.toml ]]; then
+            echo "No supported backend implementation was found." >&2
+            exit 1
+          fi
+
       - name: Set up Java 25
+        if: steps.backend.outputs.java == 'true'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
           cache: gradle
 
-      - name: Run backend tests
+      - name: Run Java baseline tests
+        if: steps.backend.outputs.java == 'true'
         run: ./gradlew :app:test --no-daemon
+
+      - name: Set up Python 3.13
+        if: steps.backend.outputs.python == 'true'
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        if: steps.backend.outputs.python == 'true'
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install Python dependencies
+        if: steps.backend.outputs.python == 'true'
+        working-directory: backend
+        run: uv sync --frozen
+
+      - name: Run Python lint and type checks
+        if: steps.backend.outputs.python == 'true'
+        working-directory: backend
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy src
+
+      - name: Run Python tests
+        if: steps.backend.outputs.python == 'true'
+        working-directory: backend
+        run: uv run pytest
 
   frontend:
     name: Frontend tests and build

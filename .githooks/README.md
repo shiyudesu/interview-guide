@@ -1,23 +1,27 @@
-# Git 提交消息 Hook
+# Git Hooks
 
-首次克隆仓库后执行：
+Enable the repository hooks after cloning:
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
-提交消息格式：
+Commit subjects follow Conventional Commits:
 
 ```text
-feat: 中文标题
-
-- 分条说明具体改动
-- 分条说明验证或兼容性影响
+feat: add resume parsing baseline
+fix(api): preserve the legacy error response
+docs(migration): 更新迁移检查清单
 ```
 
-允许的类型为 `feat`、`fix`、`refactor`、`perf`、`test`、`docs`、`chore`、`build`、`ci`、`revert`，可使用英文 scope，例如 `fix(question): 修复题目导入失败`。
+Allowed types are `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`,
+`build`, `ci`, and `revert`. A scope and breaking-change marker are optional.
+The summary may use any language.
 
-本地验证：
+The body is optional. When present, leave one blank line after the subject.
+Bullets, paragraphs, issue references, and Git trailers are all accepted.
+
+Run the hook tests with:
 
 ```bash
 bash scripts/test-commit-msg-hook.sh
