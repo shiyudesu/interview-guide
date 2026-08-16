@@ -40,7 +40,7 @@ jobs:
   backend:
     name: Backend checks
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     services:
       redis:
         image: redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635

@@ -53,6 +53,7 @@ Python 实现必须保持：
 - pypdf 只用于加密状态和页面信息，不作为第二套正文解析 fallback。
 - DOCX：python-docx。
 - DOC：LibreOffice headless。
+- 镜像固定 libmagic 5.44-3 和 LibreOffice 7.4.7-1+deb12u14。
 - TXT/Markdown：显式编码处理和现有清洗规则。
 - PDF 导出：ReportLab 和现有中文字体。
 - ASR/TTS：项目直接封装 DashScope WebSocket 协议。

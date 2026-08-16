@@ -201,6 +201,7 @@ Redisson、Apache Tika、iText 和 DashScope Java SDK。
 ### 4.4 依赖和镜像版本
 
 - Python 固定为 3.13.13，uv 固定为 0.11.14。
+- Python 镜像中的 libmagic 固定为 5.44-3，LibreOffice 固定为 7.4.7-1+deb12u14。
 - Python 小版本、uv、Python 包、Node、pnpm 和系统包全部固定版本。
 - 前端统一使用 Node 24 和 `packageManager` 中声明的 pnpm 10.26.2。
 - 容器基础镜像必须固定标签和 digest。

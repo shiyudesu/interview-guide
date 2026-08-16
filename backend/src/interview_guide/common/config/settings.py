@@ -38,6 +38,21 @@ class Settings(BaseSettings):
         ge=1,
         validation_alias="APP_BLOCKING_WORKER_COUNT",
     )
+    document_worker_count: int = Field(
+        default=2,
+        ge=1,
+        validation_alias="APP_DOCUMENT_WORKER_COUNT",
+    )
+    document_conversion_timeout_seconds: float = Field(
+        default=60,
+        gt=0,
+        validation_alias="APP_DOCUMENT_CONVERSION_TIMEOUT_SECONDS",
+    )
+    document_conversion_max_bytes: int = Field(
+        default=100 * 1024 * 1024,
+        gt=0,
+        validation_alias="APP_DOCUMENT_CONVERSION_MAX_BYTES",
+    )
 
     postgres_host: str = Field(default="localhost", validation_alias="POSTGRES_HOST")
     postgres_port: int = Field(default=5432, validation_alias="POSTGRES_PORT")

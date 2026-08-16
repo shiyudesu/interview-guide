@@ -23,7 +23,10 @@ ENV PATH=/opt/venv/bin:$PATH \
     PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update \
-    && apt-get install --yes --no-install-recommends libmagic1=1:5.44-3 \
+    && apt-get install --yes --no-install-recommends \
+      libmagic1=1:5.44-3 \
+      libreoffice-core=4:7.4.7-1+deb12u14 \
+      libreoffice-writer=4:7.4.7-1+deb12u14 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --gid 10001 interview-guide \

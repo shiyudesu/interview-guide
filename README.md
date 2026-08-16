@@ -38,6 +38,9 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 真实模型兼容测试使用 `migration/model-proxy/` 中的本地 HTTP/WebSocket 透传记录代理；
 正常结果不会被代理修改，故障注入默认关闭。
 
+Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
+LibreOffice 7.4.7-1+deb12u14，不包含 JVM。
+
 Python 基础工程创建后使用：
 
 ```bash
