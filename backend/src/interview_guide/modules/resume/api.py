@@ -82,3 +82,12 @@ async def delete_resume(
 ) -> Response:
     await service.delete(resume_id)
     return result_response(Result.ok())
+
+
+@router.post("/{resume_id}/reanalyze")
+async def reanalyze_resume(
+    resume_id: int,
+    service: ServiceDependency,
+) -> Response:
+    await service.reanalyze(resume_id)
+    return result_response(Result.ok())

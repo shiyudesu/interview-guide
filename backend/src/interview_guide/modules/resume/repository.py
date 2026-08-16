@@ -82,6 +82,26 @@ class ResumeRepository:
         await self._session.flush()
         return resume
 
+    async def analyses(self, resume_id: int) -> list[ResumeAnalysis]:
+        result = await self._session.scalars(
+            select(ResumeAnalysis)
+            .where(ResumeAnalysis.resume_id == resume_id)
+            .order_by(ResumeAnalysis.analyzed_at.desc())
+        )
+        return list(result)
+
+    async def latest_analysis(
+        self,
+        resume_id: int,
+    ) -> ResumeAnalysis | None:
+        result = await self._session.scalars(
+            select(ResumeAnalysis)
+            .where(ResumeAnalysis.resume_id == resume_id)
+            .order_by(ResumeAnalysis.analyzed_at.desc())
+            .limit(1)
+        )
+        return result.first()
+
     async def delete_graph(self, resume_id: int) -> None:
         session_ids = select(InterviewSession.id).where(InterviewSession.resume_id == resume_id)
         await self._session.execute(

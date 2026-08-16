@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from interview_guide.common.db.models import Resume
+from interview_guide.common.db.models import Resume, ResumeAnalysis
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.redis.streams import (
     RESUME_ANALYZE,
@@ -64,6 +65,7 @@ class ResumeService:
 
     async def detail(self, resume_id: int) -> ResumeDetailResponse:
         resume = await self._required(resume_id)
+        analyses = await self._repository.analyses(resume_id)
         return ResumeDetailResponse(
             id=resume.id,
             filename=resume.original_filename,
@@ -75,7 +77,22 @@ class ResumeService:
             resume_text=resume.resume_text,
             analyze_status=resume.analyze_status,
             analyze_error=resume.analyze_error,
-            analyses=[],
+            analyses=[
+                {
+                    "id": analysis.id,
+                    "overallScore": analysis.overall_score,
+                    "contentScore": analysis.content_score,
+                    "structureScore": analysis.structure_score,
+                    "skillMatchScore": analysis.skill_match_score,
+                    "expressionScore": analysis.expression_score,
+                    "projectScore": analysis.project_score,
+                    "summary": analysis.summary,
+                    "analyzedAt": analysis.analyzed_at,
+                    "strengths": json.loads(analysis.strengths_json or "[]"),
+                    "suggestions": json.loads(analysis.suggestions_json or "[]"),
+                }
+                for analysis in analyses
+            ],
             interviews=[],
         )
 
@@ -123,7 +140,18 @@ class ResumeService:
         if existing is not None:
             existing.access_count = (existing.access_count or 0) + 1
             existing.last_accessed_at = self._now
+            analysis = await self._repository.latest_analysis(existing.id)
             await self._session.commit()
+            if analysis is not None:
+                return {
+                    "analysis": self._analysis_response(existing, analysis),
+                    "storage": {
+                        "fileKey": existing.storage_key or "",
+                        "fileUrl": existing.storage_url or "",
+                        "resumeId": existing.id,
+                    },
+                    "duplicate": True,
+                }
             return self._upload_response(existing, duplicate=True)
         await self._session.rollback()
 
@@ -182,6 +210,61 @@ class ResumeService:
                     stored.analyze_error = f"任务入队失败: {error}"[:500]
         return self._upload_response(resume, duplicate=False)
 
+    async def reanalyze(self, resume_id: int) -> None:
+        if self._streams is None or self._parser is None:
+            raise RuntimeError("Resume analysis dependencies are unavailable")
+        resume = await self._required(resume_id)
+        resume_text = resume.resume_text
+        if resume_text is None or not resume_text.strip():
+            storage_key = resume.storage_key
+            filename = resume.original_filename
+            content_type = resume.content_type
+            await self._session.rollback()
+            if not storage_key:
+                raise BusinessException(
+                    ErrorCode.RESUME_PARSE_FAILED,
+                    "无法获取简历文本内容",
+                )
+            data = await self._storage.download(storage_key)
+            resume_text = await self._parser.parse(
+                data,
+                filename,
+                content_type,
+            )
+            if not resume_text.strip():
+                raise BusinessException(
+                    ErrorCode.RESUME_PARSE_FAILED,
+                    "无法获取简历文本内容",
+                )
+        else:
+            await self._session.rollback()
+        async with self._session.begin():
+            stored = await self._repository.get(resume_id)
+            if stored is None:
+                raise BusinessException(
+                    ErrorCode.RESUME_NOT_FOUND,
+                    "简历不存在",
+                )
+            if not stored.resume_text or not stored.resume_text.strip():
+                stored.resume_text = resume_text
+            stored.analyze_status = "PENDING"
+            stored.analyze_error = None
+        try:
+            await self._streams.add(
+                RESUME_ANALYZE.key,
+                {
+                    "resumeId": str(resume_id),
+                    "content": resume_text,
+                    "retryCount": "0",
+                },
+            )
+        except Exception as error:
+            async with self._session.begin():
+                stored = await self._repository.get(resume_id)
+                if stored is not None:
+                    stored.analyze_status = "FAILED"
+                    stored.analyze_error = f"任务入队失败: {error}"[:500]
+
     @staticmethod
     def _upload_response(
         resume: Resume,
@@ -200,6 +283,26 @@ class ResumeService:
                 "fileKey": resume.storage_key or "",
             },
             "duplicate": duplicate,
+        }
+
+    @staticmethod
+    def _analysis_response(
+        resume: Resume,
+        analysis: ResumeAnalysis,
+    ) -> dict[str, object]:
+        return {
+            "overallScore": analysis.overall_score,
+            "scoreDetail": {
+                "contentScore": analysis.content_score,
+                "structureScore": analysis.structure_score,
+                "skillMatchScore": analysis.skill_match_score,
+                "expressionScore": analysis.expression_score,
+                "projectScore": analysis.project_score,
+            },
+            "summary": analysis.summary,
+            "strengths": json.loads(analysis.strengths_json or "[]"),
+            "suggestions": json.loads(analysis.suggestions_json or "[]"),
+            "originalText": resume.resume_text,
         }
 
     async def _required(self, resume_id: int) -> Resume:

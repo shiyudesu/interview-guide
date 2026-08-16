@@ -2,13 +2,25 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import uuid
+from datetime import datetime
+from pathlib import Path
 
+from interview_guide.common.ai.prompts import PromptRepository
+from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.config.settings import get_settings
+from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.redis import RedisConnection
 from interview_guide.common.redis.streams import (
+    RESUME_ANALYZE,
     STREAM_DEFINITIONS,
     RedisStreamService,
+    SequentialStreamConsumer,
+)
+from interview_guide.modules.resume.analysis import (
+    ResumeAnalyzeHandler,
+    ResumeGradingService,
 )
 from interview_guide.process import install_shutdown_handlers
 
@@ -26,15 +38,50 @@ async def run_worker(
         install_shutdown_handlers(resolved_stop_event)
     connection = redis_connection or RedisConnection(settings)
     owns_connection = redis_connection is None
+    infrastructure: RuntimeInfrastructure | None = None
     try:
-        await connection.start()
-        streams = RedisStreamService(connection.client)
+        if owns_connection:
+            infrastructure = RuntimeInfrastructure(settings)
+            await infrastructure.start()
+            streams = infrastructure.streams
+        else:
+            await connection.start()
+            streams = RedisStreamService(connection.client)
         for definition in STREAM_DEFINITIONS:
             await streams.ensure_group(definition)
         logger.info("worker started streamCount=%s", len(STREAM_DEFINITIONS))
-        await resolved_stop_event.wait()
+        if infrastructure is None:
+            await resolved_stop_event.wait()
+        else:
+            resources = Path(__file__).resolve().parents[2] / "resources"
+            grading = ResumeGradingService(
+                infrastructure.provider_registry,
+                StructuredOutputInvoker(infrastructure.llm_adapter),
+                PromptRepository(resources),
+            )
+            if settings.migration_fixed_time:
+                fixed_now = datetime.fromisoformat(settings.migration_fixed_time)
+
+                def now_factory() -> datetime:
+                    return fixed_now
+            else:
+                now_factory = datetime.now
+            consumer = SequentialStreamConsumer(
+                streams,
+                RESUME_ANALYZE,
+                f"{RESUME_ANALYZE.consumer_prefix}{str(uuid.uuid4())[:8]}",
+                ResumeAnalyzeHandler(
+                    infrastructure.database.sessions,
+                    streams,
+                    grading,
+                    now_factory,
+                ),
+            )
+            await consumer.run(resolved_stop_event)
     finally:
-        if owns_connection:
+        if infrastructure is not None:
+            await infrastructure.close()
+        elif owns_connection:
             await connection.close()
         logger.info("worker stopped")
 
