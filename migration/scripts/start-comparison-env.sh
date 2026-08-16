@@ -105,6 +105,7 @@ start_java() {
     POSTGRES_PASSWORD=comparison-password \
     REDIS_HOST=localhost \
     REDIS_PORT="$redis_port" \
+    CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:4173 \
     TZ=Asia/Shanghai \
     APP_STORAGE_ENDPOINT=http://localhost:19000 \
     APP_STORAGE_ACCESS_KEY=comparison-access \
@@ -151,6 +152,7 @@ start_python() {
       POSTGRES_PASSWORD=comparison-password \
       REDIS_HOST=localhost \
       REDIS_PORT=26379 \
+      CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:4173 \
       TZ=Asia/Shanghai \
       MIGRATION_FIXED_TIME=2026-08-16T08:00:00 \
       MIGRATION_FILE_UUID=12345678-0000-0000-0000-000000000000 \
@@ -173,6 +175,7 @@ start_python() {
       POSTGRES_PASSWORD=comparison-password \
       REDIS_HOST=localhost \
       REDIS_PORT=26379 \
+      CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:4173 \
       TZ=Asia/Shanghai \
       MIGRATION_FIXED_TIME=2026-08-16T08:00:00 \
       MIGRATION_FILE_UUID=12345678-0000-0000-0000-000000000000 \
