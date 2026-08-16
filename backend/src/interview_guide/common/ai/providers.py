@@ -237,6 +237,54 @@ class ProviderRepository:
             setting.default_embedding_provider_id = provider_id
             setting.updated_at = updated_at
 
+    async def create_provider(self, provider: LlmProviderConfig) -> None:
+        async with self._sessions() as session, session.begin():
+            if await session.get(LlmProviderConfig, provider.id) is not None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_ALREADY_EXISTS,
+                    f"Provider '{provider.id}' 已存在",
+                )
+            session.add(provider)
+
+    async def update_provider(
+        self,
+        provider_id: str,
+        values: dict[str, object],
+    ) -> None:
+        async with self._sessions() as session, session.begin():
+            provider = await session.get(LlmProviderConfig, provider_id)
+            if provider is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_NOT_FOUND,
+                    f"Provider '{provider_id}' 不存在",
+                )
+            for name, value in values.items():
+                setattr(provider, name, value)
+
+    async def delete_provider(self, provider_id: str) -> None:
+        async with self._sessions() as session, session.begin():
+            setting = await session.get(LlmGlobalSetting, GLOBAL_SETTING_ID)
+            if setting is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "默认 Provider 配置未初始化",
+                )
+            if provider_id in {
+                setting.default_chat_provider_id,
+                setting.default_embedding_provider_id,
+            }:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_DEFAULT_CANNOT_DELETE,
+                    f"默认 Provider '{provider_id}' 不可删除，请先切换默认 Provider",
+                )
+            provider = await session.get(LlmProviderConfig, provider_id)
+            if provider is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_NOT_FOUND,
+                    f"Provider '{provider_id}' 不存在",
+                )
+            await session.delete(provider)
+
     async def clear_for_tests(self) -> None:
         async with self._sessions() as session, session.begin():
             await session.execute(delete(LlmGlobalSetting))

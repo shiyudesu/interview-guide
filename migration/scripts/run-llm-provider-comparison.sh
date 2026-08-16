@@ -12,6 +12,24 @@ cat >"$cases_file" <<'JSON'
     {"id":"provider-missing","method":"GET","path":"/api/llm-provider/missing"},
     {"id":"provider-defaults","method":"GET","path":"/api/llm-provider/default-provider"},
     {
+      "id":"provider-create",
+      "method":"POST",
+      "path":"/api/llm-provider",
+      "headers":{"Content-Type":"application/json"},
+      "body":"{\"id\":\"custom\",\"baseUrl\":\"https://example.invalid/v1\",\"apiKey\":\"custom-secret\",\"model\":\"custom-chat\",\"embeddingModel\":null,\"embeddingDimensions\":null,\"supportsEmbedding\":false,\"temperature\":0.3}"
+    },
+    {"id":"provider-created-detail","method":"GET","path":"/api/llm-provider/custom"},
+    {
+      "id":"provider-update",
+      "method":"PUT",
+      "path":"/api/llm-provider/custom",
+      "headers":{"Content-Type":"application/json"},
+      "body":"{\"baseUrl\":\"https://example.invalid/openai/v1\",\"apiKey\":\"updated-secret\",\"model\":\"custom-chat-v2\",\"temperature\":0.4}"
+    },
+    {"id":"provider-updated-detail","method":"GET","path":"/api/llm-provider/custom"},
+    {"id":"provider-delete","method":"DELETE","path":"/api/llm-provider/custom"},
+    {"id":"provider-deleted-detail","method":"GET","path":"/api/llm-provider/custom"},
+    {
       "id":"provider-update-chat-default",
       "method":"PUT",
       "path":"/api/llm-provider/default-provider",

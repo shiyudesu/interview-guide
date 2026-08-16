@@ -10,8 +10,10 @@ from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.models import LlmProviderConfig
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.llm_provider.models import (
+    CreateProviderRequest,
     DefaultProviderRequest,
     ProviderResponse,
+    UpdateProviderRequest,
 )
 
 
@@ -93,6 +95,95 @@ class LlmProviderService:
     async def reload(self) -> None:
         await self._registry.reload()
 
+    async def create(self, request: CreateProviderRequest) -> None:
+        provider_id = self._required(request.id, "id 不能为空")
+        base_url = self._required(request.base_url, "baseUrl 不能为空")
+        model = self._required(request.model, "model 不能为空")
+        api_key = self._required(request.api_key, "apiKey 不能为空")
+        embedding_model = self._trim(request.embedding_model)
+        dimensions = self._dimensions(request.embedding_dimensions)
+        supports_embedding = (
+            request.supports_embedding
+            if request.supports_embedding is not None
+            else embedding_model is not None
+        )
+        self._validate_embedding(
+            provider_id,
+            supports_embedding,
+            embedding_model,
+            dimensions,
+        )
+        encrypted = self._encryption.encrypt(api_key)
+        timestamp = provider_now(self._settings)
+        await self._repository.create_provider(
+            LlmProviderConfig(
+                id=provider_id,
+                api_key_ciphertext=encrypted.ciphertext,
+                api_key_nonce=encrypted.nonce,
+                base_url=base_url,
+                builtin=False,
+                created_at=timestamp,
+                embedding_dimensions=dimensions,
+                embedding_model=embedding_model,
+                enabled=True,
+                model=model,
+                supports_embedding=supports_embedding,
+                temperature=request.temperature,
+                updated_at=timestamp,
+            )
+        )
+        await self._registry.publish_change()
+
+    async def update(
+        self,
+        provider_id: str,
+        request: UpdateProviderRequest,
+    ) -> None:
+        provider = await self._repository.get_provider(provider_id)
+        values: dict[str, object] = {}
+        for field_name, value, message in (
+            ("base_url", request.base_url, "baseUrl 不能为空字符串"),
+            ("model", request.model, "model 不能为空字符串"),
+            ("api_key", request.api_key, "apiKey 不能为空字符串"),
+        ):
+            trimmed = self._trim(value)
+            if value is not None and trimmed is None:
+                raise BusinessException(ErrorCode.BAD_REQUEST, message)
+            if trimmed is not None and field_name != "api_key":
+                values[field_name] = trimmed
+        embedding_model = provider.embedding_model
+        dimensions = provider.embedding_dimensions or self._settings.ai_embedding_dimensions
+        supports_embedding = provider.supports_embedding
+        if request.embedding_model is not None:
+            embedding_model = self._trim(request.embedding_model)
+            values["embedding_model"] = embedding_model
+        if request.embedding_dimensions is not None:
+            dimensions = self._dimensions(request.embedding_dimensions)
+            values["embedding_dimensions"] = dimensions
+        if request.supports_embedding is not None:
+            supports_embedding = request.supports_embedding
+            values["supports_embedding"] = supports_embedding
+        self._validate_embedding(
+            provider_id,
+            supports_embedding,
+            embedding_model,
+            dimensions,
+        )
+        if request.temperature is not None:
+            values["temperature"] = request.temperature
+        trimmed_api_key = self._trim(request.api_key)
+        if trimmed_api_key is not None:
+            encrypted = self._encryption.encrypt(trimmed_api_key)
+            values["api_key_nonce"] = encrypted.nonce
+            values["api_key_ciphertext"] = encrypted.ciphertext
+        values["updated_at"] = provider_now(self._settings)
+        await self._repository.update_provider(provider_id, values)
+        await self._registry.publish_change()
+
+    async def delete(self, provider_id: str) -> None:
+        await self._repository.delete_provider(provider_id)
+        await self._registry.publish_change()
+
     def _response(
         self,
         provider: LlmProviderConfig,
@@ -123,3 +214,46 @@ class LlmProviderService:
         if value is None or not value.strip():
             raise BusinessException(ErrorCode.BAD_REQUEST, message)
         return value.strip()
+
+    @staticmethod
+    def _trim(value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None
+
+    def _dimensions(self, value: int | None) -> int:
+        return value if value is not None and value > 0 else self._settings.ai_embedding_dimensions
+
+    @staticmethod
+    def _validate_embedding(
+        provider_id: str,
+        supports_embedding: bool,
+        embedding_model: str | None,
+        dimensions: int,
+    ) -> None:
+        if not supports_embedding:
+            return
+        if embedding_model is None:
+            raise BusinessException(
+                ErrorCode.BAD_REQUEST,
+                "支持 Embedding 的 Provider 必须填写 embeddingModel",
+            )
+        normalized = embedding_model.lower()
+        if normalized.startswith(("glm-", "deepseek", "kimi", "moonshot", "qwen", "ernie")):
+            recommendations = {
+                "dashscope": "text-embedding-v3",
+                "glm": "embedding-3",
+            }
+            recommendation = recommendations.get(provider_id.lower())
+            suffix = (
+                f"，推荐填写 {recommendation}"
+                if recommendation is not None
+                else "，请填写该厂商真实的 Embedding 模型名"
+            )
+            raise BusinessException(
+                ErrorCode.BAD_REQUEST,
+                f"Embedding Model 不能填写聊天模型 '{embedding_model}'{suffix}",
+            )
+        if dimensions <= 0:
+            raise BusinessException(ErrorCode.BAD_REQUEST, "向量维度必须为正整数")
