@@ -42,6 +42,14 @@ for module-scoped Python comparisons. `auto` switches only after the explicit
 reports are written under the ignored `migration/reports/` directory. Passing
 `--purge` to the stop script explicitly deletes only comparison volumes.
 
+SSE, WebSocket, file, and visible PDF evidence can be captured with the locked
+backend dependencies:
+
+```bash
+cd backend
+uv run python ../migration/scripts/realtime_artifact.py --help
+```
+
 Java production defaults remain unchanged. Comparison processes opt into deterministic
 values with `interview.guide.migration.*` system properties:
 
