@@ -34,7 +34,8 @@ Python 实现必须保持：
 
 ### Python 后端
 
-- Python 3.13。
+- Python 3.13.13。
+- uv 0.11.14。
 - uv、`pyproject.toml` 和提交到仓库的 `uv.lock`。
 - FastAPI、Uvicorn 和 Pydantic v2。
 - SQLAlchemy 2.0 AsyncEngine 和 psycopg 3 async。
@@ -164,6 +165,7 @@ uv run ruff format --check .
 uv run mypy src
 uv run pytest
 uv run uvicorn interview_guide.main:app --host 0.0.0.0 --port 8080
+docker build -f Dockerfile -t interview-guide-python ..
 ```
 
 前端：

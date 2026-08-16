@@ -18,6 +18,8 @@
 **/dist
 **/build
 **/.pnpm-store
+**/.venv
+**/__pycache__
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
@@ -60,6 +62,7 @@ Thumbs.db
 **/coverage
 **/.nyc_output
 **/test-results
+migration/reports/
 
 # Documentation (not needed in production image)
 docs/

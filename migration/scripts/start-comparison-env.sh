@@ -3,9 +3,9 @@ set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/comparison-common.sh"
 
-candidate="${COMPARISON_CANDIDATE:-auto}"
+candidate="${COMPARISON_CANDIDATE:-java}"
 if [[ "$candidate" == "auto" ]]; then
-  if [[ -f "$repo_root/backend/pyproject.toml" ]]; then
+  if [[ -f "$repo_root/backend/.comparison-ready" ]]; then
     candidate="python"
   else
     candidate="java"

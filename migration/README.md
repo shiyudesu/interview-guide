@@ -29,12 +29,12 @@ instances, ports, and S3 buckets:
 ./migration/scripts/stop-comparison-env.sh
 ```
 
-Until `backend/pyproject.toml` exists, the candidate port runs a second isolated Java
-instance so Java-to-Java comparison must produce zero differences. Set
-`COMPARISON_CANDIDATE=python` after the Python application is available. Runtime
-logs and JSON/HTML reports are written under the ignored `migration/reports/`
-directory. Passing `--purge` to the stop script explicitly deletes only comparison
-volumes.
+The default candidate is a second isolated Java instance, so Java-to-Java comparison
+must produce zero differences throughout migration. Set `COMPARISON_CANDIDATE=python`
+for module-scoped Python comparisons. `auto` switches only after the explicit
+`backend/.comparison-ready` final-cutover marker exists. Runtime logs and JSON/HTML
+reports are written under the ignored `migration/reports/` directory. Passing
+`--purge` to the stop script explicitly deletes only comparison volumes.
 
 Java production defaults remain unchanged. Comparison processes opt into deterministic
 values with `interview.guide.migration.*` system properties:

@@ -7,7 +7,7 @@ Redisson、Apache Tika、iText 和 DashScope Java SDK。
 
 本次迁移只更换后端技术实现：
 
-- Java 25 替换为 Python 3.13。
+- Java 25 替换为 Python 3.13.13。
 - Spring Boot WebMVC 替换为 FastAPI 和 Uvicorn。
 - Spring Data JPA 替换为 SQLAlchemy 2.0 和 psycopg 3。
 - Flyway 替换为 Alembic。
@@ -138,7 +138,7 @@ Redisson、Apache Tika、iText 和 DashScope Java SDK。
 
 | 当前实现 | Python 实现 |
 | --- | --- |
-| Java 25 | Python 3.13 |
+| Java 25 | Python 3.13.13 |
 | Gradle | uv + `pyproject.toml` + `uv.lock` |
 | Spring Boot WebMVC | FastAPI + Uvicorn |
 | Jackson | Pydantic v2 + 项目兼容转换代码 |
@@ -200,6 +200,7 @@ Redisson、Apache Tika、iText 和 DashScope Java SDK。
 
 ### 4.4 依赖和镜像版本
 
+- Python 固定为 3.13.13，uv 固定为 0.11.14。
 - Python 小版本、uv、Python 包、Node、pnpm 和系统包全部固定版本。
 - 前端统一使用 Node 24 和 `packageManager` 中声明的 pnpm 10.26.2。
 - 容器基础镜像必须固定标签和 digest。
@@ -1524,6 +1525,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
 uv run pytest
+docker build -f Dockerfile -t interview-guide-python ..
 ```
 
 前端：
