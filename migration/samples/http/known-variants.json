@@ -2,6 +2,15 @@
   "cases": [
     {
       "allowedForComparison": false,
+      "id": "resume-upload-map-field-order",
+      "observedResponses": [
+        "The nested resume/storage/duplicate fields are emitted from Java Map.of and have varied across isolated JVM processes."
+      ],
+      "path": "/api/resumes/upload",
+      "reason": "Preserve and compare every field and value while recording Java's unstable Map.of byte ordering separately."
+    },
+    {
+      "allowedForComparison": false,
       "id": "resume-health-field-order",
       "observedResponses": [
         "{\"code\":200,\"data\":{\"status\":\"UP\",\"service\":\"AI Interview Platform - Resume Service\"},\"message\":\"success\",\"success\":true}",

@@ -31,6 +31,7 @@ instances, ports, and S3 buckets:
 ./migration/scripts/run-interview-skill-comparison.sh
 ./migration/scripts/run-llm-provider-comparison.sh
 ./migration/scripts/run-resume-foundation-comparison.sh
+./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh

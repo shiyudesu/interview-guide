@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, File, Request, UploadFile
 from starlette.responses import Response
 
 from interview_guide.common.api.responses import result_response
@@ -17,7 +18,19 @@ router = APIRouter(prefix="/api/resumes")
 async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     async with infrastructure.database.sessions() as session:
-        yield ResumeService(session, infrastructure.storage)
+        settings = request.app.state.settings
+        now = (
+            datetime.fromisoformat(settings.migration_fixed_time)
+            if settings.migration_fixed_time
+            else None
+        )
+        yield ResumeService(
+            session,
+            infrastructure.storage,
+            infrastructure.streams,
+            infrastructure.document_parser,
+            now,
+        )
 
 
 ServiceDependency = Annotated[ResumeService, Depends(resume_service)]
@@ -26,6 +39,20 @@ ServiceDependency = Annotated[ResumeService, Depends(resume_service)]
 @router.get("")
 async def list_resumes(service: ServiceDependency) -> Response:
     return result_response(Result.ok(await service.list()))
+
+
+@router.post("/upload")
+async def upload_resume(
+    file: Annotated[UploadFile, File()],
+    service: ServiceDependency,
+) -> Response:
+    data = await file.read()
+    result = await service.upload(
+        data,
+        file.filename,
+        file.content_type,
+    )
+    return result_response(Result.ok(result))
 
 
 @router.get("/health")

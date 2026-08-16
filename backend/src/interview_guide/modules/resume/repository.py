@@ -73,6 +73,15 @@ class ResumeRepository:
     async def get(self, resume_id: int) -> Resume | None:
         return await self._session.get(Resume, resume_id)
 
+    async def get_by_hash(self, file_hash: str) -> Resume | None:
+        result = await self._session.scalars(select(Resume).where(Resume.file_hash == file_hash))
+        return result.first()
+
+    async def add(self, resume: Resume) -> Resume:
+        self._session.add(resume)
+        await self._session.flush()
+        return resume
+
     async def delete_graph(self, resume_id: int) -> None:
         session_ids = select(InterviewSession.id).where(InterviewSession.resume_id == resume_id)
         await self._session.execute(

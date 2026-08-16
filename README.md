@@ -36,6 +36,7 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ./migration/scripts/run-interview-skill-comparison.sh
 ./migration/scripts/run-llm-provider-comparison.sh
 ./migration/scripts/run-resume-foundation-comparison.sh
+./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/stop-comparison-env.sh
 ```
 

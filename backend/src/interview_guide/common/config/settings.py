@@ -263,6 +263,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias="MIGRATION_PROVIDER_NONCE_HEX",
     )
+    migration_file_uuid: str | None = Field(
+        default=None,
+        validation_alias="MIGRATION_FILE_UUID",
+    )
 
     @model_validator(mode="after")
     def validate_required_secrets(self) -> Settings:

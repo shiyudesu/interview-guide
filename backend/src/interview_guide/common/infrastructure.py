@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import uuid
+from datetime import datetime
+
 from interview_guide.common.ai.adapter import LlmAdapter
 from interview_guide.common.ai.encryption import (
     ApiKeyEncryption,
@@ -15,7 +18,10 @@ from interview_guide.common.ai.providers import (
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.session import Database
 from interview_guide.common.redis import RedisConnection
+from interview_guide.common.redis.streams import RedisStreamService
 from interview_guide.common.runtime import BlockingExecutor
+from interview_guide.infrastructure.file.document import create_document_parser
+from interview_guide.infrastructure.storage.keys import FileKeyGenerator
 from interview_guide.infrastructure.storage.s3 import S3Storage
 from interview_guide.modules.llm_provider.voice import VoiceConfigStore
 
@@ -32,6 +38,7 @@ class RuntimeInfrastructure:
         self._owns_blocking_executor = blocking_executor is None
         self.database = Database(settings)
         self.redis = RedisConnection(settings)
+        self.streams = RedisStreamService(self.redis.client)
         encryption = ApiKeyEncryption(
             resolve_configured_key(settings),
             nonce_factory=provider_nonce_factory(settings),
@@ -48,7 +55,31 @@ class RuntimeInfrastructure:
         self.llm_adapter = LlmAdapter()
         self.prompt_sanitizer = PromptSanitizer()
         self.voice_config = VoiceConfigStore(settings)
-        self.storage = S3Storage(settings, self.blocking_executor)
+        key_generator: FileKeyGenerator | None = None
+        if settings.migration_fixed_time or settings.migration_file_uuid:
+            fixed_time = (
+                datetime.fromisoformat(settings.migration_fixed_time)
+                if settings.migration_fixed_time
+                else datetime.now()
+            )
+            fixed_uuid = (
+                uuid.UUID(settings.migration_file_uuid)
+                if settings.migration_file_uuid
+                else uuid.uuid4()
+            )
+            key_generator = FileKeyGenerator(
+                now=lambda: fixed_time,
+                uuid_factory=lambda: fixed_uuid,
+            )
+        self.storage = S3Storage(
+            settings,
+            self.blocking_executor,
+            key_generator=key_generator,
+        )
+        self.document_parser = create_document_parser(
+            settings,
+            self.blocking_executor,
+        )
         self.api_key_encryption = encryption
         self._started = False
 

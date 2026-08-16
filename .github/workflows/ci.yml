@@ -271,6 +271,9 @@ jobs:
       - name: Compare resume foundation
         run: ./migration/scripts/run-resume-foundation-comparison.sh
 
+      - name: Compare resume first upload
+        run: ./migration/scripts/run-resume-upload-comparison.sh
+
       - name: Upload schema comparison reports
         if: always()
         uses: actions/upload-artifact@v6
