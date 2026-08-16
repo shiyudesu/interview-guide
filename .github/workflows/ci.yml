@@ -216,7 +216,7 @@ jobs:
     name: Flyway and Alembic schema
     needs: backend
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -242,6 +242,26 @@ jobs:
             backend/uv.lock
             migration/model-proxy/uv.lock
           version: "0.11.14"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Start Java and Python schema environment
         env:
@@ -273,6 +293,14 @@ jobs:
 
       - name: Compare resume first upload
         run: ./migration/scripts/run-resume-upload-comparison.sh
+
+      - name: Run frontend against real Python backend
+        working-directory: frontend
+        env:
+          REAL_BACKEND_URL: http://127.0.0.1:28080
+          RUN_REAL_BACKEND_E2E: "true"
+          VITE_API_BASE_URL: http://127.0.0.1:28080
+        run: pnpm run test:e2e --grep @real-backend
 
       - name: Upload schema comparison reports
         if: always()
