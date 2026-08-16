@@ -262,6 +262,9 @@ jobs:
       - name: Compare interview schedule module
         run: ./migration/scripts/run-interview-schedule-comparison.sh
 
+      - name: Compare interview Skill module
+        run: ./migration/scripts/run-interview-skill-comparison.sh
+
       - name: Upload schema comparison reports
         if: always()
         uses: actions/upload-artifact@v6
