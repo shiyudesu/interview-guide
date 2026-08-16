@@ -1,5 +1,6 @@
 package interview.guide.modules.voiceinterview.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.common.model.AsyncTaskStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -105,14 +106,14 @@ public class VoiceInterviewSessionEntity {
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = MigrationTestOverrides.now();
     }
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        this.startTime = LocalDateTime.now();
+        this.createdAt = MigrationTestOverrides.now();
+        this.updatedAt = MigrationTestOverrides.now();
+        this.startTime = MigrationTestOverrides.now();
     }
 
     public enum InterviewPhase {

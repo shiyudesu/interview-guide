@@ -1,5 +1,6 @@
 package interview.guide.modules.voiceinterview.controller;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
 import interview.guide.common.model.AsyncTaskStatus;
@@ -217,7 +218,7 @@ public class VoiceInterviewController {
 
         return Result.success(VoiceEvaluationStatusDTO.builder()
                 .evaluateStatus(AsyncTaskStatus.PENDING.name())
-                .evaluateStatusUpdatedAt(LocalDateTime.now())
+                .evaluateStatusUpdatedAt(MigrationTestOverrides.now())
                 .build());
     }
 }

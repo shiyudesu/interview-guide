@@ -372,7 +372,7 @@
       "skill": 40,
       "voice-config": 1
     },
-    "testFileCount": 44
+    "testFileCount": 47
   },
   "tests": [
     {
@@ -397,6 +397,11 @@
     },
     {
       "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/ai/PromptSanitizerTest.java",
+      "sha256": "26e839aa78517ff528aede04e5e681199ab85e109213859a337f4fb85eb5fcf1"
+    },
+    {
+      "disabledMarkers": 0,
       "file": "app/src/test/java/interview/guide/common/aspect/RateLimitIntegrationTest.java",
       "sha256": "7b8904075b6a8dc475c8b60b0c8693fa7a477cd4f7828bdde3f644850c0235ad"
     },
@@ -414,6 +419,11 @@
       "disabledMarkers": 0,
       "file": "app/src/test/java/interview/guide/common/exception/RateLimitExceededExceptionTest.java",
       "sha256": "f509cf2e6b159413161b27f5f112fa9a7032788f1b8be3cbdf4c9034cad1c505"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/testing/MigrationTestOverridesTest.java",
+      "sha256": "0edfb4d33022e66d72be4234ee45a517703b87972a256bb57533fd198ccb7c87"
     },
     {
       "disabledMarkers": 0,
@@ -484,6 +494,11 @@
       "disabledMarkers": 0,
       "file": "app/src/test/java/interview/guide/modules/llmprovider/controller/LlmProviderControllerTest.java",
       "sha256": "b8547722aab3e4c87c08f32eee7a97b64eaeb8cb750417d629268f1d6fd19388"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/llmprovider/service/ApiKeyEncryptionServiceTest.java",
+      "sha256": "2e21e4b2fd80025ea62e59960e30fba38ace590f823027341d870b7f009186d9"
     },
     {
       "disabledMarkers": 0,

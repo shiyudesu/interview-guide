@@ -3,6 +3,7 @@ package interview.guide.modules.llmprovider.service;
 import interview.guide.common.config.LlmProviderProperties;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -63,7 +64,11 @@ public class ApiKeyEncryptionService {
   public EncryptedValue encrypt(String plainText) {
     try {
       byte[] nonce = new byte[NONCE_BYTES];
-      secureRandom.nextBytes(nonce);
+      MigrationTestOverrides.fillBytes(
+          "provider-api-key-nonce",
+          nonce,
+          secureRandom
+      );
 
       Cipher cipher = Cipher.getInstance(CIPHER);
       cipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_BITS, nonce));

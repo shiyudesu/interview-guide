@@ -1,5 +1,6 @@
 package interview.guide.modules.interview.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -62,7 +63,7 @@ public class InterviewAnswerEntity {
     
     @PrePersist
     protected void onCreate() {
-        answeredAt = LocalDateTime.now();
+        answeredAt = MigrationTestOverrides.now();
     }
     
     // Getters and Setters

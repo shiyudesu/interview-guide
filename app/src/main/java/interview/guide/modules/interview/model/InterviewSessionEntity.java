@@ -1,5 +1,6 @@
 package interview.guide.modules.interview.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.common.model.AsyncTaskStatus;
 import interview.guide.modules.resume.model.ResumeEntity;
 import jakarta.persistence.*;
@@ -126,7 +127,7 @@ public class InterviewSessionEntity {
     
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = MigrationTestOverrides.now();
     }
     
     // Getters and Setters

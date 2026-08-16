@@ -1,5 +1,6 @@
 package interview.guide.modules.resume.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.common.model.AsyncTaskStatus;
 import jakarta.persistence.*;
 
@@ -66,8 +67,8 @@ public class ResumeEntity {
     
     @PrePersist
     protected void onCreate() {
-        uploadedAt = LocalDateTime.now();
-        lastAccessedAt = LocalDateTime.now();
+        uploadedAt = MigrationTestOverrides.now();
+        lastAccessedAt = MigrationTestOverrides.now();
         accessCount = 1;
     }
     
@@ -162,7 +163,7 @@ public class ResumeEntity {
     
     public void incrementAccessCount() {
         this.accessCount++;
-        this.lastAccessedAt = LocalDateTime.now();
+        this.lastAccessedAt = MigrationTestOverrides.now();
     }
 
     public AsyncTaskStatus getAnalyzeStatus() {

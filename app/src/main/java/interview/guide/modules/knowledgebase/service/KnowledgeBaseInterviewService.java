@@ -3,6 +3,7 @@ package interview.guide.modules.knowledgebase.service;
 import interview.guide.common.constant.CommonConstants.InterviewDefaults;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.modules.interview.model.InterviewQuestionDTO;
 import interview.guide.modules.interview.model.InterviewSessionDTO;
 import interview.guide.modules.interview.service.InterviewSessionService;
@@ -23,12 +24,10 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -79,7 +78,7 @@ public class KnowledgeBaseInterviewService {
     }
 
     List<QuestionSource> selected = new ArrayList<>(candidates);
-    Collections.shuffle(selected);
+    MigrationTestOverrides.shuffle(selected, "knowledgebase-main-question-selection");
     List<InterviewQuestionDTO> questions =
         buildQuestions(selected.subList(0, mainCount), followUpCount);
 
@@ -214,9 +213,12 @@ public class KnowledgeBaseInterviewService {
       return new ArrayList<>(pool);
     }
     List<KnowledgeBaseQuestionFollowUpDTO> copy = new ArrayList<>(pool);
-    ThreadLocalRandom random = ThreadLocalRandom.current();
     for (int i = 0; i < n; i += 1) {
-      int j = random.nextInt(i, copy.size());
+      int j = MigrationTestOverrides.nextInt(
+          "knowledgebase-follow-up-selection",
+          i,
+          copy.size()
+      );
       KnowledgeBaseQuestionFollowUpDTO tmp = copy.get(i);
       copy.set(i, copy.get(j));
       copy.set(j, tmp);

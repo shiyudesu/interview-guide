@@ -3,6 +3,7 @@ package interview.guide.modules.voiceinterview.handler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.modules.voiceinterview.dto.WebSocketControlMessage;
 import interview.guide.modules.voiceinterview.dto.WebSocketSubtitleMessage;
 import interview.guide.modules.voiceinterview.model.VoiceInterviewMessageEntity;
@@ -161,7 +162,10 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
 
         sessions.put(sessionId, safeSession);
         sessionStates.put(sessionId, new SessionState());
-        lastActivityTime.put(sessionId, System.currentTimeMillis());
+        lastActivityTime.put(
+            sessionId,
+            MigrationTestOverrides.currentTimeMillis("voice-websocket")
+        );
         log.info("WebSocket connection established for session: {}", sessionId);
 
         try {
@@ -185,7 +189,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
             "type", "control",
             "action", "welcome",
             "message", "连接成功，准备开始语音面试",
-            "timestamp", System.currentTimeMillis()
+            "timestamp", MigrationTestOverrides.currentTimeMillis("voice-websocket")
         ));
     }
 
@@ -327,7 +331,10 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
 
             // Update last activity time for pause timeout detection
             // 更新最后活动时间（用于暂停超时检测）
-            lastActivityTime.put(sessionId, System.currentTimeMillis());
+            lastActivityTime.put(
+                sessionId,
+                MigrationTestOverrides.currentTimeMillis("voice-websocket")
+            );
 
             switch (type) {
                 case "audio":
@@ -597,7 +604,10 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
             state.isProcessing().set(false);
             return;
         }
-        long mergeWaitMs = Math.max(0, System.currentTimeMillis() - mergeStartAt);
+        long mergeWaitMs = Math.max(
+            0,
+            MigrationTestOverrides.currentTimeMillis("voice-websocket") - mergeStartAt
+        );
         recordTimerMillis("app.voice.interview.asr.merge_wait", mergeWaitMs, "status", "success");
         state.setAccumulatedText(userText);
         log.info("Merged user utterance for session {}, triggering LLM (length {})", sessionId, userText.length());
@@ -842,7 +852,10 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
             }
         } finally {
             state.aiSpeaking.set(false);
-            state.aiSpeakEndAt.set(System.currentTimeMillis() + AI_SPEAK_COOLDOWN_MS);
+            state.aiSpeakEndAt.set(
+                MigrationTestOverrides.currentTimeMillis("voice-websocket")
+                    + AI_SPEAK_COOLDOWN_MS
+            );
         }
     }
 
@@ -949,7 +962,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
             "type", "control",
             "action", action,
             "message", message,
-            "timestamp", System.currentTimeMillis()
+            "timestamp", MigrationTestOverrides.currentTimeMillis("voice-websocket")
         )));
     }
 
@@ -975,7 +988,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
             "type", "control",
             "action", "audio_complete",
             "message", "面试官语音播放完成",
-            "timestamp", System.currentTimeMillis()
+            "timestamp", MigrationTestOverrides.currentTimeMillis("voice-websocket")
         )));
     }
 
@@ -1131,7 +1144,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
      */
     @Scheduled(fixedRate = 30000)
     public void checkPauseTimeout() {
-        long now = System.currentTimeMillis();
+        long now = MigrationTestOverrides.currentTimeMillis("voice-websocket");
 
         lastActivityTime.forEach((sessionId, lastTime) -> {
             long elapsed = now - lastTime;
@@ -1172,7 +1185,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
                 "type", "control",
                 "action", "pause_timeout_warning",
                 "message", "会话将在30秒后暂停，请继续说话或点击继续",
-                "timestamp", System.currentTimeMillis()
+                "timestamp", MigrationTestOverrides.currentTimeMillis("voice-websocket")
             )));
         }
     }
@@ -1190,7 +1203,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
                     "type", "control",
                     "action", "pause_timeout",
                     "message", "会话因超时已暂停,可在历史记录中恢复",
-                    "timestamp", System.currentTimeMillis()
+                    "timestamp", MigrationTestOverrides.currentTimeMillis("voice-websocket")
                 )));
             }
 
@@ -1370,7 +1383,9 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
         /** mergeBuffer 开始计时点，用于”最长等待补充”判定 */
         private final AtomicLong mergeStartedAt = new AtomicLong(0);
         /** 最近一次 STT 活动时间（partial/final） */
-        private final AtomicLong lastSttActivityAt = new AtomicLong(System.currentTimeMillis());
+        private final AtomicLong lastSttActivityAt = new AtomicLong(
+            MigrationTestOverrides.currentTimeMillis("voice-websocket")
+        );
         /** 当前正在执行 LLM+TTS 管线的虚拟线程，断连时可中断 */
         private volatile Thread processingThread = null;
 
@@ -1381,7 +1396,9 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
             }
             mergeBuffer.updateAndGet(prev -> {
                 if (prev == null || prev.isEmpty()) {
-                    mergeStartedAt.set(System.currentTimeMillis());
+                    mergeStartedAt.set(
+                        MigrationTestOverrides.currentTimeMillis("voice-websocket")
+                    );
                     return s;
                 }
                 return joinSegments(prev, s);
@@ -1418,7 +1435,9 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
             }
             mergeBuffer.set(s);
             if (mergeStartedAt.get() == 0) {
-                mergeStartedAt.set(System.currentTimeMillis());
+                mergeStartedAt.set(
+                    MigrationTestOverrides.currentTimeMillis("voice-websocket")
+                );
             }
         }
 
@@ -1441,12 +1460,16 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
         }
 
         void markSttActivity() {
-            lastSttActivityAt.set(System.currentTimeMillis());
+            lastSttActivityAt.set(
+                MigrationTestOverrides.currentTimeMillis("voice-websocket")
+            );
         }
 
         long getMergeStartedAt() {
             long value = mergeStartedAt.get();
-            return value > 0 ? value : System.currentTimeMillis();
+            return value > 0
+                ? value
+                : MigrationTestOverrides.currentTimeMillis("voice-websocket");
         }
 
         long getLastSttActivityAt() {
@@ -1478,7 +1501,8 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
                 return true;
             }
             // AI 播放结束后的冷却期（默认 800ms），防止扬声器尾音被录入
-            return System.currentTimeMillis() < aiSpeakEndAt.get();
+            return MigrationTestOverrides.currentTimeMillis("voice-websocket")
+                < aiSpeakEndAt.get();
         }
     }
 }

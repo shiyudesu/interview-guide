@@ -2,6 +2,7 @@ package interview.guide.modules.knowledgebase.service;
 
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.common.transaction.TransactionalExecutor;
 import interview.guide.modules.knowledgebase.repository.VectorRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -67,7 +67,7 @@ public class KnowledgeBaseVectorService {
             if (knowledgeBaseId == null) {
                 throw new IllegalArgumentException("knowledgeBaseId不能为空");
             }
-            jobId = UUID.randomUUID().toString();
+            jobId = MigrationTestOverrides.uuid("vectorization-job").toString();
             log.info("开始向量化知识库: kbId={}, jobId={}, contentLength={}",
                 knowledgeBaseId, jobId, content.length());
 

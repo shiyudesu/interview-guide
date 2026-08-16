@@ -35,3 +35,16 @@ instance so Java-to-Java comparison must produce zero differences. Set
 logs and JSON/HTML reports are written under the ignored `migration/reports/`
 directory. Passing `--purge` to the stop script explicitly deletes only comparison
 volumes.
+
+Java production defaults remain unchanged. Comparison processes opt into deterministic
+values with `interview.guide.migration.*` system properties:
+
+- `fixed-time`: ISO local date-time used by persistence and scheduler code.
+- `uuid.<purpose>`: comma-separated UUID sequence.
+- `bytes.<purpose>`: comma-separated hexadecimal byte sequence, including AES-GCM nonces.
+- `int.<purpose>`: comma-separated deterministic random selections.
+- `millis.<purpose>`: comma-separated real-time protocol timestamps.
+- `string.tts-websocket-url`: test-only TTS proxy endpoint.
+- `consumer-suffix`: fixed Redis Stream consumer suffix.
+
+Configured sequences fail when exhausted instead of silently reusing an ID or nonce.

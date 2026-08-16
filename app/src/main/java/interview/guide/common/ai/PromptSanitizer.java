@@ -1,11 +1,11 @@
 package interview.guide.common.ai;
 
 import interview.guide.common.config.LlmProviderProperties;
+import interview.guide.common.testing.MigrationTestOverrides;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -99,7 +99,9 @@ public class PromptSanitizer {
      * UUID 片段使攻击者无法提前构造伪造分隔符。
      */
     public String wrapWithDelimiters(String label, String text) {
-        String id = UUID.randomUUID().toString().substring(0, 8);
+        String id = MigrationTestOverrides.uuid("prompt-boundary")
+            .toString()
+            .substring(0, 8);
         String openTag = "<data-boundary-" + id + "-" + label + ">";
         String closeTag = "</data-boundary-" + id + "-" + label + ">";
         return openTag + "\n" + text + "\n" + closeTag;

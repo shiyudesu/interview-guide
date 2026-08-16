@@ -19,6 +19,8 @@ capture_state() {
     --no-owner \
     --no-privileges \
     --table interview_schedule \
+    --table llm_global_setting \
+    --table llm_provider_config \
     "$postgres_database" \
     >"$database_dump"
 

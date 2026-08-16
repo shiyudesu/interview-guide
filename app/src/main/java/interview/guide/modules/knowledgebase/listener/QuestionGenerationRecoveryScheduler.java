@@ -1,5 +1,6 @@
 package interview.guide.modules.knowledgebase.listener;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.modules.knowledgebase.model.KnowledgeBaseEntity;
 import interview.guide.modules.knowledgebase.model.QuestionGenStatus;
 import interview.guide.modules.knowledgebase.repository.KnowledgeBaseRepository;
@@ -29,7 +30,7 @@ public class QuestionGenerationRecoveryScheduler {
 
   @Scheduled(fixedDelay = 60_000, initialDelay = 60_000)
   public void recoverStaleTasks() {
-    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime now = MigrationTestOverrides.now();
     recoverQueued(now.minusMinutes(QUEUED_STALE_MINUTES));
     recoverProcessing(now.minusMinutes(PROCESSING_STALE_MINUTES));
   }

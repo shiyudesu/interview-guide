@@ -1,5 +1,6 @@
 package interview.guide.modules.knowledgebase.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -87,13 +88,13 @@ public class KnowledgeBaseQuestionEntity {
 
   @PrePersist
   protected void onCreate() {
-    createdAt = LocalDateTime.now();
+    createdAt = MigrationTestOverrides.now();
     updatedAt = createdAt;
   }
 
   @PreUpdate
   protected void onUpdate() {
-    updatedAt = LocalDateTime.now();
+    updatedAt = MigrationTestOverrides.now();
   }
 
   public Long getId() {

@@ -1,5 +1,6 @@
 package interview.guide.modules.voiceinterview.service;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.common.ai.LlmProviderRegistry;
 import interview.guide.common.constant.CommonConstants.InterviewDefaults;
 import interview.guide.common.exception.BusinessException;
@@ -138,10 +139,13 @@ public class VoiceInterviewService {
     }
 
     private void endSession(VoiceInterviewSessionEntity session) {
-        session.setEndTime(LocalDateTime.now());
+        session.setEndTime(MigrationTestOverrides.now());
         session.setCurrentPhase(VoiceInterviewSessionEntity.InterviewPhase.COMPLETED);
         session.setStatus(VoiceInterviewSessionStatus.COMPLETED);
-        session.setActualDuration((int) Duration.between(session.getStartTime(), LocalDateTime.now()).toSeconds());
+        session.setActualDuration((int) Duration.between(
+            session.getStartTime(),
+            MigrationTestOverrides.now()
+        ).toSeconds());
         session.setEvaluateStatus(AsyncTaskStatus.PENDING);
 
         sessionRepository.save(session);
@@ -372,7 +376,7 @@ public class VoiceInterviewService {
         }
 
         session.setStatus(VoiceInterviewSessionStatus.PAUSED);
-        session.setPausedAt(LocalDateTime.now());
+        session.setPausedAt(MigrationTestOverrides.now());
 
         sessionRepository.save(session);
         invalidateSessionCache(sessionIdLong);
@@ -401,7 +405,7 @@ public class VoiceInterviewService {
         }
 
         session.setStatus(VoiceInterviewSessionStatus.IN_PROGRESS);
-        session.setResumedAt(LocalDateTime.now());
+        session.setResumedAt(MigrationTestOverrides.now());
 
         VoiceInterviewSessionEntity saved = sessionRepository.save(session);
         cacheSession(saved);
@@ -482,7 +486,10 @@ public class VoiceInterviewService {
             return false;
         }
 
-        Duration phaseDuration = Duration.between(phaseStartTime, LocalDateTime.now());
+        Duration phaseDuration = Duration.between(
+            phaseStartTime,
+            MigrationTestOverrides.now()
+        );
         VoiceInterviewProperties.DurationConfig config = getPhaseConfig(currentPhase);
 
         // Rule 1: Max duration reached (forced transition)
@@ -704,7 +711,7 @@ public class VoiceInterviewService {
      */
     @Transactional
     public int cleanupStaleSessions() {
-        LocalDateTime staleThreshold = LocalDateTime.now().minusHours(2);
+        LocalDateTime staleThreshold = MigrationTestOverrides.now().minusHours(2);
 
         List<VoiceInterviewSessionEntity> staleSessions = sessionRepository
             .findByStatusAndStartTimeBefore(VoiceInterviewSessionStatus.IN_PROGRESS, staleThreshold);
@@ -718,7 +725,7 @@ public class VoiceInterviewService {
             cleaned++;
         }
 
-        LocalDateTime pendingStaleThreshold = LocalDateTime.now()
+        LocalDateTime pendingStaleThreshold = MigrationTestOverrides.now()
             .minus(PENDING_EVALUATION_REQUEUE_DELAY);
         List<VoiceInterviewSessionEntity> pendingEvals = sessionRepository
             .findByEvaluateStatusAndUpdatedAtBefore(AsyncTaskStatus.PENDING, pendingStaleThreshold);
@@ -727,14 +734,14 @@ public class VoiceInterviewService {
             log.warn("Requeueing stale PENDING evaluation for session {}, last updated at {}",
                 session.getId(), session.getUpdatedAt());
             session.setEvaluateError(null);
-            session.setUpdatedAt(LocalDateTime.now());
+            session.setUpdatedAt(MigrationTestOverrides.now());
             sessionRepository.save(session);
             invalidateSessionCache(session.getId());
             sendEvaluateTaskAfterCommit(session.getId());
             cleaned++;
         }
 
-        LocalDateTime evalStaleThreshold = LocalDateTime.now()
+        LocalDateTime evalStaleThreshold = MigrationTestOverrides.now()
             .minus(PROCESSING_EVALUATION_TIMEOUT);
         List<VoiceInterviewSessionEntity> stuckEvals = sessionRepository
             .findByEvaluateStatusAndUpdatedAtBefore(AsyncTaskStatus.PROCESSING, evalStaleThreshold);

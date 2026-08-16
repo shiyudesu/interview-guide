@@ -1,5 +1,6 @@
 package interview.guide.modules.llmprovider.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -39,13 +40,13 @@ public class LlmGlobalSettingEntity {
 
   @PrePersist
   void prePersist() {
-    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime now = MigrationTestOverrides.now();
     createdAt = now;
     updatedAt = now;
   }
 
   @PreUpdate
   void preUpdate() {
-    updatedAt = LocalDateTime.now();
+    updatedAt = MigrationTestOverrides.now();
   }
 }

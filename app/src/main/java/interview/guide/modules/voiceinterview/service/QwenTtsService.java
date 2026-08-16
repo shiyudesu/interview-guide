@@ -7,6 +7,7 @@ import com.alibaba.dashscope.audio.qwen_tts_realtime.QwenTtsRealtimeConfig;
 import com.alibaba.dashscope.audio.qwen_tts_realtime.QwenTtsRealtimeParam;
 import com.google.gson.JsonObject;
 import interview.guide.modules.voiceinterview.config.VoiceInterviewProperties;
+import interview.guide.common.testing.MigrationTestOverrides;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import okhttp3.WebSocket;
@@ -143,10 +144,15 @@ public class QwenTtsService {
 
         try {
             // Build QwenTtsRealtimeParam with connection settings
-            QwenTtsRealtimeParam param = QwenTtsRealtimeParam.builder()
+            var paramBuilder = QwenTtsRealtimeParam.builder()
                     .model(model)
-                    .apikey(apiKey)
-                    .build();
+                    .apikey(apiKey);
+            String migrationProxyUrl =
+                MigrationTestOverrides.configuredString("tts-websocket-url");
+            if (migrationProxyUrl != null) {
+                paramBuilder.url(migrationProxyUrl);
+            }
+            QwenTtsRealtimeParam param = paramBuilder.build();
 
             // Create callback handler for WebSocket events
             QwenTtsRealtimeCallback callback = new QwenTtsRealtimeCallback() {

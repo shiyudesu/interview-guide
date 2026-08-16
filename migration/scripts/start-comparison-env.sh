@@ -56,6 +56,21 @@ start_java() {
   local runtime_dir="$comparison_runtime/$name"
   local pid_file="$runtime_dir/app.pid"
   local log_file="$runtime_dir/app.log"
+  local java_tool_options
+  java_tool_options="$(
+    printf '%s' \
+      '-Duser.timezone=Asia/Shanghai ' \
+      '-Dinterview.guide.migration.consumer-suffix=comparison ' \
+      '-Dinterview.guide.migration.fixed-time=2026-08-16T08:00:00 ' \
+      '-Dinterview.guide.migration.bytes.provider-api-key-nonce=' \
+      '000102030405060708090a0b,' \
+      '0c0d0e0f1011121314151617,' \
+      '18191a1b1c1d1e1f20212223,' \
+      '2425262728292a2b2c2d2e2f,' \
+      '303132333435363738393a3b ' \
+      '-Dinterview.guide.migration.string.tts-websocket-url=' \
+      'ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime'
+  )"
 
   if [[ -f "$pid_file" ]]; then
     local existing_pid
@@ -75,6 +90,7 @@ start_java() {
     POSTGRES_PASSWORD=comparison-password \
     REDIS_HOST=localhost \
     REDIS_PORT="$redis_port" \
+    TZ=Asia/Shanghai \
     APP_STORAGE_ENDPOINT=http://localhost:19000 \
     APP_STORAGE_ACCESS_KEY=comparison-access \
     APP_STORAGE_SECRET_KEY=comparison-secret \
@@ -86,7 +102,7 @@ start_java() {
     APP_AI_CONFIG_ENV_PATH="$runtime_dir/llm-providers.env" \
     APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
     AI_BAILIAN_API_KEY=comparison-placeholder-key \
-    JAVA_TOOL_OPTIONS=-Dinterview.guide.migration.consumer-suffix=comparison \
+    JAVA_TOOL_OPTIONS="$java_tool_options" \
     java -jar "$java_jar" \
     >"$log_file" 2>&1 &
   echo "$!" >"$pid_file"
@@ -118,6 +134,8 @@ start_python() {
       POSTGRES_PASSWORD=comparison-password \
       REDIS_HOST=localhost \
       REDIS_PORT=26379 \
+      TZ=Asia/Shanghai \
+      MIGRATION_FIXED_TIME=2026-08-16T08:00:00 \
       APP_STORAGE_ENDPOINT=http://localhost:19000 \
       APP_STORAGE_ACCESS_KEY=comparison-access \
       APP_STORAGE_SECRET_KEY=comparison-secret \

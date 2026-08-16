@@ -1,5 +1,6 @@
 package interview.guide.modules.interviewschedule.service;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import interview.guide.common.ai.LlmProviderRegistry;
@@ -297,7 +298,8 @@ public class InterviewParseService {
 
     private CreateInterviewRequest parseWithAI(String rawText, String provider) {
         try {
-            String currentDate = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String currentDate = MigrationTestOverrides.now()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
             String safeRawText = promptSanitizer.sanitize(rawText);
             String prompt = String.format(PARSE_PROMPT, currentDate,
                 PromptSecurityConstants.DATA_BOUNDARY_INSTRUCTION + "\n" +

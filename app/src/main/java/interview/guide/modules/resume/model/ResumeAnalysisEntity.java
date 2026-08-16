@@ -1,5 +1,6 @@
 package interview.guide.modules.resume.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -49,7 +50,7 @@ public class ResumeAnalysisEntity {
     
     @PrePersist
     protected void onCreate() {
-        analyzedAt = LocalDateTime.now();
+        analyzedAt = MigrationTestOverrides.now();
     }
     
     // Getters and Setters

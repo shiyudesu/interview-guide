@@ -1,5 +1,6 @@
 package interview.guide.modules.interview.service;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.common.constant.CommonConstants.InterviewDefaults;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
@@ -133,7 +134,7 @@ public class InterviewPersistenceService {
             session.setStatus(status);
             if (status == InterviewSessionEntity.SessionStatus.COMPLETED ||
                 status == InterviewSessionEntity.SessionStatus.EVALUATED) {
-                session.setCompletedAt(LocalDateTime.now());
+                session.setCompletedAt(MigrationTestOverrides.now());
             }
             sessionRepository.save(session);
         }
@@ -225,7 +226,7 @@ public class InterviewPersistenceService {
             session.setImprovementsJson(objectMapper.writeValueAsString(report.improvements()));
             session.setReferenceAnswersJson(objectMapper.writeValueAsString(report.referenceAnswers()));
             session.setStatus(InterviewSessionEntity.SessionStatus.EVALUATED);
-            session.setCompletedAt(LocalDateTime.now());
+            session.setCompletedAt(MigrationTestOverrides.now());
 
             sessionRepository.save(session);
 

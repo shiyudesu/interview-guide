@@ -2,6 +2,7 @@ package interview.guide.modules.knowledgebase.service;
 
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.modules.knowledgebase.model.KnowledgeBaseEntity;
 import interview.guide.modules.knowledgebase.model.KnowledgeBaseQuestionEntity;
 import interview.guide.modules.knowledgebase.model.QuestionGenStatus;
@@ -18,7 +19,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 知识库题目生成状态的事务边界。
@@ -46,8 +46,10 @@ public class QuestionGenerationStateService {
       throw new BusinessException(ErrorCode.BAD_REQUEST, "知识库问题正在生成中，请勿重复提交");
     }
 
-    LocalDateTime now = LocalDateTime.now();
-    kb.setQuestionGenTaskId(UUID.randomUUID().toString());
+    LocalDateTime now = MigrationTestOverrides.now();
+    kb.setQuestionGenTaskId(
+        MigrationTestOverrides.uuid("question-generation-task").toString()
+    );
     kb.setQuestionGenStatus(QuestionGenStatus.QUEUED);
     kb.setQuestionGenConfig(writeConfig(config));
     kb.setQuestionGenError(null);
@@ -88,7 +90,7 @@ public class QuestionGenerationStateService {
     }
     kb.setQuestionGenStatus(QuestionGenStatus.PROCESSING);
     kb.setQuestionGenError(null);
-    kb.setQuestionGenUpdatedAt(LocalDateTime.now());
+    kb.setQuestionGenUpdatedAt(MigrationTestOverrides.now());
     return true;
   }
 
@@ -99,7 +101,7 @@ public class QuestionGenerationStateService {
       return false;
     }
     kb.setQuestionGenStatus(QuestionGenStatus.QUEUED);
-    kb.setQuestionGenUpdatedAt(LocalDateTime.now());
+    kb.setQuestionGenUpdatedAt(MigrationTestOverrides.now());
     return true;
   }
 
@@ -114,7 +116,7 @@ public class QuestionGenerationStateService {
     }
     kb.setQuestionGenStatus(QuestionGenStatus.FAILED);
     kb.setQuestionGenError(SAFE_FAILURE_MESSAGE);
-    kb.setQuestionGenUpdatedAt(LocalDateTime.now());
+    kb.setQuestionGenUpdatedAt(MigrationTestOverrides.now());
     return true;
   }
 
@@ -143,7 +145,7 @@ public class QuestionGenerationStateService {
     kb.setQuestionGenMessage(message);
     kb.setQuestionGenSavedCount(savedCount);
     kb.setQuestionGenSkippedCount(skippedCount);
-    kb.setQuestionGenUpdatedAt(LocalDateTime.now());
+    kb.setQuestionGenUpdatedAt(MigrationTestOverrides.now());
     return true;
   }
 
@@ -158,7 +160,7 @@ public class QuestionGenerationStateService {
         || !isStale(kb.getQuestionGenUpdatedAt(), threshold)) {
       return false;
     }
-    kb.setQuestionGenUpdatedAt(LocalDateTime.now());
+    kb.setQuestionGenUpdatedAt(MigrationTestOverrides.now());
     return true;
   }
 
@@ -174,7 +176,7 @@ public class QuestionGenerationStateService {
       return false;
     }
     kb.setQuestionGenStatus(QuestionGenStatus.QUEUED);
-    kb.setQuestionGenUpdatedAt(LocalDateTime.now());
+    kb.setQuestionGenUpdatedAt(MigrationTestOverrides.now());
     return true;
   }
 

@@ -3,6 +3,7 @@ package interview.guide.infrastructure.file;
 import interview.guide.common.config.StorageConfigProperties;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +27,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 /**
  * 文件存储服务
@@ -250,9 +249,9 @@ public class FileStorageService {
      * 生成文件键
      */
     private String generateFileKey(String originalFilename, String prefix) {
-        LocalDateTime now = LocalDateTime.now();
+        var now = MigrationTestOverrides.now();
         String datePath = now.format(DATE_PATH_FORMAT);
-        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String uuid = MigrationTestOverrides.uuid("file-key").toString().substring(0, 8);
         String safeName = sanitizeFilename(originalFilename);
         return String.format("%s/%s/%s_%s", prefix, datePath, uuid, safeName);
     }

@@ -1,5 +1,6 @@
 package interview.guide.modules.knowledgebase.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -102,8 +103,8 @@ public class KnowledgeBaseEntity {
     
     @PrePersist
     protected void onCreate() {
-        uploadedAt = LocalDateTime.now();
-        lastAccessedAt = LocalDateTime.now();
+        uploadedAt = MigrationTestOverrides.now();
+        lastAccessedAt = MigrationTestOverrides.now();
         accessCount = 1;
     }
     
@@ -206,12 +207,12 @@ public class KnowledgeBaseEntity {
     
     public void incrementAccessCount() {
         this.accessCount++;
-        this.lastAccessedAt = LocalDateTime.now();
+        this.lastAccessedAt = MigrationTestOverrides.now();
     }
     
     public void incrementQuestionCount() {
         this.questionCount++;
-        this.lastAccessedAt = LocalDateTime.now();
+        this.lastAccessedAt = MigrationTestOverrides.now();
     }
 
     public String getCategory() {

@@ -348,7 +348,7 @@
       "name": "DEV_FALLBACK_KEY",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/llmprovider/service/ApiKeyEncryptionService.java",
-        "line": 24
+        "line": 25
       },
       "valueExpression": "\"interview-guide-dev-only-provider-api-key-encryption\""
     },
@@ -356,7 +356,7 @@
       "name": "MAX_ASR_READY_RETRY",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/handler/VoiceInterviewWebSocketHandler.java",
-        "line": 92
+        "line": 93
       },
       "valueExpression": "2"
     },
@@ -364,7 +364,7 @@
       "name": "SESSION_CACHE_KEY_PREFIX",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
-        "line": 59
+        "line": 60
       },
       "valueExpression": "\"voice:interview:session:\""
     },
@@ -372,7 +372,7 @@
       "name": "CACHE_TTL_HOURS",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
-        "line": 60
+        "line": 61
       },
       "valueExpression": "1"
     },
@@ -380,7 +380,7 @@
       "name": "PENDING_EVALUATION_REQUEUE_DELAY",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
-        "line": 62
+        "line": 63
       },
       "valueExpression": "Duration.ofMinutes(3)"
     }
@@ -452,7 +452,7 @@
     {
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
-        "line": 59
+        "line": 60
       },
       "value": "voice:interview:session:"
     }
@@ -468,7 +468,7 @@
       "code": "import org.redisson.api.RScript;",
       "source": {
         "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
-        "line": 12
+        "line": 13
       }
     },
     {
@@ -1105,21 +1105,21 @@
       "code": "RBucket<VoiceInterviewSessionEntity> bucket = redissonClient.getBucket(cacheKey);",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
-        "line": 179
+        "line": 183
       }
     },
     {
       "code": "RBucket<VoiceInterviewSessionEntity> bucket = redissonClient.getBucket(cacheKey);",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
-        "line": 664
+        "line": 671
       }
     },
     {
       "code": "RBucket<VoiceInterviewSessionEntity> bucket = redissonClient.getBucket(cacheKey);",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
-        "line": 674
+        "line": 681
       }
     }
   ],
@@ -1395,7 +1395,7 @@
       "schedule": "fixedDelay = 60_000, initialDelay = 60_000",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/knowledgebase/listener/QuestionGenerationRecoveryScheduler.java",
-        "line": 30
+        "line": 31
       }
     },
     {
@@ -1403,7 +1403,7 @@
       "schedule": "fixedRate = 30000",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/handler/VoiceInterviewWebSocketHandler.java",
-        "line": 1132
+        "line": 1145
       }
     },
     {
@@ -1411,7 +1411,7 @@
       "schedule": "fixedRate = 60_000",
       "source": {
         "file": "app/src/main/java/interview/guide/modules/voiceinterview/handler/VoiceInterviewWebSocketHandler.java",
-        "line": 1152
+        "line": 1165
       }
     }
   ],

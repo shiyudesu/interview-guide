@@ -2,6 +2,7 @@ package interview.guide.common.aspect;
 
 import interview.guide.common.annotation.RateLimit;
 import interview.guide.common.exception.RateLimitExceededException;
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,6 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 限流 AOP 切面
@@ -72,8 +72,8 @@ public class RateLimitAspect {
         String methodName = method.getName();
 
         RateLimit[] rules = method.getAnnotationsByType(RateLimit.class);
-        long nowMs = System.currentTimeMillis();
-        String requestId = UUID.randomUUID().toString();
+        long nowMs = MigrationTestOverrides.currentTimeMillis("rate-limit");
+        String requestId = MigrationTestOverrides.uuid("rate-limit-request").toString();
 
         List<Object> keysList = new ArrayList<>(rules.length);
         List<Object> args = new ArrayList<>(3 + rules.length * 3);

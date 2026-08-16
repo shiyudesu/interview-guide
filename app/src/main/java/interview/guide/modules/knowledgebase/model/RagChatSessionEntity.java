@@ -1,5 +1,6 @@
 package interview.guide.modules.knowledgebase.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -88,13 +89,13 @@ public class RagChatSessionEntity {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = MigrationTestOverrides.now();
+        updatedAt = MigrationTestOverrides.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = MigrationTestOverrides.now();
     }
 
     @PostLoad
@@ -112,7 +113,7 @@ public class RagChatSessionEntity {
         messages.add(message);
         message.setSession(this);
         messageCount = messages.size();
-        updatedAt = LocalDateTime.now();
+        updatedAt = MigrationTestOverrides.now();
     }
 
     /**

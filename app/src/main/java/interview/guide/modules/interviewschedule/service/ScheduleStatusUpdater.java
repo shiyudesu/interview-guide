@@ -1,5 +1,6 @@
 package interview.guide.modules.interviewschedule.service;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.modules.interviewschedule.model.InterviewStatus;
 import interview.guide.modules.interviewschedule.repository.InterviewScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,10 @@ public class ScheduleStatusUpdater {
     @Transactional
     public void updateExpiredInterviews() {
         int updated = repository.updateStatusByStatusAndInterviewTimeBefore(
-            InterviewStatus.CANCELLED, InterviewStatus.PENDING, LocalDateTime.now());
+            InterviewStatus.CANCELLED,
+            InterviewStatus.PENDING,
+            MigrationTestOverrides.now()
+        );
 
         if (updated > 0) {
             log.info("已将 {} 条过期面试标记为已取消", updated);

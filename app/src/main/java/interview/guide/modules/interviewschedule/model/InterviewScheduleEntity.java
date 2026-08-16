@@ -1,5 +1,6 @@
 package interview.guide.modules.interviewschedule.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -47,12 +48,12 @@ public class InterviewScheduleEntity {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = MigrationTestOverrides.now();
+        updatedAt = MigrationTestOverrides.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = MigrationTestOverrides.now();
     }
 }

@@ -5,6 +5,7 @@ import interview.guide.common.ai.LlmProviderRegistry;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
 import interview.guide.common.model.AsyncTaskStatus;
+import interview.guide.common.testing.MigrationTestOverrides;
 import interview.guide.infrastructure.redis.InterviewSessionCache;
 import interview.guide.infrastructure.redis.InterviewSessionCache.CachedSession;
 import interview.guide.infrastructure.redis.RedisService;
@@ -30,7 +31,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -112,7 +112,10 @@ public class InterviewSessionService {
             }
         }
 
-        String sessionId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        String sessionId = MigrationTestOverrides.uuid("interview-session")
+            .toString()
+            .replace("-", "")
+            .substring(0, 16);
         String skillId = request.skillId() != null ? request.skillId() : InterviewDefaults.SKILL_ID;
         String difficulty = request.difficulty() != null ? request.difficulty() : InterviewDefaults.DIFFICULTY;
 
@@ -199,7 +202,10 @@ public class InterviewSessionService {
             throw new BusinessException(ErrorCode.INTERVIEW_QUESTION_NOT_FOUND, "面试题目不能为空");
         }
 
-        String sessionId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        String sessionId = MigrationTestOverrides.uuid("interview-session")
+            .toString()
+            .replace("-", "")
+            .substring(0, 16);
         persistenceService.saveSession(
             sessionId, null, questions.size(), questions, llmProvider, skillId, difficulty,
             "KNOWLEDGE_BASE", knowledgeBaseId, interviewCategory);

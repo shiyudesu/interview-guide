@@ -1,5 +1,6 @@
 package interview.guide.modules.voiceinterview.model;
 
+import interview.guide.common.testing.MigrationTestOverrides;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,8 +55,8 @@ public class VoiceInterviewMessageEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.timestamp = LocalDateTime.now();
+        this.createdAt = MigrationTestOverrides.now();
+        this.timestamp = MigrationTestOverrides.now();
     }
 
     public static String trimToNull(String text) {
