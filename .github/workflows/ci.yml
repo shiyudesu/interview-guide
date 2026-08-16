@@ -254,6 +254,7 @@ jobs:
       - name: Run Python Redis and S3 integration tests
         working-directory: backend
         env:
+          TEST_POSTGRES_URL: postgresql+psycopg://postgres:comparison-password@127.0.0.1:25432/interview_guide_python
           TEST_REDIS_URL: redis://127.0.0.1:26379/0
           TEST_S3_ENDPOINT: http://127.0.0.1:19000
         run: uv run pytest -m integration

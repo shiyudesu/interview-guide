@@ -17,6 +17,7 @@ from interview_guide.common.api.middleware import (
 )
 from interview_guide.common.config.settings import Settings, get_settings
 from interview_guide.common.errors.handlers import install_exception_handlers
+from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.runtime import BlockingExecutor
@@ -34,9 +35,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.accepting_tasks = True
-        yield
-        app.state.accepting_tasks = False
-        await blocking_executor.shutdown()
+        infrastructure: RuntimeInfrastructure | None = None
+        try:
+            if resolved_settings.infrastructure_startup_enabled:
+                infrastructure = RuntimeInfrastructure(resolved_settings)
+                await infrastructure.start()
+                app.state.infrastructure = infrastructure
+            yield
+        finally:
+            app.state.accepting_tasks = False
+            if infrastructure is not None:
+                await infrastructure.close()
+            await blocking_executor.shutdown()
 
     app = FastAPI(
         title="智能 AI 面试官平台 API",

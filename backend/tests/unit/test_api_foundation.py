@@ -15,6 +15,7 @@ def settings(**overrides: object) -> Settings:
     return Settings(
         _env_file=None,
         APP_AI_CONFIG_ENCRYPTION_KEY="test-encryption-key",
+        APP_INFRASTRUCTURE_STARTUP_ENABLED=False,
         OTEL_ENABLED=False,
         **overrides,
     )

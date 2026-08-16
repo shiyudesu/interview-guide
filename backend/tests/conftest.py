@@ -7,3 +7,4 @@ os.environ.setdefault(
     "backend-test-encryption-key",
 )
 os.environ.setdefault("OTEL_ENABLED", "false")
+os.environ.setdefault("APP_INFRASTRUCTURE_STARTUP_ENABLED", "false")

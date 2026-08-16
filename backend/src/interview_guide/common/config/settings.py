@@ -38,6 +38,10 @@ class Settings(BaseSettings):
         ge=1,
         validation_alias="APP_BLOCKING_WORKER_COUNT",
     )
+    infrastructure_startup_enabled: bool = Field(
+        default=True,
+        validation_alias="APP_INFRASTRUCTURE_STARTUP_ENABLED",
+    )
     document_worker_count: int = Field(
         default=2,
         ge=1,
@@ -117,6 +121,56 @@ class Settings(BaseSettings):
         default=False,
         validation_alias="APP_AI_CONFIG_ALLOW_FALLBACK_ENCRYPTION_KEY",
     )
+    ai_default_provider: str = Field(
+        default="dashscope",
+        validation_alias="APP_AI_DEFAULT_PROVIDER",
+    )
+    ai_default_embedding_provider: str = Field(
+        default="dashscope",
+        validation_alias="APP_AI_DEFAULT_EMBEDDING_PROVIDER",
+    )
+    ai_embedding_dimensions: int = Field(
+        default=1024,
+        gt=0,
+        validation_alias="APP_AI_EMBEDDING_DIMENSIONS",
+    )
+    ai_bailian_api_key: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias="AI_BAILIAN_API_KEY",
+    )
+    ai_model: str = Field(default="qwen3.5-flash", validation_alias="AI_MODEL")
+    ai_dashscope_base_url: str = Field(
+        default="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        validation_alias="APP_AI_PROVIDERS_DASHSCOPE_BASE_URL",
+    )
+    provider_lmstudio_api_key: SecretStr = Field(
+        default=SecretStr("lm-studio"),
+        validation_alias="PROVIDER_LMSTUDIO_API_KEY",
+    )
+    provider_kimi_api_key: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias="PROVIDER_KIMI_API_KEY",
+    )
+    provider_kimi_model: str = Field(
+        default="kimi-latest",
+        validation_alias="PROVIDER_KIMI_MODEL",
+    )
+    provider_deepseek_api_key: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias="PROVIDER_DEEPSEEK_API_KEY",
+    )
+    provider_deepseek_model: str = Field(
+        default="deepseek-v4-flash",
+        validation_alias="PROVIDER_DEEPSEEK_MODEL",
+    )
+    provider_glm_api_key: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias="PROVIDER_GLM_API_KEY",
+    )
+    provider_glm_model: str = Field(
+        default="glm-5",
+        validation_alias="PROVIDER_GLM_MODEL",
+    )
 
     otel_enabled: bool = Field(default=True, validation_alias="OTEL_ENABLED")
     otel_service_name: str = Field(
@@ -131,6 +185,10 @@ class Settings(BaseSettings):
     migration_fixed_time: str | None = Field(
         default=None,
         validation_alias="MIGRATION_FIXED_TIME",
+    )
+    migration_provider_nonce_hex: str | None = Field(
+        default=None,
+        validation_alias="MIGRATION_PROVIDER_NONCE_HEX",
     )
 
     @model_validator(mode="after")
