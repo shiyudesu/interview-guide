@@ -28,6 +28,7 @@ from interview_guide.modules.interview_schedule.api import (
 from interview_guide.modules.interview_skill.api import (
     router as interview_skill_router,
 )
+from interview_guide.modules.llm_provider.api import router as llm_provider_router
 
 ACTUATOR_MEDIA_TYPE = "application/vnd.spring-boot.actuator.v3+json"
 
@@ -70,6 +71,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     install_exception_handlers(app)
     app.include_router(interview_schedule_router)
     app.include_router(interview_skill_router)
+    app.include_router(llm_provider_router)
     app.add_middleware(
         RequestContextMiddleware,
         metrics=metrics,

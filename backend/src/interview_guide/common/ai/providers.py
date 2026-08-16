@@ -155,6 +155,21 @@ class ProviderRepository:
             )
             return list(result)
 
+    async def all_providers(self) -> list[LlmProviderConfig]:
+        async with self._sessions() as session:
+            result = await session.scalars(select(LlmProviderConfig))
+            return list(result)
+
+    async def get_provider(self, provider_id: str) -> LlmProviderConfig:
+        async with self._sessions() as session:
+            provider = await session.get(LlmProviderConfig, provider_id)
+            if provider is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_NOT_FOUND,
+                    f"Provider '{provider_id}' 不存在",
+                )
+            return provider
+
     async def global_setting(self) -> LlmGlobalSetting:
         async with self._sessions() as session:
             setting = await session.get(LlmGlobalSetting, GLOBAL_SETTING_ID)
@@ -175,6 +190,52 @@ class ProviderRepository:
             )
             if updated_id is None:
                 raise BusinessException(ErrorCode.PROVIDER_NOT_FOUND)
+
+    async def update_default_chat(
+        self,
+        provider_id: str,
+        updated_at: datetime,
+    ) -> None:
+        async with self._sessions() as session, session.begin():
+            if await session.get(LlmProviderConfig, provider_id) is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_NOT_FOUND,
+                    f"Provider '{provider_id}' 不存在",
+                )
+            setting = await session.get(LlmGlobalSetting, GLOBAL_SETTING_ID)
+            if setting is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "默认 Provider 配置未初始化",
+                )
+            setting.default_chat_provider_id = provider_id
+            setting.updated_at = updated_at
+
+    async def update_default_embedding(
+        self,
+        provider_id: str,
+        updated_at: datetime,
+    ) -> None:
+        async with self._sessions() as session, session.begin():
+            provider = await session.get(LlmProviderConfig, provider_id)
+            if provider is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_NOT_FOUND,
+                    f"Provider '{provider_id}' 不存在",
+                )
+            if not provider.supports_embedding or not provider.embedding_model:
+                raise BusinessException(
+                    ErrorCode.BAD_REQUEST,
+                    f"Provider '{provider_id}' 不支持 Embedding，不能设为默认向量服务",
+                )
+            setting = await session.get(LlmGlobalSetting, GLOBAL_SETTING_ID)
+            if setting is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "默认 Provider 配置未初始化",
+                )
+            setting.default_embedding_provider_id = provider_id
+            setting.updated_at = updated_at
 
     async def clear_for_tests(self) -> None:
         async with self._sessions() as session, session.begin():

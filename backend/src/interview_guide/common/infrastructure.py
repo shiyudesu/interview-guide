@@ -26,7 +26,7 @@ class RuntimeInfrastructure:
             nonce_factory=provider_nonce_factory(settings),
         )
         repository = ProviderRepository(self.database.sessions)
-        self._repository = repository
+        self.provider_repository = repository
         self._settings = settings
         self.provider_registry = LlmProviderRegistry(
             repository,
@@ -36,14 +36,14 @@ class RuntimeInfrastructure:
         )
         self.llm_adapter = LlmAdapter()
         self.prompt_sanitizer = PromptSanitizer()
-        self._encryption = encryption
+        self.api_key_encryption = encryption
         self._started = False
 
     async def start(self) -> None:
         await self.redis.start()
-        await self._repository.bootstrap(
+        await self.provider_repository.bootstrap(
             self._settings,
-            self._encryption,
+            self.api_key_encryption,
             now=lambda: provider_now(self._settings),
         )
         await self.provider_registry.start()
