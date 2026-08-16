@@ -10,6 +10,7 @@ python3 -m unittest discover \
   -p 'test_*.py'
 
 "$repo_root/migration/scripts/sync-flyway-schema.py" --check
+"$repo_root/migration/scripts/sync-java-resources.py" --check
 
 python3 "$repo_root/migration/scripts/generate_manifests.py" \
   --root "$repo_root" \

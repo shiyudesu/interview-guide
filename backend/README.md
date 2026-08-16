@@ -10,6 +10,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
 uv run pytest
+TEST_REDIS_URL=redis://127.0.0.1:6379/0 uv run pytest -m integration
 uv run interview-guide-api
 ```
 

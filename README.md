@@ -27,6 +27,8 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ```bash
 ./migration/scripts/generate-manifests.sh
 ./migration/scripts/check-manifests.sh
+./migration/scripts/sync-flyway-schema.py
+./migration/scripts/sync-java-resources.py
 ./migration/scripts/start-comparison-env.sh
 ./migration/scripts/run-comparison.sh
 ./migration/scripts/run-schema-comparison.sh

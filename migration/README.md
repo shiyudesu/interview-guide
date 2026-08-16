@@ -7,6 +7,8 @@ samples and comparison reports are added in later stages.
 ```bash
 ./migration/scripts/generate-manifests.sh
 ./migration/scripts/check-manifests.sh
+./migration/scripts/sync-flyway-schema.py
+./migration/scripts/sync-java-resources.py
 ```
 
 The generator uses only the Python standard library. It scans Java controller and

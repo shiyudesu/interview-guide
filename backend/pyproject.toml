@@ -62,6 +62,9 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "integration: requires real PostgreSQL, Redis, or S3 infrastructure",
+]
 
 [tool.ruff]
 line-length = 100

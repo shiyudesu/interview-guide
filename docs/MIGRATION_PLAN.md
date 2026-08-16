@@ -1497,6 +1497,8 @@ docker history <python-image>
 ```bash
 ./migration/scripts/generate-manifests.sh
 ./migration/scripts/check-manifests.sh
+./migration/scripts/sync-flyway-schema.py
+./migration/scripts/sync-java-resources.py
 ./migration/scripts/start-comparison-env.sh
 ./migration/scripts/start-model-proxy.sh
 ./migration/scripts/record-java-baseline.sh

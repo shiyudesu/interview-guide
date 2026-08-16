@@ -41,6 +41,16 @@ jobs:
     name: Backend checks
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    services:
+      redis:
+        image: redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
 
     steps:
       - name: Checkout repository
@@ -109,6 +119,8 @@ jobs:
       - name: Run Python tests
         if: steps.backend.outputs.python == 'true'
         working-directory: backend
+        env:
+          TEST_REDIS_URL: redis://127.0.0.1:6379/0
         run: uv run pytest
 
       - name: Build Python application image

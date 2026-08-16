@@ -137,6 +137,8 @@ docker compose -f docker-compose.dev.yml up -d
 ```bash
 ./migration/scripts/generate-manifests.sh
 ./migration/scripts/check-manifests.sh
+./migration/scripts/sync-flyway-schema.py
+./migration/scripts/sync-java-resources.py
 ./migration/scripts/start-comparison-env.sh
 ./migration/scripts/start-model-proxy.sh
 ./migration/scripts/capture-runtime-state.sh

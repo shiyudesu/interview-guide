@@ -10,6 +10,32 @@ from interview_guide.scheduler import run_scheduler
 from interview_guide.worker import run_worker
 
 
+class FakeRedisClient:
+    async def ping(self) -> bool:
+        return True
+
+    async def xgroup_create(
+        self,
+        name: str,
+        groupname: str,
+        id: str,
+        mkstream: bool,
+    ) -> bool:
+        del name, groupname, id, mkstream
+        return True
+
+
+class FakeRedisConnection:
+    def __init__(self) -> None:
+        self.client = FakeRedisClient()
+
+    async def start(self) -> None:
+        await self.client.ping()
+
+    async def close(self) -> None:
+        return None
+
+
 @pytest.mark.asyncio
 async def test_blocking_operation_does_not_block_event_loop() -> None:
     executor = BlockingExecutor(max_workers=1)
@@ -43,5 +69,11 @@ async def test_worker_and_scheduler_stop_when_event_is_set() -> None:
     scheduler_stop = asyncio.Event()
     scheduler_stop.set()
 
-    await asyncio.wait_for(run_worker(worker_stop), timeout=1)
+    await asyncio.wait_for(
+        run_worker(
+            worker_stop,
+            FakeRedisConnection(),  # type: ignore[arg-type]
+        ),
+        timeout=1,
+    )
     await asyncio.wait_for(run_scheduler(scheduler_stop), timeout=1)
