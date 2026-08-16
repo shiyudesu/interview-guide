@@ -87,7 +87,7 @@ jobs:
 
       - name: Set up uv
         if: steps.backend.outputs.python == 'true'
-        uses: astral-sh/setup-uv@v10
+        uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
           cache-dependency-glob: backend/uv.lock
