@@ -16,5 +16,7 @@ compose exec -T java-postgres \
   --schema-only \
   --no-owner \
   --no-privileges \
+  --exclude-table flyway_schema_history \
+  --exclude-table alembic_version \
   interview_guide_java \
   >"$repo_root/migration/samples/database/java-schema.sql"

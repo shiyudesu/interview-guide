@@ -295,6 +295,19 @@ def compare_command(args: argparse.Namespace) -> int:
     return 0 if report["passed"] else 1
 
 
+def compare_schema_command(args: argparse.Namespace) -> int:
+    empty_http = {"cases": [], "schemaVersion": SCHEMA_VERSION}
+    report = compare_snapshots(
+        empty_http,
+        empty_http,
+        args.left_schema.read_text(encoding="utf-8"),
+        args.right_schema.read_text(encoding="utf-8"),
+    )
+    write_json(args.json_report, report)
+    write_html_report(args.html_report, report, args.title)
+    return 0 if report["passed"] else 1
+
+
 def parser() -> argparse.ArgumentParser:
     argument_parser = argparse.ArgumentParser()
     subparsers = argument_parser.add_subparsers(dest="command", required=True)
@@ -316,6 +329,17 @@ def parser() -> argparse.ArgumentParser:
     compare_parser.add_argument("--right-state", type=Path)
     compare_parser.add_argument("--title", default="Migration comparison")
     compare_parser.set_defaults(handler=compare_command)
+
+    schema_parser = subparsers.add_parser("compare-schema")
+    schema_parser.add_argument("--html-report", type=Path, required=True)
+    schema_parser.add_argument("--json-report", type=Path, required=True)
+    schema_parser.add_argument("--left-schema", type=Path, required=True)
+    schema_parser.add_argument("--right-schema", type=Path, required=True)
+    schema_parser.add_argument(
+        "--title",
+        default="Database schema comparison",
+    )
+    schema_parser.set_defaults(handler=compare_schema_command)
     return argument_parser
 
 

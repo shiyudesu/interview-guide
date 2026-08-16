@@ -126,6 +126,25 @@ start_python() {
   fi
   (
     cd "$repo_root/backend"
+    env \
+      POSTGRES_HOST=localhost \
+      POSTGRES_PORT=25432 \
+      POSTGRES_DB=interview_guide_python \
+      POSTGRES_USER=postgres \
+      POSTGRES_PASSWORD=comparison-password \
+      REDIS_HOST=localhost \
+      REDIS_PORT=26379 \
+      TZ=Asia/Shanghai \
+      MIGRATION_FIXED_TIME=2026-08-16T08:00:00 \
+      APP_STORAGE_ENDPOINT=http://localhost:19000 \
+      APP_STORAGE_ACCESS_KEY=comparison-access \
+      APP_STORAGE_SECRET_KEY=comparison-secret \
+      APP_STORAGE_BUCKET=interview-guide-python \
+      APP_AI_PROVIDERS_DASHSCOPE_BASE_URL=http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1 \
+      APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
+      APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
+      AI_BAILIAN_API_KEY=comparison-placeholder-key \
+      uv run --frozen interview-guide-migrate
     nohup env \
       POSTGRES_HOST=localhost \
       POSTGRES_PORT=25432 \

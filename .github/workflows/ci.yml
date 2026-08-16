@@ -200,6 +200,57 @@ jobs:
           uv run python -m compileall -q src tests
           uv run python -m unittest discover -s tests -v
 
+  database-schema-comparison:
+    name: Flyway and Alembic schema
+    needs: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: gradle
+
+      - name: Set up Python 3.13.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            backend/uv.lock
+            migration/model-proxy/uv.lock
+          version: "0.11.14"
+
+      - name: Start Java and Python schema environment
+        env:
+          COMPARISON_CANDIDATE: python
+        run: ./migration/scripts/start-comparison-env.sh
+
+      - name: Compare Flyway and Alembic schemas
+        run: ./migration/scripts/run-schema-comparison.sh
+
+      - name: Upload schema comparison reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: database-schema-comparison-reports
+          path: migration/reports/
+          if-no-files-found: ignore
+
+      - name: Stop isolated schema environment
+        if: always()
+        run: ./migration/scripts/stop-comparison-env.sh
+
   frontend:
     name: Frontend tests and build
     runs-on: ubuntu-latest

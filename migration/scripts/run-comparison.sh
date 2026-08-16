@@ -21,6 +21,8 @@ compose exec -T java-postgres \
   --schema-only \
   --no-owner \
   --no-privileges \
+  --exclude-table flyway_schema_history \
+  --exclude-table alembic_version \
   interview_guide_java \
   >"$comparison_reports/java-schema.sql"
 compose exec -T python-postgres \
@@ -29,6 +31,8 @@ compose exec -T python-postgres \
   --schema-only \
   --no-owner \
   --no-privileges \
+  --exclude-table flyway_schema_history \
+  --exclude-table alembic_version \
   interview_guide_python \
   >"$comparison_reports/candidate-schema.sql"
 

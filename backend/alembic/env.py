@@ -8,12 +8,16 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from interview_guide.common.config.settings import get_settings
+from interview_guide.common.db import models as database_models
+from interview_guide.common.db.base import Base
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = None
+del database_models
+
+target_metadata = Base.metadata
 config.set_main_option("sqlalchemy.url", get_settings().sqlalchemy_url)
 
 
