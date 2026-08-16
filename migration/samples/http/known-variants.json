@@ -2,6 +2,15 @@
   "cases": [
     {
       "allowedForComparison": false,
+      "id": "knowledge-base-upload-map-field-order",
+      "observedResponses": [
+        "The nested knowledgeBase/storage/duplicate fields are emitted from Java Map.of and may vary in byte order across isolated JVM processes."
+      ],
+      "path": "/api/knowledgebase/upload",
+      "reason": "Compare parsed fields and values after bucket normalization while preserving raw Java and Python responses in the module report."
+    },
+    {
+      "allowedForComparison": false,
       "id": "resume-upload-map-field-order",
       "observedResponses": [
         "The nested resume/storage/duplicate fields are emitted from Java Map.of and have varied across isolated JVM processes."

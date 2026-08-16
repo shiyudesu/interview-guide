@@ -185,7 +185,9 @@ def build_consumer(
         registry,
         adapter,
         job_id_factory=lambda: "integration-job-success",
-        max_chunk_characters=1,
+        chunk_size=1,
+        min_chunk_size_characters=0,
+        min_chunk_length_to_embed=0,
     )
     return SequentialStreamConsumer(
         streams,
@@ -215,7 +217,7 @@ async def test_fake_embedding_vector_worker_promotes_and_completes_atomically(
         KB_VECTORIZE.key,
         {
             "kbId": str(knowledge_base_id),
-            "content": "abcdefghijk",
+            "content": "one two three four five six seven eight nine ten eleven",
             "retryCount": "0",
         },
         message_id="1-0",
@@ -242,7 +244,19 @@ async def test_fake_embedding_vector_worker_promotes_and_completes_atomically(
     assert entity.vector_status == "COMPLETED"
     assert entity.vector_error is None
     assert entity.chunk_count == 11
-    assert [vector.content for vector in vectors] == list("abcdefghijk")
+    assert [vector.content for vector in vectors] == [
+        "eight",
+        "eleven",
+        "five",
+        "four",
+        "nine",
+        "one",
+        "seven",
+        "six",
+        "ten",
+        "three",
+        "two",
+    ]
     assert all(vector.metadata_json == {"kb_id": str(knowledge_base_id)} for vector in vectors)
     assert all(
         vector.embedding is not None and len(vector.embedding) == EMBEDDING_DIMENSIONS
@@ -282,7 +296,9 @@ async def test_fake_embedding_vector_worker_retries_cleans_and_finally_fails(
         registry,
         adapter,
         job_id_factory=lambda: next(job_ids),
-        max_chunk_characters=1,
+        chunk_size=1,
+        min_chunk_size_characters=0,
+        min_chunk_length_to_embed=0,
     )
     consumer = SequentialStreamConsumer(
         streams,
@@ -295,7 +311,7 @@ async def test_fake_embedding_vector_worker_retries_cleans_and_finally_fails(
         KB_VECTORIZE.key,
         {
             "kbId": str(knowledge_base_id),
-            "content": "abcdefghijk",
+            "content": "one two three four five six seven eight nine ten eleven",
             "retryCount": "0",
         },
         message_id="1-0",
@@ -339,7 +355,7 @@ async def test_fake_embedding_vector_worker_retries_cleans_and_finally_fails(
     assert entity is not None
     assert entity.vector_status == "FAILED"
     assert entity.vector_error is not None
-    assert entity.vector_error.startswith("task failed after retry 3:")
+    assert entity.vector_error.startswith("向量化 failed after retry 3:")
     assert [vector.content for vector in formal_vectors] == ["old formal vector"]
     assert pending_count == 0
     assert registry.calls == 4

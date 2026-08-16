@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import logging
+import os
 import uuid
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Protocol
 
+import tiktoken
 from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -25,7 +28,11 @@ logger = logging.getLogger(__name__)
 
 MAX_EMBEDDING_BATCH_SIZE = 10
 EMBEDDING_DIMENSIONS = 1024
-DEFAULT_MAX_CHUNK_CHARACTERS = 2400
+DEFAULT_CHUNK_SIZE = 800
+MIN_CHUNK_SIZE_CHARACTERS = 350
+MIN_CHUNK_LENGTH_TO_EMBED = 5
+MAX_NUM_CHUNKS = 10_000
+PUNCTUATION_MARKS = (".", "?", "!", "\n")
 
 
 @dataclass(frozen=True)
@@ -78,28 +85,66 @@ class VectorizationRepository(Protocol):
     async def cleanup_job(self, job_id: str) -> None: ...
 
 
+@lru_cache(maxsize=1)
+def cl100k_encoding() -> tiktoken.Encoding:
+    return tiktoken.get_encoding("cl100k_base")
+
+
+def java_utf16_length(value: str) -> int:
+    return len(value.encode("utf-16-le", errors="surrogatepass")) // 2
+
+
+def java_substring(value: str, end_utf16: int) -> str:
+    encoded = value.encode("utf-16-le", errors="surrogatepass")
+    return encoded[: end_utf16 * 2].decode("utf-16-le", errors="surrogatepass")
+
+
+def last_punctuation_index(value: str) -> int:
+    result = -1
+    for punctuation in PUNCTUATION_MARKS:
+        index = value.rfind(punctuation)
+        if index >= 0:
+            result = max(result, java_utf16_length(value[:index]))
+    return result
+
+
 def split_text(
     content: str,
-    max_characters: int = DEFAULT_MAX_CHUNK_CHARACTERS,
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
+    min_chunk_size_characters: int = MIN_CHUNK_SIZE_CHARACTERS,
+    min_chunk_length_to_embed: int = MIN_CHUNK_LENGTH_TO_EMBED,
+    max_num_chunks: int = MAX_NUM_CHUNKS,
 ) -> list[str]:
-    if max_characters < 1:
-        raise ValueError("max_characters must be at least 1")
-    paragraphs = [value.strip() for value in content.split("\n\n") if value.strip()]
+    if chunk_size < 1:
+        raise ValueError("chunk_size must be at least 1")
+    if not content.strip():
+        return []
+    encoding = cl100k_encoding()
+    tokens = encoding.encode(content, disallowed_special=())
     chunks: list[str] = []
-    current = ""
-    for paragraph in paragraphs:
-        candidate = f"{current}\n\n{paragraph}" if current else paragraph
-        if len(candidate) <= max_characters:
-            current = candidate
+    chunk_count = 0
+    while tokens and chunk_count < max_num_chunks:
+        chunk_tokens = tokens[: min(chunk_size, len(tokens))]
+        chunk_text = encoding.decode(chunk_tokens)
+        if not chunk_text.strip():
+            tokens = tokens[len(chunk_tokens) :]
             continue
-        if current:
-            chunks.append(current)
-        while len(paragraph) > max_characters:
-            chunks.append(paragraph[:max_characters])
-            paragraph = paragraph[max_characters:]
-        current = paragraph
-    if current:
-        chunks.append(current)
+        if len(tokens) > chunk_size:
+            punctuation_index = last_punctuation_index(chunk_text)
+            if punctuation_index != -1 and punctuation_index > min_chunk_size_characters:
+                chunk_text = java_substring(chunk_text, punctuation_index + 1)
+        value = chunk_text.strip()
+        if java_utf16_length(value) > min_chunk_length_to_embed:
+            chunks.append(value)
+        consumed = len(encoding.encode(chunk_text, disallowed_special=()))
+        if consumed < 1:
+            raise ValueError("token splitter made no progress")
+        tokens = tokens[consumed:]
+        chunk_count += 1
+    if tokens:
+        remaining = encoding.decode(tokens).replace(os.linesep, " ").strip()
+        if java_utf16_length(remaining) > min_chunk_length_to_embed:
+            chunks.append(remaining)
     return chunks
 
 
@@ -162,13 +207,11 @@ async def promote_vector_job(
                 ) - 'kb_vector_job_id' - 'kb_target_id'
             )::json
             WHERE metadata->>'kb_vector_job_id' = :job_id
-              AND metadata->>'kb_id' = :pending
             """
         ),
         {
             "target": str(knowledge_base_id),
             "job_id": job_id,
-            "pending": f"pending:{knowledge_base_id}:{job_id}",
         },
     )
 
@@ -181,6 +224,10 @@ class KnowledgeBaseVectorRepository:
         async with self._sessions() as session:
             entity = await session.get(KnowledgeBase, knowledge_base_id)
             return entity is None or entity.vector_status == "COMPLETED"
+
+    async def exists(self, knowledge_base_id: int) -> bool:
+        async with self._sessions() as session:
+            return await session.get(KnowledgeBase, knowledge_base_id) is not None
 
     async def update_status(
         self,
@@ -249,18 +296,30 @@ class KnowledgeBaseVectorizationService:
         adapter: EmbeddingLlmAdapter,
         *,
         job_id_factory: Callable[[], str] | None = None,
-        max_chunk_characters: int = DEFAULT_MAX_CHUNK_CHARACTERS,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+        min_chunk_size_characters: int = MIN_CHUNK_SIZE_CHARACTERS,
+        min_chunk_length_to_embed: int = MIN_CHUNK_LENGTH_TO_EMBED,
+        max_num_chunks: int = MAX_NUM_CHUNKS,
     ) -> None:
         self._repository = repository
         self._registry = registry
         self._adapter = adapter
         self._job_id_factory = job_id_factory or (lambda: str(uuid.uuid4()))
-        self._max_chunk_characters = max_chunk_characters
+        self._chunk_size = chunk_size
+        self._min_chunk_size_characters = min_chunk_size_characters
+        self._min_chunk_length_to_embed = min_chunk_length_to_embed
+        self._max_num_chunks = max_num_chunks
 
     async def vectorize(self, knowledge_base_id: int, content: str) -> None:
         job_id = self._job_id_factory()
         try:
-            chunks = split_text(content, self._max_chunk_characters)
+            chunks = split_text(
+                content,
+                self._chunk_size,
+                self._min_chunk_size_characters,
+                self._min_chunk_length_to_embed,
+                self._max_num_chunks,
+            )
             vectors = pending_vectors(knowledge_base_id, job_id, chunks)
             if vectors:
                 provider = await self._registry.get_embedding()
@@ -352,6 +411,8 @@ class VectorizeStreamHandler:
         )
 
     async def process(self, payload: VectorizePayload) -> None:
+        if not await self._repository.exists(payload.knowledge_base_id):
+            return
         await self._vectorization.vectorize(
             payload.knowledge_base_id,
             payload.content,
@@ -379,6 +440,12 @@ class VectorizeStreamHandler:
             )
 
     async def mark_failed(self, payload: VectorizePayload, error: str) -> None:
+        if error.startswith("task failed after retry "):
+            error = error.replace(
+                "task failed after retry ",
+                "向量化 failed after retry ",
+                1,
+            )
         await self._repository.update_status(
             payload.knowledge_base_id,
             "FAILED",

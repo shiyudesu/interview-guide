@@ -9,6 +9,14 @@
       "valueExpression": "\"interview.guide.migration.consumer-suffix\""
     },
     {
+      "name": "MIGRATION_DISABLE_CONSUMERS_PROPERTY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
+        "line": 23
+      },
+      "valueExpression": "\"interview.guide.migration.disable-stream-consumers\""
+    },
+    {
       "name": "FIELD_RETRY_COUNT",
       "source": {
         "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
@@ -531,35 +539,35 @@
       "code": "redisService.createStreamGroup(streamKey(), groupName());",
       "source": {
         "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
-        "line": 74
+        "line": 80
       }
     },
     {
       "code": "redisService.streamConsumeMessages(",
       "source": {
         "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
-        "line": 86
+        "line": 92
       }
     },
     {
       "code": "streamKey(),",
       "source": {
         "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
-        "line": 87
+        "line": 93
       }
     },
     {
       "code": "redisService.streamAck(streamKey(), groupName(), messageId);",
       "source": {
         "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
-        "line": 175
+        "line": 181
       }
     },
     {
       "code": "protected abstract String streamKey();",
       "source": {
         "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
-        "line": 187
+        "line": 193
       }
     },
     {
@@ -1417,7 +1425,7 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "constantCount": 48,
+    "constantCount": 49,
     "rateLimitRuleCount": 33,
     "scheduledMethodCount": 3,
     "streamCount": 5

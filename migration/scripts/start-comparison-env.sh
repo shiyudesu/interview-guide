@@ -63,6 +63,7 @@ start_java() {
     printf '%s' \
       '-Duser.timezone=Asia/Shanghai ' \
       '-Dinterview.guide.migration.consumer-suffix=comparison ' \
+      '-Dinterview.guide.migration.disable-stream-consumers=true ' \
       '-Dinterview.guide.migration.fixed-time=2026-08-16T08:00:00 ' \
       '-Dinterview.guide.migration.uuid.file-key=' \
       '12345678-0000-0000-0000-000000000000,' \

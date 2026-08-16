@@ -26,7 +26,7 @@
       "knownIssueCount": 20
     },
     "redis.json": {
-      "constantCount": 48,
+      "constantCount": 49,
       "rateLimitRuleCount": 33,
       "scheduledMethodCount": 3,
       "streamCount": 5

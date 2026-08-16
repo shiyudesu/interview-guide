@@ -262,13 +262,13 @@ class SequentialStreamConsumer[T]:
         if payload is None:
             await self._streams.ack(self._definition, message.message_id)
             return
-        if await self._handler.should_skip(payload):
-            await self._streams.ack(self._definition, message.message_id)
-            return
-        if not await self._handler.try_mark_processing(payload):
-            await self._streams.ack(self._definition, message.message_id)
-            return
         try:
+            if await self._handler.should_skip(payload):
+                await self._streams.ack(self._definition, message.message_id)
+                return
+            if not await self._handler.try_mark_processing(payload):
+                await self._streams.ack(self._definition, message.message_id)
+                return
             await self._handler.process(payload)
             await self._handler.mark_completed(payload)
         except Exception as error:

@@ -32,6 +32,7 @@ instances, ports, and S3 buckets:
 ./migration/scripts/run-llm-provider-comparison.sh
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
+./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh
@@ -52,6 +53,10 @@ cd backend
 uv run python ../migration/scripts/realtime_artifact.py --help
 ```
 
+The knowledge-base comparison uses the committed TXT/Markdown fixtures under
+`samples/knowledge-base/`. It compares synchronous HTTP, PostgreSQL, Redis Stream,
+and S3 state. It does not invoke or claim validation of a real Embedding model.
+
 Java production defaults remain unchanged. Comparison processes opt into deterministic
 values with `interview.guide.migration.*` system properties:
 
@@ -62,5 +67,6 @@ values with `interview.guide.migration.*` system properties:
 - `millis.<purpose>`: comma-separated real-time protocol timestamps.
 - `string.tts-websocket-url`: test-only TTS proxy endpoint.
 - `consumer-suffix`: fixed Redis Stream consumer suffix.
+- `disable-stream-consumers`: keeps API-only comparison queues deterministic.
 
 Configured sequences fail when exhausted instead of silently reusing an ID or nonce.

@@ -294,6 +294,9 @@ jobs:
       - name: Compare resume first upload
         run: ./migration/scripts/run-resume-upload-comparison.sh
 
+      - name: Compare knowledge base foundation
+        run: ./migration/scripts/run-knowledge-base-comparison.sh
+
       - name: Run frontend against real Python backend
         working-directory: frontend
         env:

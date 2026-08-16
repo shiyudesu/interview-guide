@@ -1,0 +1,4 @@
+固定知识库样本
+
+Java、Python、Redis 与 pgvector 用于验证知识库上传、重复检测和重新向量化。
+这个样本包含中文、ASCII 和 emoji 😀，内容固定且不依赖真实模型。

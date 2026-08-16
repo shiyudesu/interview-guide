@@ -20,6 +20,8 @@ public abstract class AbstractStreamConsumer<T> {
 
     static final String MIGRATION_CONSUMER_SUFFIX_PROPERTY =
         "interview.guide.migration.consumer-suffix";
+    static final String MIGRATION_DISABLE_CONSUMERS_PROPERTY =
+        "interview.guide.migration.disable-stream-consumers";
 
     private final RedisService redisService;
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -32,6 +34,10 @@ public abstract class AbstractStreamConsumer<T> {
 
     @PostConstruct
     public void init() {
+        if (Boolean.getBoolean(MIGRATION_DISABLE_CONSUMERS_PROPERTY)) {
+            log.info("{} consumer disabled by migration test override", taskDisplayName());
+            return;
+        }
         this.consumerName = resolveConsumerName(consumerPrefix());
         this.executorService = new ThreadPoolExecutor(
             1,

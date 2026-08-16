@@ -32,10 +32,39 @@ def test_pending_metadata_is_not_promoted_early() -> None:
 
 
 def test_split_text_preserves_order() -> None:
-    assert split_text("first\n\nsecond\n\nthird", max_characters=12) == [
-        "first",
-        "second",
-        "third",
+    assert split_text("first\n\nsecond\n\nthird") == [
+        "first\n\nsecond\n\nthird",
+    ]
+
+
+def test_split_text_matches_java_minimum_chunk_length() -> None:
+    assert split_text("short") == []
+
+
+def test_split_text_matches_java_cl100k_chunks() -> None:
+    assert split_text(
+        "one two three four five six seven eight nine ten eleven",
+        chunk_size=3,
+        min_chunk_size_characters=0,
+        min_chunk_length_to_embed=0,
+        max_num_chunks=100,
+    ) == [
+        "one two three",
+        "four five six",
+        "seven eight nine",
+        "ten eleven",
+    ]
+    assert split_text(
+        "😀 alpha. beta gamma! delta epsilon? zeta",
+        chunk_size=3,
+        min_chunk_size_characters=0,
+        min_chunk_length_to_embed=0,
+        max_num_chunks=100,
+    ) == [
+        "😀 alpha",
+        ". beta gamma",
+        "! delta epsilon",
+        "? zeta",
     ]
 
 
@@ -110,7 +139,9 @@ def vectorization_service(
         registry,
         adapter,
         job_id_factory=lambda: "fixed-job",
-        max_chunk_characters=1,
+        chunk_size=1,
+        min_chunk_size_characters=0,
+        min_chunk_length_to_embed=0,
     )
 
 
@@ -122,7 +153,7 @@ async def test_fake_embedding_uses_default_provider_and_batches_sequentially() -
 
     await vectorization_service(repository, registry, adapter).vectorize(
         7,
-        "abcdefghijk",
+        "one two three four five six seven eight nine ten eleven",
     )
 
     assert registry.calls == 1
@@ -146,7 +177,7 @@ async def test_fake_embedding_failure_cleans_current_pending_job() -> None:
     with pytest.raises(BusinessException, match="向量化知识库失败"):
         await vectorization_service(repository, registry, adapter).vectorize(
             8,
-            "abcdefghijk",
+            "one two three four five six seven eight nine ten eleven",
         )
 
     assert [len(batch) for batch in repository.stored_batches] == [10]
