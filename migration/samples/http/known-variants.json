@@ -1,0 +1,15 @@
+{
+  "cases": [
+    {
+      "allowedForComparison": false,
+      "id": "resume-health-field-order",
+      "observedResponses": [
+        "{\"code\":200,\"data\":{\"status\":\"UP\",\"service\":\"AI Interview Platform - Resume Service\"},\"message\":\"success\",\"success\":true}",
+        "{\"code\":200,\"data\":{\"service\":\"AI Interview Platform - Resume Service\",\"status\":\"UP\"},\"message\":\"success\",\"success\":true}"
+      ],
+      "path": "/api/resumes/health",
+      "reason": "The Java controller returns Map.of(...); immutable map iteration order varies between JVM processes. Preserve both observed byte-level variants as an existing issue instead of sorting JSON fields."
+    }
+  ],
+  "schemaVersion": 1
+}

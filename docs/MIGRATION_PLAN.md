@@ -110,10 +110,12 @@ Redisson、Apache Tika、iText 和 DashScope Java SDK。
 以下问题必须先保留，不能在迁移中静默修复：
 
 - 前端调用 `/api/resumes/statistics`，但后端没有对应接口。
+- 简历健康接口使用 `Map.of`，`data.status` 和 `data.service` 的 JSON 字段顺序可能随 JVM 实例变化。
 - 语音创建请求中的 `roleType` 当前被忽略。
 - 语音 WebSocket URL 在部分前端代码中回退到 localhost。
 - `audio_chunk.isLast` 当前始终为 false。
 - 部分 Controller 没有启用 `@Valid`，请求对象上的校验注解实际不生效。
+- 多个 Bean Validation 字段同时失败时，Java 返回的错误文案顺序可能随 JVM 实例变化。
 - 部分请求使用原始 Map 和强制类型转换，错误输入可能落入通用 500 处理。
 - 简历 AI 失败时返回零分结果，而不是把任务标记为失败。
 - RAG Chat 客户端中途断开时，当前不会保存已经生成的部分内容。
@@ -1494,6 +1496,11 @@ docker history <python-image>
 ```bash
 ./migration/scripts/generate-manifests.sh
 ./migration/scripts/check-manifests.sh
+./migration/scripts/start-comparison-env.sh
+./migration/scripts/record-java-baseline.sh
+./migration/scripts/run-comparison.sh
+./migration/scripts/run-failure-cases.sh
+./migration/scripts/stop-comparison-env.sh
 ```
 
 Python：

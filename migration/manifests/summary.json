@@ -23,7 +23,7 @@
       "tableCount": 17
     },
     "known-issues.json": {
-      "knownIssueCount": 18
+      "knownIssueCount": 20
     },
     "redis.json": {
       "constantCount": 47,
