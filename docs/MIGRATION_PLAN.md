@@ -1,80 +1,225 @@
-# Java/Spring AI 到 Python/LangGraph 技术栈迁移实施计划
+# Java/Spring AI 到 Python/FastAPI/LangGraph 迁移实施计划
 
-## 1. 问题与目标
+## 1. 迁移目标
 
-当前后端基于 Java 25、Spring Boot 4.1、Spring AI 2.0、Spring Data JPA、Redisson、
-Apache Tika、iText 和 DashScope Java SDK。后端约有 197 个 Java 文件，覆盖简历、
-文字面试、语音面试、知识库、RAG、面试日程、多 Provider 配置、Redis Stream
-异步任务、pgvector、S3 文件存储、SSE 和 WebSocket。
+当前后端使用 Java 25、Spring Boot 4.1、Spring AI 2.0、Spring Data JPA、
+Redisson、Apache Tika、iText 和 DashScope Java SDK。
 
-本次迁移的唯一目标是替换技术栈：
+本次迁移只更换后端技术实现：
 
-- Java/Spring Boot/Spring AI 替换为 Python/FastAPI/LangGraph。
-- PostgreSQL、pgvector、Redis、Redis Stream、S3/RustFS、React 前端继续保留。
-- 最终运行环境彻底移除 Java/JVM，包括 Flyway 和 Apache Tika Java 运行时。
-- 当前没有需要保留的开发数据，允许重建 PostgreSQL、Redis 和对象存储。
-- 开发阶段直接逐模块替换，不建设生产双栈路由、灰度发布和长期 Java 回滚链路。
+- Java 25 替换为 Python 3.13。
+- Spring Boot WebMVC 替换为 FastAPI 和 Uvicorn。
+- Spring Data JPA 替换为 SQLAlchemy 2.0 和 psycopg 3。
+- Flyway 替换为 Alembic。
+- Spring AI 替换为 LangGraph、langchain-openai 和项目统一 LLM Adapter。
+- Redisson 替换为 redis-py asyncio。
+- Apache Tika、iText 和 DashScope Java SDK 替换为不需要 JVM 的实现。
 
-### P0 不变量
+以下部分继续保留：
 
-除实现技术外，以下内容必须完全一致：
+- PostgreSQL 和 pgvector。
+- Redis、Redis Stream 和 Lua 限流脚本。
+- RustFS/S3 兼容对象存储。
+- React 前端。
+- 现有 REST、SSE 和 WebSocket 对外协议。
 
-- 用户功能、业务规则和页面交互。
-- REST 路径、HTTP 方法、参数、响应字段、默认值、错误码和错误文案。
-- PostgreSQL 表结构、字段类型、约束、索引和状态机。
-- Redis key、TTL、Stream、消息字段、重试、ACK 和限流语义。
-- Prompt、Skill、模型参数、Provider 选择、结构化输出和降级策略。
-- SSE 分帧、WebSocket 消息协议、时序、超时、暂停和恢复行为。
-- 文件格式、上传限制、哈希去重、对象存储 key、下载响应和 PDF 内容。
+最终运行环境中不能再包含 JDK、JRE、Java 命令、Gradle、Flyway 或其他 JVM 服务。
 
-迁移过程中发现的现存问题只能登记，不能在迁移任务中顺手修复。需要修复时必须在
-迁移完成后以独立需求处理。
+## 2. 迁移期间不能改变的内容
 
-## 2. 已确认的迁移边界
+### 2.1 功能和接口
 
-- 实施方式：开发阶段直接逐模块替换。
-- 数据处理：允许清空并重建开发数据库、Redis 和 RustFS/MinIO 数据。
-- Java 边界：最终不保留任何 JVM 运行时。
-- LangGraph 边界：
-  - 多步骤、并行、分支和降级流程使用 LangGraph。
-  - 单次模型调用通过统一 Python LLM Adapter 完成，不创建无意义的单节点图。
-  - 所有 AI 调用均不再依赖 Spring AI。
-- 前端：原则上不修改业务代码；只有测试或环境配置确有必要时才能调整。
+迁移前后必须保持一致：
 
-## 3. 目标技术栈
+- 页面功能、操作流程和业务规则。
+- REST 路径、HTTP 方法、查询参数、路径参数和请求体字段。
+- multipart 字段名、文件名、Content-Type 和上传大小限制。
+- 响应字段、默认值、null、空数组、字段顺序和时间格式。
+- HTTP 状态码、业务错误码和错误文案。
+- SSE 的 event、data、换行、转义、结束和报错方式。
+- WebSocket 消息类型、字段、发送顺序、超时、暂停、恢复和断开行为。
 
-| 当前技术 | 目标技术 |
+普通业务异常继续使用 HTTP 200 和统一 `Result`。文件下载、SSE、WebSocket 以及当前确实
+返回 HTTP 4xx/5xx 的情况，按 Java 实际结果保留。
+
+### 2.2 数据和异步处理
+
+迁移前后必须保持一致：
+
+- PostgreSQL 表、列、类型、默认值、约束、索引、扩展和状态变化。
+- 数据库事务开始和提交的位置，以及程序中途失败后的可见数据状态。
+- Redis key、TTL、缓存内容、Stream、Group、消息字段、重试次数和 ACK 顺序。
+- requestId 幂等锁、数据库唯一索引和结果缓存。
+- 定时任务的执行周期、首次延迟、重复执行方式和恢复条件。
+- pgvector 维度 `1024` 和 COSINE 距离。
+
+### 2.3 AI、文件和实时语音
+
+迁移前后必须保持一致：
+
+- Prompt、Skill、reference 文件和渲染结果。
+- Provider 选择、模型、base URL、temperature、超时和重试次数。
+- Tool、结构化输出 JSON Schema、JSON 修复和失败后的回退顺序。
+- 文档类型判断、文本提取、清洗、字符上限和错误结果。
+- 文件哈希、重复检测、对象存储 key、下载响应头和 PDF 可见内容。
+- ASR、TTS、LLM、Base64 音频、字幕和控制消息的顺序。
+
+### 2.4 不在迁移中顺手修复问题
+
+发现现有问题时：
+
+1. 写入本计划的“已知问题”部分。
+2. 用测试保存当前结果。
+3. Python 先保持相同结果。
+4. 如果需要修复，迁移完成后再单独立项。
+
+迁移任务不能以“Python 默认更合理”为理由改变当前行为。
+
+## 3. 当前项目情况
+
+本计划编写时，仓库包含：
+
+- 197 个生产 Java 文件。
+- 36 个 Java 测试文件，但其中部分语音测试被禁用或只是占位。
+- 9 个 Controller。
+- 14 个 Entity。
+- 5 组 Redis Stream 任务。
+- 17 个 StringTemplate Prompt。
+- 10 个 Skill 目录和共享 reference 文件。
+- React 18、TypeScript、Vite 和 pnpm 前端。
+
+以上数字只用于说明当前规模。迁移开始后必须通过脚本重新生成实际清单，不能长期依赖这里
+的手工统计。
+
+### 3.1 当前实现的主要来源
+
+迁移时按以下顺序确认现有行为：
+
+1. 实际请求和响应样本。
+2. Java Controller、Service、Repository 和配置代码。
+3. Flyway SQL。
+4. Redis Lua、Stream 常量和缓存实现。
+5. 前端 API 调用和 TypeScript 类型。
+6. Java 测试。
+7. README 等说明文档。
+
+如果文档与代码不一致，以实际运行结果和代码为准，并记录差异。
+
+### 3.2 已确认的现有问题
+
+以下问题必须先保留，不能在迁移中静默修复：
+
+- 前端调用 `/api/resumes/statistics`，但后端没有对应接口。
+- 语音创建请求中的 `roleType` 当前被忽略。
+- 语音 WebSocket URL 在部分前端代码中回退到 localhost。
+- `audio_chunk.isLast` 当前始终为 false。
+- 部分 Controller 没有启用 `@Valid`，请求对象上的校验注解实际不生效。
+- 部分请求使用原始 Map 和强制类型转换，错误输入可能落入通用 500 处理。
+- 简历 AI 失败时返回零分结果，而不是把任务标记为失败。
+- RAG Chat 客户端中途断开时，当前不会保存已经生成的部分内容。
+- RAG 慢客户端当前没有明确的缓冲上限。
+- 同一 RAG 会话并发发送可能出现消息顺序竞争。
+- 语音 WebSocket 连接开始时没有先完整校验会话状态，再启动 ASR。
+- 语音配置中的连接数量限制当前没有真正使用。
+- 同一 sessionId 建立第二条语音连接时，当前进程内状态可能互相覆盖。
+- 部分语音配置项写在 `application.yml` 中，但没有对应代码读取，当前实际无效。
+- 部分语音单元测试和集成测试被禁用。
+- 当前 Nginx 配置代理 `/api`，但没有完整覆盖 `/ws`。
+- README、前端 Dockerfile 和 CI 使用的 Node 版本不一致。
+- `.env.example` 与开发 Compose 的默认 PostgreSQL 密码不一致。
+
+这些问题要进入固定测试样本或风险清单。任何行为修改都需要独立任务。
+
+## 4. 已确定的目标技术方案
+
+### 4.1 技术栈
+
+| 当前实现 | Python 实现 |
 | --- | --- |
 | Java 25 | Python 3.13 |
-| Gradle | uv + pyproject.toml |
+| Gradle | uv + `pyproject.toml` + `uv.lock` |
 | Spring Boot WebMVC | FastAPI + Uvicorn |
-| Jackson / Bean Validation | Pydantic v2 |
-| Spring Data JPA | SQLAlchemy 2.0 + psycopg 3 |
-| Flyway | Alembic，历史结构重建为等价初始迁移 |
-| Spring AI | LangGraph + langchain-openai + 自定义 LLM Adapter |
-| Reactor Flux | async generator + StreamingResponse |
+| Jackson | Pydantic v2 + 项目兼容转换代码 |
+| Bean Validation | Pydantic 校验 + 每个接口的兼容处理 |
+| Spring Data JPA | SQLAlchemy 2.0 AsyncEngine |
+| PostgreSQL Driver | psycopg 3 async |
+| Flyway | Alembic |
+| Spring AI | LangGraph + langchain-openai + 统一 LLM Adapter |
+| Reactor Flux | async generator + `StreamingResponse` |
 | Spring WebSocket | FastAPI/Starlette WebSocket |
 | Redisson | redis-py asyncio |
-| Spring Scheduler | APScheduler 独立单实例进程 |
+| Spring Scheduler | APScheduler 独立进程 |
 | AWS S3 SDK | boto3 |
-| Apache Tika | python-magic + pdfminer.six/pypdf + python-docx + antiword/LibreOffice |
-| iText 8 | ReportLab，继续使用现有中文字体 |
-| DashScope Java SDK | DashScope Python SDK或原始 WebSocket 协议 |
+| Apache Tika PDF | pdfminer.six |
+| Apache Tika DOCX | python-docx |
+| Apache Tika DOC | LibreOffice headless |
+| Apache Tika TXT/Markdown | 显式编码处理和现有清洗规则 |
+| iText 8 | ReportLab |
+| DashScope Java SDK | 项目封装 DashScope WebSocket 协议 |
 | Micrometer | prometheus-client + OpenTelemetry |
 | JUnit/Mockito/AssertJ | pytest + pytest-asyncio + pytest-mock |
 
-## 4. 目标工程结构
+### 4.2 已确定的运行方式
 
-迁移期间新增 `backend/`，保留 `app/` 作为只读行为参考。全部验收通过后删除 Java
-`app/`，Docker Compose 中的服务名仍保持 `app`，避免前端和部署调用变化。
+使用同一 Python 镜像启动四类程序：
+
+1. **Migrate**
+   - 只执行 `alembic upgrade head`。
+   - 执行成功后 API、Worker 和 Scheduler 才能启动。
+   - 多个应用进程不得同时执行数据库升级。
+
+2. **API**
+   - 提供 REST、SSE 和 WebSocket。
+   - 迁移完成初期固定一个 Uvicorn worker。
+   - 原因是语音连接和部分计时状态保存在进程内。
+   - 多 worker 和横向扩容属于迁移后的独立改造。
+
+3. **Worker**
+   - 处理五类 Redis Stream。
+   - 每类 Stream 内保持顺序处理。
+   - 五类 Stream 可以同时运行。
+   - 迁移期间固定 Worker 副本数，不能在未比较行为前提高并发。
+
+4. **Scheduler**
+   - 只执行数据库中的过期和恢复任务。
+   - 只运行一个实例。
+   - WebSocket 连接活动计时仍放在 API 进程，不能错误移动到 Scheduler。
+
+### 4.3 异步和阻塞操作
+
+- FastAPI 路由、SQLAlchemy、Redis 和外部 HTTP 使用异步接口。
+- boto3、ReportLab、libmagic 和部分文档解析是阻塞操作，不能直接堵塞事件循环。
+- S3 和 PDF 生成放入有数量限制的线程池。
+- LibreOffice 通过受控子进程执行，并限制并发、执行时间、临时目录和输出大小。
+- 文档解析需要单独的并发限制，避免大文件耗尽 API 线程。
+- 所有后台任务在应用关闭时必须停止接收新任务，并在规定时间内完成或明确取消。
+
+默认并发值必须写入配置，并通过压力测试确认后才能修改。
+
+### 4.4 依赖和镜像版本
+
+- Python 小版本、uv、Python 包、Node、pnpm 和系统包全部固定版本。
+- 前端统一使用 Node 24 和 `packageManager` 中声明的 pnpm 10.26.2。
+- 容器基础镜像必须固定标签和 digest。
+- 不允许在生产 Compose 中使用 `latest`。
+- `uv.lock` 必须提交。
+- CI 使用 `uv sync --frozen`。
+- 生成 Python 依赖清单和容器软件清单，随发布结果保存。
+
+## 5. 目标工程结构
+
+迁移期间新增 `backend/`，保留 `app/` 作为 Java 行为参考。
 
 ```text
 backend/
 ├── pyproject.toml
+├── uv.lock
 ├── alembic.ini
 ├── alembic/
 ├── src/interview_guide/
 │   ├── main.py
+│   ├── worker.py
+│   ├── scheduler.py
 │   ├── common/
 │   │   ├── api/
 │   │   ├── ai/
@@ -82,6 +227,7 @@ backend/
 │   │   ├── db/
 │   │   ├── errors/
 │   │   ├── evaluation/
+│   │   ├── logging/
 │   │   ├── redis/
 │   │   └── result/
 │   ├── infrastructure/
@@ -89,15 +235,13 @@ backend/
 │   │   ├── export/
 │   │   ├── storage/
 │   │   └── mapping/
-│   ├── modules/
-│   │   ├── interview/
-│   │   ├── interview_schedule/
-│   │   ├── knowledge_base/
-│   │   ├── llm_provider/
-│   │   ├── resume/
-│   │   └── voice_interview/
-│   ├── worker.py
-│   └── scheduler.py
+│   └── modules/
+│       ├── interview/
+│       ├── interview_schedule/
+│       ├── knowledge_base/
+│       ├── llm_provider/
+│       ├── resume/
+│       └── voice_interview/
 ├── resources/
 │   ├── prompts/
 │   ├── skills/
@@ -105,218 +249,688 @@ backend/
 │   ├── fonts/
 │   └── voice-interview-opening.yml
 └── tests/
+    ├── unit/
+    ├── integration/
+    ├── contract/
+    └── performance/
+
+migration/
+├── manifests/       接口、数据库、Redis、配置和资源清单
+├── samples/         固定请求、响应、文件、SSE 和 WebSocket 样本
+├── model-proxy/     转发真实模型请求、记录请求响应并支持故障测试
+├── scripts/         启动、比较、故障测试和清理脚本
+└── reports/         本地生成的差异报告，不提交大文件
 ```
 
-API、Worker 和 Scheduler 使用同一代码库、不同启动命令：
+全部检查通过后才能删除 Java `app/`。Docker Compose 中对外服务名继续使用 `app`，端口继续
+使用 `8080`。
 
-- API：REST、SSE、WebSocket。
-- Worker：Redis Stream 消费。
-- Scheduler：日程过期、题目生成恢复和语音评估恢复。
+## 6. 迁移开始前必须整理的清单
 
-## 5. 实施阶段
+### 6.1 接口清单
 
-### 阶段 A：冻结现有行为
+为每个 REST、SSE 和 WebSocket 接口记录：
 
-目标是在删除 Java 前获得可自动比较的行为基线。
+- Java Controller 和方法。
+- 前端调用位置。
+- HTTP 方法和路径。
+- 请求头、查询参数、路径参数、请求体和 multipart 字段。
+- 正常响应。
+- 业务错误。
+- 缺少字段、null、空字符串、错误类型、超长值和非法枚举的结果。
+- HTTP 状态、Content-Type、Content-Disposition 和其他响应头。
+- 是否写数据库、Redis、S3 或发送 Stream。
 
-实施内容：
+接口清单必须由脚本扫描 Controller 后再人工检查，避免只靠手写。
 
-1. 从所有 Controller、前端 API 和 TypeScript 类型生成接口契约矩阵。
-2. 固化统一响应：
-   - 成功 `{code: 200, message: "success", data: ...}`。
-   - 普通业务异常继续使用 HTTP 200。
-   - 文件、SSE 和 WebSocket 保持当前例外行为。
-3. 为每个接口保存典型请求、响应、错误、空值、默认值和时间格式样本。
-4. 保存 SSE event block 和换行转义样本。
-5. 保存语音 WebSocket 从连接、开场、ASR、提交、LLM、TTS 到断线的完整 trace。
-6. 保存所有 Prompt 的渲染快照、JSON Schema 和模型请求参数。
-7. 保存文档解析、文本清洗、分块、对象 key 和 PDF 黄金样本。
-8. 将 36 个现有 Java 测试文件按行为映射到 Python 测试清单。
-9. 登记但不修复当前兼容行为：
-   - 前端调用但后端不存在的 `/api/resumes/statistics`。
-   - 语音创建请求中的 `roleType` 当前被忽略。
-   - WebSocket URL 当前硬编码 localhost。
-   - `audio_chunk.isLast` 当前始终为 false。
-   - 部分接口当前未启用完整校验。
-   - 简历 AI 失败返回零分结果而非任务失败。
+### 6.2 校验和错误清单
 
-完成门禁：
+FastAPI/Pydantic 默认行为不能直接代替 Spring 当前行为。
 
-- 每个外部接口均有契约用例。
-- 每个 AI 用例均有固定模型响应的回归样本。
-- 每个异步状态机均有正常、重试、最终失败和重复执行样本。
+每个接口至少比较：
 
-### 阶段 B：建立 Python 基础骨架
+- 字段不存在。
+- 字段为 null。
+- 字符串为空或只有空格。
+- 数字使用字符串传入。
+- 小数传给整数。
+- 数字溢出。
+- 日期格式错误。
+- 枚举大小写错误。
+- JSON 语法错误。
+- 多余字段。
+- 缺少 query、path 或 multipart 参数。
+- 上传不支持的 Content-Type。
+- HTTP 方法错误。
 
-实施内容：
+需要保存：
 
-1. 使用 uv 管理 Python 版本和锁文件。
-2. 配置 Ruff、mypy、pytest 和覆盖率。
-3. 创建 FastAPI 应用，端口保持 8080。
-4. 实现与 Spring 相同的兼容入口：
-   - `/swagger-ui.html`
-   - `/v3/api-docs`
-   - `/actuator/health`
-   - `/actuator/info`
-   - `/actuator/metrics`
-   - `/actuator/prometheus`
-5. 实现 `Result`、`BusinessException`、`ErrorCode` 和全局异常处理。
-6. Pydantic 输出使用 camelCase，保留 null、数组顺序和无时区时间格式。
-7. 复刻 CORS origin、method、credentials 和 multipart 50MB 限制。
-8. 建立配置模型，继续支持当前环境变量和 `application.yml` 中的同名配置。
-9. 配置结构化日志、请求关联 ID、Prometheus 和 OpenTelemetry。
+- HTTP 状态。
+- 原始响应体。
+- 业务 code 和 message。
+- 多个字段同时错误时的错误顺序。
 
-完成门禁：
+当前没有启用 `@Valid` 的接口，Python 也不能因为使用 Pydantic 而自动增加更严格的校验。
 
-- 前端 Axios 无须修改即可访问健康检查和模拟接口。
-- 统一响应、异常、OpenAPI 路径和 CORS 契约测试通过。
+### 6.3 数据库清单
 
-### 阶段 C：重建等价数据库结构
+从最终 Flyway SQL 和 PostgreSQL catalog 生成：
 
-因为允许重建开发数据，使用 Alembic 创建新的初始 migration，但必须逐字段复刻现有
-Flyway 最终状态。
+- extension。
+- table。
+- column。
+- 数据类型和长度。
+- null。
+- 默认值表达式。
+- identity 类型。
+- sequence 和 owner。
+- primary key。
+- foreign key 和删除规则。
+- check。
+- unique constraint。
+- unique index。
+- 普通索引。
+- 索引方法、opclass 和参数。
+- comment。
 
-实施内容：
+必须明确：
 
-1. 建立所有 SQLAlchemy Model。
-2. 保留：
-   - 原表名和列名。
-   - `BIGINT IDENTITY`。
-   - `VARCHAR` 状态字段和 CHECK 约束。
-   - JSON 字符串使用 `TEXT`，不改为 JSONB。
-   - `TIMESTAMP(6)` 无时区。
-   - 当前 FK 和缺失 FK。
-   - 当前唯一约束和索引，包括冗余索引。
-3. 使用 Alembic raw SQL 创建：
-   - `vector` 和 `uuid-ossp` extension。
-   - `vector_store.embedding vector(1024)`。
-   - HNSW `vector_cosine_ops` 索引。
-4. 显式实现原 Entity `@PrePersist/@PreUpdate` 默认值。
-5. 实现 Repository 和事务 helper：
-   - LLM、S3、文档解析、外部 HTTP 不进入数据库事务。
-   - 保留 `SELECT ... FOR UPDATE`。
-   - 保留题库替换、向量 promote 和 after-commit 投递边界。
-6. 编写 schema diff，比较 PostgreSQL catalog，而不是只比较 ORM Model。
+- 使用 `hstore`、`uuid-ossp` 和 `vector` extension。
+- 主键是 `BIGINT GENERATED BY DEFAULT AS IDENTITY`。
+- `vector_store.embedding` 是 `vector(1024)`。
+- `vector_store.metadata` 是 JSON。
+- HNSW 使用 `vector_cosine_ops`。
+- JSON 字符串业务字段继续使用 TEXT，不能统一改为 JSONB。
+- 时间字段继续使用无时区 `TIMESTAMP(6)`。
+- 状态继续使用 VARCHAR 和现有 CHECK，不自动改为 PostgreSQL enum。
+- `request_id` 的唯一性按现有 unique index 复刻。
+- 需要保留现有冗余索引和缺失的外键。
 
-完成门禁：
+### 6.4 Redis 和定时任务清单
 
-- 新旧空数据库的表、列、类型、默认值、约束和索引差异为零。
-- 所有状态机和唯一键测试通过。
+记录：
 
-### 阶段 D：迁移 Redis、异步任务和限流
+- 每个 key 的完整格式。
+- key 中使用的类名、方法名、用户、IP 和业务 ID。
+- value 格式。
+- TTL 和刷新 TTL 的时机。
+- Stream、Group、Consumer、消息字段和字段类型。
+- `XGROUP CREATE` 的起始 ID。
+- `XREADGROUP` 数量和 BLOCK 时间。
+- Pending idle 时间和 `XAUTOCLAIM` 数量。
+- 重试字段、重投、ACK 和最终失败顺序。
+- 定时任务是按固定频率执行、上一次结束后延迟执行，还是首次等待后执行。
+- 时区和允许同时运行的任务数量。
 
-实施内容：
+当前 requestId 幂等创建还必须记录：
 
-1. 原样复用 `rate_limit_single.lua`。
-2. 保留限流 key namespace、GLOBAL/IP/User 维度、窗口、permit 和错误码 8001。
-3. 使用 redis-py 实现 Stream 模板：
-   - `XREADGROUP`
-   - `XAUTOCLAIM`
-   - `XADD MAXLEN ~ 1000`
-   - `XACK`
-4. 保留五组 Stream 名称、Group 和消息字段。
-5. 保留批量 10、BLOCK 1 秒、Pending idle 5 分钟、claim 10。
-6. 保留 retryCount 0 到 3，因此最多执行四次。
-7. 保留“重投后 ACK”的 at-least-once 语义，不替换为 Celery。
-8. 缓存改为明确 JSON codec；因为允许清空数据，不实现 Redisson 二进制兼容层。
-9. 保留：
-   - 文字会话缓存 24 小时。
-   - 语音会话缓存 1 小时。
-   - requestId 创建幂等结果 1 天。
-10. Scheduler 单实例执行当前恢复和过期逻辑。
+- 锁 key `interview:create:{requestId}`。
+- 结果 key `interview:create:result:{requestId}`。
+- requestId 规则 `[A-Za-z0-9_-]{8,64}`。
+- 等待锁 185 秒。
+- 锁持有 600 秒。
+- 结果缓存 1 天。
+- 数据库唯一索引作为最后保护。
 
-完成门禁：
+### 6.5 配置清单
 
-- Redis 集成测试覆盖重复消费、崩溃窗口、reclaim、重试和最终失败。
-- 同样的故障序列产生相同数据库状态。
+每个配置项记录：
 
-### 阶段 E：迁移文件、解析、存储和 PDF
+- 配置名和环境变量名。
+- 类型。
+- 默认值。
+- 是否敏感。
+- API、Worker、Scheduler 中谁会使用。
+- 启动时读取还是运行时可修改。
+- Java 代码是否真的读取。
+- Python 对应位置。
+- 修改后是否需要重启。
 
-实施内容：
+当前写在 YAML 但没有代码读取的语音配置，在 Python 中也必须保持无效，除非另开任务。
 
-1. 文件校验保持简历 10MB、知识库 50MB 和当前 MIME 白名单。
-2. 使用 libmagic 检测实际 MIME，不能只信任上传头。
-3. 解析链：
-   - PDF：pdfminer.six/pypdf，复刻位置排序。
-   - DOCX：python-docx。
-   - DOC：antiword 或 LibreOffice headless，不引入 JVM。
-   - TXT/Markdown：按当前编码和清洗规则处理。
-4. 保持无 OCR、不提取嵌入文件、不提取 PDF inline image。
-5. 复刻正文 5Mi 字符上限和超长失败行为。
-6. 逐条移植文本清洗正则和换行规则。
-7. 使用 boto3 path-style 访问 RustFS/MinIO。
-8. 保持 SHA-256、日期目录、8 位 UUID、安全文件名、拼音规则和 URL 拼接。
-9. 使用 ReportLab 和现有朱雀仿宋字体重建 PDF。
-10. 保留 Unicode `So/Cs` 删除、字段顺序、下载 Content-Type 和 RFC 5987 文件名。
+Provider 配置需要单独记录：
 
-完成门禁：
+- 静态配置只在数据库为空时初始化。
+- 初始化后数据库是唯一配置来源。
+- API 修改 Provider 后，在事务提交完成后发送 Redis 配置变更通知。
+- API、Worker 和 Scheduler 收到通知后清理本地客户端缓存。
+- 每次任务开始时检查配置版本，防止进程错过通知后长期使用旧配置。
 
-- 黄金文档的清洗文本、哈希、对象 key 与 Java 基线一致。
-- PDF 用户可见内容、顺序、字体、分页和响应头一致；不要求二进制字节相同。
+### 6.6 固定测试样本
 
-### 阶段 F：迁移 Provider 和统一 LLM Adapter
+必须保存：
 
-实施内容：
+- 每个接口的典型请求和响应。
+- 每个业务错误和错误文案。
+- 所有 Prompt 渲染结果。
+- 发送给模型的 headers、path、model、temperature、messages、tools 和 JSON Schema。
+- SSE 原始字节。
+- WebSocket 完整消息记录。
+- 数据库执行前后状态。
+- Redis key、TTL、Stream 和 Pending 状态。
+- S3 对象 key、metadata 和响应头。
+- PDF、DOC、DOCX、RTF、TXT、Markdown、加密、损坏和超大文件。
+- PDF 抽取文本和页面截图。
 
-1. 实现 Python `LlmProviderRegistry`：
-   - 数据库配置优先，静态配置 fallback。
-   - 聊天和 Embedding 默认 Provider 独立。
-   - base URL 自动补 `/v1`。
-   - 连接 10 秒、读取 300 秒。
-   - temperature 缺省 0.2。
-2. 保留 plain、voice、embedding 三类客户端的能力差异。
-3. 使用 AES-GCM 复刻 API Key 加密、nonce、Base64 和 key 派生。
-4. 保留 Provider 增删改查、掩码、默认切换、reload 和连通性测试。
-5. 禁用 SDK、LangChain 和 LangGraph 的隐式自动 retry。
-6. 实现结构化输出兼容层：
-   - 同样的 JSON Schema。
-   - 默认最多两次。
-   - 第二次注入上次错误和严格 JSON 指令。
-   - 同样的错误截断、指标和最终 BusinessException。
-7. Prompt 内容不转换为新模板；继续保存原文件，编写兼容渲染器并使用快照测试确保
-   渲染文本逐字符一致。
-8. Skill 文件、reference 文件和 display 元数据原样复用。
-9. 将 SkillsTool 映射为 LangChain Tool，但保持 tool history 和 memory 当前关闭状态。
+测试中固定：
 
-完成门禁：
+- 当前时间。
+- 时区。
+- UUID。
+- 随机数。
+- AES-GCM nonce。
+- 数据库初始 sequence。
+- 使用的真实 Provider、模型名称、temperature 和其他模型参数。
+- 音频发送时间。
+- 故障发生位置。
 
-- 固定 Mock Provider 下，请求路径、headers、model、temperature、messages、tools、
-  JSON Schema 和调用次数一致。
+Prompt 中随机生成的八位 UUID 分隔符必须通过测试注入固定值，不能用“比较时忽略整段
+Prompt”的方式绕过。
 
-### 阶段 G：实现 LangGraph 工作流
+### 6.7 真实模型使用规则
 
-#### G1. 面试出题图
+- 任何用于证明迁移完成、接口兼容、AI 效果、语音流程或性能的数据，都必须调用真实模型。
+- LLM、Embedding、ASR 和 TTS 都不能在最终验收时偷偷替换为固定字符串、随机生成器或本地
+  假服务。
+- 可以在普通单元测试中使用明确命名的 stub/fake，测试不需要模型参与的分支和业务计算。
+- 使用 stub/fake 的测试必须在测试名和报告中明确标记，并且不能算作真实模型验收结果。
+- Java 和 Python 都通过同一个转发代理调用真实 Provider。代理只负责记录请求、响应、耗时
+  和错误，不得修改正常模型结果。
+- 需要测试超时、断线、429 或 5xx 时，代理可以主动制造网络故障，但报告必须明确标记这是
+  故障测试，不得把它描述成真实模型返回。
+- 每次真实模型测试保存 Provider、模型版本、请求参数、调用时间、requestId、响应和费用
+  统计，敏感密钥必须脱敏。
+- 真实模型输出存在波动，因此逐字符比较的是发给模型的请求；模型响应比较 JSON Schema、
+  字段、类型、数量、分数范围、业务回退和保存结果，不强制比较自然语言文本逐字相同。
 
-节点：
+## 7. Java/Python 新旧对比环境
+
+### 7.1 环境隔离
+
+Java 和 Python 同时运行时：
+
+- Java 使用测试端口 `18080`。
+- Python 使用测试端口 `28080`。
+- 使用两个独立 PostgreSQL 数据库。
+- 使用两个独立 Redis 实例，保证 key 名不需要添加额外前缀。
+- 使用两个独立 S3 bucket。
+- Java 和 Python 通过同一个记录代理调用同一个真实 Provider 和真实模型。
+- 使用同一份初始化数据和同一组请求。
+
+不能让两套后端消费同一个 Stream、修改同一张表或写同一个 bucket。
+
+### 7.2 对比内容
+
+每次对比生成：
+
+- REST 请求和响应差异。
+- SSE 原始内容差异。
+- WebSocket 消息顺序和字段差异。
+- PostgreSQL schema 差异。
+- 请求执行后的数据库数据差异。
+- Redis key、value、TTL、Stream、Pending 和 ACK 差异。
+- S3 对象 key、hash、metadata 和下载头差异。
+- Prompt 和模型请求差异。
+- 真实模型响应的结构、字段、数量、分数范围、回退结果和数据库保存结果。
+- PDF 抽取文本、页数和页面截图差异。
+
+### 7.3 允许替换的动态值
+
+默认不允许忽略字段。确实无法固定时，只能对提前列出的字段做替换：
+
+- 端口。
+- 环境隔离使用的数据库名和 bucket 名。
+- 明确标记为动态的 trace ID。
+
+业务 ID、时间、UUID、对象 key、nonce 和消息顺序应优先通过测试注入固定下来，不应直接
+忽略。
+
+### 7.4 执行命令
+
+迁移过程中需要实现以下命令：
+
+```bash
+./migration/scripts/start-comparison-env.sh
+./migration/scripts/seed-comparison-data.sh
+./migration/scripts/run-comparison.sh
+./migration/scripts/run-failure-cases.sh
+./migration/scripts/stop-comparison-env.sh
+```
+
+`run-comparison.sh` 必须使用非零退出码表示存在不允许的差异，并生成 JSON 和 HTML 报告。
+
+## 8. Python 基础运行规则
+
+### 8.1 API 和统一响应
+
+实现与 Spring 相同的兼容入口：
+
+- `/swagger-ui.html`
+- `/v3/api-docs`
+- `/actuator/health`
+- `/actuator/info`
+- `/actuator/metrics`
+- `/actuator/prometheus`
+
+不仅路径一致，返回字段、Content-Type、HTTP 状态和依赖异常时的结果也要比较。
+
+统一响应继续使用：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {}
+}
+```
+
+实现 Python 版：
+
+- `Result`。
+- `BusinessException`。
+- `ErrorCode`。
+- 全局异常处理。
+- 请求校验异常转换。
+
+### 8.2 JSON、时间和数字
+
+需要单独实现兼容转换：
+
+- API 字段输出 camelCase。
+- 保留 null。
+- 保留数组顺序。
+- Long ID 输出 JSON number。
+- 普通时间继续输出无时区字符串。
+- `interviewTime` 保持秒级格式。
+- 其他时间字段按 Java 当前是否带微秒分别保存。
+- WebSocket 时间戳继续使用 epoch millisecond。
+- `plannedDuration` 和 `actualDuration` 保持当前不同单位。
+- 评分中的平均值、整数截断和未回答题目按零分处理保持一致。
+- TEXT 中保存的 JSON 使用固定字段顺序、Unicode 处理和紧凑分隔符。
+- 嵌套 JSON 字符串不能自动改成 JSON 对象。
+
+Python 的 Unicode 字符数与 Java UTF-16 code unit 不完全相同。涉及字符上限时必须用兼容
+方法计算。
+
+### 8.3 配置加载
+
+- 继续支持现有环境变量名。
+- 本地 `.env` 只用于开发，不提交密钥。
+- 配置通过 Pydantic Settings 集中读取。
+- Service 中不能直接散落读取环境变量。
+- 对无效配置、缺少配置和格式错误返回明确启动错误。
+- API Key、数据库密码和 S3 密钥不能写日志。
+- Provider API Key 加密必须复刻 AES-GCM、nonce、Base64、字符编码和 key 派生。
+
+### 8.4 日志和监控
+
+- 每个 HTTP 请求生成 requestId。
+- requestId 写入 Stream 消息，并在 Worker 日志中继续使用。
+- WebSocket 每条连接使用稳定 connectionId。
+- 结构化日志记录模块、操作、业务 ID、耗时和结果。
+- 不记录完整 API Key、Authorization、简历正文、Prompt 私密内容和 Base64 音频。
+- 指标保留当前接口，并增加 API、Worker、Scheduler、LLM、Embedding、ASR、TTS、S3、
+  文档解析和 Stream 指标。
+- 指标标签不能直接使用 sessionId、requestId 或文件名，避免标签数量无限增长。
+
+## 9. PostgreSQL 和事务迁移
+
+### 9.1 Alembic 初始版本
+
+因为开发数据允许清空，创建一个等价的 Alembic 初始版本，不逐条移植旧 Flyway 历史。
+
+初始版本必须：
+
+- 创建全部 extension。
+- 创建全部表、约束和索引。
+- 使用原表名和列名。
+- 使用原默认值表达式。
+- 使用相同 identity 方式。
+- 创建 pgvector HNSW 索引。
+- 保留索引和约束名称。
+- 保留数据库中实际存在的 seed 数据。
+
+### 9.2 数据库结构比较
+
+不能只比较 SQLAlchemy Model。
+
+对两个空数据库查询 PostgreSQL 自带的结构信息，比较：
+
+- extension。
+- table、column 和顺序。
+- 类型、长度、precision 和 scale。
+- null 和 default。
+- identity 和 sequence。
+- primary key、foreign key、check 和 unique。
+- index name、method、column、expression、opclass 和参数。
+- comment。
+
+任何未列入允许差异的项目都必须使测试失败。
+
+### 9.3 事务和失败后的状态
+
+为每个包含多个系统的操作画出实际顺序，例如：
+
+```text
+parse file
+→ upload S3
+→ insert database
+→ send Redis Stream
+```
+
+每两个步骤之间模拟程序崩溃，记录：
+
+- 数据库是否已经提交。
+- S3 对象是否存在。
+- Redis 消息是否已经发送。
+- 重试后是否重复。
+- 是否需要清理。
+- 用户查询到什么状态。
+
+重点覆盖：
+
+- 简历上传和分析。
+- 知识库上传和向量化。
+- 题目生成。
+- 文字面试创建和完成。
+- 语音会话创建、完成和评估。
+- RAG 消息保存。
+- Provider 修改。
+
+一般情况下，LLM、S3、文档解析和外部 HTTP 不能放在数据库事务内。但如果 Java 当前失败
+顺序与此不同，必须先用测试保存实际结果，再决定 Python 如何在不改变外部结果的前提下
+缩短事务。
+
+继续保留：
+
+- `SELECT ... FOR UPDATE`。
+- 题库替换事务。
+- 向量 promote 事务。
+- 已经存在的 after-commit 发送行为。
+- 当前确实会吞掉并继续执行的特定失败结果，但必须在代码和测试中明确标记。
+
+## 10. Redis、异步任务和定时任务迁移
+
+### 10.1 限流
+
+- 原样复用 `rate_limit_single.lua`。
+- 保留 GLOBAL、IP、User 三种维度。
+- 保留 permit、窗口和错误码 8001。
+- 保留 forwarded IP 的取值顺序。
+- 保留 `:value`、`:permits` 等实际 key。
+- 保留当前 key 中 Java 类名和方法名，不能自动换成 Python 函数名。
+- 保留当前 TTL 为窗口两倍的行为。
+- 保留可重复限流注解对应的多条规则执行顺序。
+
+### 10.2 Redis Stream
+
+使用 redis-py asyncio 直接实现：
+
+- `XGROUP CREATE`
+- `XREADGROUP`
+- `XAUTOCLAIM`
+- `XADD MAXLEN ~ 1000`
+- `XACK`
+
+保持：
+
+- 五组 Stream、Group 和字段。
+- 每批 10 条。
+- BLOCK 1 秒。
+- Pending idle 5 分钟。
+- 每次 claim 10 条。
+- `retryCount` 从 0 到 3，因此最多执行四次。
+- 重投成功后才 ACK 原消息。
+- 消息格式错误时 ACK 并丢弃。
+- 实体已经删除时 ACK 并丢弃。
+- 重投本身失败时保留原 Pending 状态。
+- 消费者崩溃后使用相同 cursor 规则继续 reclaim。
+
+不能使用 Celery、RQ、简单 pub/sub 或内存队列代替 Stream。
+
+### 10.3 缓存
+
+- 文字面试会话 TTL 24 小时。
+- 语音会话 TTL 1 小时。
+- requestId 创建结果 TTL 1 天。
+- 保留当前 key namespace。
+- 保留 `questionsJson` 等嵌套 JSON 字符串。
+- 保留读改写导致 TTL 刷新的时机。
+- 保留不同映射缓存当前不同的 TTL 刷新方式。
+- 迁移时允许清空 Redisson 二进制缓存，因此 Python 使用明确 JSON 编码，不实现 Redisson
+  二进制兼容。
+
+### 10.4 定时任务
+
+迁移以下数据库定时任务：
+
+- 面试日程过期。
+- 知识库题目生成恢复。
+- 语音会话和评估恢复。
+
+当前时间规则必须按下表保存并在 Python 中复刻：
+
+| 任务 | 当前执行方式 | 当前时间条件 |
+| --- | --- | --- |
+| 面试日程过期 | 每小时检查一次 | 使用服务器本地时间 |
+| 知识库题目恢复 | 上一次执行结束 60 秒后再次执行，首次等待 60 秒 | Pending 超过 2 分钟；Processing 超过 20 分钟 |
+| 语音会话和评估恢复 | 每 60 秒检查一次 | 会话超过 2 小时；Pending 超过 3 分钟；Processing 超过 30 分钟 |
+
+APScheduler 必须明确：
+
+- 错过执行时间后是否补跑。
+- 多次错过时是否合并成一次。
+- 同一任务最多同时运行一个实例。
+- 进程重启后第一次何时执行。
+
+语音 4 分 30 秒提示、5 分钟暂停等连接内计时继续放在 API 进程。当前检查周期造成的时间
+偏差必须用测试记录，不能假设提示会精确发生在某一毫秒。
+
+## 11. 文件、对象存储和 PDF 迁移
+
+### 11.1 文件校验
+
+保持：
+
+- 简历最大 10MB。
+- 知识库最大 50MB。
+- multipart 总限制 50MB。
+- 当前扩展名和 MIME 白名单。
+
+文件类型判断必须复刻当前特殊情况：
+
+- 先用 libmagic 判断实际类型。
+- 类型判断发生 I/O 错误时，回退到上传请求头的 Content-Type。
+- 知识库允许 `.md`、`.markdown`、`.mdown` 的扩展名特例。
+- 知识库当前接受 RTF。
+- 简历当前存在 MIME 子字符串匹配行为。
+- 请求头和实际文件类型不一致时，结果按固定样本比较。
+
+### 11.2 文档解析
+
+- PDF 正文使用 pdfminer.six，按位置排序。
+- pypdf 只检查加密状态和页面信息。
+- DOCX 使用 python-docx。
+- DOC 通过 LibreOffice headless 转换后解析。
+- TXT/Markdown 使用固定编码识别顺序。
+- 不增加 OCR。
+- 不提取嵌入文件。
+- 不提取 PDF inline image。
+
+当前 5MiB 是解析阶段清洗前的字符上限，超出时整体失败，不是截断。Python 需要按照 Java
+UTF-16 code unit 方式计算边界。
+
+逐条移植文本清洗：
+
+- Unicode 类别删除。
+- 空白和换行规则。
+- 标点处理。
+- 最大长度。
+- 空文档结果。
+
+### 11.3 S3/RustFS
+
+- 使用 boto3 path-style。
+- 保留 bucket 自动创建。
+- 保留 SHA-256。
+- 保留日期目录。
+- 保留八位 UUID。
+- 保留安全文件名和中文转拼音规则。
+- 保留对象 URL 拼接。
+- 上传时保存的 Content-Type 继续使用当前上传请求头值。
+- 保留调用总超时 60 秒和单次尝试 20 秒。
+- S3 `HEAD` 的任意异常当前都按对象不存在处理。
+- 删除前 `HEAD` 异常时当前会跳过删除。
+- Python 自动重试次数必须通过网络层测试与 Java 实际行为一致。
+
+### 11.4 PDF
+
+使用 ReportLab 和现有中文字体。
+
+比较：
+
+- 可见文字和顺序。
+- 页数。
+- 字体和字号。
+- 粗体和斜体。
+- 颜色。
+- 页边距。
+- 表格宽度和换行。
+- 分页位置。
+- Unicode `So/Cs` 删除位置。
+- Content-Type。
+- RFC 5987 文件名。
+
+验收同时使用：
+
+- PDF 抽取文本比较。
+- 页面截图比较。
+- 人工查看复杂样本。
+
+不要求 PDF 二进制字节完全一致。
+
+## 12. Provider、Prompt 和统一 LLM Adapter
+
+### 12.1 Provider
+
+Python `LlmProviderRegistry` 保持：
+
+- 数据库为空时，从静态配置初始化一次。
+- 初始化完成后，数据库是唯一配置来源。
+- 聊天和 Embedding 默认 Provider 分开。
+- base URL 自动补 `/v1`。
+- 普通连接超时 10 秒。
+- 普通读取超时 300 秒。
+- temperature 缺省 0.2。
+- Provider 连通性测试使用当前独立的 5 秒连接、10 秒读取限制。
+- Provider 增删改查、掩码、默认切换、reload 和测试接口不变。
+
+当前实际存在四类客户端配置，Python 也要分别保留：
+
+1. 带 Tool 的普通聊天客户端。
+2. 不带普通业务 Tool 的 plain 客户端。
+3. 语音流式 Tool 客户端。
+4. Embedding 客户端。
+
+SafeGuard、Tool、memory 和 advisor 的启用情况按实际请求样本复制，不能按方法名称推测。
+
+### 12.2 API Key 加密
+
+复刻：
+
+- AES-GCM。
+- nonce 长度。
+- Base64 格式。
+- 字符编码。
+- key 派生。
+- 加密失败和解密失败的错误结果。
+- API 返回时的掩码。
+
+生产环境修改加密 key 前必须有明确迁移方法，否则已有 Provider 密钥无法解密。
+
+### 12.3 自动重试
+
+- Python SDK 和 HTTP 客户端的自动重试全部关闭。
+- 通过模拟 408、409、429、5xx、连接断开和读取超时，记录 Java 实际请求次数。
+- 如果 Java 底层 SDK 确实发生重试，在项目 Adapter 中明确实现相同次数和等待，不依赖库默认。
+- 业务 Service 不得自行复制重试代码。
+
+### 12.4 结构化输出
+
+统一组件必须保留：
+
+- attempts 最小为 1。
+- 错误截断长度配置最小为 20。
+- 每次调用都追加防注入说明。
+- 是否启用 repair prompt。
+- 上一次错误如何加入第二次请求。
+- 是否启用 JSON Schema 校验。
+- 只有关闭 Schema 校验时才执行的本地未转义引号修复。
+- 错误截断。
+- 指标。
+- 最终 `BusinessException`。
+
+所有分支都需要测试，不只测试“第二次成功”。
+
+### 12.5 Prompt 和 Skill
+
+- Prompt 内容不转换为新的模板语法。
+- 继续保存原 `.st` 文件。
+- 实现兼容 StringTemplate 的渲染器。
+- 渲染结果逐字符比较。
+- 随机分隔符在测试中固定。
+- 保留 PromptSanitizer 正则。
+- 保留 SafeGuard 词表和固定回复。
+- 保留 Skill 排序。
+- 保留 category 冲突时 first-wins。
+- 保留路径校验和 fallback 顺序。
+- 保留每个 reference 3,000 字符、生成 12,000 字符、评估 6,000 字符限制。
+
+## 13. LangGraph 使用范围
+
+LangGraph 只用于多步骤、分支、并行或回退流程。简单模型调用直接使用统一 Adapter。
+
+### 13.1 面试出题
 
 ```text
 resolve_skill
 → allocate_question_counts
-→ [generate_resume_questions || generate_direction_questions]
-→ apply_existing_fallbacks
+→ start_resume_and_direction_generation
+→ apply_current_asymmetric_fallback
 → merge_and_cap
 ```
 
-必须保留单分支失败、双分支失败和静态 fallback 的当前顺序。
+必须保留当前不对称回退：
 
-#### G2. 统一评估图
+- 简历分支失败时，取消方向分支，并重新按方向生成全部题目。
+- 方向分支失败时，只返回已经生成的简历题目。
+- 当前分支没有额外业务超时，Python 不能自行增加后改变结果。
 
-节点：
+### 13.2 统一评估
+
+当前批次必须顺序执行，不能并行：
 
 ```text
 prepare_qa
-→ fan_out_batches(batch_size=8)
-→ replace_failed_batches_with_zero
+→ evaluate_next_batch_sequentially
+→ replace_failed_batch_with_zero
+→ repeat_until_finished
 → summarize
 → summary_fallback
 → calculate_local_overall_score
 ```
 
-最终总分继续由本地逐题平均计算，不能采用模型返回的 overallScore。
+保持：
 
-#### G3. 知识库题目生成图
+- batch size 最小为 1。
+- 默认每批 8 条。
+- 失败批次用零分结果替代。
+- 最终总分由本地逐题平均。
+- 未回答题目按当前规则进入平均。
+- Java `(int)` 截断方式。
+- 分类统计顺序按当前实际输出样本。
 
-节点：
+### 13.3 知识库题目生成
 
 ```text
 validate_task
@@ -328,11 +942,13 @@ validate_task
 → transactional_replace
 ```
 
-提交前必须重新检查 taskId。
+写入前必须再次检查 taskId 和任务状态。
 
-#### G4. RAG 图
+### 13.4 RAG
 
-节点：
+普通查询和 RAG Chat 分开实现。
+
+普通查询：
 
 ```text
 normalize
@@ -340,12 +956,28 @@ normalize
 → retrieve_rewritten
 → retrieve_original_fallback
 → answer_or_no_hit
-→ stream_and_persist
+→ stream
 ```
 
-#### G5. 语音单轮图
+RAG Chat：
 
-节点：
+```text
+validate_session
+→ persist_user_message
+→ create_assistant_placeholder
+→ run_rag_stream
+→ persist_on_complete_or_error
+```
+
+保持当前行为：
+
+- 普通 SSE 不保存聊天消息。
+- RAG Chat 正常完成时保存完整内容。
+- 报错时按当前回调保存。
+- 客户端取消时不保存部分内容。
+- 当前慢客户端缓冲和并发顺序问题先记录，不在迁移中悄悄改变外部结果。
+
+### 13.5 语音单轮
 
 ```text
 load_session
@@ -356,9 +988,9 @@ load_session
 → persist_turn
 ```
 
-ASR、TTS、WebSocket 生命周期和音频块不放入 LangGraph。
+ASR、TTS、WebSocket 生命周期、连接计时和音频块不放入 LangGraph。
 
-#### 简单 LLM 调用
+### 13.6 简单调用
 
 以下调用直接使用统一 Adapter：
 
@@ -370,197 +1002,567 @@ ASR、TTS、WebSocket 生命周期和音频块不放入 LangGraph。
 - Provider 连通性测试。
 - Embedding。
 
-完成门禁：
+## 14. RAG、SSE 和 WebSocket
 
-- 每个图的节点顺序、并行、分支、异常和降级均有状态转换测试。
-- LangGraph 不新增当前不存在的业务重试和持久化副作用。
+### 14.1 SSE
 
-### 阶段 H：按风险顺序迁移业务模块
+保存原始字节样本，覆盖：
 
-每个模块均执行“实现 → 单元测试 → 集成测试 → Java/Python 契约对比 → 前端验证”，
-通过后才能迁移下一个模块。
+- 正常多段输出。
+- 多行 data。
+- 换行和转义。
+- 无命中。
+- 业务错误以数据形式返回。
+- 外部模型超时。
+- 客户端取消。
+- 慢客户端。
+- 服务端生成完成但客户端尚未读完。
 
-#### H1. 面试日程
+FastAPI 必须设置与 Java 一致的：
 
-- CRUD、状态更新、时间格式和定时过期。
-- 规则解析优先、LLM fallback。
-- PATCH 和 PUT 状态更新均保留。
+- Content-Type。
+- charset。
+- Cache-Control。
+- Connection。
+- 代理缓冲相关响应头。
+- 完成时的最后分帧。
 
-#### H2. Skill 与 LLM Provider
+### 14.2 RAG 并发
 
-- Skill 列表、详情和 JD 解析。
-- Provider、默认模型、Embedding、ASR/TTS 配置。
-- 配置文件路径、掩码和连通性测试。
+固定测试：
 
-#### H3. 简历
+- 同一会话同时发送两个请求。
+- 两个请求同时读取当前最大 message order。
+- 一个请求完成、另一个失败。
+- 删除会话时仍有流式响应。
 
-- 上传、重复检测、解析、S3、Stream 分析。
+先保存 Java 当前结果。Python 不得因数据库锁或新排序方式改变正常场景的消息顺序。
+
+### 14.3 WebSocket 基础限制
+
+保持当前限制：
+
+- WebSocket 容器消息上限 2MiB。
+- 处理器单条输入上限 256KiB。
+- 发送时间上限 10 秒。
+- 发送缓冲区 512KiB。
+- 当前发送失败会被记录后吞掉，不会继续向调用方抛出。
+- 文本 JSON 加 Base64 音频。
+- 不改为二进制帧。
+
+连接建立、重复 sessionId、超大消息、发送超时和断开后的清理都要有测试。
+
+## 15. 语音面试迁移
+
+语音模块最后迁移，并先补齐禁用测试。
+
+### 15.1 连接和会话
+
+保持：
+
+- `/ws/voice-interview/{sessionId}`。
+- welcome。
+- asr_ready。
+- asr_reconnecting。
+- audio_complete。
+- timeout action。
+- partial/final 字幕。
+- 手动 submit。
+- AI 流式 text。
+- Base64 音频。
+
+当前连接开始前没有完整校验会话并限制资源，配置中的连接数量限制也没有真正使用。这些属于
+已知风险。迁移中先保存当前正常行为，不得一边迁移一边增加新鉴权或连接拒绝规则。
+
+固定测试：
+
+- sessionId 不存在。
+- session 已完成。
+- 同一 sessionId 两个连接。
+- 连接建立后立即断开。
+- ASR 尚未 ready 时发送音频。
+- AI/TTS 处理中断开。
+- pause 后断开。
+- resume 后重连。
+
+### 15.2 ASR
+
+保持当前实际流程：
+
+- ASR ready 每 10 秒检查一次。
+- 初始失败后最多重启两次。
+- ready 前音频等待约 1.2 秒后仍不可用则丢弃。
+- append 失败时重启 ASR。
+- 同一音频块最多进行 15 次、每次 80ms 的追加重试。
+- ASR `onClose` 当前不会自行重连。
+- partial 和 final 的字段及顺序。
+- 手动 submit 才触发本轮回答。
+
+不能只写“ASR 重试两次”。
+
+### 15.3 TTS
+
+保持：
+
+- 连接超时可配置，最小 1 秒。
+- SDK 等待语音合成完成的当前上限 30 秒。
+- 外层单句超时最小 5 秒，默认 8 秒。
+- 每个会话最多并发 3 条 TTS。
+- 输出实际为 PCM 24kHz。
+- `audio_chunk.isLast` 始终为 false。
+- 至少一条音频成功后才发送 `audio_complete`。
+- 完整文本 TTS fallback。
+
+消息中报告的 format 和 sampleRate 与实际字节不一致时，也要先保存当前结果。
+
+### 15.4 AI 说话期间的音频处理
+
+- 从服务端开始执行 LLM/TTS 到流程结束期间丢弃用户音频。
+- 流程结束后继续丢弃 800ms。
+- 这个时间以服务端流程为准，不以浏览器实际播放结束为准。
+- 开场白音频当前不一定设置同一 speaking 标志。
+
+需要覆盖用户在开场白、AI 文本生成、TTS 合成、音频播放和 800ms 窗口内说话的情况。
+
+### 15.5 超时和暂停
+
+- 4 分 30 秒发送 warning。
+- 5 分钟自动暂停。
+- 当前检查任务按固定周期运行，因此允许值来自 Java 实际样本，不能假设毫秒级精确。
+- IN_PROGRESS WebSocket 关闭时自动完成并触发评估。
+- PAUSED 关闭时不自动完成。
+- resume 后不重复开场。
+
+### 15.6 取消和后台任务
+
+当前 LLM 流没有独立超时，文本发送默认存在 180ms 和 12 字符节流。断开连接时，父流程
+中断后部分 TTS 子任务可能继续运行。
+
+迁移时必须测试：
+
+- 断开发生在 LLM 流中。
+- 断开发生在多个 TTS 子任务中。
+- 发送缓冲区满。
+- TTS 子任务超时。
+- API 进程关闭。
+
+如果要改进子任务取消，需要迁移完成后单独处理。
+
+## 16. 业务模块迁移顺序
+
+每个模块都执行：
+
+```text
+整理 Java 行为
+→ 增加固定测试样本
+→ 实现 Python
+→ Python 单元测试
+→ PostgreSQL/Redis/S3 集成测试
+→ Java/Python 自动比较
+→ 前端真实流程测试
+→ 保存报告
+```
+
+### 16.1 面试日程
+
+- CRUD。
+- 时间解析和输出。
+- 状态更新。
+- PATCH 和 PUT。
+- 规则解析优先。
+- LLM fallback。
+- 定时过期。
+
+### 16.2 Skill 和 LLM Provider
+
+- Skill 列表和详情。
+- JD 解析。
+- Provider CRUD。
+- 默认聊天和 Embedding Provider。
+- ASR/TTS 配置。
+- API Key 加密和掩码。
+- reload、跨进程更新和连通性测试。
+
+### 16.3 简历
+
+- `/api/resumes/health`。
+- 上传、MIME、解析和重复检测。
+- S3。
+- Stream 分析。
 - 状态机和重新分析。
-- 列表、详情、删除和 PDF。
-- 保留上传响应的多种联合结构。
+- 列表、详情和删除。
+- PDF。
+- 上传响应的多种结构。
+- AI 失败时零分结果。
 
-#### H4. 知识库基础与向量化
+### 16.4 知识库基础和向量化
 
 - 上传、重复检测、分类、搜索、统计和下载。
-- 分块和 Embedding 每批最多 10。
-- 临时 metadata、旧向量删除和 promote 事务。
-- 保持维度 1024、COSINE 和 TopK/score 配置。
+- 文档清洗和分块。
+- Embedding 每批最多 10 条。
+- 临时 metadata。
+- 旧向量删除。
+- promote 事务。
+- 维度 1024、COSINE、TopK 和 score。
 
-#### H5. RAG Chat
+### 16.5 RAG Chat
 
 - 单次同步查询。
 - 单次 SSE 查询。
 - 会话创建、列表、详情、标题、置顶、知识库关联和删除。
-- 用户消息预写、AI 占位、流完成和中断后的内容持久化。
+- 用户消息预写。
+- AI 占位消息。
+- 正常完成、报错和取消。
+- 慢客户端和并发发送。
 
-#### H6. 文字面试
+### 16.6 文字面试
 
 - requestId 幂等创建。
-- Skill/JD/简历出题。
-- 当前题、答案暂存、答案提交、完成和异步评估。
+- Skill、JD 和简历出题。
+- 当前题。
+- 答案暂存。
+- 答案提交。
+- 完成和异步评估。
 - 历史、未完成、详情、报告和 PDF。
 
-#### H7. 知识库题库及专项面试
+### 16.7 知识库题库和专项面试
 
 - 题目生成状态机和恢复。
 - 题目 CRUD、状态、筛选和分类。
-- 容量校验、ACTIVE 题抽取、追问硬约束。
-- 复用文字面试和统一评估。
+- 容量校验。
+- ACTIVE 题抽取。
+- 追问数量硬约束。
+- 文字面试和统一评估复用。
 
-#### H8. 语音面试
+### 16.8 语音面试
 
-- REST 会话、列表、暂停、恢复、结束、删除和评估。
-- `/ws/voice-interview/{sessionId}`。
-- 文本 JSON + Base64 音频，不改成二进制帧。
-- welcome、asr_ready、asr_reconnecting、audio_complete 和 timeout action。
-- ASR partial/final、手动 submit、AI 流式 text、完整或分句音频。
-- AI 说话期间和结束后 800ms 丢弃音频。
-- 4 分 30 秒 warning、5 分钟自动暂停。
-- WebSocket close 时 IN_PROGRESS 自动完成并触发评估。
-- pause 后关闭不自动完成，resume 后不重复开场。
-- ASR 重连两次、TTS 连接/合成超时、并发 3 和完整文本兜底。
+- REST 会话。
+- 列表、暂停、恢复、结束、删除和评估。
+- WebSocket 完整流程。
+- ASR、TTS、LLM 和连接计时。
+- 断开、恢复和失败状态。
 
-完成门禁：
+## 17. 每个阶段必须使用的写法
 
-- React 前端无需业务改动即可覆盖全部页面流程。
-- 所有异步轮询状态和恢复行为一致。
+每个阶段都要写清：
 
-### 阶段 I：全量兼容性验证
+1. **开始条件**
+   - 前一阶段哪些结果已经通过。
 
-测试层次：
+2. **修改内容**
+   - 哪些目录、模块和配置会变化。
 
-1. Python 单元测试。
-2. PostgreSQL/pgvector、Redis、RustFS/MinIO 集成测试。
-3. API 契约测试。
-4. Java/Python golden-master 对比。
-5. 前端现有 Node 测试、构建和 Playwright E2E。
-6. LLM Mock、超时、无效 JSON、Provider 切换和 Embedding 维度测试。
-7. Redis 崩溃、消费者崩溃、重复消息和恢复测试。
-8. SSE 慢客户端和中断测试。
-9. WebSocket 重连、暂停、超时、ASR/TTS 失败和顺序测试。
-10. 性能基线，确保 API p95、错误率和语音首包延迟没有明显退化。
+3. **必须保持的行为**
+   - 对应清单编号和固定样本。
 
-最终兼容矩阵必须达到：
+4. **执行命令**
+   - 本地和 CI 使用的准确命令。
 
-- REST 路由、请求和响应差异为零。
-- 数据库 schema 差异为零。
-- Redis Stream 和状态机差异为零。
-- Prompt 渲染和固定模型请求差异为零。
-- SSE/WebSocket 协议差异为零。
-- 前端全部测试和构建通过。
+5. **通过标准**
+   - 哪些测试必须通过。
+   - 允许的差异是什么。
+   - 性能允许变化多少。
 
-## 6. CI、容器与开发命令迁移
+6. **保存结果**
+   - JSON、HTML、日志、截图和性能报告位置。
 
-1. 新建纯 Python 多阶段 Dockerfile，不安装 JDK/JRE。
-2. Compose 保持 `app:8080` 服务和现有环境变量。
-3. 增加 Worker 和 Scheduler 服务，使用同一 Python 镜像。
-4. 删除 Flyway；API/部署启动前执行 `alembic upgrade head`。
-5. CI 后端步骤改为：
-   - 安装 Python 3.13 和 uv。
-   - `uv sync --frozen`。
-   - Ruff。
-   - mypy。
-   - pytest。
-   - PostgreSQL schema diff 和集成测试。
-6. 前端 CI 命令保持不变。
-7. 更新 README、AGENTS.md 和开发命令，但不改变功能说明。
+7. **失败恢复**
+   - 回到哪个 Git 提交。
+   - 使用哪套 Compose。
+   - 是否需要清空测试数据库、Redis 和 bucket。
 
-## 7. Java 清理
+## 18. 实施阶段
 
-仅在所有门禁通过后执行：
+### 阶段 0：纠正现状并固定决定
 
-1. 删除 Java `app/src/main/java`、Java tests 和 Gradle 配置。
-2. 删除 Spring Boot、Spring AI、Redisson、Tika、iText 和 DashScope Java 依赖。
-3. 删除 Java Docker 镜像和 CI Java setup。
-4. 删除 Flyway runtime 和历史脚本；保留 schema 对照文档或归档引用。
-5. 检查最终镜像和 Compose，不允许包含 JDK、JRE、Java 命令或 JVM 服务。
-6. 确认仓库只剩 Python 后端和现有 React 前端。
+实施内容：
 
-## 8. 关键风险与控制
+- 生成接口、数据库、Redis、配置、Prompt、Skill 和测试清单。
+- 修正文档中与 Java 不一致的描述。
+- 固定本计划中的技术方案。
+- 为已知问题创建编号。
+- 统一 Python、Node、pnpm、容器和系统包版本。
 
-### 文档解析差异
+通过标准：
 
-纯 Python/非 JVM 解析器可能改变 PDF/DOC 的文本顺序。必须以真实样本文本快照作为门禁，
-不以“能够解析”为验收标准。
+- 清单能够关联到具体代码和前端调用。
+- 没有未决定的“或”方案。
+- 所有已知问题都有固定样本或明确的补样任务。
 
-### Prompt 和结构化输出差异
+### 阶段 1：建立新旧对比和 CI
 
-LangChain 默认消息构造、Schema 和 retry 可能与 Spring AI 不同。所有调用必须经过统一
-Adapter，禁止业务 Service 直接创建 ChatOpenAI。
+实施内容：
 
-### LangGraph 重复副作用
+- 建立 Java/Python 隔离环境。
+- 建立真实模型转发和记录代理。
+- 固定时间、UUID、随机数和 nonce。
+- 生成 REST、SSE、WebSocket、数据库、Redis、S3 和 PDF 差异报告。
+- CI 从这一阶段开始运行比较。
+- 补齐前端当前没有进入 CI 的测试。
+- Playwright 对真实 Python 后端执行，不只使用浏览器内 mock。
+- 真实模型测试只在有受保护密钥的 main 分支或手动任务中运行。
+- Fork PR 只能运行不需要密钥的测试，不能因此被标记为“完整迁移检查通过”。
 
-图恢复或节点重试可能重复保存消息、写向量或发送 TTS。迁移初期不启用额外持久
-checkpointer；现有 DB 状态和 taskId 继续作为幂等来源。
+通过标准：
 
-### Redis Stream 语义漂移
+- Java 对 Java 自比较时差异为零。
+- 故意修改一个响应字段时比较脚本必须失败。
+- 故意修改一个数据库索引时结构比较必须失败。
+- Java 和 Python 都有调用真实 LLM、Embedding、ASR 和 TTS 的记录。
+- CI 保存差异报告。
 
-不得用 Celery、RQ 或简单 pub/sub 替换 Redis Stream。需要直接实现并测试当前
-at-least-once、reclaim、重投和 ACK 顺序。
+### 阶段 2：建立 Python 基础项目
 
-### FastAPI 默认 HTTP 语义
+实施内容：
 
-FastAPI 默认使用 4xx/5xx，与当前 HTTP 200 + 业务码不同。必须通过全局异常层和验证异常
-处理器显式覆盖。
+- uv、pyproject、锁文件。
+- FastAPI、Uvicorn 和生命周期。
+- Result、异常和校验兼容。
+- JSON、时间和数字兼容。
+- 配置、日志、指标和 trace。
+- Migrate、API、Worker 和 Scheduler 启动入口。
+- Python 多阶段 Dockerfile。
 
-### 数据库 ORM 默认差异
+通过标准：
 
-SQLAlchemy 不得自动把 enum、JSON、timezone 或 cascade 调整为更“现代”的设计；以当前
-PostgreSQL schema 为唯一标准。
+- 健康检查、OpenAPI、CORS、multipart 和统一响应通过新旧比较。
+- API 能优雅停止。
+- 阻塞操作不会堵塞事件循环测试通过。
+- 镜像中没有 Java。
 
-## 9. 完成定义
+### 阶段 3：迁移 PostgreSQL、Redis、文件和存储
+
+实施内容：
+
+- SQLAlchemy Model。
+- Alembic 初始版本。
+- PostgreSQL catalog 比较。
+- Redis Stream、缓存、幂等和限流。
+- Scheduler 数据库任务。
+- 文件判断、解析、清洗、S3 和 PDF。
+
+通过标准：
+
+- 空数据库结构差异为零。
+- 状态机、锁和唯一索引测试通过。
+- Redis 重复消费、崩溃、reclaim 和最终失败测试通过。
+- 所有固定文件样本通过。
+- PDF 文字、页数、截图和响应头通过。
+
+### 阶段 4：迁移 Provider 和 AI 公共能力
+
+实施内容：
+
+- Provider 初始化和数据库配置。
+- 跨进程配置更新。
+- 四类客户端。
+- API Key 加密。
+- Prompt 和 Skill。
+- 结构化输出。
+- 统一评估。
+- LangGraph 公共流程。
+
+通过标准：
+
+- 调用同一个真实 Provider 时，Java 和 Python 发出的完整请求差异为零。
+- 真实模型响应都满足相同 JSON Schema、字段约束和业务保存结果。
+- 所有结构化输出分支通过。
+- 顺序批处理和回退顺序一致。
+- Provider 修改后 API 和 Worker 都使用新配置。
+
+### 阶段 5：按模块逐个迁移
+
+按第 16 节顺序迁移。
+
+每完成一个模块：
+
+- Java 模块继续保留。
+- Python 模块完成接口、数据和异步比较。
+- 前端真实流程通过。
+- 保存模块报告。
+- 不允许用“后面统一补测试”结束模块。
+
+### 阶段 6：集中测试语音、流式和故障
+
+实施内容：
+
+- SSE 慢客户端和取消。
+- RAG 并发。
+- WebSocket 重连和重复连接。
+- ASR/TTS/LLM 失败。
+- Redis、数据库、S3 和进程崩溃。
+- API、Worker 和 Scheduler 优雅停止。
+- 前端 Playwright 全流程。
+
+通过标准：
+
+- 消息字段和顺序符合固定样本。
+- 没有新增重复数据库记录和重复音频。
+- 已知现有问题仍按登记结果表现。
+- 所有故障后的数据库、Redis 和 S3 状态符合记录。
+
+### 阶段 7：性能测试
+
+性能测试必须调用真实 Provider，不能用假模型制造更好看的延迟。
+
+为了区分应用性能和模型本身波动：
+
+- Java 和 Python 使用同一个 Provider、模型和参数。
+- 尽量在同一时间段交替执行。
+- 每组场景至少重复 5 次，使用中位数比较。
+- 同时记录应用内部耗时和 Provider 网络耗时。
+- 报告真实调用次数、Token、音频时长和费用。
+- 单独运行不调用模型的基础接口测试，但不能用它替代 AI 接口性能结果。
+
+测试场景：
+
+- REST 1、10、50 并发。
+- SSE 1、10、20 个客户端，包括慢客户端。
+- WebSocket 1、5、10 个并发会话。
+- Worker 正常消息、重复消息和 Pending reclaim。
+- 10MB 简历、50MB 知识库文件和 PDF 生成。
+
+通过标准：
+
+- REST p95 不超过 Java 基线的 110%，且绝对增加不超过 100ms。
+- REST p99 不超过 Java 基线的 115%。
+- 吞吐不低于 Java 基线的 90%。
+- SSE 首包 p95 不超过 Java 基线的 110%，且绝对增加不超过 100ms。
+- 语音文本首包 p95 不超过 Java 基线的 110%，且绝对增加不超过 150ms。
+- 语音音频首包 p95 不超过 Java 基线的 110%，且绝对增加不超过 200ms。
+- 稳定运行时内存不超过 Java 基线的 120%。
+- 消息顺序错误、重复 ACK、丢失完成消息均为 0。
+- 错误率不能高于 Java 基线。
+
+如果 Java 基线本身不稳定，先重复测试并记录中位数和波动范围，不能直接放宽 Python 标准。
+
+### 阶段 8：正式切换和 Java 清理
+
+正式切换前：
+
+- 保存 `pre-python-switch` Git tag。
+- 保存 Java 镜像、配置备份和新旧对比报告。
+- 实际演练一次恢复 Java 版本。
+- 确认 Python 数据库升级程序只运行一次。
+- 确认 API、Worker 和 Scheduler 健康。
+- 运行前端冒烟测试。
+
+正式切换：
+
+- Compose 服务名继续使用 `app`。
+- 对外端口继续使用 `8080`。
+- Worker 和 Scheduler 使用同一 Python 镜像。
+- 先执行 Migrate，再启动其他程序。
+
+连续两次完整 CI 和一次本地 Compose 全流程通过后，才允许：
+
+- 删除 Java 生产代码和测试。
+- 删除 Gradle。
+- 删除 Flyway。
+- 删除 Spring Boot、Spring AI、Redisson、Tika、iText 和 DashScope Java 依赖。
+- 删除 Java Dockerfile 和 CI Java setup。
+- 删除 JVM 运行说明。
+
+删除后再次检查：
+
+```bash
+git grep -nEi 'java|jdk|jre|gradle|flyway|spring-ai|spring boot' \
+  -- Dockerfile* docker-compose*.yml .github backend README.md
+docker compose config
+docker history <python-image>
+```
+
+保留：
+
+- 固定测试样本。
+- Java 最终行为报告。
+- 数据库结构报告。
+- 新旧差异报告。
+- 恢复演练记录。
+
+## 19. 测试命令
+
+当前 Java 基线：
+
+```bash
+./gradlew :app:compileJava
+./gradlew :app:test --no-daemon
+```
+
+Python：
+
+```bash
+cd backend
+uv sync --frozen
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src
+uv run pytest
+```
+
+前端：
+
+```bash
+cd frontend
+pnpm install --frozen-lockfile
+pnpm run test:interview-history
+pnpm run test:question-generation
+pnpm run test:interview-capacity
+pnpm run test:interview-entry
+pnpm run test:e2e
+pnpm run build
+```
+
+基础设施：
+
+```bash
+docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml down
+```
+
+新旧比较：
+
+```bash
+./migration/scripts/run-comparison.sh
+./migration/scripts/run-failure-cases.sh
+```
+
+## 20. 完成标准
 
 迁移完成必须同时满足：
 
 1. React 前端不感知后端技术变化。
-2. 所有现有功能和业务分支可用。
-3. 所有 API、数据、异步、AI、SSE 和 WebSocket 契约测试通过。
-4. PostgreSQL schema 与当前最终 Flyway schema 等价。
-5. Prompt、Skill、模型参数、重试和降级一致。
-6. 开发环境可通过新的 Python 命令和 Docker Compose 启动。
-7. 最终应用、容器、CI 和运行环境不存在 Java/JVM。
-8. 所有行为变化均为零；任何功能改进均留到迁移完成后的独立任务。
+2. 所有现有页面流程可用。
+3. REST 请求、响应、错误和响应头符合固定样本。
+4. PostgreSQL 结构差异为零。
+5. 数据库事务失败后的状态符合固定样本。
+6. Redis key、TTL、Stream、Pending、重试和 ACK 符合固定样本。
+7. Prompt、Skill、模型参数、Tool、Schema、重试和回退一致。
+8. SSE 和 WebSocket 字段、分帧、顺序、取消和超时一致。
+9. 文档文本、hash、对象 key、下载头和 PDF 可见结果一致。
+10. 前端测试、Playwright 和构建通过。
+11. 性能达到“阶段 7：性能测试”的标准。
+12. Python Compose 可以从空环境完成数据库升级并启动。
+13. 正式应用镜像、Compose、CI 和运行环境不存在 JVM。
+14. Java 恢复演练和 Python 正式切换记录已经保存。
+15. 所有行为变化都已被拒绝或通过独立需求批准，迁移任务本身没有夹带功能改造。
 
-## 10. 执行 Todos
+## 21. 执行清单
 
-1. 冻结并自动化现有行为契约。
-2. 建立 Python 工程、基础 API 和质量工具。
-3. 使用 Alembic 重建等价 PostgreSQL/pgvector schema。
-4. 迁移 Redis、限流、Stream、缓存和 Scheduler。
-5. 迁移文件解析、S3 和 PDF。
-6. 实现 Provider Registry、LLM Adapter 和结构化输出。
-7. 实现五个 LangGraph 工作流。
-8. 迁移面试日程、Skill 和 Provider 模块。
-9. 迁移简历模块。
-10. 迁移知识库、向量化和 RAG Chat。
-11. 迁移文字面试和知识库专项面试。
-12. 迁移语音面试。
-13. 完成全量契约、故障和前端 E2E 验证。
-14. 更新 CI、Docker、文档和开发命令。
-15. 删除 Java、Gradle、Flyway 和全部 JVM 运行时。
-
-## 11. 说明
-
-当前未发现本项目正在运行的 Compose 服务，也未发现当前 Compose 对应的
-`postgres_data`、`redis_data`、`rustfs_data` 数据卷，因此本计划按允许重建开发数据执行。
-若实施前出现需要保留的数据，应暂停 schema 初始化和 Java 清理，先增加一次数据兼容检查。
+1. 生成当前接口、数据库、Redis、配置、资源和测试清单。
+2. 补齐固定请求、响应、文件、SSE 和 WebSocket 样本。
+3. 建立 Java/Python 隔离对比环境。
+4. 将新旧比较接入 CI。
+5. 建立 Python 项目和四类启动入口。
+6. 实现统一响应、异常、校验、JSON、配置和日志。
+7. 使用 Alembic 重建 PostgreSQL 结构。
+8. 迁移 Redis、幂等、限流、Stream、缓存和 Scheduler。
+9. 迁移文件判断、解析、S3 和 PDF。
+10. 迁移 Provider、Prompt、Skill、结构化输出和统一评估。
+11. 实现规定的 LangGraph 流程。
+12. 按顺序迁移八个业务模块。
+13. 完成流式、语音、故障和性能测试。
+14. 更新 Docker、Compose、CI、README 和 AGENTS.md。
+15. 演练 Java 恢复。
+16. 正式切换 Python。
+17. 删除 Java、Gradle、Flyway 和全部 JVM 运行时。
