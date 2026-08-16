@@ -14,6 +14,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     Flowable,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -106,6 +107,8 @@ class PdfDocumentBuilder:
         title: str,
         sections: list[tuple[str, list[str]]],
         score_rows: list[ScoreRow] | None = None,
+        score_after_sections: int = 0,
+        page_break_after_titles: frozenset[str] = frozenset(),
     ) -> bytes:
         output = BytesIO()
         document = SimpleDocTemplate(
@@ -148,15 +151,9 @@ class PdfDocumentBuilder:
                 title_style,
             )
         ]
-        if score_rows:
-            story.extend(
-                [
-                    Spacer(1, 5 * mm),
-                    Paragraph("<b>各维度评分</b>", section_style),
-                    self._score_table(score_rows, body_style),
-                ]
-            )
-        for section_title, paragraphs in sections:
+        if score_rows and score_after_sections == 0:
+            self._append_scores(story, score_rows, section_style, body_style)
+        for index, (section_title, paragraphs) in enumerate(sections, start=1):
             story.append(Spacer(1, 3 * mm))
             story.append(
                 Paragraph(
@@ -164,11 +161,30 @@ class PdfDocumentBuilder:
                     section_style,
                 )
             )
+            if section_title in page_break_after_titles:
+                story.append(PageBreak())
             story.extend(
                 Paragraph(sanitize_pdf_text(paragraph), body_style) for paragraph in paragraphs
             )
+            if score_rows and index == score_after_sections:
+                self._append_scores(story, score_rows, section_style, body_style)
         document.build(story)
         return output.getvalue()
+
+    def _append_scores(
+        self,
+        story: list[Flowable],
+        rows: list[ScoreRow],
+        section_style: ParagraphStyle,
+        body_style: ParagraphStyle,
+    ) -> None:
+        story.extend(
+            [
+                Spacer(1, 5 * mm),
+                Paragraph("<b>各维度评分</b>", section_style),
+                self._score_table(rows, body_style),
+            ]
+        )
 
     def _score_table(
         self,

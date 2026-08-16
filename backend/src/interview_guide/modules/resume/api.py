@@ -75,6 +75,22 @@ async def resume_detail(
     return result_response(Result.ok(await service.detail(resume_id)))
 
 
+@router.get("/{resume_id}/export")
+async def export_resume_pdf(
+    resume_id: int,
+    service: ServiceDependency,
+) -> Response:
+    try:
+        pdf, headers = await service.export_pdf(resume_id)
+        return Response(
+            content=pdf,
+            media_type="application/pdf",
+            headers=headers,
+        )
+    except Exception:
+        return Response(status_code=500)
+
+
 @router.delete("/{resume_id}")
 async def delete_resume(
     resume_id: int,

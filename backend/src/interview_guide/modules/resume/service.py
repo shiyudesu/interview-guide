@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +12,11 @@ from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.redis.streams import (
     RESUME_ANALYZE,
     RedisStreamService,
+)
+from interview_guide.infrastructure.export.pdf import (
+    PdfDocumentBuilder,
+    ScoreRow,
+    pdf_download_headers,
 )
 from interview_guide.infrastructure.file.content_type import ContentTypeDetector
 from interview_guide.infrastructure.file.document import AsyncDocumentParser
@@ -264,6 +270,58 @@ class ResumeService:
                 if stored is not None:
                     stored.analyze_status = "FAILED"
                     stored.analyze_error = f"任务入队失败: {error}"[:500]
+
+    async def export_pdf(self, resume_id: int) -> tuple[bytes, dict[str, str]]:
+        resume = await self._required(resume_id)
+        analysis = await self._repository.latest_analysis(resume_id)
+        if analysis is None:
+            raise BusinessException(ErrorCode.RESUME_ANALYSIS_NOT_FOUND)
+        font = Path(__file__).resolve().parents[4] / "resources/fonts/ZhuqueFangsong-Regular.ttf"
+        strengths = json.loads(analysis.strengths_json or "[]")
+        suggestions = json.loads(analysis.suggestions_json or "[]")
+        sections: list[tuple[str, list[str]]] = [
+            (
+                "基本信息",
+                [
+                    f"文件名: {resume.original_filename}",
+                    f"上传时间: {resume.uploaded_at:%Y-%m-%d %H:%M:%S}",
+                ],
+            ),
+            (
+                "综合评分",
+                [f"总分: {analysis.overall_score} / 100"],
+            ),
+        ]
+        if analysis.summary is not None:
+            sections.append(("简历摘要", [analysis.summary]))
+        if strengths:
+            sections.append(("优势亮点", [f"• {item}" for item in strengths]))
+        if suggestions:
+            paragraphs: list[str] = []
+            for suggestion in suggestions:
+                paragraphs.extend(
+                    [
+                        (f"【{suggestion.get('priority')}】{suggestion.get('category')}"),
+                        f"问题: {suggestion.get('issue')}",
+                        f"建议: {suggestion.get('recommendation')}",
+                    ]
+                )
+            sections.append(("改进建议", paragraphs))
+        pdf = PdfDocumentBuilder(font).build(
+            "简历分析报告",
+            sections,
+            score_rows=[
+                ScoreRow("项目经验", analysis.project_score or 0, 40),
+                ScoreRow("技能匹配度", analysis.skill_match_score or 0, 20),
+                ScoreRow("内容完整性", analysis.content_score or 0, 15),
+                ScoreRow("结构清晰度", analysis.structure_score or 0, 15),
+                ScoreRow("表达专业性", analysis.expression_score or 0, 10),
+            ],
+            score_after_sections=2,
+            page_break_after_titles=frozenset({"改进建议"}),
+        )
+        filename = f"简历分析报告_{resume.original_filename}.pdf"
+        return pdf, pdf_download_headers(filename)
 
     @staticmethod
     def _upload_response(
