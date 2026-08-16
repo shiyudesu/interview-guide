@@ -1,0 +1,67 @@
+#!/bin/sh
+
+set -eu
+
+MESSAGE_FILE=${1:?缺少提交消息文件}
+MESSAGE=$(git stripspace --strip-comments < "$MESSAGE_FILE")
+SUBJECT=$(printf '%s\n' "$MESSAGE" | sed -n '1p')
+
+fail() {
+  printf '%s\n' "提交消息格式不符合规范：$1" >&2
+  printf '%s\n' "" >&2
+  printf '%s\n' "正确示例：" >&2
+  printf '%s\n' "feat: 新增面试题导入" >&2
+  printf '%s\n' "" >&2
+  printf '%s\n' "- 增加题库文件解析流程" >&2
+  printf '%s\n' "- 补充导入失败的提示信息" >&2
+  exit 1
+}
+
+contains_han() {
+  printf '%s\n' "$1" \
+    | perl -CSD -ne '$found ||= /\p{Han}/; END { exit($found ? 0 : 1) }'
+}
+
+case "$SUBJECT" in
+  Merge\ *|Revert\ *|fixup\!\ *|squash\!\ *|amend\!\ *)
+    exit 0
+    ;;
+esac
+
+if ! command -v perl >/dev/null 2>&1; then
+  fail "本机缺少用于校验中文字符的 perl"
+fi
+
+if ! printf '%s\n' "$SUBJECT" \
+    | grep -Eq '^(feat|fix|refactor|perf|test|docs|chore|build|ci|revert)(\([A-Za-z0-9._/-]+\))?!?: .+'; then
+  fail "标题必须使用允许的类型前缀，例如 feat:、fix: 或 docs:"
+fi
+
+if ! contains_han "$SUBJECT"; then
+  fail "冒号后的标题必须包含中文"
+fi
+
+SECOND_LINE=$(printf '%s\n' "$MESSAGE" | sed -n '2p')
+if [ -n "$SECOND_LINE" ]; then
+  fail "标题和正文之间必须保留一个空行"
+fi
+
+BODY=$(printf '%s\n' "$MESSAGE" | sed '1,2d' | sed '/^[[:space:]]*$/d')
+if [ -z "$BODY" ]; then
+  fail "必须使用至少一条 '- ' 分条说明具体改动"
+fi
+
+INVALID_BODY=$(printf '%s\n' "$BODY" | grep -Ev '^- ' || true)
+if [ -n "$INVALID_BODY" ]; then
+  fail "正文中的每个非空行都必须以 '- ' 开头"
+fi
+
+while IFS= read -r LINE; do
+  if ! contains_han "$LINE"; then
+    fail "每条正文说明都必须包含中文"
+  fi
+done <<EOF
+$BODY
+EOF
+
+exit 0
