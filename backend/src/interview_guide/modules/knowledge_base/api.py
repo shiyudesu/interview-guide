@@ -1,17 +1,26 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from contextlib import suppress
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Request
-from sqlalchemy import func, or_, select
+from fastapi import APIRouter, Body, Depends, Request
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
 
 from interview_guide.common.api.responses import result_response
-from interview_guide.common.db.models import KnowledgeBase, RagChatMessage
+from interview_guide.common.db.models import (
+    KnowledgeBase,
+    KnowledgeBaseQuestion,
+    RagChatMessage,
+    RagSessionKnowledgeBase,
+    VectorStore,
+)
+from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
+from interview_guide.infrastructure.export.pdf import original_file_download_headers
 
 router = APIRouter(prefix="/api/knowledgebase")
 
@@ -148,6 +157,87 @@ async def statistics(session: Session) -> Response:
             }
         )
     )
+
+
+@router.put("/{knowledge_base_id}/category")
+async def update_category(
+    knowledge_base_id: int,
+    session: Session,
+    payload: Annotated[dict[str, str | None], Body()],
+) -> Response:
+    entity = await session.get(KnowledgeBase, knowledge_base_id)
+    if entity is None:
+        raise BusinessException(
+            ErrorCode.KNOWLEDGE_BASE_NOT_FOUND,
+            "知识库不存在",
+        )
+    category = payload.get("category")
+    entity.category = category if category and category.strip() else None
+    await session.commit()
+    return result_response(Result.ok())
+
+
+@router.get("/{knowledge_base_id}/download")
+async def download_knowledge_base(
+    knowledge_base_id: int,
+    request: Request,
+    session: Session,
+) -> Response:
+    entity = await session.get(KnowledgeBase, knowledge_base_id)
+    if entity is None:
+        raise BusinessException(
+            ErrorCode.KNOWLEDGE_BASE_NOT_FOUND,
+            "知识库不存在",
+        )
+    if not entity.storage_key:
+        raise BusinessException(
+            ErrorCode.STORAGE_DOWNLOAD_FAILED,
+            "文件存储信息不存在",
+        )
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    content = await infrastructure.storage.download(entity.storage_key)
+    return Response(
+        content=content,
+        headers=original_file_download_headers(
+            entity.original_filename,
+            entity.content_type,
+        ),
+    )
+
+
+@router.delete("/{knowledge_base_id}")
+async def delete_knowledge_base(
+    knowledge_base_id: int,
+    request: Request,
+    session: Session,
+) -> Response:
+    entity = await session.get(KnowledgeBase, knowledge_base_id)
+    if entity is None:
+        raise BusinessException(ErrorCode.NOT_FOUND, "知识库不存在")
+    storage_key = entity.storage_key
+    await session.rollback()
+    async with session.begin():
+        await session.execute(
+            delete(RagSessionKnowledgeBase).where(
+                RagSessionKnowledgeBase.knowledge_base_id == knowledge_base_id
+            )
+        )
+        await session.execute(
+            delete(KnowledgeBaseQuestion).where(
+                KnowledgeBaseQuestion.knowledge_base_id == knowledge_base_id
+            )
+        )
+        await session.execute(delete(KnowledgeBase).where(KnowledgeBase.id == knowledge_base_id))
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    async with infrastructure.database.sessions() as vector_session, vector_session.begin():
+        await vector_session.execute(
+            delete(VectorStore).where(
+                VectorStore.metadata_json["kb_id"].astext == str(knowledge_base_id)
+            )
+        )
+    with suppress(Exception):
+        await infrastructure.storage.delete(storage_key)
+    return result_response(Result.ok())
 
 
 @router.get("/{knowledge_base_id}")
