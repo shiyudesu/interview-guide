@@ -3,6 +3,8 @@ set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/comparison-common.sh"
 
+comparison_ai_api_key="${AI_BAILIAN_API_KEY:-comparison-placeholder-key}"
+
 candidate="${COMPARISON_CANDIDATE:-java}"
 if [[ "$candidate" == "auto" ]]; then
   if [[ -f "$repo_root/backend/.comparison-ready" ]]; then
@@ -115,7 +117,7 @@ start_java() {
     APP_AI_CONFIG_ENV_PATH="$runtime_dir/llm-providers.env" \
     APP_VOICE_CONFIG_PATH="$runtime_dir/voice-config.json" \
     APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
-    AI_BAILIAN_API_KEY=comparison-placeholder-key \
+    AI_BAILIAN_API_KEY="$comparison_ai_api_key" \
     JAVA_TOOL_OPTIONS="$java_tool_options" \
     java -jar "$java_jar" \
     >"$log_file" 2>&1 &
@@ -161,7 +163,7 @@ start_python() {
       APP_AI_PROVIDERS_DASHSCOPE_BASE_URL=http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1 \
       APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
       APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
-      AI_BAILIAN_API_KEY=comparison-placeholder-key \
+      AI_BAILIAN_API_KEY="$comparison_ai_api_key" \
       uv run --frozen interview-guide-migrate
     nohup env \
       POSTGRES_HOST=localhost \
@@ -183,7 +185,7 @@ start_python() {
       APP_AI_PROVIDERS_DASHSCOPE_BASE_URL=http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1 \
       APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
       APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
-      AI_BAILIAN_API_KEY=comparison-placeholder-key \
+      AI_BAILIAN_API_KEY="$comparison_ai_api_key" \
       uv run uvicorn interview_guide.main:app \
         --host 127.0.0.1 \
         --port 28080 \

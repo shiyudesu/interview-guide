@@ -32,7 +32,7 @@
       "streamCount": 5
     },
     "resources.json": {
-      "disabledTestMarkerCount": 7,
+      "disabledTestMarkerCount": 8,
       "resourceCount": 60,
       "resourceCountsByCategory": {
         "font": 1,
@@ -41,7 +41,7 @@
         "skill": 40,
         "voice-config": 1
       },
-      "testFileCount": 47
+      "testFileCount": 48
     }
   },
   "nextRequiredWork": [

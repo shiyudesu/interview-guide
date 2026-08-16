@@ -363,7 +363,7 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "disabledTestMarkerCount": 7,
+    "disabledTestMarkerCount": 8,
     "resourceCount": 60,
     "resourceCountsByCategory": {
       "font": 1,
@@ -372,7 +372,7 @@
       "skill": 40,
       "voice-config": 1
     },
-    "testFileCount": 47
+    "testFileCount": 48
   },
   "tests": [
     {
@@ -574,6 +574,11 @@
       "disabledMarkers": 0,
       "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/VoiceInterviewSummaryPersistenceTest.java",
       "sha256": "b1b3ca635a9d9fabdc08dc74fc45429ad70d664a16dbc8eecf90b0c309158a08"
+    },
+    {
+      "disabledMarkers": 1,
+      "file": "frontend/e2e/real-backend.spec.ts",
+      "sha256": "005a71111aea39cb7dd732ace76d097ff972107f1db1a50cd1baf4348e6b1252"
     },
     {
       "disabledMarkers": 0,

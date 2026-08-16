@@ -1,0 +1,59 @@
+name: Real model migration checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: real-model
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: gradle
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13.13"
+
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          version: "0.11.14"
+          enable-cache: true
+          cache-dependency-glob: |
+            backend/uv.lock
+            migration/model-proxy/uv.lock
+
+      - name: Start isolated Java and Python
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+          COMPARISON_CANDIDATE: python
+        run: ./migration/scripts/start-comparison-env.sh
+
+      - name: Call real Provider through recording proxy
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        run: ./migration/scripts/run-real-model-smoke.sh
+
+      - name: Upload redacted model records
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: real-model-migration-records
+          path: |
+            migration/reports/model-proxy.jsonl
+            migration/reports/real-model-smoke.json
+          if-no-files-found: ignore
+
+      - name: Stop comparison environment
+        if: always()
+        run: ./migration/scripts/stop-comparison-env.sh
