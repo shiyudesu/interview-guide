@@ -3,6 +3,11 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from sqlalchemy import delete, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from interview_guide.common.db.models import VectorStore
+
 MAX_EMBEDDING_BATCH_SIZE = 10
 
 
@@ -55,3 +60,34 @@ def embedding_batches[T](values: list[T]) -> list[list[T]]:
         values[index : index + MAX_EMBEDDING_BATCH_SIZE]
         for index in range(0, len(values), MAX_EMBEDDING_BATCH_SIZE)
     ]
+
+
+async def promote_vector_job(
+    session: AsyncSession,
+    knowledge_base_id: int,
+    job_id: str,
+) -> None:
+    target = str(knowledge_base_id)
+    pending = f"pending:{job_id}"
+    await session.execute(
+        delete(VectorStore).where(
+            VectorStore.metadata_json["kb_id"].astext == target
+        )
+    )
+    await session.execute(
+        update(VectorStore)
+        .where(
+            VectorStore.metadata_json["kb_id"].astext == pending,
+            VectorStore.metadata_json["kb_vector_job_id"].astext == job_id,
+        )
+        .values(
+            metadata_json=VectorStore.metadata_json.op("-")(
+                "kb_target_id"
+            ).op("-")("kb_vector_job_id").op("||")({"kb_id": target})
+        )
+    )
+    await session.execute(
+        delete(VectorStore).where(
+            VectorStore.metadata_json["kb_target_id"].astext == target
+        )
+    )
