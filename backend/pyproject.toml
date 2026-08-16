@@ -51,6 +51,7 @@ dev = [
     "pytest-asyncio==1.4.0",
     "pytest-mock==3.15.1",
     "ruff==0.16.3",
+    "types-reportlab==4.5.1.20260807",
 ]
 
 [tool.hatch.build.targets.wheel]
