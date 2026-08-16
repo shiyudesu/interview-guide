@@ -32,6 +32,9 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ./migration/scripts/stop-comparison-env.sh
 ```
 
+真实模型兼容测试使用 `migration/model-proxy/` 中的本地 HTTP/WebSocket 透传记录代理；
+正常结果不会被代理修改，故障注入默认关闭。
+
 ## 系统架构
 
 ![系统架构图](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/interview-guide-architecture-diagram.png)

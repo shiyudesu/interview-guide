@@ -28,5 +28,6 @@ frontend/playwright-report/
 migration/reports/
 __pycache__/
 .pytest_cache/
+.venv/
 /.agents
 skills-lock.json

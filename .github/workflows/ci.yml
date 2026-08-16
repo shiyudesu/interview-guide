@@ -150,6 +150,37 @@ jobs:
         if: always()
         run: ./migration/scripts/stop-comparison-env.sh
 
+  model-proxy:
+    name: Model proxy checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: migration/model-proxy
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: migration/model-proxy/uv.lock
+
+      - name: Install locked dependencies
+        run: uv sync --frozen
+
+      - name: Test HTTP and WebSocket proxy
+        run: |
+          uv run python -m compileall -q src tests
+          uv run python -m unittest discover -s tests -v
+
   frontend:
     name: Frontend tests and build
     runs-on: ubuntu-latest

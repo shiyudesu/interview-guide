@@ -20,9 +20,11 @@ instances, ports, and S3 buckets:
 
 ```bash
 ./migration/scripts/start-comparison-env.sh
+./migration/scripts/start-model-proxy.sh
 ./migration/scripts/record-java-baseline.sh
 ./migration/scripts/run-comparison.sh
 ./migration/scripts/run-failure-cases.sh
+./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh
 ```
 

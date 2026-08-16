@@ -5,6 +5,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/comparison-common.sh"
 
 stop_pid_file "$comparison_runtime/java/app.pid"
 stop_pid_file "$comparison_runtime/candidate/app.pid"
+"$repo_root/migration/scripts/stop-model-proxy.sh"
 
 if [[ "${1:-}" == "--purge" ]]; then
   compose down --volumes --remove-orphans

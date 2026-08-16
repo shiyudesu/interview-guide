@@ -137,9 +137,20 @@ docker compose -f docker-compose.dev.yml up -d
 ./migration/scripts/generate-manifests.sh
 ./migration/scripts/check-manifests.sh
 ./migration/scripts/start-comparison-env.sh
+./migration/scripts/start-model-proxy.sh
 ./migration/scripts/run-comparison.sh
 ./migration/scripts/run-failure-cases.sh
+./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh
+```
+
+模型代理：
+
+```bash
+cd migration/model-proxy
+uv sync --frozen
+uv run python -m unittest discover -s tests -v
+uv run interview-guide-model-proxy
 ```
 
 Python 工程创建后：

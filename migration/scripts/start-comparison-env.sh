@@ -21,6 +21,8 @@ mkdir -p \
   "$comparison_runtime/candidate" \
   "$comparison_reports"
 
+"$repo_root/migration/scripts/start-model-proxy.sh"
+
 compose up -d --wait \
   java-postgres \
   python-postgres \
@@ -78,10 +80,12 @@ start_java() {
     APP_STORAGE_SECRET_KEY=comparison-secret \
     APP_STORAGE_BUCKET="$bucket" \
     APP_STORAGE_AUTO_CREATE_BUCKET=false \
+    APP_AI_PROVIDERS_DASHSCOPE_BASE_URL=http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1 \
     APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
     APP_AI_CONFIG_YAML_PATH="$runtime_dir/llm-providers.yml" \
     APP_AI_CONFIG_ENV_PATH="$runtime_dir/llm-providers.env" \
     APP_ASYNC_CONSUMER_SUFFIX="$name" \
+    APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
     AI_BAILIAN_API_KEY=comparison-placeholder-key \
     java -jar "$java_jar" \
     >"$log_file" 2>&1 &
@@ -118,7 +122,9 @@ start_python() {
       APP_STORAGE_ACCESS_KEY=comparison-access \
       APP_STORAGE_SECRET_KEY=comparison-secret \
       APP_STORAGE_BUCKET=interview-guide-python \
+      APP_AI_PROVIDERS_DASHSCOPE_BASE_URL=http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1 \
       APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
+      APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
       AI_BAILIAN_API_KEY=comparison-placeholder-key \
       uv run uvicorn interview_guide.main:app \
         --host 127.0.0.1 \

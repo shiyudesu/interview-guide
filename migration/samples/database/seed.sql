@@ -33,3 +33,7 @@ SELECT setval(
   1001,
   true
 );
+
+UPDATE llm_provider_config
+SET base_url = 'http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1'
+WHERE id = 'dashscope';
