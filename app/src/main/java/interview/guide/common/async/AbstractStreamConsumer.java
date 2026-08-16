@@ -18,6 +18,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public abstract class AbstractStreamConsumer<T> {
 
+    static final String MIGRATION_CONSUMER_SUFFIX_PROPERTY =
+        "interview.guide.migration.consumer-suffix";
+
     private final RedisService redisService;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private ExecutorService executorService;
@@ -29,7 +32,7 @@ public abstract class AbstractStreamConsumer<T> {
 
     @PostConstruct
     public void init() {
-        this.consumerName = consumerPrefix() + UUID.randomUUID().toString().substring(0, 8);
+        this.consumerName = resolveConsumerName(consumerPrefix());
         this.executorService = new ThreadPoolExecutor(
             1,
             1,
@@ -47,6 +50,14 @@ public abstract class AbstractStreamConsumer<T> {
         running.set(true);
         executorService.submit(this::startConsumer);
         log.info("{} consumer started: consumerName={}", taskDisplayName(), consumerName);
+    }
+
+    static String resolveConsumerName(String prefix) {
+        String fixedSuffix = System.getProperty(MIGRATION_CONSUMER_SUFFIX_PROPERTY);
+        if (fixedSuffix != null && !fixedSuffix.isBlank()) {
+            return prefix + fixedSuffix;
+        }
+        return prefix + UUID.randomUUID().toString().substring(0, 8);
     }
 
     @PreDestroy

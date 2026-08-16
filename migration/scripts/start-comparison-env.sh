@@ -84,9 +84,9 @@ start_java() {
     APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
     APP_AI_CONFIG_YAML_PATH="$runtime_dir/llm-providers.yml" \
     APP_AI_CONFIG_ENV_PATH="$runtime_dir/llm-providers.env" \
-    APP_ASYNC_CONSUMER_SUFFIX="$name" \
     APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
     AI_BAILIAN_API_KEY=comparison-placeholder-key \
+    JAVA_TOOL_OPTIONS=-Dinterview.guide.migration.consumer-suffix=comparison \
     java -jar "$java_jar" \
     >"$log_file" 2>&1 &
   echo "$!" >"$pid_file"

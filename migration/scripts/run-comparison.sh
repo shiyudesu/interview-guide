@@ -32,6 +32,8 @@ compose exec -T python-postgres \
   interview_guide_python \
   >"$comparison_reports/candidate-schema.sql"
 
+"$repo_root/migration/scripts/capture-runtime-state.sh"
+
 python3 "$repo_root/migration/scripts/comparison.py" compare \
   --left-http "$repo_root/migration/samples/http/java-baseline.json" \
   --right-http "$comparison_reports/java-http.json" \
@@ -46,6 +48,8 @@ python3 "$repo_root/migration/scripts/comparison.py" compare \
   --right-http "$comparison_reports/candidate-http.json" \
   --left-schema "$comparison_reports/java-schema.sql" \
   --right-schema "$comparison_reports/candidate-schema.sql" \
+  --left-state "$comparison_reports/java-runtime-state.json" \
+  --right-state "$comparison_reports/candidate-runtime-state.json" \
   --json-report "$comparison_reports/comparison.json" \
   --html-report "$comparison_reports/comparison.html" \
   --title "Java and candidate comparison"

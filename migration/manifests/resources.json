@@ -372,7 +372,7 @@
       "skill": 40,
       "voice-config": 1
     },
-    "testFileCount": 43
+    "testFileCount": 44
   },
   "tests": [
     {
@@ -404,6 +404,11 @@
       "disabledMarkers": 0,
       "file": "app/src/test/java/interview/guide/common/aspect/RateLimitScriptTest.java",
       "sha256": "0043cca59ba046001bbf0b4b03d08bf1df97186dc65442c3844696932e81b2ed"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/async/AbstractStreamConsumerTest.java",
+      "sha256": "f31392b18c6c1136ffedb83d2d5274355731a0a883a32f139ed63eb6406ec349"
     },
     {
       "disabledMarkers": 0,

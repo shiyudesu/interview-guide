@@ -55,6 +55,7 @@ class ComparisonTest(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(0, report["summary"]["httpDifferenceCount"])
         self.assertTrue(report["summary"]["schemaEqual"])
+        self.assertTrue(report["summary"]["runtimeStateEqual"])
 
     def test_response_field_change_fails_comparison(self) -> None:
         changed = copy.deepcopy(snapshot())
@@ -82,6 +83,23 @@ class ComparisonTest(unittest.TestCase):
             "idx_example_id_changed",
             report["differences"]["databaseSchema"],
         )
+
+    def test_runtime_state_change_fails_comparison(self) -> None:
+        left_state = {"redis": {"keys": []}}
+        right_state = {"redis": {"keys": [{"key": "unexpected"}]}}
+
+        report = COMPARISON.compare_snapshots(
+            snapshot(),
+            snapshot(),
+            SCHEMA,
+            SCHEMA,
+            left_state,
+            right_state,
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertFalse(report["summary"]["runtimeStateEqual"])
+        self.assertIn("unexpected", report["differences"]["runtimeState"])
 
 
 if __name__ == "__main__":

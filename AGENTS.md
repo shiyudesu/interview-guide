@@ -138,6 +138,7 @@ docker compose -f docker-compose.dev.yml up -d
 ./migration/scripts/check-manifests.sh
 ./migration/scripts/start-comparison-env.sh
 ./migration/scripts/start-model-proxy.sh
+./migration/scripts/capture-runtime-state.sh
 ./migration/scripts/run-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh

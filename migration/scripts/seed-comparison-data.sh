@@ -16,3 +16,18 @@ compose exec -T python-postgres \
   --username postgres \
   --dbname interview_guide_python \
   <"$seed_file"
+
+python3 "$repo_root/migration/scripts/runtime_state.py" seed-s3 \
+  --s3-endpoint http://127.0.0.1:19000 \
+  --s3-access-key comparison-access \
+  --s3-secret-key comparison-secret \
+  --s3-bucket interview-guide-java \
+  --key comparison/baseline.txt \
+  --content 'deterministic migration comparison object'
+python3 "$repo_root/migration/scripts/runtime_state.py" seed-s3 \
+  --s3-endpoint http://127.0.0.1:19000 \
+  --s3-access-key comparison-access \
+  --s3-secret-key comparison-secret \
+  --s3-bucket interview-guide-python \
+  --key comparison/baseline.txt \
+  --content 'deterministic migration comparison object'

@@ -26,7 +26,7 @@
       "knownIssueCount": 20
     },
     "redis.json": {
-      "constantCount": 47,
+      "constantCount": 48,
       "rateLimitRuleCount": 33,
       "scheduledMethodCount": 3,
       "streamCount": 5
@@ -41,7 +41,7 @@
         "skill": 40,
         "voice-config": 1
       },
-      "testFileCount": 43
+      "testFileCount": 44
     }
   },
   "nextRequiredWork": [

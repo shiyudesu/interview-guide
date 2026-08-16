@@ -171,11 +171,23 @@ def compare_snapshots(
     right_http: dict[str, Any],
     left_schema: str,
     right_schema: str,
+    left_state: dict[str, Any] | None = None,
+    right_state: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     http_differences = compare_http(left_http, right_http)
     normalized_left_schema = normalize_schema(left_schema)
     normalized_right_schema = normalize_schema(right_schema)
     schema_equal = normalized_left_schema == normalized_right_schema
+    runtime_state_equal = left_state == right_state
+    runtime_state_diff = None
+    if not runtime_state_equal:
+        runtime_state_diff = text_diff(
+            json.dumps(left_state, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            json.dumps(right_state, ensure_ascii=False, indent=2, sort_keys=True)
+            + "\n",
+            "left-runtime-state.json",
+            "right-runtime-state.json",
+        )
     report = {
         "differences": {
             "databaseSchema": None
@@ -187,14 +199,16 @@ def compare_snapshots(
                 "right-schema.sql",
             ),
             "http": http_differences,
+            "runtimeState": runtime_state_diff,
         },
-        "passed": not http_differences and schema_equal,
+        "passed": not http_differences and schema_equal and runtime_state_equal,
         "schemaVersion": SCHEMA_VERSION,
         "summary": {
             "differingHttpCaseCount": len(
                 {item["caseId"] for item in http_differences}
             ),
             "httpDifferenceCount": len(http_differences),
+            "runtimeStateEqual": runtime_state_equal,
             "schemaEqual": schema_equal,
         },
     }
@@ -222,6 +236,7 @@ def write_html_report(path: Path, report: dict[str, Any], title: str) -> None:
             "</tr>"
         )
     schema_diff = report["differences"]["databaseSchema"] or ""
+    runtime_state_diff = report["differences"]["runtimeState"] or ""
     document = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -240,7 +255,8 @@ def write_html_report(path: Path, report: dict[str, Any], title: str) -> None:
   <h1>{html.escape(title)}</h1>
   <p class="{status.lower()}"><strong>{status}</strong></p>
   <p>HTTP differences: {report['summary']['httpDifferenceCount']};
-     database schema equal: {str(report['summary']['schemaEqual']).lower()}.</p>
+     database schema equal: {str(report['summary']['schemaEqual']).lower()};
+     runtime state equal: {str(report['summary']['runtimeStateEqual']).lower()}.</p>
   <h2>HTTP differences</h2>
   <table>
     <thead><tr><th>Case</th><th>Kind</th><th>Detail</th></tr></thead>
@@ -248,6 +264,8 @@ def write_html_report(path: Path, report: dict[str, Any], title: str) -> None:
   </table>
   <h2>Database schema difference</h2>
   <pre>{html.escape(schema_diff)}</pre>
+  <h2>Runtime state difference</h2>
+  <pre>{html.escape(runtime_state_diff)}</pre>
 </body>
 </html>
 """
@@ -262,11 +280,15 @@ def capture_command(args: argparse.Namespace) -> int:
 
 
 def compare_command(args: argparse.Namespace) -> int:
+    if bool(args.left_state) != bool(args.right_state):
+        raise ValueError("Both --left-state and --right-state are required together")
     report = compare_snapshots(
         load_json(args.left_http),
         load_json(args.right_http),
         args.left_schema.read_text(encoding="utf-8"),
         args.right_schema.read_text(encoding="utf-8"),
+        load_json(args.left_state) if args.left_state else None,
+        load_json(args.right_state) if args.right_state else None,
     )
     write_json(args.json_report, report)
     write_html_report(args.html_report, report, args.title)
@@ -288,8 +310,10 @@ def parser() -> argparse.ArgumentParser:
     compare_parser.add_argument("--json-report", type=Path, required=True)
     compare_parser.add_argument("--left-http", type=Path, required=True)
     compare_parser.add_argument("--left-schema", type=Path, required=True)
+    compare_parser.add_argument("--left-state", type=Path)
     compare_parser.add_argument("--right-http", type=Path, required=True)
     compare_parser.add_argument("--right-schema", type=Path, required=True)
+    compare_parser.add_argument("--right-state", type=Path)
     compare_parser.add_argument("--title", default="Migration comparison")
     compare_parser.set_defaults(handler=compare_command)
     return argument_parser
