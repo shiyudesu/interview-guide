@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 from redis.asyncio import Redis
@@ -112,11 +113,13 @@ async def test_rate_limit_lua_is_atomic_and_sets_java_ttl(redis_client: Redis) -
 @pytest.mark.asyncio
 async def test_worker_creates_all_five_stream_groups(redis_client: Redis) -> None:
     assert REDIS_URL is not None
+    parsed_url = urlsplit(REDIS_URL)
     settings = Settings(
         _env_file=None,
         APP_AI_CONFIG_ENCRYPTION_KEY="integration-key",
-        REDIS_HOST="127.0.0.1",
-        REDIS_PORT=26379,
+        REDIS_HOST=parsed_url.hostname or "127.0.0.1",
+        REDIS_PORT=parsed_url.port or 6379,
+        REDIS_DB=int(parsed_url.path.removeprefix("/") or "0"),
     )
     connection = RedisConnection(settings)
     stop_event = asyncio.Event()

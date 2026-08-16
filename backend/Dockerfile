@@ -22,6 +22,10 @@ ENV PATH=/opt/venv/bin:$PATH \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends libmagic1=1:5.44-3 \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --gid 10001 interview-guide \
     && useradd --uid 10001 --gid interview-guide --create-home interview-guide
 

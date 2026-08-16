@@ -75,6 +75,20 @@ class Settings(BaseSettings):
         default="us-east-1",
         validation_alias="APP_STORAGE_REGION",
     )
+    storage_api_call_timeout_seconds: float = Field(
+        default=60,
+        gt=0,
+        validation_alias="APP_STORAGE_API_CALL_TIMEOUT_SECONDS",
+    )
+    storage_api_call_attempt_timeout_seconds: float = Field(
+        default=20,
+        gt=0,
+        validation_alias="APP_STORAGE_API_CALL_ATTEMPT_TIMEOUT_SECONDS",
+    )
+    storage_auto_create_bucket: bool = Field(
+        default=True,
+        validation_alias="APP_STORAGE_AUTO_CREATE_BUCKET",
+    )
 
     ai_config_encryption_key: SecretStr | None = Field(
         default=None,
