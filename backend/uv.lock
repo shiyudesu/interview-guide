@@ -494,6 +494,7 @@ dependencies = [
     { name = "alembic" },
     { name = "apscheduler" },
     { name = "boto3" },
+    { name = "cryptography" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "langchain-openai" },
@@ -513,6 +514,7 @@ dependencies = [
     { name = "python-docx" },
     { name = "python-magic" },
     { name = "python-multipart" },
+    { name = "pyyaml" },
     { name = "redis" },
     { name = "reportlab" },
     { name = "sqlalchemy" },
@@ -528,6 +530,7 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-mock" },
     { name = "ruff" },
+    { name = "types-pyyaml" },
     { name = "types-reportlab" },
 ]
 
@@ -536,6 +539,7 @@ requires-dist = [
     { name = "alembic", specifier = "==1.19.1" },
     { name = "apscheduler", specifier = "==3.11.3" },
     { name = "boto3", specifier = "==1.43.72" },
+    { name = "cryptography", specifier = "==50.0.0" },
     { name = "fastapi", specifier = "==0.141.1" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "langchain-openai", specifier = "==1.5.1" },
@@ -555,6 +559,7 @@ requires-dist = [
     { name = "python-docx", specifier = "==1.2.0" },
     { name = "python-magic", specifier = "==0.4.27" },
     { name = "python-multipart", specifier = "==0.0.32" },
+    { name = "pyyaml", specifier = "==6.0.3" },
     { name = "redis", specifier = "==8.1.0" },
     { name = "reportlab", specifier = "==5.0.0" },
     { name = "sqlalchemy", specifier = "==2.0.52" },
@@ -570,6 +575,7 @@ dev = [
     { name = "pytest-asyncio", specifier = "==1.4.0" },
     { name = "pytest-mock", specifier = "==3.15.1" },
     { name = "ruff", specifier = "==0.16.3" },
+    { name = "types-pyyaml", specifier = "==6.0.12.20260815" },
     { name = "types-reportlab", specifier = "==4.5.1.20260807" },
 ]
 
@@ -1655,6 +1661,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/53/a3/1585216310e344e8102c22482f6060c7a6ea0322b63e026372e6dcefcfd6/truststore-0.10.4.tar.gz", hash = "sha256:9d91bd436463ad5e4ee4aba766628dd6cd7010cf3e2461756b3303710eebc301", size = 26169, upload-time = "2025-08-12T18:49:02.73Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/19/97/56608b2249fe206a67cd573bc93cd9896e1efb9e98bce9c163bcdc704b88/truststore-0.10.4-py3-none-any.whl", hash = "sha256:adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981", size = 18660, upload-time = "2025-08-12T18:49:01.46Z" },
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.20260815"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/72/b56089aeee6c496d969bac42376bedb6e3eeab4682e1018fa3137122f94b/types_pyyaml-6.0.12.20260815.tar.gz", hash = "sha256:28764110c9cf35846e733da32d8d734df7473c5dde9ef67c3b7332ec0e819858", size = 18545, upload-time = "2026-08-15T02:41:51.532Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/52/eefeba09be4ef2a1eb989eb92934561e8e502a6ee3c32654996e4be7e399/types_pyyaml-6.0.12.20260815-py3-none-any.whl", hash = "sha256:6f332212b7e191f3afd5016a713c510b6340593b7ebec573c7d5d20aa5386d3b", size = 21148, upload-time = "2026-08-15T02:41:50.555Z" },
 ]
 
 [[package]]

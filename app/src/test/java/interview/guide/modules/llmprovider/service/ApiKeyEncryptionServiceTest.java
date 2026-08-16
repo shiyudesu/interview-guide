@@ -35,6 +35,10 @@ class ApiKeyEncryptionServiceTest {
 
         assertEquals("AAECAwQFBgcICQoL", encrypted.nonce());
         assertEquals(
+            "K76N/FWVMsxEi0udlOy2zn5mt1Scq8BIs1736SzBLA==",
+            encrypted.ciphertext()
+        );
+        assertEquals(
             "provider-secret",
             service.decrypt(encrypted.nonce(), encrypted.ciphertext())
         );

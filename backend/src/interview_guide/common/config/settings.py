@@ -113,6 +113,10 @@ class Settings(BaseSettings):
         default=True,
         validation_alias="APP_AI_CONFIG_REQUIRE_ENCRYPTION_KEY",
     )
+    ai_config_allow_fallback_encryption_key: bool = Field(
+        default=False,
+        validation_alias="APP_AI_CONFIG_ALLOW_FALLBACK_ENCRYPTION_KEY",
+    )
 
     otel_enabled: bool = Field(default=True, validation_alias="OTEL_ENABLED")
     otel_service_name: str = Field(
@@ -131,12 +135,21 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_required_secrets(self) -> Settings:
-        if self.ai_config_require_encryption_key and (
+        missing_key = (
             self.ai_config_encryption_key is None
             or not self.ai_config_encryption_key.get_secret_value().strip()
-        ):
+        )
+        if missing_key and self.ai_config_require_encryption_key:
             raise ValueError(
                 "APP_AI_CONFIG_ENCRYPTION_KEY 未配置，无法初始化 Provider API Key 加密"
+            )
+        if (
+            missing_key
+            and not self.ai_config_require_encryption_key
+            and not self.ai_config_allow_fallback_encryption_key
+        ):
+            raise ValueError(
+                "APP_AI_CONFIG_ENCRYPTION_KEY 未配置，且未显式允许 Provider API Key 开发 fallback"
             )
         return self
 
