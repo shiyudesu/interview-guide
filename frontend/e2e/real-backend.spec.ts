@@ -28,8 +28,8 @@ test.describe('真实 Python 后端 @real-backend', () => {
 
     await page.goto('/interview-schedule');
 
-    await expect(page.getByText('Playwright Real Backend Corp')).toBeVisible();
-    await expect(page.getByText('Backend Engineer')).toBeVisible();
+    await expect(page.getByText('Playwright Real Backend Corp').first()).toBeVisible();
+    await expect(page.getByText('Backend Engineer').first()).toBeVisible();
   });
 
   test('设置页读取真实 Provider 列表', async ({ page }) => {
