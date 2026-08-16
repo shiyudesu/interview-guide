@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from urllib.parse import quote_plus
 
 from pydantic import Field, SecretStr, model_validator
@@ -170,6 +171,78 @@ class Settings(BaseSettings):
     provider_glm_model: str = Field(
         default="glm-5",
         validation_alias="PROVIDER_GLM_MODEL",
+    )
+    voice_config_path: Path = Field(
+        default=Path("~/.interview-guide/voice-config.json"),
+        validation_alias="APP_VOICE_CONFIG_PATH",
+    )
+    voice_asr_url: str = Field(
+        default="wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_URL",
+    )
+    voice_asr_model: str = Field(
+        default="qwen3-asr-flash-realtime",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_MODEL",
+    )
+    voice_asr_language: str = Field(
+        default="zh",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_LANGUAGE",
+    )
+    voice_asr_format: str = Field(
+        default="pcm",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_FORMAT",
+    )
+    voice_asr_sample_rate: int = Field(
+        default=16000,
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_SAMPLE_RATE",
+    )
+    voice_asr_enable_turn_detection: bool = Field(
+        default=True,
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_ENABLE_TURN_DETECTION",
+    )
+    voice_asr_turn_detection_type: str = Field(
+        default="server_vad",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_TURN_DETECTION_TYPE",
+    )
+    voice_asr_turn_detection_threshold: float = Field(
+        default=0,
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_TURN_DETECTION_THRESHOLD",
+    )
+    voice_asr_silence_ms: int = Field(
+        default=2000,
+        validation_alias="APP_VOICE_ASR_SILENCE_MS",
+    )
+    voice_tts_model: str = Field(
+        default="qwen3-tts-flash-realtime",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_MODEL",
+    )
+    voice_tts_voice: str = Field(
+        default="Cherry",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_VOICE",
+    )
+    voice_tts_format: str = Field(
+        default="pcm",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_FORMAT",
+    )
+    voice_tts_sample_rate: int = Field(
+        default=24000,
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_SAMPLE_RATE",
+    )
+    voice_tts_mode: str = Field(
+        default="commit",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_MODE",
+    )
+    voice_tts_language_type: str = Field(
+        default="Chinese",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_LANGUAGE_TYPE",
+    )
+    voice_tts_speech_rate: float = Field(
+        default=1,
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_SPEECH_RATE",
+    )
+    voice_tts_volume: int = Field(
+        default=60,
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_VOLUME",
     )
 
     otel_enabled: bool = Field(default=True, validation_alias="OTEL_ENABLED")

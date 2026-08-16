@@ -74,6 +74,7 @@ start_java() {
       '-Dinterview.guide.migration.string.tts-websocket-url=' \
       'ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime'
   )"
+  rm -f "$runtime_dir/voice-config.json"
 
   if [[ -f "$pid_file" ]]; then
     local existing_pid
@@ -103,6 +104,7 @@ start_java() {
     APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
     APP_AI_CONFIG_YAML_PATH="$runtime_dir/llm-providers.yml" \
     APP_AI_CONFIG_ENV_PATH="$runtime_dir/llm-providers.env" \
+    APP_VOICE_CONFIG_PATH="$runtime_dir/voice-config.json" \
     APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
     AI_BAILIAN_API_KEY=comparison-placeholder-key \
     JAVA_TOOL_OPTIONS="$java_tool_options" \
@@ -115,6 +117,7 @@ start_python() {
   local runtime_dir="$comparison_runtime/candidate"
   local pid_file="$runtime_dir/app.pid"
   local log_file="$runtime_dir/app.log"
+  rm -f "$runtime_dir/voice-config.json"
   if [[ ! -f "$repo_root/backend/pyproject.toml" ]]; then
     echo "backend/pyproject.toml is required for the Python candidate" >&2
     exit 1
@@ -144,6 +147,7 @@ start_python() {
       APP_STORAGE_ACCESS_KEY=comparison-access \
       APP_STORAGE_SECRET_KEY=comparison-secret \
       APP_STORAGE_BUCKET=interview-guide-python \
+      APP_VOICE_CONFIG_PATH="$runtime_dir/voice-config.json" \
       APP_AI_PROVIDERS_DASHSCOPE_BASE_URL=http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1 \
       APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
       APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \
@@ -164,6 +168,7 @@ start_python() {
       APP_STORAGE_ACCESS_KEY=comparison-access \
       APP_STORAGE_SECRET_KEY=comparison-secret \
       APP_STORAGE_BUCKET=interview-guide-python \
+      APP_VOICE_CONFIG_PATH="$runtime_dir/voice-config.json" \
       APP_AI_PROVIDERS_DASHSCOPE_BASE_URL=http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1 \
       APP_AI_CONFIG_ENCRYPTION_KEY=comparison-provider-encryption-key \
       APP_VOICE_INTERVIEW_QWEN_ASR_URL=ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime \

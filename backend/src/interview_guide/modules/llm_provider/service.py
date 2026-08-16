@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import re
+
+import httpx
+
 from interview_guide.common.ai.encryption import ApiKeyEncryption
 from interview_guide.common.ai.providers import (
     LlmProviderRegistry,
@@ -13,6 +17,7 @@ from interview_guide.modules.llm_provider.models import (
     CreateProviderRequest,
     DefaultProviderRequest,
     ProviderResponse,
+    ProviderTestResult,
     UpdateProviderRequest,
 )
 
@@ -184,6 +189,51 @@ class LlmProviderService:
         await self._repository.delete_provider(provider_id)
         await self._registry.publish_change()
 
+    async def test(self, provider_id: str) -> ProviderTestResult:
+        provider = await self._repository.get_provider(provider_id)
+        api_key = self._encryption.decrypt(
+            provider.api_key_nonce,
+            provider.api_key_ciphertext,
+        )
+        candidates = connectivity_test_urls(provider.base_url)
+        last_failure = "Unknown error"
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(connect=5, read=10, write=10, pool=5),
+            follow_redirects=False,
+        ) as client:
+            for url in candidates:
+                try:
+                    response = await client.post(
+                        url,
+                        headers={"Authorization": f"Bearer {api_key}"},
+                        json={
+                            "model": provider.model,
+                            "messages": [
+                                {
+                                    "role": "user",
+                                    "content": "Reply with OK only.",
+                                }
+                            ],
+                            "max_tokens": 1,
+                        },
+                    )
+                    response.raise_for_status()
+                    return ProviderTestResult(
+                        success=True,
+                        message="连接成功",
+                        model=provider.model,
+                    )
+                except httpx.HTTPStatusError as error:
+                    body = abbreviate(error.response.text)
+                    last_failure = f"HTTP {error.response.status_code} on {url}, body={body}"
+                except Exception as error:
+                    last_failure = f"{type(error).__name__} on {url}: {error}"
+        return ProviderTestResult(
+            success=False,
+            message=f"连接失败: {last_failure}",
+            model=provider.model,
+        )
+
     def _response(
         self,
         provider: LlmProviderConfig,
@@ -257,3 +307,18 @@ class LlmProviderService:
             )
         if dimensions <= 0:
             raise BusinessException(ErrorCode.BAD_REQUEST, "向量维度必须为正整数")
+
+
+def abbreviate(value: str | None) -> str:
+    if value is None or not value.strip():
+        return "[no body]"
+    normalized = re.sub(r"\s+", " ", value).strip()
+    return normalized if len(normalized) <= 200 else f"{normalized[:200]}..."
+
+
+def connectivity_test_urls(base_url: str) -> list[str]:
+    normalized = base_url.strip().rstrip("/")
+    candidates = [f"{normalized}/chat/completions"]
+    if not re.search(r"/v\d+[A-Za-z0-9]*$", normalized):
+        candidates.append(f"{normalized}/v1/chat/completions")
+    return list(dict.fromkeys(candidates))

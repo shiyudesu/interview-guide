@@ -15,6 +15,7 @@ from interview_guide.common.ai.providers import (
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.session import Database
 from interview_guide.common.redis import RedisConnection
+from interview_guide.modules.llm_provider.voice import VoiceConfigStore
 
 
 class RuntimeInfrastructure:
@@ -36,6 +37,7 @@ class RuntimeInfrastructure:
         )
         self.llm_adapter = LlmAdapter()
         self.prompt_sanitizer = PromptSanitizer()
+        self.voice_config = VoiceConfigStore(settings)
         self.api_key_encryption = encryption
         self._started = False
 
@@ -47,6 +49,7 @@ class RuntimeInfrastructure:
             now=lambda: provider_now(self._settings),
         )
         await self.provider_registry.start()
+        await self.voice_config.start()
         self._started = True
 
     async def close(self) -> None:

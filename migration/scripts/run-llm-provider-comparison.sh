@@ -26,6 +26,26 @@ cat >"$cases_file" <<'JSON'
     {"id":"provider-detail","method":"GET","path":"/api/llm-provider/dashscope"},
     {"id":"provider-missing","method":"GET","path":"/api/llm-provider/missing"},
     {"id":"provider-defaults","method":"GET","path":"/api/llm-provider/default-provider"},
+    {"id":"voice-asr-initial","method":"GET","path":"/api/llm-provider/voice/asr"},
+    {"id":"voice-tts-initial","method":"GET","path":"/api/llm-provider/voice/tts"},
+    {
+      "id":"voice-asr-update",
+      "method":"PUT",
+      "path":"/api/llm-provider/voice/asr",
+      "headers":{"Content-Type":"application/json"},
+      "body":"{\"model\":\"asr-updated\",\"apiKey\":\"voice-updated-secret\",\"language\":\"en\",\"sampleRate\":8000,\"enableTurnDetection\":false,\"turnDetectionSilenceDurationMs\":1500}"
+    },
+    {"id":"voice-asr-updated","method":"GET","path":"/api/llm-provider/voice/asr"},
+    {"id":"voice-tts-shared-key","method":"GET","path":"/api/llm-provider/voice/tts"},
+    {
+      "id":"voice-tts-update",
+      "method":"PUT",
+      "path":"/api/llm-provider/voice/tts",
+      "headers":{"Content-Type":"application/json"},
+      "body":"{\"model\":\"tts-updated\",\"voice\":\"UpdatedVoice\",\"sampleRate\":16000,\"speechRate\":1.2,\"volume\":55}"
+    },
+    {"id":"voice-tts-updated","method":"GET","path":"/api/llm-provider/voice/tts"},
+    {"id":"voice-asr-connectivity","method":"POST","path":"/api/llm-provider/voice/asr/test"},
     {
       "id":"provider-create",
       "method":"POST",

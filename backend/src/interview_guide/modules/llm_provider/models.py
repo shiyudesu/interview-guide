@@ -49,3 +49,59 @@ class UpdateProviderRequest(CamelModel):
     embedding_dimensions: int | None = None
     supports_embedding: bool | None = None
     temperature: float | None = None
+
+
+class AsrConfigResponse(CamelModel):
+    enable_turn_detection: bool
+    format: str
+    language: str
+    masked_api_key: str
+    model: str
+    sample_rate: int
+    turn_detection_silence_duration_ms: int
+    turn_detection_threshold: float
+    turn_detection_type: str
+    url: str
+
+
+class AsrConfigRequest(CamelModel):
+    url: str | None = None
+    model: str | None = None
+    api_key: str | None = None
+    language: str | None = None
+    format: str | None = None
+    sample_rate: int | None = None
+    enable_turn_detection: bool | None = None
+    turn_detection_type: str | None = None
+    turn_detection_threshold: float | None = None
+    turn_detection_silence_duration_ms: int | None = None
+
+
+class TtsConfigResponse(CamelModel):
+    format: str
+    language_type: str
+    masked_api_key: str
+    mode: str
+    model: str
+    sample_rate: int
+    speech_rate: float
+    voice: str
+    volume: int
+
+
+class TtsConfigRequest(CamelModel):
+    model: str | None = None
+    api_key: str | None = None
+    voice: str | None = None
+    format: str | None = None
+    sample_rate: int | None = None
+    mode: str | None = None
+    language_type: str | None = None
+    speech_rate: float | None = None
+    volume: int | None = None
+
+
+class ProviderTestResult(CamelModel):
+    success: bool
+    message: str
+    model: str
