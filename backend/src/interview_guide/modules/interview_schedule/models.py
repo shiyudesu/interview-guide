@@ -21,13 +21,13 @@ class InterviewStatus(StrEnum):
 
 class CreateInterviewRequest(CamelModel):
     company_name: str
-    position: str
     interview_time: datetime
     interview_type: str | None = None
-    meeting_link: str | None = None
-    round_number: int | None = 1
     interviewer: str | None = None
+    meeting_link: str | None = None
     notes: str | None = None
+    position: str
+    round_number: int | None = 1
 
     @field_validator("company_name")
     @classmethod
@@ -86,8 +86,8 @@ class ParseRequest(CamelModel):
 
 
 class ParseResponse(CamelModel):
-    confidence: float
-    data: CreateInterviewRequest | None
-    log: str
-    parse_method: str
     success: bool
+    data: CreateInterviewRequest | None
+    confidence: float
+    parse_method: str
+    log: str

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from interview_guide.common.ai.adapter import LlmAdapter
 from interview_guide.common.ai.encryption import (
     ApiKeyEncryption,
     resolve_configured_key,
 )
+from interview_guide.common.ai.prompts import PromptSanitizer
 from interview_guide.common.ai.providers import (
     LlmProviderRegistry,
     ProviderRepository,
@@ -32,6 +34,8 @@ class RuntimeInfrastructure:
             self.redis.client,
             settings,
         )
+        self.llm_adapter = LlmAdapter()
+        self.prompt_sanitizer = PromptSanitizer()
         self._encryption = encryption
         self._started = False
 
@@ -48,5 +52,6 @@ class RuntimeInfrastructure:
     async def close(self) -> None:
         if self._started:
             await self.provider_registry.close()
+        await self.llm_adapter.close()
         await self.redis.close()
         await self.database.close()

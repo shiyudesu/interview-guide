@@ -13,7 +13,9 @@ from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
 from interview_guide.modules.interview_schedule.models import (
     CreateInterviewRequest,
+    ParseRequest,
 )
+from interview_guide.modules.interview_schedule.parser import InterviewParseService
 from interview_guide.modules.interview_schedule.service import (
     InterviewScheduleService,
     schedule_now,
@@ -48,6 +50,23 @@ ServiceDependency = Annotated[
 ]
 
 
+async def parse_service(request: Request) -> InterviewParseService:
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    settings = request.app.state.settings
+    return InterviewParseService(
+        infrastructure.provider_registry,
+        infrastructure.llm_adapter,
+        infrastructure.prompt_sanitizer,
+        schedule_now(settings),
+    )
+
+
+ParseServiceDependency = Annotated[
+    InterviewParseService,
+    Depends(parse_service),
+]
+
+
 def parse_query_datetime(value: str | None) -> datetime | None:
     if value is None:
         return None
@@ -73,6 +92,15 @@ async def create_schedule(
 ) -> Response:
     created = await service.create(payload)
     return result_response(Result.ok(created))
+
+
+@router.post("/parse")
+async def parse_schedule(
+    payload: ParseRequest,
+    service: ParseServiceDependency,
+) -> Response:
+    parsed = await service.parse(payload.raw_text, payload.source)
+    return result_response(Result.ok(parsed))
 
 
 @router.get("/{schedule_id}")

@@ -24,6 +24,75 @@ TRACKED_HEADERS = [
 
 FLOW = (
     {
+        "body": json.dumps(
+            {
+                "rawText": (
+                    "飞书 公司：字节跳动 岗位：Java工程师 "
+                    "时间：2026-08-20 10:30 第2轮 "
+                    "https://meeting.feishu.cn/fixed"
+                ),
+                "source": "feishu",
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
+        "headers": {"Content-Type": "application/json"},
+        "id": "schedule-parse-feishu",
+        "method": "POST",
+        "path": "/api/interview-schedule/parse",
+    },
+    {
+        "body": json.dumps(
+            {
+                "rawText": (
+                    "公司：字节跳动 岗位：Java工程师 "
+                    "时间：2026-08-20 10:30 第二轮"
+                ),
+                "source": "feishu",
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
+        "headers": {"Content-Type": "application/json"},
+        "id": "schedule-parse-chinese-round",
+        "method": "POST",
+        "path": "/api/interview-schedule/parse",
+    },
+    {
+        "body": json.dumps(
+            {
+                "rawText": (
+                    "腾讯会议 公司：腾讯 岗位：后端工程师 "
+                    "2026-08-20 10:30 会议号：123456789 密码：1234"
+                ),
+                "source": "tencent",
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
+        "headers": {"Content-Type": "application/json"},
+        "id": "schedule-parse-tencent",
+        "method": "POST",
+        "path": "/api/interview-schedule/parse",
+    },
+    {
+        "body": json.dumps(
+            {
+                "rawText": (
+                    "Zoom 2026-08-20 10:30 "
+                    "https://zoom.us/j/123456789"
+                ),
+                "source": "zoom",
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
+        "headers": {"Content-Type": "application/json"},
+        "id": "schedule-parse-zoom-failure",
+        "method": "POST",
+        "path": "/api/interview-schedule/parse",
+    },
+    {
         "id": "schedule-list",
         "method": "GET",
         "path": "/api/interview-schedule",
