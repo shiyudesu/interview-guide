@@ -13,10 +13,17 @@ from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.redis import RedisConnection
 from interview_guide.common.redis.streams import (
+    KB_VECTORIZE,
     RESUME_ANALYZE,
     STREAM_DEFINITIONS,
     RedisStreamService,
     SequentialStreamConsumer,
+    run_stream_consumers,
+)
+from interview_guide.modules.knowledge_base.vectorization import (
+    KnowledgeBaseVectorizationService,
+    KnowledgeBaseVectorRepository,
+    VectorizeStreamHandler,
 )
 from interview_guide.modules.resume.analysis import (
     ResumeAnalyzeHandler,
@@ -66,7 +73,7 @@ async def run_worker(
                     return fixed_now
             else:
                 now_factory = datetime.now
-            consumer = SequentialStreamConsumer(
+            resume_consumer = SequentialStreamConsumer(
                 streams,
                 RESUME_ANALYZE,
                 f"{RESUME_ANALYZE.consumer_prefix}{str(uuid.uuid4())[:8]}",
@@ -77,7 +84,25 @@ async def run_worker(
                     now_factory,
                 ),
             )
-            await consumer.run(resolved_stop_event)
+            vector_repository = KnowledgeBaseVectorRepository(infrastructure.database.sessions)
+            vector_consumer = SequentialStreamConsumer(
+                streams,
+                KB_VECTORIZE,
+                f"{KB_VECTORIZE.consumer_prefix}{str(uuid.uuid4())[:8]}",
+                VectorizeStreamHandler(
+                    vector_repository,
+                    streams,
+                    KnowledgeBaseVectorizationService(
+                        vector_repository,
+                        infrastructure.provider_registry,
+                        infrastructure.llm_adapter,
+                    ),
+                ),
+            )
+            await run_stream_consumers(
+                (resume_consumer, vector_consumer),
+                resolved_stop_event,
+            )
     finally:
         if infrastructure is not None:
             await infrastructure.close()
