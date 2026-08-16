@@ -35,7 +35,7 @@ def settings_from_environment() -> Settings:
     return Settings(
         _env_file=None,
         APP_AI_CONFIG_ENCRYPTION_KEY="comparison-provider-encryption-key",
-        AI_BAILIAN_API_KEY="dashscope-placeholder",
+        AI_BAILIAN_API_KEY="comparison-placeholder-key",
         POSTGRES_HOST=postgres.hostname or "127.0.0.1",
         POSTGRES_PORT=postgres.port or 5432,
         POSTGRES_DB=postgres.path.removeprefix("/"),
@@ -93,6 +93,23 @@ async def test_bootstrap_registry_and_cross_process_version_reload() -> None:
         await first.close()
         await second.close()
         await repository.clear_for_tests()
+        restore_nonces = iter(
+            [
+                bytes.fromhex("000102030405060708090a0b"),
+                bytes.fromhex("0c0d0e0f1011121314151617"),
+                bytes.fromhex("18191a1b1c1d1e1f20212223"),
+                bytes.fromhex("2425262728292a2b2c2d2e2f"),
+                bytes.fromhex("303132333435363738393a3b"),
+            ]
+        )
+        await repository.bootstrap(
+            settings,
+            ApiKeyEncryption(
+                "comparison-provider-encryption-key",
+                nonce_factory=lambda size: next(restore_nonces),
+            ),
+            now=lambda: datetime(2026, 8, 16, 8, 0),
+        )
         await redis.flushdb()
         await redis.aclose()
         await database.close()

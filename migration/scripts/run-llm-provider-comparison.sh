@@ -4,6 +4,21 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/comparison-common.sh"
 
 cases_file="$comparison_runtime/provider-cases.json"
+provider_reset="$repo_root/migration/samples/database/provider-reset.sql"
+
+compose exec -T java-postgres \
+  psql \
+  --set ON_ERROR_STOP=1 \
+  --username postgres \
+  --dbname interview_guide_java \
+  <"$provider_reset"
+compose exec -T python-postgres \
+  psql \
+  --set ON_ERROR_STOP=1 \
+  --username postgres \
+  --dbname interview_guide_python \
+  <"$provider_reset"
+
 cat >"$cases_file" <<'JSON'
 {
   "cases": [
