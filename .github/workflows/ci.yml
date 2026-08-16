@@ -268,6 +268,9 @@ jobs:
       - name: Compare LLM Provider read and defaults
         run: ./migration/scripts/run-llm-provider-comparison.sh
 
+      - name: Compare resume foundation
+        run: ./migration/scripts/run-resume-foundation-comparison.sh
+
       - name: Upload schema comparison reports
         if: always()
         uses: actions/upload-artifact@v6
