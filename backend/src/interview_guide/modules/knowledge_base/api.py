@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from contextlib import suppress
+from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Body, Depends, Request
+from fastapi import APIRouter, Body, Depends, File, Form, Request, UploadFile
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
@@ -19,8 +20,18 @@ from interview_guide.common.db.models import (
 )
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
+from interview_guide.common.redis.streams import KB_VECTORIZE
 from interview_guide.common.result import Result
 from interview_guide.infrastructure.export.pdf import original_file_download_headers
+from interview_guide.infrastructure.file.content_type import ContentTypeDetector
+from interview_guide.infrastructure.file.hash import sha256_bytes
+from interview_guide.infrastructure.file.validation import (
+    KNOWLEDGE_BASE_MAX_BYTES,
+    is_knowledge_base_mime_type,
+    is_markdown_extension,
+    validate_content_type,
+    validate_file,
+)
 
 router = APIRouter(prefix="/api/knowledgebase")
 
@@ -102,6 +113,138 @@ async def list_knowledge_bases(
         }[sortBy.lower()]
         entities.sort(key=field, reverse=True)
     return result_response(Result.ok([item(entity) for entity in entities]))
+
+
+@router.post("/upload")
+async def upload_knowledge_base(
+    request: Request,
+    session: Session,
+    file: Annotated[UploadFile, File()],
+    name: Annotated[str | None, Form()] = None,
+    category: Annotated[str | None, Form()] = None,
+) -> Response:
+    data = await file.read()
+    validate_file(data, KNOWLEDGE_BASE_MAX_BYTES, "知识库")
+    detected = ContentTypeDetector().detect(
+        data,
+        file.filename,
+        file.content_type,
+    )
+    validate_content_type(
+        detected,
+        file.filename,
+        is_knowledge_base_mime_type,
+        is_markdown_extension,
+        f"不支持的文件类型: {detected}，支持的类型：PDF、DOCX、DOC、TXT、MD等",
+    )
+    file_hash = sha256_bytes(data)
+    existing = await session.scalar(
+        select(KnowledgeBase).where(KnowledgeBase.file_hash == file_hash)
+    )
+    if existing is not None:
+        existing.access_count = (existing.access_count or 0) + 1
+        await session.commit()
+        return result_response(
+            Result.ok(
+                {
+                    "knowledgeBase": {
+                        "id": existing.id,
+                        "name": existing.name,
+                        "fileSize": existing.file_size,
+                        "contentLength": 0,
+                    },
+                    "storage": {
+                        "fileKey": existing.storage_key or "",
+                        "fileUrl": existing.storage_url or "",
+                    },
+                    "duplicate": True,
+                }
+            )
+        )
+    await session.rollback()
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    content = await infrastructure.document_parser.parse(
+        data,
+        file.filename,
+        detected,
+    )
+    if not content.strip():
+        raise BusinessException(
+            ErrorCode.INTERNAL_ERROR,
+            "无法从文件中提取文本内容，请确保文件格式正确",
+        )
+    file_key = await infrastructure.storage.upload(
+        data,
+        file.filename,
+        file.content_type,
+        "knowledgebases",
+    )
+    file_url = infrastructure.storage.object_url(file_key)
+    settings = request.app.state.settings
+    uploaded_at = (
+        datetime.fromisoformat(settings.migration_fixed_time)
+        if settings.migration_fixed_time
+        else datetime.now()
+    )
+    filename = file.filename or ""
+    knowledge_name = (
+        name.strip()
+        if name and name.strip()
+        else filename.rsplit(".", 1)[0]
+        if "." in filename
+        else filename or "未命名知识库"
+    )
+    async with session.begin():
+        entity = KnowledgeBase(
+            access_count=1,
+            category=category.strip() if category and category.strip() else None,
+            chunk_count=None,
+            content_type=file.content_type,
+            file_hash=file_hash,
+            file_size=len(data),
+            last_accessed_at=uploaded_at,
+            name=knowledge_name,
+            original_filename=filename,
+            question_count=0,
+            storage_key=file_key,
+            storage_url=file_url,
+            uploaded_at=uploaded_at,
+            vector_error=None,
+            vector_status="PENDING",
+        )
+        session.add(entity)
+        await session.flush()
+    try:
+        await infrastructure.streams.add(
+            KB_VECTORIZE.key,
+            {
+                "kbId": str(entity.id),
+                "content": content,
+                "retryCount": "0",
+            },
+        )
+    except Exception as error:
+        async with session.begin():
+            stored = await session.get(KnowledgeBase, entity.id)
+            if stored is not None:
+                stored.vector_status = "FAILED"
+                stored.vector_error = f"任务入队失败: {error}"[:500]
+    return result_response(
+        Result.ok(
+            {
+                "knowledgeBase": {
+                    "id": entity.id,
+                    "name": entity.name,
+                    "category": entity.category or "",
+                    "fileSize": entity.file_size,
+                    "contentLength": len(content),
+                    "vectorStatus": "PENDING",
+                },
+                "storage": {"fileKey": file_key, "fileUrl": file_url},
+                "duplicate": False,
+            }
+        )
+    )
 
 
 @router.get("/categories")
