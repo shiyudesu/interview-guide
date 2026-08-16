@@ -6,7 +6,12 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[import-untyped]
 
 from interview_guide.common.config.settings import get_settings
+from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.logging.config import configure_logging
+from interview_guide.modules.interview_schedule.service import (
+    InterviewScheduleService,
+    schedule_now,
+)
 from interview_guide.process import install_shutdown_handlers
 
 logger = logging.getLogger(__name__)
@@ -19,12 +24,44 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
     if stop_event is None:
         install_shutdown_handlers(resolved_stop_event)
     scheduler = AsyncIOScheduler(timezone=settings.timezone)
-    scheduler.start()
-    logger.info("scheduler started jobCount=0")
+    infrastructure: RuntimeInfrastructure | None = None
     try:
+        if settings.infrastructure_startup_enabled:
+            infrastructure = RuntimeInfrastructure(settings)
+            await infrastructure.start()
+
+            async def expire_interview_schedules() -> None:
+                assert infrastructure is not None
+                async with infrastructure.database.sessions() as session:
+                    updated = await InterviewScheduleService(
+                        session,
+                        now=lambda: schedule_now(settings),
+                    ).expire_pending()
+                    if updated:
+                        logger.info(
+                            "expired interview schedules updated=%s",
+                            updated,
+                        )
+
+            scheduler.add_job(
+                expire_interview_schedules,
+                trigger="cron",
+                minute=0,
+                second=0,
+                id="interview-schedule-expiry",
+                max_instances=1,
+                coalesce=False,
+            )
+        scheduler.start()
+        logger.info(
+            "scheduler started jobCount=%s",
+            len(scheduler.get_jobs()),
+        )
         await resolved_stop_event.wait()
     finally:
         scheduler.shutdown(wait=True)
+        if infrastructure is not None:
+            await infrastructure.close()
         logger.info("scheduler stopped")
 
 

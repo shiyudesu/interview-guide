@@ -259,6 +259,9 @@ jobs:
           TEST_S3_ENDPOINT: http://127.0.0.1:19000
         run: uv run pytest -m integration
 
+      - name: Compare interview schedule module
+        run: ./migration/scripts/run-interview-schedule-comparison.sh
+
       - name: Upload schema comparison reports
         if: always()
         uses: actions/upload-artifact@v6

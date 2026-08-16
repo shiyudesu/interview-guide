@@ -15,6 +15,15 @@ from interview_guide.common.errors.exceptions import BusinessException
 from interview_guide.common.result import Result
 
 logger = logging.getLogger(__name__)
+MISSING_FIELD_MESSAGES = {
+    "companyName": "公司名称不能为空",
+    "company_name": "公司名称不能为空",
+    "interviewTime": "面试时间不能为空",
+    "interview_time": "面试时间不能为空",
+    "position": "岗位不能为空",
+    "rawText": "文本不能为空",
+    "raw_text": "文本不能为空",
+}
 
 
 def validation_message(errors: Sequence[Any]) -> str:
@@ -24,6 +33,16 @@ def validation_message(errors: Sequence[Any]) -> str:
             messages.append(str(raw_error))
             continue
         error: dict[str, Any] = raw_error
+        if error.get("type") == "missing":
+            location = error.get("loc") or ()
+            field = str(location[-1]) if location else ""
+            messages.append(
+                MISSING_FIELD_MESSAGES.get(
+                    field,
+                    str(error.get("msg", ErrorCode.BAD_REQUEST.message)),
+                )
+            )
+            continue
         context = error.get("ctx") or {}
         context_error = context.get("error")
         if context_error is not None:
@@ -78,6 +97,15 @@ def install_exception_handlers(app: FastAPI) -> None:
             Result.error(exception.status_code, str(exception.detail)),
             status_code=exception.status_code,
         )
+
+    @app.exception_handler(ValueError)
+    async def handle_value_error(
+        request: Request,
+        exception: ValueError,
+    ) -> Response:
+        del request
+        logger.warning("illegal argument message=%s", exception)
+        return result_response(Result.error(ErrorCode.BAD_REQUEST, str(exception)))
 
     @app.exception_handler(Exception)
     async def handle_unexpected_exception(

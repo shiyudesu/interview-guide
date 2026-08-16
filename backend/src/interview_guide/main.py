@@ -22,6 +22,9 @@ from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.common.telemetry import configure_tracing
+from interview_guide.modules.interview_schedule.api import (
+    router as interview_schedule_router,
+)
 
 ACTUATOR_MEDIA_TYPE = "application/vnd.spring-boot.actuator.v3+json"
 
@@ -62,6 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.blocking_executor = blocking_executor
 
     install_exception_handlers(app)
+    app.include_router(interview_schedule_router)
     app.add_middleware(
         RequestContextMiddleware,
         metrics=metrics,
