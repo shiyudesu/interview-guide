@@ -1,0 +1,594 @@
+{
+  "resources": [
+    {
+      "bytes": 8824084,
+      "category": "font",
+      "file": "app/src/main/resources/fonts/ZhuqueFangsong-Regular.ttf",
+      "sha256": "558c62730844fe54ba220146ed62f859d4e2880188d92d985f8921c6e3743bc4"
+    },
+    {
+      "bytes": 436,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-evaluation-summary-system.st",
+      "sha256": "7ddec414e0bf241850a1f9b600c91aeb8af3b1d543efb4d3c294cf1c0d6e024e"
+    },
+    {
+      "bytes": 553,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-evaluation-summary-user.st",
+      "sha256": "64e4ea70d1f615f6f93a053fdabcd8b56ed0909ba587579a1be63ae1cc9bdcd6"
+    },
+    {
+      "bytes": 2568,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-evaluation-system.st",
+      "sha256": "a10475ace75340006316c4fe11ea49abccfe00f50e6bba2b55b4c42aab53dddf"
+    },
+    {
+      "bytes": 816,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-evaluation-user.st",
+      "sha256": "cd32ac88cbfda6eb4dbda0771e9d963923891fc5c925e2f48d215ef5ba72a663"
+    },
+    {
+      "bytes": 1161,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-question-resume-system.st",
+      "sha256": "27e00ef18ae90dd98636dbc767c29987563feed3cb66025442699b30a5a8329b"
+    },
+    {
+      "bytes": 807,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-question-resume-user.st",
+      "sha256": "9a9becd81afbc334c7e27cfaec7c6320f25060b797d120ad618bf7a06179846b"
+    },
+    {
+      "bytes": 1171,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-question-skill-system.st",
+      "sha256": "1ba1b15d03bc67f4fea831305a3a55816c885849a9c0c03f87796918e8a5cd07"
+    },
+    {
+      "bytes": 910,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/interview-question-skill-user.st",
+      "sha256": "bd1090706aeb3a40f712d84b967ad06262f00b964b1741c753b1f96654b39ce4"
+    },
+    {
+      "bytes": 796,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/jd-parse-system.st",
+      "sha256": "e1ad5b4c800e3929706633a5660d87c1c52ec3ed2ecd58b4dcb9bdcd80423def"
+    },
+    {
+      "bytes": 625,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/knowledgebase-query-rewrite.st",
+      "sha256": "f4e622ad2784bd87e4b5888329fd5fed7b32b41f7758e7d149f9e7976661c201"
+    },
+    {
+      "bytes": 3497,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/knowledgebase-query-system.st",
+      "sha256": "fe8d276e4d7ad6e178c5fe5548caa4c8841c216af9106e1a055928833c2b0fdd"
+    },
+    {
+      "bytes": 746,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/knowledgebase-query-user.st",
+      "sha256": "6e309171d460a64c6818ce27dc3aba2405fc57a54579225494d4a52e1493bc57"
+    },
+    {
+      "bytes": 1231,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/knowledgebase-question-generation-system.st",
+      "sha256": "1538be6b71dcbc890d608ec635fd036f0a736ff5b2dab4c42cff825c4b43b811"
+    },
+    {
+      "bytes": 964,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/knowledgebase-question-generation-user.st",
+      "sha256": "826c69651a0bcb8571233602edb21f3efa7b08fb58aa9f4a47afcf8727af6c14"
+    },
+    {
+      "bytes": 3979,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/resume-analysis-system.st",
+      "sha256": "5295c97ab899dc1c2ea6ce2620711645fb31540618538cfd9448b81bfb8cfb95"
+    },
+    {
+      "bytes": 2523,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/resume-analysis-user.st",
+      "sha256": "decc88267b7a073d0ce489638d666eee8c912a7876c8d6f2ce4bba4f43ef6eb4"
+    },
+    {
+      "bytes": 406,
+      "category": "prompt",
+      "file": "app/src/main/resources/prompts/voice-interview-context-summary.st",
+      "sha256": "7c727c3eb362260f436b1da01ba9c6c887866330563784febe2bbda600aff902"
+    },
+    {
+      "bytes": 2565,
+      "category": "redis-script",
+      "file": "app/src/main/resources/scripts/rate_limit_single.lua",
+      "sha256": "341ac2fcf664a024c5b0c5522bddd589b310ff5b51839903bb44644ace46d46b"
+    },
+    {
+      "bytes": 1792,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/algorithm-data-structures.md",
+      "sha256": "2a682a65af36de0a4e60512f51fd35e5ff063efa41713e2a6a69815487a7308f"
+    },
+    {
+      "bytes": 2348,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/browser.md",
+      "sha256": "8f54a0fd02a4c0f4bcb050cc196213caed4f6ad96af9d20737135270a5642b92"
+    },
+    {
+      "bytes": 2862,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/database.md",
+      "sha256": "5d4a9286d40dc65982e874582e51817006103e04af06cefcdbc0a325b931ab9f"
+    },
+    {
+      "bytes": 2439,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/db-design.md",
+      "sha256": "3f7bba5678f50e8dbef1455d87078a8272261948281d00fb0c566da3a74ef5b4"
+    },
+    {
+      "bytes": 1696,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/design-pattern.md",
+      "sha256": "5656a90004472d84ec39f847586eb0395c209b4bba3dbe2a2cfccc7d9b66acfe"
+    },
+    {
+      "bytes": 1787,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/distributed.md",
+      "sha256": "0d7fbdac1cde72e8438fe3058714f684c424f705f0bc75d4803b205bd3becf3a"
+    },
+    {
+      "bytes": 2934,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/django-flask.md",
+      "sha256": "641d9058fefc0c3e195c8b8d455fb962624011d64d735083277253be21908c93"
+    },
+    {
+      "bytes": 2716,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/high-availability.md",
+      "sha256": "0e07fab915d1159a9ee419732521056b79011c27c9f8652c98034e1d205b8932"
+    },
+    {
+      "bytes": 3078,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/java.md",
+      "sha256": "345a67393059f4700e4bc5108a355f4723c8f720a31ae855e2d0840173a1c737"
+    },
+    {
+      "bytes": 2753,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/javascript.md",
+      "sha256": "780315a4ab96164b798e125d3686295c925cd108ccf3f2b6859826b2e9b03be7"
+    },
+    {
+      "bytes": 2735,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/mq.md",
+      "sha256": "b541a75a3983cde1b229e68facecaa7c94d5a1329d9a19c2d6a1c4771953708e"
+    },
+    {
+      "bytes": 1682,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/mysql.md",
+      "sha256": "d30f329c442385725196f827d8b5571f7aaa714fc8042fda92df4e473f553a38"
+    },
+    {
+      "bytes": 979,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/network-os.md",
+      "sha256": "eb282d9d6699e2efd453531984b1df771faced270452a68e22f751ac9c6b193c"
+    },
+    {
+      "bytes": 2814,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/python-basic.md",
+      "sha256": "7b0b6b8b406fe17cbfc5b22f5c0b0cb6ee2d6f89a08a611eb0715d04749e9834"
+    },
+    {
+      "bytes": 3362,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/react-vue.md",
+      "sha256": "fcc214cfa7984099214189dd7b649829848de916b52778699a3d32cce464e9bc"
+    },
+    {
+      "bytes": 1714,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/redis.md",
+      "sha256": "bbf0457d09f12674abdafcc80c76ad99e57b00c2d9b603b2cfa3c3996ae27526"
+    },
+    {
+      "bytes": 2052,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/spring.md",
+      "sha256": "92dfdaac59c29ac10763297266fc3d45c78fae0d66a28b180e8dd18a9d581084"
+    },
+    {
+      "bytes": 3730,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/system-design-scenarios.md",
+      "sha256": "8e4d37d552e0606792a3c647f15734e41c034b4d418f803d4a27630866c84a21"
+    },
+    {
+      "bytes": 5366,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/_shared/references/test-development.md",
+      "sha256": "9600d7c1e1b3237978719851e42362ba7b9cde8d058ca6745b39a59de0cbd34c"
+    },
+    {
+      "bytes": 1430,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/ai-agent-dev/SKILL.md",
+      "sha256": "943dc133d83c1f5934f28aaa5f46aae882868bb4a7d91352f7e00cc1660e5698"
+    },
+    {
+      "bytes": 6009,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/ai-agent-dev/ai-agent-dev.md",
+      "sha256": "5575fda3776a13b453660dfd54933f13acde18007c3bcabe7d6f9e9b16651a8c"
+    },
+    {
+      "bytes": 808,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/ai-agent-dev/skill.meta.yml",
+      "sha256": "f1de6ef5d39d7d36f6131fbf722aab4846a9c43d519f488a56a0d94aaf70e9c9"
+    },
+    {
+      "bytes": 1096,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/algorithm/SKILL.md",
+      "sha256": "f399ed81a290dc84aedf3f794678507b1fa8d81a102ca1fa515cd5a6ec8e65dc"
+    },
+    {
+      "bytes": 925,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/algorithm/skill.meta.yml",
+      "sha256": "860410a753a31b5e9842867b2d84a3748662a2d2a2a511d8a7bd0ab3e3baf876"
+    },
+    {
+      "bytes": 1129,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/ali-backend/SKILL.md",
+      "sha256": "8c6eab08c6bbea2db0046160796b8dabd37c162895eb83ece001f0540ac6ef64"
+    },
+    {
+      "bytes": 1071,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/ali-backend/skill.meta.yml",
+      "sha256": "bb0d0c740c159bef0083978fe29a882bcf331f663daccd3fbc81c056ccb39e76"
+    },
+    {
+      "bytes": 1351,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/bytedance-backend/SKILL.md",
+      "sha256": "c68751d9695022dc3689c23473bda882e09a745fe5e72312775d3bebeb43b669"
+    },
+    {
+      "bytes": 981,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/bytedance-backend/skill.meta.yml",
+      "sha256": "13418b93dd992888ce864f8530008dc855125236c9e3c963d8e9fe9af26a8027"
+    },
+    {
+      "bytes": 942,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/frontend/SKILL.md",
+      "sha256": "1d0af9b533549d744844206f6e806cf70e94128f797b0e94c98ab2d8a75afdf0"
+    },
+    {
+      "bytes": 729,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/frontend/skill.meta.yml",
+      "sha256": "758ea52e7139a3e5218782bc82205a0c771cd9db1285e8dcbcac7ad7b2785d33"
+    },
+    {
+      "bytes": 970,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/java-backend/SKILL.md",
+      "sha256": "16a37db4a0635c2087ffab278126922899ebc8e8a9d8b134bfc74264f11bea51"
+    },
+    {
+      "bytes": 744,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/java-backend/skill.meta.yml",
+      "sha256": "f3acbd9fe405925ab6b9912644505ca5dfe6b1b615784f912eb6d8d4017090bd"
+    },
+    {
+      "bytes": 1067,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/java-backend-tencent/SKILL.md",
+      "sha256": "37d1952051fc6037ec7807a01020440cace4959684258bebc4e3b2a26a67bfe0"
+    },
+    {
+      "bytes": 946,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/java-backend-tencent/skill.meta.yml",
+      "sha256": "f5a7ee27c78ba65b6a85b17503d10894e3d0d7998c8aed5fcb01118d6e020230"
+    },
+    {
+      "bytes": 856,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/python-backend/SKILL.md",
+      "sha256": "69f1e20e60d7107e0ace15877d41c6824e8f567a9ca2bead4cd4aa7d03f02300"
+    },
+    {
+      "bytes": 861,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/python-backend/skill.meta.yml",
+      "sha256": "6d6077fe6f03d032e1ff692057d02b3707b1cd5a3145ff296a5473270e2d38f4"
+    },
+    {
+      "bytes": 868,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/system-design/SKILL.md",
+      "sha256": "74a9f3735c98d3510bfa434a7596981827655bb063d778a2dbd097b900878d4a"
+    },
+    {
+      "bytes": 876,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/system-design/skill.meta.yml",
+      "sha256": "0d40e46c9e5c3e98c84625ec37f8ba6eb2304511f5fa81c4621e278640192d0d"
+    },
+    {
+      "bytes": 1275,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/test-development/SKILL.md",
+      "sha256": "fda065edf1bfc99da2298073a78334e130bbd8db536e6302340cb07375125994"
+    },
+    {
+      "bytes": 969,
+      "category": "skill",
+      "file": "app/src/main/resources/skills/test-development/skill.meta.yml",
+      "sha256": "6acb09462313cd845e209b9645ab6ea490b7b48bab1d22096421e19da8a670ce"
+    },
+    {
+      "bytes": 3496,
+      "category": "voice-config",
+      "file": "app/src/main/resources/voice-interview-opening.yml",
+      "sha256": "b2c99ad41456bd3d1270945b27597b6623512050119d2c252586e5a772e08580"
+    }
+  ],
+  "schemaVersion": 1,
+  "summary": {
+    "disabledTestMarkerCount": 7,
+    "resourceCount": 60,
+    "resourceCountsByCategory": {
+      "font": 1,
+      "prompt": 17,
+      "redis-script": 1,
+      "skill": 40,
+      "voice-config": 1
+    },
+    "testFileCount": 43
+  },
+  "tests": [
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/AppTest.java",
+      "sha256": "7d2b743211ab5b5b34ec6d892771676a33b1c59a0962cc90146edecf44ec63cd"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/ai/ApiPathResolverTest.java",
+      "sha256": "771a32b6eae155184a8280e04ed185902543fd952889ccbb90af207125652d41"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/ai/LlmProviderRegistryPathIntegrationTest.java",
+      "sha256": "e649273d982ba14be3ff1dc5b5b4c5dbaa7557587e94cce50c80c7fceb946982"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/ai/LlmProviderRegistryTest.java",
+      "sha256": "551be07bed32dac0f87d80f7b0aacc7c7f0ae684628b553d053b95586d407710"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/aspect/RateLimitIntegrationTest.java",
+      "sha256": "7b8904075b6a8dc475c8b60b0c8693fa7a477cd4f7828bdde3f644850c0235ad"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/aspect/RateLimitScriptTest.java",
+      "sha256": "0043cca59ba046001bbf0b4b03d08bf1df97186dc65442c3844696932e81b2ed"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/common/exception/RateLimitExceededExceptionTest.java",
+      "sha256": "f509cf2e6b159413161b27f5f112fa9a7032788f1b8be3cbdf4c9034cad1c505"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/infrastructure/file/DocumentParseIntegrationTest.java",
+      "sha256": "94b0abb7114811341c2eb16b6995f2f9fb2d632ee0ea070ae7148791b01d72f0"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/infrastructure/file/DocumentParseServiceTest.java",
+      "sha256": "a18f02e26309478d006f350ef962f646fba88907730d4dd48352b7a3d2fb7bfd"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/infrastructure/file/FileStorageServiceTest.java",
+      "sha256": "d3fbe7462b9bb247b49990e822ecfdd0ff38c8e7d722c84788c22fb588122606"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/infrastructure/file/TextCleaningServiceTest.java",
+      "sha256": "080dace2f022b16faf3da2127dcf8d2e9874b434ea3d58f7c4273aecf10a43e8"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/interview/model/SessionListItemDTOTest.java",
+      "sha256": "dbce0ffadcbdeb51f84a0c10f80c34c8f6a354e96d0f7cc49948ff871714e7bc"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/interview/service/AnswerEvaluationServiceTest.java",
+      "sha256": "2ebce7ba4ba1c88c4d2b7ac4ed163c626593a656c764e2ef7a53cbdc278acb05"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/interview/service/InterviewPersistenceServiceTest.java",
+      "sha256": "8d11f55c11f23c33d4526892402e9895b6bdd996d2dfa7d2918c6e384203c569"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/interview/service/InterviewSessionIdempotencyTest.java",
+      "sha256": "57975aa53b696252808046df67aa5557211c5cc8611fb4c59c7215c747bf06d2"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/knowledgebase/service/KnowledgeBaseInterviewServiceTest.java",
+      "sha256": "5c04e62476622bb4cf9f21e2b2079efd0624e26af2bb7522605c48142e48caac"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/knowledgebase/service/KnowledgeBaseQuestionServiceTest.java",
+      "sha256": "ac5c9ba50c429718c6250fe04e3d34a4cf9ad1a888cd5bbce888eddb03117c63"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/knowledgebase/service/KnowledgeBaseVectorServiceTest.java",
+      "sha256": "730dd8b3981676cbd78837d558349e2c269049ebd994660da0b4b4b0807cc7fd"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/knowledgebase/service/QuestionGenerationAsyncTest.java",
+      "sha256": "72ab0d13a7be9386ea3afbb453339f5be73d928e09cf0f094f8017bb0d944457"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/knowledgebase/service/QuestionGenerationStateServiceTest.java",
+      "sha256": "ce909d67ad8e77a931e59b2eee5e6b34c65b21880229d7f95ce725bf951e527d"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/llmprovider/controller/LlmProviderControllerTest.java",
+      "sha256": "b8547722aab3e4c87c08f32eee7a97b64eaeb8cb750417d629268f1d6fd19388"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/llmprovider/service/LlmProviderConfigServiceTest.java",
+      "sha256": "9b68e82159cad5f1ee5f5f245da1b83562aecd4950795359fd26f33764ee5d08"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/context/VoiceContextCompressorTest.java",
+      "sha256": "f445c1a7698b7f652bbf245ecec56f620ee3c7107964aeb8e69d6ea75d2c80f4"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewControllerEvaluationTest.java",
+      "sha256": "68223c5c760215a5bbcc8bbb26e411c1025e36614e5520bb0de23b2a3d5dfbb8"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/handler/VoiceInterviewWebSocketHandlerTest.java",
+      "sha256": "a346028461aa3695fe5e643b73bc6afdda21e8f7840e7a2a210e92766acffdfe"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/integration/VoiceInterviewIntegrationTest.java",
+      "sha256": "bff7dbea207be93a9cd48bfc3489a6b2d2d118c71219acae7d50c2c90202a51f"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/model/VoiceInterviewSessionStatusTest.java",
+      "sha256": "bd34ca298c51be75eb517b7652058de1cc02ca5455888424f5eabca4144fed3f"
+    },
+    {
+      "disabledMarkers": 2,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/DashscopeLlmServiceTest.java",
+      "sha256": "8942a86a653c484ed46a468a17c66b7a755fe121dca80d9f5e770fef1d6b11a0"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/QwenAsrServiceTest.java",
+      "sha256": "9a4ee4d70b2015bd765dfa9a21c282202d42f50d0437f067d99222664176b04a"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/QwenTtsServiceTest.java",
+      "sha256": "0eb9eef8a216679b8f749a44f6bff52febd0d8d55540ef7c0da57ff60fa39042"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/VoiceInterviewEvaluationRecoveryTest.java",
+      "sha256": "b88aa3d5891111286ac62908e1f90d4cc878b21cfa56f6959514c412d4d8c748"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/VoiceInterviewEvaluationServiceTest.java",
+      "sha256": "14af503bfd5df0c1d0ab89295e5c11e6c9be34a5ae50ab70364cee417ee36c32"
+    },
+    {
+      "disabledMarkers": 2,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/VoiceInterviewPromptServiceTest.java",
+      "sha256": "679afe3a46b7701aa2bedc0155d5f625f90703135930dc62ac5eeada83f579ee"
+    },
+    {
+      "disabledMarkers": 2,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/VoiceInterviewServicePauseTest.java",
+      "sha256": "e873a808294c545771748c403d2956f1ce7fccb32aec01b6787e6adeb1bce27f"
+    },
+    {
+      "disabledMarkers": 1,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/VoiceInterviewServiceTest.java",
+      "sha256": "2f1ef26faf991608fdfb1a10e3d77ad034eb8572874371a12651efe5d2b3f041"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/voiceinterview/service/VoiceInterviewSummaryPersistenceTest.java",
+      "sha256": "b1b3ca635a9d9fabdc08dc74fc45429ad70d664a16dbc8eecf90b0c309158a08"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/e2e/voice-interview.spec.ts",
+      "sha256": "2f63ede4e3536944ea9e69775a4dc37c384d3ccf6d2545338aed4e169f0132a2"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/components/knowledgebaseInterview/interviewCapacity.test.ts",
+      "sha256": "c2087db5f5f739f0ee9fa8e8063dd033fd98c95ed7fcb220c5b4405f115e9b0c"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/pages/interviewEntry.test.ts",
+      "sha256": "d8af54f3ed1e20d13e4d787ebaf19f95e6e66e8c05ced7d4ee12a9beacab0861"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/pages/interviewHistoryStats.test.ts",
+      "sha256": "947ffec1f4bcd3e9259db10f77b57c6ff13e68d4f94322c92ac17a4fbdc36f1f"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/pages/knowledgeBaseInterviewCompletion.test.ts",
+      "sha256": "74f9e0b536d5828a7afa98c2a4bba8922626d35a179ee86ed840a7f7513e5a55"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/pages/questionGenerationStatus.test.ts",
+      "sha256": "38851c7b5f65f2b4202a65880574a6602ae5dc4ee3db84ccdbe34859bc222785"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/pages/voiceEvaluationStatus.test.ts",
+      "sha256": "7ef80b21d9abb81ef965f0275994c4ab9f4862a9143a88aaec2f43f7ea7dc9c4"
+    }
+  ]
+}

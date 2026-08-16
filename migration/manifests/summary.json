@@ -1,0 +1,53 @@
+{
+  "manifests": {
+    "api.json": {
+      "backendEndpointCount": 88,
+      "backendOnlyCount": 0,
+      "controllerCount": 10,
+      "frontendCallCount": 89,
+      "frontendOnlyCount": 1,
+      "sseEndpointCount": 2,
+      "webSocketEndpointCount": 1
+    },
+    "configuration.json": {
+      "configurationValueCount": 244,
+      "envExampleCount": 20,
+      "envReferencedButUndocumentedCount": 77,
+      "propertyBindingCount": 11
+    },
+    "database.json": {
+      "alterationCount": 5,
+      "extensionCount": 3,
+      "indexCount": 14,
+      "migrationCount": 5,
+      "tableCount": 17
+    },
+    "known-issues.json": {
+      "knownIssueCount": 18
+    },
+    "redis.json": {
+      "constantCount": 47,
+      "rateLimitRuleCount": 33,
+      "scheduledMethodCount": 3,
+      "streamCount": 5
+    },
+    "resources.json": {
+      "disabledTestMarkerCount": 7,
+      "resourceCount": 60,
+      "resourceCountsByCategory": {
+        "font": 1,
+        "prompt": 17,
+        "redis-script": 1,
+        "skill": 40,
+        "voice-config": 1
+      },
+      "testFileCount": 43
+    }
+  },
+  "nextRequiredWork": [
+    "Record fixed runtime request/response/error samples.",
+    "Capture PostgreSQL catalog, Redis runtime state, S3 metadata, SSE bytes, and WebSocket transcripts.",
+    "Establish isolated Java/Python comparison environments."
+  ],
+  "schemaVersion": 1
+}

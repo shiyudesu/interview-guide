@@ -131,6 +131,13 @@ docker compose -f docker-compose.dev.yml up -d
 ./gradlew :app:bootRun
 ```
 
+迁移阶段 0 清单：
+
+```bash
+./migration/scripts/generate-manifests.sh
+./migration/scripts/check-manifests.sh
+```
+
 Python 工程创建后：
 
 ```bash

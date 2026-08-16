@@ -1,0 +1,4076 @@
+{
+  "backendEndpoints": [
+    {
+      "canonicalPath": "/api/interview-schedule",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule",
+          "httpMethod": "GET",
+          "path": "/api/interview-schedule",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 31
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule",
+          "httpMethod": "POST",
+          "path": "/api/interview-schedule",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 19
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getAll",
+      "parameters": [
+        {
+          "arguments": "(required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(required = false)",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/interview-schedule",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 88
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview-schedule",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule",
+          "httpMethod": "GET",
+          "path": "/api/interview-schedule",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 31
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule",
+          "httpMethod": "POST",
+          "path": "/api/interview-schedule",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 19
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "create",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/interview-schedule",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 61
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/parse",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule/parse",
+          "httpMethod": "POST",
+          "path": "/api/interview-schedule/parse",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 15
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "parse",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/interview-schedule/parse",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 48
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 39
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "GET",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 23
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "PUT",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 35
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "delete",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview-schedule/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 121
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 39
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "GET",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 23
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "PUT",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 35
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getById",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview-schedule/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 74
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 39
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "GET",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 23
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule/{}",
+          "httpMethod": "PUT",
+          "path": "/api/interview-schedule/${id}",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 35
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "update",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/interview-schedule/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 105
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}/status",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule/{}/status",
+          "httpMethod": "PATCH",
+          "path": "/api/interview-schedule/${id}/status",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 43
+          }
+        }
+      ],
+      "httpMethod": "PATCH",
+      "javaMethod": "updateStatus",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/interview-schedule/{id}/status",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 135
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}/status",
+      "consumes": null,
+      "controller": "InterviewScheduleController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule/{}/status",
+          "httpMethod": "PATCH",
+          "path": "/api/interview-schedule/${id}/status",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 43
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateStatus",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/interview-schedule/{id}/status",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
+        "line": 135
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 33
+          }
+        },
+        {
+          "canonicalPath": "/api/interview/sessions",
+          "httpMethod": "POST",
+          "path": "/api/interview/sessions",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 40
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "listSessions",
+      "parameters": [],
+      "path": "/api/interview/sessions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 51
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 33
+          }
+        },
+        {
+          "canonicalPath": "/api/interview/sessions",
+          "httpMethod": "POST",
+          "path": "/api/interview/sessions",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 40
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "createSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/interview/sessions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 62
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/unfinished/{}",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/unfinished/{}",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions/unfinished/${resumeId}",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 86
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "findUnfinishedSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/unfinished/{resumeId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 118
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 137
+          }
+        },
+        {
+          "canonicalPath": "/api/interview/sessions/{}",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 49
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "deleteInterview",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 181
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 137
+          }
+        },
+        {
+          "canonicalPath": "/api/interview/sessions/{}",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 49
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 74
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/answers",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}/answers",
+          "httpMethod": "POST",
+          "path": "/api/interview/sessions/${req.sessionId}/answers",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 64
+          }
+        },
+        {
+          "canonicalPath": "/api/interview/sessions/{}/answers",
+          "httpMethod": "PUT",
+          "path": "/api/interview/sessions/${req.sessionId}/answers",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 98
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "submitAnswer",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}/answers",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 91
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/answers",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}/answers",
+          "httpMethod": "POST",
+          "path": "/api/interview/sessions/${req.sessionId}/answers",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 64
+          }
+        },
+        {
+          "canonicalPath": "/api/interview/sessions/{}/answers",
+          "httpMethod": "PUT",
+          "path": "/api/interview/sessions/${req.sessionId}/answers",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 98
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "saveAnswer",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}/answers",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 126
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/complete",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}/complete",
+          "httpMethod": "POST",
+          "path": "/api/interview/sessions/${sessionId}/complete",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 107
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "completeInterview",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}/complete",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 141
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/details",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}/details",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions/${sessionId}/details",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 109
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getInterviewDetail",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}/details",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 152
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/export",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}/export",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions/${sessionId}/export",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 123
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "exportInterviewPdf",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}/export",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 161
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/question",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}/question",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions/${sessionId}/question",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 56
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getCurrentQuestion",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}/question",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 83
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/report",
+      "consumes": null,
+      "controller": "InterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/sessions/{}/report",
+          "httpMethod": "GET",
+          "path": "/api/interview/sessions/${sessionId}/report",
+          "source": {
+            "file": "frontend/src/api/interview.ts",
+            "line": 76
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getReport",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/sessions/{sessionId}/report",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 107
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/skills",
+      "consumes": null,
+      "controller": "InterviewSkillController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/skills",
+          "httpMethod": "GET",
+          "path": "/api/interview/skills",
+          "source": {
+            "file": "frontend/src/api/skill.ts",
+            "line": 31
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "listSkills",
+      "parameters": [],
+      "path": "/api/interview/skills",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillController.java",
+        "line": 26
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/interview/skills/parse-jd",
+      "consumes": null,
+      "controller": "InterviewSkillController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/skills/parse-jd",
+          "httpMethod": "POST",
+          "path": "/api/interview/skills/parse-jd",
+          "source": {
+            "file": "frontend/src/api/skill.ts",
+            "line": 39
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "parseJd",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/interview/skills/parse-jd",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillController.java",
+        "line": 36
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/interview/skills/{}",
+      "consumes": null,
+      "controller": "InterviewSkillController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview/skills/{}",
+          "httpMethod": "GET",
+          "path": "/api/interview/skills/${id}",
+          "source": {
+            "file": "frontend/src/api/skill.ts",
+            "line": 35
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getSkill",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/interview/skills/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillController.java",
+        "line": 31
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase-interviews/sessions",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase-interviews/sessions",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase-interviews/sessions",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 355
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "createInterviewSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase-interviews/sessions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 98
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/categories",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/categories",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/categories",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 240
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getAllCategories",
+      "parameters": [],
+      "path": "/api/knowledgebase/categories",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 117
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/category/{}",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/category/{}",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/category/${encodeURIComponent(category)}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 247
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getByCategory",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/category/{category}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 125
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/list",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/list",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/list${queryString ? ",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 217
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getAllKnowledgeBases",
+      "parameters": [
+        {
+          "arguments": "(value = \"sortBy\", required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"vectorStatus\", required = false)",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/knowledgebase/list",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 54
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/query",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/query",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase/query",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 378
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "queryKnowledgeBase",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase/query",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 93
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/query/stream",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/query/stream",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase/query/stream",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 394
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "queryKnowledgeBaseStream",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase/query/stream",
+      "produces": "MediaType.TEXT_EVENT_STREAM_VALUE",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 103
+      },
+      "transport": "sse",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/questions/{}",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/questions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/knowledgebase/questions/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 351
+          }
+        },
+        {
+          "canonicalPath": "/api/knowledgebase/questions/{}",
+          "httpMethod": "PUT",
+          "path": "/api/knowledgebase/questions/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 340
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "deleteQuestion",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/questions/{questionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 92
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/questions/{}",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/questions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/knowledgebase/questions/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 351
+          }
+        },
+        {
+          "canonicalPath": "/api/knowledgebase/questions/{}",
+          "httpMethod": "PUT",
+          "path": "/api/knowledgebase/questions/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 340
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateQuestion",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase/questions/{questionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 78
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/questions/{}/status",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/questions/{}/status",
+          "httpMethod": "PUT",
+          "path": "/api/knowledgebase/questions/${id}/status",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 347
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateQuestionStatus",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase/questions/{questionId}/status",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 85
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/search",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/search",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/search?keyword=${encodeURIComponent(keyword)}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 270
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "search",
+      "parameters": [
+        {
+          "arguments": "(\"keyword\")",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/knowledgebase/search",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 188
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/stats",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/stats",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/stats",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 279
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getStatistics",
+      "parameters": [],
+      "path": "/api/knowledgebase/stats",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 198
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/uncategorized",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/uncategorized",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/uncategorized",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 254
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getUncategorized",
+      "parameters": [],
+      "path": "/api/knowledgebase/uncategorized",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 133
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/upload",
+      "consumes": "MediaType.MULTIPART_FORM_DATA_VALUE",
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/upload",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase/upload",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 195
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "uploadKnowledgeBase",
+      "parameters": [
+        {
+          "arguments": "(\"file\")",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"name\", required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"category\", required = false)",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/knowledgebase/upload",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 152
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/knowledgebase/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 231
+          }
+        },
+        {
+          "canonicalPath": "/api/knowledgebase/{}",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 224
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "deleteKnowledgeBase",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 84
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/knowledgebase/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 231
+          }
+        },
+        {
+          "canonicalPath": "/api/knowledgebase/{}",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 224
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getKnowledgeBase",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 74
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/category",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/category",
+          "httpMethod": "PUT",
+          "path": "/api/knowledgebase/${id}/category",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 261
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateCategory",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/category",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 141
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/download",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/download",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}/download",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 202
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "downloadKnowledgeBase",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/download",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 165
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/interview-capacity",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/interview-capacity",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}/interview-capacity?${searchParams.toString()}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 370
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getInterviewCapacity",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "(value = \"category\", required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"difficulty\", defaultValue = \"mid\")",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"mainQuestionCount\", defaultValue = \"5\")",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/interview-capacity",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 104
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/questions",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase/${id}/questions",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 333
+          }
+        },
+        {
+          "canonicalPath": "/api/knowledgebase/{}/questions",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}/questions${query}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 322
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "listQuestions",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "(value = \"status\", required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"category\", required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"difficulty\", required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(value = \"keyword\", required = false)",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/questions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 42
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/questions",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase/${id}/questions",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 333
+          }
+        },
+        {
+          "canonicalPath": "/api/knowledgebase/{}/questions",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}/questions${query}",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 322
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "createQuestion",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/questions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 71
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions/categories",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/questions/categories",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}/questions/categories",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 326
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "listCategories",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/questions/categories",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 52
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions/generate",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/questions/generate",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase/${id}/questions/generate",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 298
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "generateQuestions",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/questions/generate",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 57
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions/generation-status",
+      "consumes": null,
+      "controller": "KnowledgeBaseInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/questions/generation-status",
+          "httpMethod": "GET",
+          "path": "/api/knowledgebase/${id}/questions/generation-status",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 305
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getQuestionGenerationStatus",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/questions/generation-status",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 66
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/revectorize",
+      "consumes": null,
+      "controller": "KnowledgeBaseController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/knowledgebase/{}/revectorize",
+          "httpMethod": "POST",
+          "path": "/api/knowledgebase/${id}/revectorize",
+          "source": {
+            "file": "frontend/src/api/knowledgebase.ts",
+            "line": 288
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "revectorize",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/knowledgebase/{id}/revectorize",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 209
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider",
+          "httpMethod": "POST",
+          "path": "/api/llm-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 20
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "createProvider",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/llm-provider",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 49
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/llm-provider/default-embedding-provider",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/default-embedding-provider",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/default-embedding-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 41
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateDefaultEmbeddingProvider",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/llm-provider/default-embedding-provider",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 97
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/default-provider",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/default-provider",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/default-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 35
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/default-provider",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/default-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 38
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getDefaultProvider",
+      "parameters": [],
+      "path": "/api/llm-provider/default-provider",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 84
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/default-provider",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/default-provider",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/default-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 35
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/default-provider",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/default-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 38
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateDefaultProvider",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/llm-provider/default-provider",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 90
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/list",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/list",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/list",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 15
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "listProviders",
+      "parameters": [],
+      "path": "/api/llm-provider/list",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 37
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/reload",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/reload",
+          "httpMethod": "POST",
+          "path": "/api/llm-provider/reload",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 32
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "reloadProviders",
+      "parameters": [],
+      "path": "/api/llm-provider/reload",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 77
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/asr",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/voice/asr",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/voice/asr",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 45
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/voice/asr",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/voice/asr",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 48
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getAsrConfig",
+      "parameters": [],
+      "path": "/api/llm-provider/voice/asr",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 106
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/asr",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/voice/asr",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/voice/asr",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 45
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/voice/asr",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/voice/asr",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 48
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateAsrConfig",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/llm-provider/voice/asr",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 112
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/asr/test",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/voice/asr/test",
+          "httpMethod": "POST",
+          "path": "/api/llm-provider/voice/asr/test",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 57
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "testAsrConfig",
+      "parameters": [],
+      "path": "/api/llm-provider/voice/asr/test",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 132
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/tts",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/voice/tts",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/voice/tts",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 51
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/voice/tts",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/voice/tts",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 54
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getTtsConfig",
+      "parameters": [],
+      "path": "/api/llm-provider/voice/tts",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 119
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/tts",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/voice/tts",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/voice/tts",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 51
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/voice/tts",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/voice/tts",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 54
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateTtsConfig",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/llm-provider/voice/tts",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 125
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 26
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 17
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 23
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "deleteProvider",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/llm-provider/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 64
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 26
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 17
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 23
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getProvider",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/llm-provider/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 43
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 26
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 17
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/{}",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/${id}",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 23
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateProvider",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/llm-provider/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 56
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}/test",
+      "consumes": null,
+      "controller": "LlmProviderController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/{}/test",
+          "httpMethod": "POST",
+          "path": "/api/llm-provider/${id}/test",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 29
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "testProvider",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/llm-provider/{id}/test",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 71
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions",
+          "httpMethod": "GET",
+          "path": "/api/rag-chat/sessions",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 67
+          }
+        },
+        {
+          "canonicalPath": "/api/rag-chat/sessions",
+          "httpMethod": "POST",
+          "path": "/api/rag-chat/sessions",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 57
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "listSessions",
+      "parameters": [],
+      "path": "/api/rag-chat/sessions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 51
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions",
+          "httpMethod": "GET",
+          "path": "/api/rag-chat/sessions",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 67
+          }
+        },
+        {
+          "canonicalPath": "/api/rag-chat/sessions",
+          "httpMethod": "POST",
+          "path": "/api/rag-chat/sessions",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 57
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "createSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/rag-chat/sessions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 43
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/rag-chat/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 104
+          }
+        },
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}",
+          "httpMethod": "GET",
+          "path": "/api/rag-chat/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 74
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "deleteSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/rag-chat/sessions/{sessionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 101
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/rag-chat/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 104
+          }
+        },
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}",
+          "httpMethod": "GET",
+          "path": "/api/rag-chat/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 74
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getSessionDetail",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/rag-chat/sessions/{sessionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 60
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/knowledge-bases",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}/knowledge-bases",
+          "httpMethod": "PUT",
+          "path": "/api/rag-chat/sessions/${sessionId}/knowledge-bases",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 88
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateSessionKnowledgeBases",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/rag-chat/sessions/{sessionId}/knowledge-bases",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 89
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/messages/stream",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}/messages/stream",
+          "httpMethod": "DELETE",
+          "path": "/api/rag-chat/sessions/${sessionId}/messages/stream",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 118
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "sendMessageStream",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/rag-chat/sessions/{sessionId}/messages/stream",
+      "produces": "MediaType.TEXT_EVENT_STREAM_VALUE",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 114
+      },
+      "transport": "sse",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/pin",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}/pin",
+          "httpMethod": "PUT",
+          "path": "/api/rag-chat/sessions/${sessionId}/pin",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 97
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "togglePin",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/rag-chat/sessions/{sessionId}/pin",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 80
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/title",
+      "consumes": null,
+      "controller": "RagChatController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/rag-chat/sessions/{}/title",
+          "httpMethod": "PUT",
+          "path": "/api/rag-chat/sessions/${sessionId}/title",
+          "source": {
+            "file": "frontend/src/api/ragChat.ts",
+            "line": 81
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "updateSessionTitle",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/rag-chat/sessions/{sessionId}/title",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
+        "line": 68
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/resumes",
+      "consumes": null,
+      "controller": "ResumeController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/resumes",
+          "httpMethod": "GET",
+          "path": "/api/resumes",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 95
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getAllResumes",
+      "parameters": [],
+      "path": "/api/resumes",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 64
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/resumes/health",
+      "consumes": null,
+      "controller": "ResumeController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/resumes/health",
+          "httpMethod": "GET",
+          "path": "/api/resumes/health",
+          "source": {
+            "file": "frontend/src/api/resume.ts",
+            "line": 18
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "health",
+      "parameters": [],
+      "path": "/api/resumes/health",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 128
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/resumes/upload",
+      "consumes": "MediaType.MULTIPART_FORM_DATA_VALUE",
+      "controller": "ResumeController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/resumes/upload",
+          "httpMethod": "POST",
+          "path": "/api/resumes/upload",
+          "source": {
+            "file": "frontend/src/api/resume.ts",
+            "line": 11
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "uploadAndAnalyze",
+      "parameters": [
+        {
+          "arguments": "(\"file\")",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/resumes/upload",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 49
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/resumes/{}",
+      "consumes": null,
+      "controller": "ResumeController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/resumes/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/resumes/${id}",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 130
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "deleteResume",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/resumes/{id}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 104
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/resumes/{}/detail",
+      "consumes": null,
+      "controller": "ResumeController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/resumes/{}/detail",
+          "httpMethod": "GET",
+          "path": "/api/resumes/${id}/detail",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 102
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getResumeDetail",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/resumes/{id}/detail",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 73
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/resumes/{}/export",
+      "consumes": null,
+      "controller": "ResumeController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/resumes/{}/export",
+          "httpMethod": "GET",
+          "path": "/api/resumes/${resumeId}/export",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 116
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "exportAnalysisPdf",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/resumes/{id}/export",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 82
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/resumes/{}/reanalyze",
+      "consumes": null,
+      "controller": "ResumeController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/resumes/{}/reanalyze",
+          "httpMethod": "POST",
+          "path": "/api/resumes/${id}/reanalyze",
+          "source": {
+            "file": "frontend/src/api/history.ts",
+            "line": 151
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "reanalyze",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/resumes/{id}/reanalyze",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 117
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions",
+          "httpMethod": "POST",
+          "path": "/api/voice-interview/sessions",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 161
+          }
+        },
+        {
+          "canonicalPath": "/api/voice-interview/sessions",
+          "httpMethod": "GET",
+          "path": "/api/voice-interview/sessions?${params.toString()}",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 233
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getAllSessions",
+      "parameters": [
+        {
+          "arguments": "(required = false)",
+          "kind": "RequestParam"
+        },
+        {
+          "arguments": "(required = false)",
+          "kind": "RequestParam"
+        }
+      ],
+      "path": "/api/voice-interview/sessions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 117
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions",
+          "httpMethod": "POST",
+          "path": "/api/voice-interview/sessions",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 161
+          }
+        },
+        {
+          "canonicalPath": "/api/voice-interview/sessions",
+          "httpMethod": "GET",
+          "path": "/api/voice-interview/sessions?${params.toString()}",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 233
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "createSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/voice-interview/sessions",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 57
+      },
+      "transport": "rest",
+      "usesValid": true
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/voice-interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 241
+          }
+        },
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}",
+          "httpMethod": "GET",
+          "path": "/api/voice-interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 168
+          }
+        }
+      ],
+      "httpMethod": "DELETE",
+      "javaMethod": "deleteSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 130
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}",
+          "httpMethod": "DELETE",
+          "path": "/api/voice-interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 241
+          }
+        },
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}",
+          "httpMethod": "GET",
+          "path": "/api/voice-interview/sessions/${sessionId}",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 168
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 67
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/end",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/end",
+          "httpMethod": "POST",
+          "path": "/api/voice-interview/sessions/${sessionId}/end",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 175
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "endSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}/end",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 83
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+          "httpMethod": "GET",
+          "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 192
+          }
+        },
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+          "httpMethod": "POST",
+          "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 201
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getEvaluation",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}/evaluation",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 156
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+          "httpMethod": "GET",
+          "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 192
+          }
+        },
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+          "httpMethod": "POST",
+          "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 201
+          }
+        }
+      ],
+      "httpMethod": "POST",
+      "javaMethod": "generateEvaluation",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}/evaluation",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 187
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/messages",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/messages",
+          "httpMethod": "GET",
+          "path": "/api/voice-interview/sessions/${sessionId}/messages",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 183
+          }
+        }
+      ],
+      "httpMethod": "GET",
+      "javaMethod": "getMessages",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}/messages",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 140
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/pause",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/pause",
+          "httpMethod": "PUT",
+          "path": "/api/voice-interview/sessions/${sessionId}/pause",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 210
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "pauseSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        },
+        {
+          "arguments": "",
+          "kind": "RequestBody"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}/pause",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 93
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/resume",
+      "consumes": null,
+      "controller": "VoiceInterviewController",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/voice-interview/sessions/{}/resume",
+          "httpMethod": "PUT",
+          "path": "/api/voice-interview/sessions/${sessionId}/resume",
+          "source": {
+            "file": "frontend/src/api/voiceInterview.ts",
+            "line": 220
+          }
+        }
+      ],
+      "httpMethod": "PUT",
+      "javaMethod": "resumeSession",
+      "parameters": [
+        {
+          "arguments": "",
+          "kind": "PathVariable"
+        }
+      ],
+      "path": "/api/voice-interview/sessions/{sessionId}/resume",
+      "produces": null,
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
+        "line": 107
+      },
+      "transport": "rest",
+      "usesValid": false
+    },
+    {
+      "canonicalPath": "/ws/voice-interview/{}",
+      "consumes": "text/json",
+      "controller": "VoiceInterviewWebSocketHandler",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/ws/voice-interview/{}",
+          "httpMethod": "UNKNOWN",
+          "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
+          "source": {
+            "file": "frontend/src/pages/VoiceInterviewPage.tsx",
+            "line": 561
+          }
+        },
+        {
+          "canonicalPath": "/ws/voice-interview/{}",
+          "httpMethod": "UNKNOWN",
+          "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
+          "source": {
+            "file": "frontend/src/pages/VoiceInterviewPage.tsx",
+            "line": 622
+          }
+        }
+      ],
+      "httpMethod": "WEBSOCKET",
+      "javaMethod": "handleTextMessage",
+      "parameters": [],
+      "path": "/ws/voice-interview/{sessionId}",
+      "produces": "text/json",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/config/WebSocketConfig.java",
+        "line": 24
+      },
+      "transport": "websocket",
+      "usesValid": false
+    }
+  ],
+  "frontendCalls": [
+    {
+      "canonicalPath": "/api/interview-schedule",
+      "httpMethod": "GET",
+      "path": "/api/interview-schedule",
+      "source": {
+        "file": "frontend/src/api/interviewSchedule.ts",
+        "line": 31
+      }
+    },
+    {
+      "canonicalPath": "/api/interview-schedule",
+      "httpMethod": "POST",
+      "path": "/api/interview-schedule",
+      "source": {
+        "file": "frontend/src/api/interviewSchedule.ts",
+        "line": 19
+      }
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/interview-schedule/${id}",
+      "source": {
+        "file": "frontend/src/api/interviewSchedule.ts",
+        "line": 39
+      }
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}",
+      "httpMethod": "GET",
+      "path": "/api/interview-schedule/${id}",
+      "source": {
+        "file": "frontend/src/api/interviewSchedule.ts",
+        "line": 23
+      }
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}",
+      "httpMethod": "PUT",
+      "path": "/api/interview-schedule/${id}",
+      "source": {
+        "file": "frontend/src/api/interviewSchedule.ts",
+        "line": 35
+      }
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/{}/status",
+      "httpMethod": "PATCH",
+      "path": "/api/interview-schedule/${id}/status",
+      "source": {
+        "file": "frontend/src/api/interviewSchedule.ts",
+        "line": 43
+      }
+    },
+    {
+      "canonicalPath": "/api/interview-schedule/parse",
+      "httpMethod": "POST",
+      "path": "/api/interview-schedule/parse",
+      "source": {
+        "file": "frontend/src/api/interviewSchedule.ts",
+        "line": 15
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions",
+      "httpMethod": "GET",
+      "path": "/api/interview/sessions",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 33
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions",
+      "httpMethod": "POST",
+      "path": "/api/interview/sessions",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 40
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/answers",
+      "httpMethod": "POST",
+      "path": "/api/interview/sessions/${req.sessionId}/answers",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 64
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/answers",
+      "httpMethod": "PUT",
+      "path": "/api/interview/sessions/${req.sessionId}/answers",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 98
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/interview/sessions/${sessionId}",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 137
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}",
+      "httpMethod": "GET",
+      "path": "/api/interview/sessions/${sessionId}",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 49
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/complete",
+      "httpMethod": "POST",
+      "path": "/api/interview/sessions/${sessionId}/complete",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 107
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/details",
+      "httpMethod": "GET",
+      "path": "/api/interview/sessions/${sessionId}/details",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 109
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/export",
+      "httpMethod": "GET",
+      "path": "/api/interview/sessions/${sessionId}/export",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 123
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/question",
+      "httpMethod": "GET",
+      "path": "/api/interview/sessions/${sessionId}/question",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 56
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/{}/report",
+      "httpMethod": "GET",
+      "path": "/api/interview/sessions/${sessionId}/report",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 76
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/sessions/unfinished/{}",
+      "httpMethod": "GET",
+      "path": "/api/interview/sessions/unfinished/${resumeId}",
+      "source": {
+        "file": "frontend/src/api/interview.ts",
+        "line": 86
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/skills",
+      "httpMethod": "GET",
+      "path": "/api/interview/skills",
+      "source": {
+        "file": "frontend/src/api/skill.ts",
+        "line": 31
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/skills/{}",
+      "httpMethod": "GET",
+      "path": "/api/interview/skills/${id}",
+      "source": {
+        "file": "frontend/src/api/skill.ts",
+        "line": 35
+      }
+    },
+    {
+      "canonicalPath": "/api/interview/skills/parse-jd",
+      "httpMethod": "POST",
+      "path": "/api/interview/skills/parse-jd",
+      "source": {
+        "file": "frontend/src/api/skill.ts",
+        "line": 39
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase-interviews/sessions",
+      "httpMethod": "POST",
+      "path": "/api/knowledgebase-interviews/sessions",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 355
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/knowledgebase/${id}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 231
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/${id}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 224
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/category",
+      "httpMethod": "PUT",
+      "path": "/api/knowledgebase/${id}/category",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 261
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/download",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/${id}/download",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 202
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/interview-capacity",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/${id}/interview-capacity?${searchParams.toString()}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 370
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions",
+      "httpMethod": "POST",
+      "path": "/api/knowledgebase/${id}/questions",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 333
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/${id}/questions${query}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 322
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions/categories",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/${id}/questions/categories",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 326
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions/generate",
+      "httpMethod": "POST",
+      "path": "/api/knowledgebase/${id}/questions/generate",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 298
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/questions/generation-status",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/${id}/questions/generation-status",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 305
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/{}/revectorize",
+      "httpMethod": "POST",
+      "path": "/api/knowledgebase/${id}/revectorize",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 288
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/categories",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/categories",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 240
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/category/{}",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/category/${encodeURIComponent(category)}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 247
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/list",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/list${queryString ? ",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 217
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/query",
+      "httpMethod": "POST",
+      "path": "/api/knowledgebase/query",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 378
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/query/stream",
+      "httpMethod": "POST",
+      "path": "/api/knowledgebase/query/stream",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 394
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/questions/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/knowledgebase/questions/${id}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 351
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/questions/{}",
+      "httpMethod": "PUT",
+      "path": "/api/knowledgebase/questions/${id}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 340
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/questions/{}/status",
+      "httpMethod": "PUT",
+      "path": "/api/knowledgebase/questions/${id}/status",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 347
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/search",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/search?keyword=${encodeURIComponent(keyword)}",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 270
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/stats",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/stats",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 279
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/uncategorized",
+      "httpMethod": "GET",
+      "path": "/api/knowledgebase/uncategorized",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 254
+      }
+    },
+    {
+      "canonicalPath": "/api/knowledgebase/upload",
+      "httpMethod": "POST",
+      "path": "/api/knowledgebase/upload",
+      "source": {
+        "file": "frontend/src/api/knowledgebase.ts",
+        "line": 195
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider",
+      "httpMethod": "POST",
+      "path": "/api/llm-provider",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 20
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/llm-provider/${id}",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 26
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}",
+      "httpMethod": "GET",
+      "path": "/api/llm-provider/${id}",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 17
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}",
+      "httpMethod": "PUT",
+      "path": "/api/llm-provider/${id}",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 23
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/{}/test",
+      "httpMethod": "POST",
+      "path": "/api/llm-provider/${id}/test",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 29
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/default-embedding-provider",
+      "httpMethod": "PUT",
+      "path": "/api/llm-provider/default-embedding-provider",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 41
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/default-provider",
+      "httpMethod": "GET",
+      "path": "/api/llm-provider/default-provider",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 35
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/default-provider",
+      "httpMethod": "PUT",
+      "path": "/api/llm-provider/default-provider",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 38
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/list",
+      "httpMethod": "GET",
+      "path": "/api/llm-provider/list",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 15
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/reload",
+      "httpMethod": "POST",
+      "path": "/api/llm-provider/reload",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 32
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/asr",
+      "httpMethod": "GET",
+      "path": "/api/llm-provider/voice/asr",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 45
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/asr",
+      "httpMethod": "PUT",
+      "path": "/api/llm-provider/voice/asr",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 48
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/asr/test",
+      "httpMethod": "POST",
+      "path": "/api/llm-provider/voice/asr/test",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 57
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/tts",
+      "httpMethod": "GET",
+      "path": "/api/llm-provider/voice/tts",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 51
+      }
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/tts",
+      "httpMethod": "PUT",
+      "path": "/api/llm-provider/voice/tts",
+      "source": {
+        "file": "frontend/src/api/llmProvider.ts",
+        "line": 54
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions",
+      "httpMethod": "GET",
+      "path": "/api/rag-chat/sessions",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 67
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions",
+      "httpMethod": "POST",
+      "path": "/api/rag-chat/sessions",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 57
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/rag-chat/sessions/${sessionId}",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 104
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}",
+      "httpMethod": "GET",
+      "path": "/api/rag-chat/sessions/${sessionId}",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 74
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/knowledge-bases",
+      "httpMethod": "PUT",
+      "path": "/api/rag-chat/sessions/${sessionId}/knowledge-bases",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 88
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/messages/stream",
+      "httpMethod": "DELETE",
+      "path": "/api/rag-chat/sessions/${sessionId}/messages/stream",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 118
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/pin",
+      "httpMethod": "PUT",
+      "path": "/api/rag-chat/sessions/${sessionId}/pin",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 97
+      }
+    },
+    {
+      "canonicalPath": "/api/rag-chat/sessions/{}/title",
+      "httpMethod": "PUT",
+      "path": "/api/rag-chat/sessions/${sessionId}/title",
+      "source": {
+        "file": "frontend/src/api/ragChat.ts",
+        "line": 81
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes",
+      "httpMethod": "GET",
+      "path": "/api/resumes",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 95
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/resumes/${id}",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 130
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes/{}/detail",
+      "httpMethod": "GET",
+      "path": "/api/resumes/${id}/detail",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 102
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes/{}/reanalyze",
+      "httpMethod": "POST",
+      "path": "/api/resumes/${id}/reanalyze",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 151
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes/{}/export",
+      "httpMethod": "GET",
+      "path": "/api/resumes/${resumeId}/export",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 116
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes/health",
+      "httpMethod": "GET",
+      "path": "/api/resumes/health",
+      "source": {
+        "file": "frontend/src/api/resume.ts",
+        "line": 18
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes/statistics",
+      "httpMethod": "GET",
+      "path": "/api/resumes/statistics",
+      "source": {
+        "file": "frontend/src/api/history.ts",
+        "line": 144
+      }
+    },
+    {
+      "canonicalPath": "/api/resumes/upload",
+      "httpMethod": "POST",
+      "path": "/api/resumes/upload",
+      "source": {
+        "file": "frontend/src/api/resume.ts",
+        "line": 11
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions",
+      "httpMethod": "POST",
+      "path": "/api/voice-interview/sessions",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 161
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}",
+      "httpMethod": "DELETE",
+      "path": "/api/voice-interview/sessions/${sessionId}",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 241
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}",
+      "httpMethod": "GET",
+      "path": "/api/voice-interview/sessions/${sessionId}",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 168
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/end",
+      "httpMethod": "POST",
+      "path": "/api/voice-interview/sessions/${sessionId}/end",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 175
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+      "httpMethod": "GET",
+      "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 192
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
+      "httpMethod": "POST",
+      "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 201
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/messages",
+      "httpMethod": "GET",
+      "path": "/api/voice-interview/sessions/${sessionId}/messages",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 183
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/pause",
+      "httpMethod": "PUT",
+      "path": "/api/voice-interview/sessions/${sessionId}/pause",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 210
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions/{}/resume",
+      "httpMethod": "PUT",
+      "path": "/api/voice-interview/sessions/${sessionId}/resume",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 220
+      }
+    },
+    {
+      "canonicalPath": "/api/voice-interview/sessions",
+      "httpMethod": "GET",
+      "path": "/api/voice-interview/sessions?${params.toString()}",
+      "source": {
+        "file": "frontend/src/api/voiceInterview.ts",
+        "line": 233
+      }
+    },
+    {
+      "canonicalPath": "/ws/voice-interview/{}",
+      "httpMethod": "UNKNOWN",
+      "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
+      "source": {
+        "file": "frontend/src/pages/VoiceInterviewPage.tsx",
+        "line": 561
+      }
+    },
+    {
+      "canonicalPath": "/ws/voice-interview/{}",
+      "httpMethod": "UNKNOWN",
+      "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
+      "source": {
+        "file": "frontend/src/pages/VoiceInterviewPage.tsx",
+        "line": 622
+      }
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceOfTruth": [
+    "Java controller mappings",
+    "Java WebSocket registration",
+    "frontend/src URL literals"
+  ],
+  "summary": {
+    "backendEndpointCount": 88,
+    "backendOnlyCount": 0,
+    "controllerCount": 10,
+    "frontendCallCount": 89,
+    "frontendOnlyCount": 1,
+    "sseEndpointCount": 2,
+    "webSocketEndpointCount": 1
+  },
+  "unmatched": {
+    "backendOnly": [],
+    "frontendOnly": [
+      {
+        "canonicalPath": "/api/resumes/statistics",
+        "httpMethod": "GET",
+        "path": "/api/resumes/statistics",
+        "source": {
+          "file": "frontend/src/api/history.ts",
+          "line": 144
+        }
+      }
+    ]
+  }
+}

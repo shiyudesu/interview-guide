@@ -1,0 +1,1417 @@
+{
+  "constants": [
+    {
+      "name": "FIELD_RETRY_COUNT",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 18
+      },
+      "valueExpression": "\"retryCount\""
+    },
+    {
+      "name": "FIELD_CONTENT",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 23
+      },
+      "valueExpression": "\"content\""
+    },
+    {
+      "name": "MAX_RETRY_COUNT",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 30
+      },
+      "valueExpression": "3"
+    },
+    {
+      "name": "BATCH_SIZE",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 35
+      },
+      "valueExpression": "10"
+    },
+    {
+      "name": "PENDING_IDLE_TIMEOUT_MS",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 40
+      },
+      "valueExpression": "5 * 60 * 1000"
+    },
+    {
+      "name": "PENDING_CLAIM_BATCH_SIZE",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 45
+      },
+      "valueExpression": "10"
+    },
+    {
+      "name": "POLL_INTERVAL_MS",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 50
+      },
+      "valueExpression": "1000"
+    },
+    {
+      "name": "STREAM_MAX_LEN",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 55
+      },
+      "valueExpression": "1000"
+    },
+    {
+      "name": "KB_VECTORIZE_STREAM_KEY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 62
+      },
+      "valueExpression": "\"knowledgebase:vectorize:stream\""
+    },
+    {
+      "name": "KB_VECTORIZE_GROUP_NAME",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 67
+      },
+      "valueExpression": "\"vectorize-group\""
+    },
+    {
+      "name": "KB_VECTORIZE_CONSUMER_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 72
+      },
+      "valueExpression": "\"vectorize-consumer-\""
+    },
+    {
+      "name": "FIELD_KB_ID",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 77
+      },
+      "valueExpression": "\"kbId\""
+    },
+    {
+      "name": "RESUME_ANALYZE_STREAM_KEY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 84
+      },
+      "valueExpression": "\"resume:analyze:stream\""
+    },
+    {
+      "name": "RESUME_ANALYZE_GROUP_NAME",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 89
+      },
+      "valueExpression": "\"analyze-group\""
+    },
+    {
+      "name": "RESUME_ANALYZE_CONSUMER_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 94
+      },
+      "valueExpression": "\"analyze-consumer-\""
+    },
+    {
+      "name": "FIELD_RESUME_ID",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 99
+      },
+      "valueExpression": "\"resumeId\""
+    },
+    {
+      "name": "INTERVIEW_EVALUATE_STREAM_KEY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 106
+      },
+      "valueExpression": "\"interview:evaluate:stream\""
+    },
+    {
+      "name": "INTERVIEW_EVALUATE_GROUP_NAME",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 111
+      },
+      "valueExpression": "\"evaluate-group\""
+    },
+    {
+      "name": "INTERVIEW_EVALUATE_CONSUMER_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 116
+      },
+      "valueExpression": "\"evaluate-consumer-\""
+    },
+    {
+      "name": "FIELD_SESSION_ID",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 121
+      },
+      "valueExpression": "\"sessionId\""
+    },
+    {
+      "name": "VOICE_EVALUATE_STREAM_KEY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 128
+      },
+      "valueExpression": "\"voice:evaluate:stream\""
+    },
+    {
+      "name": "VOICE_EVALUATE_GROUP_NAME",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 133
+      },
+      "valueExpression": "\"voice-evaluate-group\""
+    },
+    {
+      "name": "VOICE_EVALUATE_CONSUMER_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 138
+      },
+      "valueExpression": "\"voice-evaluate-consumer-\""
+    },
+    {
+      "name": "FIELD_VOICE_SESSION_ID",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 143
+      },
+      "valueExpression": "\"voiceSessionId\""
+    },
+    {
+      "name": "KB_QUESTION_GEN_STREAM_KEY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 150
+      },
+      "valueExpression": "\"knowledgebase:question-gen:stream\""
+    },
+    {
+      "name": "KB_QUESTION_GEN_GROUP_NAME",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 155
+      },
+      "valueExpression": "\"question-gen-group\""
+    },
+    {
+      "name": "KB_QUESTION_GEN_CONSUMER_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 160
+      },
+      "valueExpression": "\"question-gen-consumer-\""
+    },
+    {
+      "name": "FIELD_TASK_ID",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 165
+      },
+      "valueExpression": "\"taskId\""
+    },
+    {
+      "name": "FIELD_DIFFICULTY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 170
+      },
+      "valueExpression": "\"difficulty\""
+    },
+    {
+      "name": "FIELD_QUESTION_COUNT",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 175
+      },
+      "valueExpression": "\"questionCount\""
+    },
+    {
+      "name": "FIELD_FOLLOW_UP_COUNT",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 180
+      },
+      "valueExpression": "\"followUpCount\""
+    },
+    {
+      "name": "FIELD_CATEGORY_LIMIT",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 185
+      },
+      "valueExpression": "\"categoryLimit\""
+    },
+    {
+      "name": "FIELD_LLM_PROVIDER",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 190
+      },
+      "valueExpression": "\"llmProvider\""
+    },
+    {
+      "name": "SESSION_KEY_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/InterviewSessionCache.java",
+        "line": 35
+      },
+      "valueExpression": "\"interview:session:\""
+    },
+    {
+      "name": "RESUME_SESSION_KEY_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/InterviewSessionCache.java",
+        "line": 40
+      },
+      "valueExpression": "\"interview:resume:\""
+    },
+    {
+      "name": "SESSION_TTL",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/InterviewSessionCache.java",
+        "line": 45
+      },
+      "valueExpression": "Duration.ofHours(24)"
+    },
+    {
+      "name": "CREATE_LOCK_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/service/InterviewSessionService.java",
+        "line": 45
+      },
+      "valueExpression": "\"interview:create:\""
+    },
+    {
+      "name": "CREATE_RESULT_TTL",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/service/InterviewSessionService.java",
+        "line": 47
+      },
+      "valueExpression": "Duration.ofDays(1)"
+    },
+    {
+      "name": "MAX_CATEGORY_KEY_LENGTH",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillService.java",
+        "line": 48
+      },
+      "valueExpression": "50"
+    },
+    {
+      "name": "COPYABLE_FIELDS",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interviewschedule/service/InterviewScheduleService.java",
+        "line": 25
+      },
+      "valueExpression": "{ \"companyName\", \"position\", \"interviewTime\", \"interviewType\", \"meetingLink\", \"roundNumber\", \"interviewer\", \"notes\" }"
+    },
+    {
+      "name": "STREAM_PROBE_CHARS",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/service/KnowledgeBaseQueryService.java",
+        "line": 40
+      },
+      "valueExpression": "120"
+    },
+    {
+      "name": "MAX_BATCH_SIZE",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/service/KnowledgeBaseVectorService.java",
+        "line": 32
+      },
+      "valueExpression": "10"
+    },
+    {
+      "name": "DEV_FALLBACK_KEY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/service/ApiKeyEncryptionService.java",
+        "line": 24
+      },
+      "valueExpression": "\"interview-guide-dev-only-provider-api-key-encryption\""
+    },
+    {
+      "name": "MAX_ASR_READY_RETRY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/handler/VoiceInterviewWebSocketHandler.java",
+        "line": 92
+      },
+      "valueExpression": "2"
+    },
+    {
+      "name": "SESSION_CACHE_KEY_PREFIX",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
+        "line": 59
+      },
+      "valueExpression": "\"voice:interview:session:\""
+    },
+    {
+      "name": "CACHE_TTL_HOURS",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
+        "line": 60
+      },
+      "valueExpression": "1"
+    },
+    {
+      "name": "PENDING_EVALUATION_REQUEUE_DELAY",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
+        "line": 62
+      },
+      "valueExpression": "Duration.ofMinutes(3)"
+    }
+  ],
+  "keyLiterals": [
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 62
+      },
+      "value": "knowledgebase:vectorize:stream"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 84
+      },
+      "value": "resume:analyze:stream"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 106
+      },
+      "value": "interview:evaluate:stream"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 128
+      },
+      "value": "voice:evaluate:stream"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/constant/AsyncTaskStreamConstants.java",
+        "line": 150
+      },
+      "value": "knowledgebase:question-gen:stream"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/InterviewSessionCache.java",
+        "line": 35
+      },
+      "value": "interview:session:"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/InterviewSessionCache.java",
+        "line": 40
+      },
+      "value": "interview:resume:"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/service/InterviewSessionService.java",
+        "line": 45
+      },
+      "value": "interview:create:"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/service/InterviewSessionService.java",
+        "line": 46
+      },
+      "value": "interview:create:result:"
+    },
+    {
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
+        "line": 59
+      },
+      "value": "voice:interview:session:"
+    }
+  ],
+  "luaScripts": [
+    {
+      "file": "app/src/main/resources/scripts/rate_limit_single.lua",
+      "sha256": "341ac2fcf664a024c5b0c5522bddd589b310ff5b51839903bb44644ace46d46b"
+    }
+  ],
+  "operationEvidence": [
+    {
+      "code": "import org.redisson.api.RScript;",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 12
+      }
+    },
+    {
+      "code": "private RScript rScript;",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 41
+      }
+    },
+    {
+      "code": "this.luaScriptSha = rScript.scriptLoad(LUA_SCRIPT);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 59
+      }
+    },
+    {
+      "code": "Object resultObj = rScript.evalSha(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 107
+      }
+    },
+    {
+      "code": "RScript.Mode.READ_WRITE,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 108
+      }
+    },
+    {
+      "code": "RScript.ReturnType.VALUE,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 110
+      }
+    },
+    {
+      "code": "Object resultObj = rScript.evalSha(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 119
+      }
+    },
+    {
+      "code": "RScript.Mode.READ_WRITE,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 120
+      }
+    },
+    {
+      "code": "RScript.ReturnType.VALUE,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/aspect/RateLimitAspect.java",
+        "line": 122
+      }
+    },
+    {
+      "code": "redisService.createStreamGroup(streamKey(), groupName());",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
+        "line": 63
+      }
+    },
+    {
+      "code": "redisService.streamConsumeMessages(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
+        "line": 75
+      }
+    },
+    {
+      "code": "streamKey(),",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
+        "line": 76
+      }
+    },
+    {
+      "code": "redisService.streamAck(streamKey(), groupName(), messageId);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
+        "line": 164
+      }
+    },
+    {
+      "code": "protected abstract String streamKey();",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamConsumer.java",
+        "line": 176
+      }
+    },
+    {
+      "code": "String messageId = redisService.streamAdd(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamProducer.java",
+        "line": 24
+      }
+    },
+    {
+      "code": "streamKey(),",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamProducer.java",
+        "line": 25
+      }
+    },
+    {
+      "code": "protected abstract String streamKey();",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/async/AbstractStreamProducer.java",
+        "line": 49
+      }
+    },
+    {
+      "code": "private final ConcurrentMap<String, StreamMessageId> streamReclaimCursors = new ConcurrentHashMap<>();",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 51
+      }
+    },
+    {
+      "code": "RBucket<T> bucket = redissonClient.getBucket(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 59
+      }
+    },
+    {
+      "code": "RBucket<T> bucket = redissonClient.getBucket(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 67
+      }
+    },
+    {
+      "code": "RBucket<T> bucket = redissonClient.getBucket(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 75
+      }
+    },
+    {
+      "code": "RBucket<T> bucket = redissonClient.getBucket(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 83
+      }
+    },
+    {
+      "code": "return redissonClient.getBucket(key).delete();",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 98
+      }
+    },
+    {
+      "code": "return redissonClient.getBucket(key).isExists();",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 105
+      }
+    },
+    {
+      "code": "return redissonClient.getBucket(key).expire(ttl);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 112
+      }
+    },
+    {
+      "code": "return redissonClient.getBucket(key).remainTimeToLive();",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 119
+      }
+    },
+    {
+      "code": "RMap<K, V> map = redissonClient.getMap(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 128
+      }
+    },
+    {
+      "code": "RMap<K, V> map = redissonClient.getMap(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 136
+      }
+    },
+    {
+      "code": "RMap<K, V> map = redissonClient.getMap(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 144
+      }
+    },
+    {
+      "code": "RMap<K, V> map = redissonClient.getMap(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 152
+      }
+    },
+    {
+      "code": "RMap<K, Object> map = redissonClient.getMap(key);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 160
+      }
+    },
+    {
+      "code": "public RLock getLock(String lockKey) {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 169
+      }
+    },
+    {
+      "code": "return redissonClient.getLock(lockKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 170
+      }
+    },
+    {
+      "code": "RLock lock = redissonClient.getLock(lockKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 177
+      }
+    },
+    {
+      "code": "RLock lock = redissonClient.getLock(lockKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 190
+      }
+    },
+    {
+      "code": "RLock lock = redissonClient.getLock(lockKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 201
+      }
+    },
+    {
+      "code": "* @param streamKey Stream 键",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 236
+      }
+    },
+    {
+      "code": "public boolean streamConsumeMessages(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 244
+      }
+    },
+    {
+      "code": "String streamKey,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 245
+      }
+    },
+    {
+      "code": "return streamConsumeMessages(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 251
+      }
+    },
+    {
+      "code": "streamKey,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 252
+      }
+    },
+    {
+      "code": "* @param streamKey Stream 键",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 265
+      }
+    },
+    {
+      "code": "public boolean streamConsumeMessages(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 274
+      }
+    },
+    {
+      "code": "String streamKey,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 275
+      }
+    },
+    {
+      "code": "return streamConsumeMessages(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 282
+      }
+    },
+    {
+      "code": "streamKey,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 283
+      }
+    },
+    {
+      "code": "* @param streamKey Stream 键",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 297
+      }
+    },
+    {
+      "code": "public boolean streamConsumeMessages(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 307
+      }
+    },
+    {
+      "code": "String streamKey,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 308
+      }
+    },
+    {
+      "code": "RStream<String, String> stream = redissonClient.getStream(streamKey, StringCodec.INSTANCE);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 317
+      }
+    },
+    {
+      "code": "streamKey,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 320
+      }
+    },
+    {
+      "code": "streamKey, groupName);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 343
+      }
+    },
+    {
+      "code": "String streamKey,",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 356
+      }
+    },
+    {
+      "code": "String cursorKey = streamKey + \":\" + groupName;",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 365
+      }
+    },
+    {
+      "code": "StreamMessageId startId = streamReclaimCursors.getOrDefault(cursorKey, StreamMessageId.MIN);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 366
+      }
+    },
+    {
+      "code": "streamKey, groupName);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 380
+      }
+    },
+    {
+      "code": "streamReclaimCursors.remove(cursorKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 386
+      }
+    },
+    {
+      "code": "streamReclaimCursors.put(cursorKey, nextId);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 388
+      }
+    },
+    {
+      "code": "streamKey, groupName, deletedIds);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 394
+      }
+    },
+    {
+      "code": "streamKey, groupName, consumerName, messages.size());",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 400
+      }
+    },
+    {
+      "code": "public void createStreamGroup(String streamKey, String groupName) {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 421
+      }
+    },
+    {
+      "code": "RStream<String, String> stream = redissonClient.getStream(streamKey, StringCodec.INSTANCE);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 422
+      }
+    },
+    {
+      "code": "log.info(\"创建 Stream 消费者组: stream={}, group={}\", streamKey, groupName);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 425
+      }
+    },
+    {
+      "code": "log.warn(\"创建消费者组失败: stream={}, group={}, error={}\", streamKey, groupName, e.getMessage());",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 433
+      }
+    },
+    {
+      "code": "public String streamAdd(String streamKey, Map<String, String> message) {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 440
+      }
+    },
+    {
+      "code": "return streamAdd(streamKey, message, 0);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 441
+      }
+    },
+    {
+      "code": "* @param streamKey Stream 键",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 447
+      }
+    },
+    {
+      "code": "public String streamAdd(String streamKey, Map<String, String> message, int maxLen) {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 452
+      }
+    },
+    {
+      "code": "RStream<String, String> stream = redissonClient.getStream(streamKey, StringCodec.INSTANCE);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 453
+      }
+    },
+    {
+      "code": "log.debug(\"发送 Stream 消息: stream={}, messageId={}, maxLen={}\", streamKey, messageId, maxLen);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 459
+      }
+    },
+    {
+      "code": "public Map<StreamMessageId, Map<String, String>> streamReadGroup(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 466
+      }
+    },
+    {
+      "code": "String streamKey, String groupName, String consumerName, int count) {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 467
+      }
+    },
+    {
+      "code": "RStream<String, String> stream = redissonClient.getStream(streamKey, StringCodec.INSTANCE);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 468
+      }
+    },
+    {
+      "code": "public void streamAck(String streamKey, String groupName, StreamMessageId... ids) {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 476
+      }
+    },
+    {
+      "code": "RStream<String, String> stream = redissonClient.getStream(streamKey, StringCodec.INSTANCE);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 477
+      }
+    },
+    {
+      "code": "public long streamLen(String streamKey) {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 484
+      }
+    },
+    {
+      "code": "RStream<String, String> stream = redissonClient.getStream(streamKey, StringCodec.INSTANCE);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/infrastructure/redis/RedisService.java",
+        "line": 485
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/listener/EvaluateStreamConsumer.java",
+        "line": 64
+      }
+    },
+    {
+      "code": "redisService().streamAdd(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/listener/EvaluateStreamConsumer.java",
+        "line": 162
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/listener/EvaluateStreamProducer.java",
+        "line": 50
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/listener/QuestionGenStreamConsumer.java",
+        "line": 48
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/listener/QuestionGenStreamProducer.java",
+        "line": 47
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/listener/VectorizeStreamConsumer.java",
+        "line": 44
+      }
+    },
+    {
+      "code": "redisService().streamAdd(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/listener/VectorizeStreamConsumer.java",
+        "line": 122
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/listener/VectorizeStreamProducer.java",
+        "line": 46
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/listener/AnalyzeStreamConsumer.java",
+        "line": 50
+      }
+    },
+    {
+      "code": "redisService().streamAdd(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/listener/AnalyzeStreamConsumer.java",
+        "line": 135
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/listener/AnalyzeStreamProducer.java",
+        "line": 53
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/listener/VoiceEvaluateStreamConsumer.java",
+        "line": 47
+      }
+    },
+    {
+      "code": "redisService().streamAdd(",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/listener/VoiceEvaluateStreamConsumer.java",
+        "line": 126
+      }
+    },
+    {
+      "code": "protected String streamKey() {",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/listener/VoiceEvaluateStreamProducer.java",
+        "line": 43
+      }
+    },
+    {
+      "code": "RBucket<VoiceInterviewSessionEntity> bucket = redissonClient.getBucket(cacheKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
+        "line": 179
+      }
+    },
+    {
+      "code": "RBucket<VoiceInterviewSessionEntity> bucket = redissonClient.getBucket(cacheKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
+        "line": 664
+      }
+    },
+    {
+      "code": "RBucket<VoiceInterviewSessionEntity> bucket = redissonClient.getBucket(cacheKey);",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/service/VoiceInterviewService.java",
+        "line": 674
+      }
+    }
+  ],
+  "rateLimits": [
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "createSession",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 63
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 5",
+      "method": "createSession",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 64
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 10",
+      "method": "submitAnswer",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
+        "line": 92
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 5",
+      "method": "parseJd",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillController.java",
+        "line": 37
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 10",
+      "method": "queryKnowledgeBase",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 94
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 10",
+      "method": "queryKnowledgeBase",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 95
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "queryKnowledgeBaseStream",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 104
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 5",
+      "method": "queryKnowledgeBaseStream",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 105
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 3",
+      "method": "uploadKnowledgeBase",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 153
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 3",
+      "method": "uploadKnowledgeBase",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 154
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 2",
+      "method": "revectorize",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 210
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 2",
+      "method": "revectorize",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
+        "line": 211
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 2",
+      "method": "generateQuestions",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 58
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 2",
+      "method": "generateQuestions",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
+        "line": 59
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 30",
+      "method": "listProviders",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 38
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 30",
+      "method": "getProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 44
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "createProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 50
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "updateProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 57
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "deleteProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 65
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 10",
+      "method": "testProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 72
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "reloadProviders",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 78
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 30",
+      "method": "getDefaultProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 85
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "updateDefaultProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 91
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "updateDefaultEmbeddingProvider",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 98
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 30",
+      "method": "getAsrConfig",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 107
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "updateAsrConfig",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 113
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 30",
+      "method": "getTtsConfig",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 120
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "updateTtsConfig",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 126
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 10",
+      "method": "testAsrConfig",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
+        "line": 133
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 5",
+      "method": "uploadAndAnalyze",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 50
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 5",
+      "method": "uploadAndAnalyze",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 51
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.GLOBAL, count = 2",
+      "method": "reanalyze",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 118
+      }
+    },
+    {
+      "arguments": "dimension = RateLimit.Dimension.IP, count = 2",
+      "method": "reanalyze",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
+        "line": 119
+      }
+    }
+  ],
+  "scheduledMethods": [
+    {
+      "method": "recoverStaleTasks",
+      "schedule": "fixedDelay = 60_000, initialDelay = 60_000",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/listener/QuestionGenerationRecoveryScheduler.java",
+        "line": 30
+      }
+    },
+    {
+      "method": "checkPauseTimeout",
+      "schedule": "fixedRate = 30000",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/handler/VoiceInterviewWebSocketHandler.java",
+        "line": 1132
+      }
+    },
+    {
+      "method": "cleanupStaleSessions",
+      "schedule": "fixedRate = 60_000",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/handler/VoiceInterviewWebSocketHandler.java",
+        "line": 1152
+      }
+    }
+  ],
+  "schemaVersion": 1,
+  "summary": {
+    "constantCount": 47,
+    "rateLimitRuleCount": 33,
+    "scheduledMethodCount": 3,
+    "streamCount": 5
+  }
+}

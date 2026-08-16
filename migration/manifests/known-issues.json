@@ -1,0 +1,188 @@
+{
+  "issues": [
+    {
+      "id": "KNOWN-001",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 112
+      },
+      "status": "sample-required",
+      "summary": "前端调用 `/api/resumes/statistics`，但后端没有对应接口。"
+    },
+    {
+      "id": "KNOWN-002",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 113
+      },
+      "status": "sample-required",
+      "summary": "语音创建请求中的 `roleType` 当前被忽略。"
+    },
+    {
+      "id": "KNOWN-003",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 114
+      },
+      "status": "sample-required",
+      "summary": "语音 WebSocket URL 在部分前端代码中回退到 localhost。"
+    },
+    {
+      "id": "KNOWN-004",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 115
+      },
+      "status": "sample-required",
+      "summary": "`audio_chunk.isLast` 当前始终为 false。"
+    },
+    {
+      "id": "KNOWN-005",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 116
+      },
+      "status": "sample-required",
+      "summary": "部分 Controller 没有启用 `@Valid`，请求对象上的校验注解实际不生效。"
+    },
+    {
+      "id": "KNOWN-006",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 117
+      },
+      "status": "sample-required",
+      "summary": "部分请求使用原始 Map 和强制类型转换，错误输入可能落入通用 500 处理。"
+    },
+    {
+      "id": "KNOWN-007",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 118
+      },
+      "status": "sample-required",
+      "summary": "简历 AI 失败时返回零分结果，而不是把任务标记为失败。"
+    },
+    {
+      "id": "KNOWN-008",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 119
+      },
+      "status": "sample-required",
+      "summary": "RAG Chat 客户端中途断开时，当前不会保存已经生成的部分内容。"
+    },
+    {
+      "id": "KNOWN-009",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 120
+      },
+      "status": "sample-required",
+      "summary": "RAG 慢客户端当前没有明确的缓冲上限。"
+    },
+    {
+      "id": "KNOWN-010",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 121
+      },
+      "status": "sample-required",
+      "summary": "同一 RAG 会话并发发送可能出现消息顺序竞争。"
+    },
+    {
+      "id": "KNOWN-011",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 122
+      },
+      "status": "sample-required",
+      "summary": "语音 WebSocket 连接开始时没有先完整校验会话状态，再启动 ASR。"
+    },
+    {
+      "id": "KNOWN-012",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 123
+      },
+      "status": "sample-required",
+      "summary": "语音配置中的连接数量限制当前没有真正使用。"
+    },
+    {
+      "id": "KNOWN-013",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 124
+      },
+      "status": "sample-required",
+      "summary": "同一 sessionId 建立第二条语音连接时，当前进程内状态可能互相覆盖。"
+    },
+    {
+      "id": "KNOWN-014",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 125
+      },
+      "status": "sample-required",
+      "summary": "部分语音配置项写在 `application.yml` 中，但没有对应代码读取，当前实际无效。"
+    },
+    {
+      "id": "KNOWN-015",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 126
+      },
+      "status": "sample-required",
+      "summary": "部分语音单元测试和集成测试被禁用。"
+    },
+    {
+      "id": "KNOWN-016",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 127
+      },
+      "status": "sample-required",
+      "summary": "当前 Nginx 配置代理 `/api`，但没有完整覆盖 `/ws`。"
+    },
+    {
+      "id": "KNOWN-017",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 128
+      },
+      "status": "sample-required",
+      "summary": "README、前端 Dockerfile 和 CI 使用的 Node 版本不一致。"
+    },
+    {
+      "id": "KNOWN-018",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 129
+      },
+      "status": "sample-required",
+      "summary": "`.env.example` 与开发 Compose 的默认 PostgreSQL 密码不一致。"
+    }
+  ],
+  "schemaVersion": 1,
+  "summary": {
+    "knownIssueCount": 18
+  }
+}

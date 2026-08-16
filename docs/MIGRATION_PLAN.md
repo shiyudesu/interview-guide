@@ -1489,6 +1489,13 @@ docker history <python-image>
 ./gradlew :app:test --no-daemon
 ```
 
+阶段 0 清单：
+
+```bash
+./migration/scripts/generate-manifests.sh
+./migration/scripts/check-manifests.sh
+```
+
 Python：
 
 ```bash

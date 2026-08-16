@@ -25,5 +25,8 @@ GEMINI.md
 .playwright-mcp/
 frontend/test-results/
 frontend/playwright-report/
+migration/reports/
+__pycache__/
+.pytest_cache/
 /.agents
 skills-lock.json

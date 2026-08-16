@@ -1,0 +1,1196 @@
+{
+  "alterations": [
+    {
+      "definition": "ALTER TABLE interview_sessions ADD COLUMN interview_category VARCHAR(64);",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260722__add_interview_category_to_interview_sessions.sql",
+        "line": 13
+      }
+    },
+    {
+      "definition": "ALTER TABLE knowledge_bases ADD COLUMN IF NOT EXISTS question_gen_status VARCHAR(20) NOT NULL DEFAULT 'NONE', ADD COLUMN IF NOT EXISTS question_gen_error VARCHAR(500), ADD COLUMN IF NOT EXISTS question_gen_task_id VARCHAR(36), ADD COLUMN IF NOT EXISTS question_gen_config TEXT, ADD COLUMN IF NOT EXISTS question_gen_message VARCHAR(500), ADD COLUMN IF NOT EXISTS question_gen_saved_count INTEGER NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS question_gen_skipped_count INTEGER NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS question_gen_updated_at TIMESTAMP(6);",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
+        "line": 2
+      }
+    },
+    {
+      "definition": "ALTER TABLE knowledge_bases DROP CONSTRAINT IF EXISTS knowledge_bases_question_gen_status_check;",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
+        "line": 12
+      }
+    },
+    {
+      "definition": "ALTER TABLE knowledge_bases ADD CONSTRAINT knowledge_bases_question_gen_status_check CHECK (question_gen_status IN ('NONE', 'QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED'));",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
+        "line": 15
+      }
+    },
+    {
+      "definition": "ALTER TABLE interview_sessions ADD COLUMN request_id VARCHAR(64);",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260803__add_interview_request_id.sql",
+        "line": 1
+      }
+    }
+  ],
+  "extensions": [
+    {
+      "name": "hstore",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 1
+      }
+    },
+    {
+      "name": "uuid-ossp",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 2
+      }
+    },
+    {
+      "name": "vector",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 3
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "definition": "CREATE INDEX idx_interview_answer_session_question ON interview_answers (session_id, question_index);",
+      "name": "idx_interview_answer_session_question",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 283
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_interview_session_resume_created ON interview_sessions (resume_id, created_at);",
+      "name": "idx_interview_session_resume_created",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 285
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_interview_session_resume_status_created ON interview_sessions (resume_id, status, created_at);",
+      "name": "idx_interview_session_resume_status_created",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 287
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_interview_session_skill_created ON interview_sessions (skill_id, created_at);",
+      "name": "idx_interview_session_skill_created",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 289
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_kb_category ON knowledge_bases (category);",
+      "name": "idx_kb_category",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 291
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_kb_question_kb_status ON knowledge_base_questions (knowledge_base_id, status);",
+      "name": "idx_kb_question_kb_status",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 293
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_kb_question_skill_difficulty ON knowledge_base_questions (skill_id, difficulty);",
+      "name": "idx_kb_question_skill_difficulty",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 295
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_rag_message_order ON rag_chat_messages (session_id, message_order);",
+      "name": "idx_rag_message_order",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 297
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_rag_message_session ON rag_chat_messages (session_id);",
+      "name": "idx_rag_message_session",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 299
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_rag_session_updated ON rag_chat_sessions (updated_at);",
+      "name": "idx_rag_session_updated",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 301
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX spring_ai_vector_index ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
+      "name": "spring_ai_vector_index",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 303
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX spring_ai_vector_index ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
+      "name": "spring_ai_vector_index",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260723__ensure_pgvector_store.sql",
+        "line": 25
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_kb_question_gen_status_updated ON knowledge_bases(question_gen_status, question_gen_updated_at);",
+      "name": "idx_kb_question_gen_status_updated",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
+        "line": 19
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uk_interview_sessions_request_id ON interview_sessions (request_id);",
+      "name": "uk_interview_sessions_request_id",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260803__add_interview_request_id.sql",
+        "line": 4
+      },
+      "unique": true
+    }
+  ],
+  "migrations": [
+    {
+      "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+      "sha256": "06168d60b3f874e523a9c13dbfe66a84c6abb62e4f0b0c2e383192c677862208",
+      "statementTerminatorCount": 31
+    },
+    {
+      "file": "app/src/main/resources/db/migration/V20260722__add_interview_category_to_interview_sessions.sql",
+      "sha256": "c12fc031df45163111d720b749f174ce3186f9c5474bda256a6bd3748e1ea4cb",
+      "statementTerminatorCount": 5
+    },
+    {
+      "file": "app/src/main/resources/db/migration/V20260723__ensure_pgvector_store.sql",
+      "sha256": "3a7085785f22ec12b0977868b55a5c9215e3d8e42dad8470039ada20dba61f8a",
+      "statementTerminatorCount": 11
+    },
+    {
+      "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
+      "sha256": "803dbc372adf94bad49b50c8acaf0c1d9d965b63122648d70f038bc91f5658ac",
+      "statementTerminatorCount": 4
+    },
+    {
+      "file": "app/src/main/resources/db/migration/V20260803__add_interview_request_id.sql",
+      "sha256": "5eedcef50000a728c8ba740af39087bada4ae29d2c1fe39ecccb6d15200b050b",
+      "statementTerminatorCount": 2
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceOfTruth": "Flyway SQL; PostgreSQL catalog comparison is added in Stage 1/3.",
+  "summary": {
+    "alterationCount": 5,
+    "extensionCount": 3,
+    "indexCount": 14,
+    "migrationCount": 5,
+    "tableCount": 17
+  },
+  "tables": [
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "company_name"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "created_at"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "interview_time"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "interview_type"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "interviewer"
+        },
+        {
+          "definition": "TEXT",
+          "name": "meeting_link"
+        },
+        {
+          "definition": "TEXT",
+          "name": "notes"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "position"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "round_number"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "status"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "updated_at"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT interview_schedule_status_check CHECK (status IN ('PENDING', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'))"
+      ],
+      "name": "interview_schedule",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 5
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "access_count"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "analyze_error"
+        },
+        {
+          "definition": "VARCHAR(20)",
+          "name": "analyze_status"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "content_type"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "file_hash"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "file_size"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "last_accessed_at"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "original_filename"
+        },
+        {
+          "definition": "TEXT",
+          "name": "resume_text"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "storage_key"
+        },
+        {
+          "definition": "VARCHAR(1000)",
+          "name": "storage_url"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "uploaded_at"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT resumes_analyze_status_check CHECK (analyze_status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'))",
+        "CONSTRAINT idx_resume_hash UNIQUE (file_hash)"
+      ],
+      "name": "resumes",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 22
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "analyzed_at"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "content_score"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "expression_score"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "overall_score"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "project_score"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "skill_match_score"
+        },
+        {
+          "definition": "TEXT",
+          "name": "strengths_json"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "structure_score"
+        },
+        {
+          "definition": "TEXT",
+          "name": "suggestions_json"
+        },
+        {
+          "definition": "TEXT",
+          "name": "summary"
+        },
+        {
+          "definition": "BIGINT NOT NULL",
+          "name": "resume_id"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT fkrp4f11h23bp0j118yan185lr5 FOREIGN KEY (resume_id) REFERENCES resumes(id)"
+      ],
+      "name": "resume_analyses",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 41
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "completed_at"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "created_at"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "current_question_index"
+        },
+        {
+          "definition": "VARCHAR(16)",
+          "name": "difficulty"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "evaluate_error"
+        },
+        {
+          "definition": "VARCHAR(20)",
+          "name": "evaluate_status"
+        },
+        {
+          "definition": "TEXT",
+          "name": "improvements_json"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "interview_category"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "knowledge_base_id"
+        },
+        {
+          "definition": "VARCHAR(50)",
+          "name": "llm_provider"
+        },
+        {
+          "definition": "TEXT",
+          "name": "overall_feedback"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "overall_score"
+        },
+        {
+          "definition": "TEXT",
+          "name": "questions_json"
+        },
+        {
+          "definition": "TEXT",
+          "name": "reference_answers_json"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "resume_id"
+        },
+        {
+          "definition": "VARCHAR(36) NOT NULL",
+          "name": "session_id"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "skill_id"
+        },
+        {
+          "definition": "VARCHAR(32)",
+          "name": "source_type"
+        },
+        {
+          "definition": "VARCHAR(20)",
+          "name": "status"
+        },
+        {
+          "definition": "TEXT",
+          "name": "strengths_json"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "total_questions"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT interview_sessions_evaluate_status_check CHECK (evaluate_status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'))",
+        "CONSTRAINT interview_sessions_status_check CHECK (status IN ('CREATED', 'IN_PROGRESS', 'COMPLETED', 'EVALUATED'))",
+        "CONSTRAINT uk42bhenf7mu90ochoc1efpg3xa UNIQUE (session_id)",
+        "CONSTRAINT fkhresfe6p1s53klvmqhxxissa2 FOREIGN KEY (resume_id) REFERENCES resumes(id)"
+      ],
+      "name": "interview_sessions",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 58
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "answered_at"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "category"
+        },
+        {
+          "definition": "TEXT",
+          "name": "feedback"
+        },
+        {
+          "definition": "TEXT",
+          "name": "key_points_json"
+        },
+        {
+          "definition": "TEXT",
+          "name": "question"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "question_index"
+        },
+        {
+          "definition": "TEXT",
+          "name": "reference_answer"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "score"
+        },
+        {
+          "definition": "TEXT",
+          "name": "user_answer"
+        },
+        {
+          "definition": "BIGINT NOT NULL",
+          "name": "session_id"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT uk_interview_answer_session_question UNIQUE (session_id, question_index)",
+        "CONSTRAINT fkjeqvvamvdarrcbswn6kkiuym9 FOREIGN KEY (session_id) REFERENCES interview_sessions(id)"
+      ],
+      "name": "interview_answers",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 90
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "access_count"
+        },
+        {
+          "definition": "VARCHAR(100)",
+          "name": "category"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "chunk_count"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "content_type"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "file_hash"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "file_size"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "last_accessed_at"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "name"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "original_filename"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "question_count"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "storage_key"
+        },
+        {
+          "definition": "VARCHAR(1000)",
+          "name": "storage_url"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "uploaded_at"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "vector_error"
+        },
+        {
+          "definition": "VARCHAR(20)",
+          "name": "vector_status"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT knowledge_bases_vector_status_check CHECK (vector_status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'))",
+        "CONSTRAINT idx_kb_hash UNIQUE (file_hash)"
+      ],
+      "name": "knowledge_bases",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 107
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "category"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "created_at"
+        },
+        {
+          "definition": "VARCHAR(16)",
+          "name": "difficulty"
+        },
+        {
+          "definition": "TEXT",
+          "name": "follow_ups_json"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "kb_content_hash"
+        },
+        {
+          "definition": "TEXT",
+          "name": "key_points_json"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "knowledge_base_id"
+        },
+        {
+          "definition": "TEXT NOT NULL",
+          "name": "question"
+        },
+        {
+          "definition": "TEXT",
+          "name": "reference_answer"
+        },
+        {
+          "definition": "TEXT",
+          "name": "scoring_rubric"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "skill_id"
+        },
+        {
+          "definition": "TEXT",
+          "name": "source_context"
+        },
+        {
+          "definition": "VARCHAR(20) NOT NULL",
+          "name": "status"
+        },
+        {
+          "definition": "VARCHAR(300)",
+          "name": "topic_summary"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "type"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "updated_at"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT knowledge_base_questions_status_check CHECK (status IN ('DRAFT', 'ACTIVE', 'ARCHIVED', 'STALE'))",
+        "CONSTRAINT fkosobqu06r3tbr13ca043slftw FOREIGN KEY (knowledge_base_id) REFERENCES knowledge_bases(id)"
+      ],
+      "name": "knowledge_base_questions",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 129
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT NOT NULL PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "created_at"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "default_chat_provider_id"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "default_embedding_provider_id"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "updated_at"
+        }
+      ],
+      "constraints": [],
+      "name": "llm_global_setting",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 153
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "VARCHAR(64) NOT NULL PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "VARCHAR(4096) NOT NULL",
+          "name": "api_key_ciphertext"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "api_key_nonce"
+        },
+        {
+          "definition": "VARCHAR(512) NOT NULL",
+          "name": "base_url"
+        },
+        {
+          "definition": "BOOLEAN NOT NULL",
+          "name": "builtin"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "created_at"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "embedding_dimensions"
+        },
+        {
+          "definition": "VARCHAR(128)",
+          "name": "embedding_model"
+        },
+        {
+          "definition": "BOOLEAN NOT NULL",
+          "name": "enabled"
+        },
+        {
+          "definition": "VARCHAR(128) NOT NULL",
+          "name": "model"
+        },
+        {
+          "definition": "BOOLEAN NOT NULL",
+          "name": "supports_embedding"
+        },
+        {
+          "definition": "DOUBLE PRECISION",
+          "name": "temperature"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "updated_at"
+        }
+      ],
+      "constraints": [],
+      "name": "llm_provider_config",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 161
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "created_at"
+        },
+        {
+          "definition": "BOOLEAN DEFAULT false",
+          "name": "is_pinned"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "message_count"
+        },
+        {
+          "definition": "VARCHAR(20)",
+          "name": "status"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "title"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "updated_at"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT rag_chat_sessions_status_check CHECK (status IN ('ACTIVE', 'ARCHIVED'))"
+      ],
+      "name": "rag_chat_sessions",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 177
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "BOOLEAN",
+          "name": "completed"
+        },
+        {
+          "definition": "TEXT NOT NULL",
+          "name": "content"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "created_at"
+        },
+        {
+          "definition": "INTEGER NOT NULL",
+          "name": "message_order"
+        },
+        {
+          "definition": "VARCHAR(20) NOT NULL",
+          "name": "type"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "updated_at"
+        },
+        {
+          "definition": "BIGINT NOT NULL",
+          "name": "session_id"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT rag_chat_messages_type_check CHECK (type IN ('USER', 'ASSISTANT'))",
+        "CONSTRAINT fkfohypaygc0qfqo62vyaxlbntn FOREIGN KEY (session_id) REFERENCES rag_chat_sessions(id)"
+      ],
+      "name": "rag_chat_messages",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 189
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT NOT NULL",
+          "name": "session_id"
+        },
+        {
+          "definition": "BIGINT NOT NULL",
+          "name": "knowledge_base_id"
+        }
+      ],
+      "constraints": [
+        "PRIMARY KEY (session_id, knowledge_base_id)",
+        "CONSTRAINT fkqfob368wcvb82elsjkx2troqu FOREIGN KEY (session_id) REFERENCES rag_chat_sessions(id)",
+        "CONSTRAINT fkjsfwqyt1ntgr0fcvjieq8c0nb FOREIGN KEY (knowledge_base_id) REFERENCES knowledge_bases(id)"
+      ],
+      "name": "rag_session_knowledge_bases",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 204
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "UUID DEFAULT public.uuid_generate_v4() NOT NULL PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TEXT",
+          "name": "content"
+        },
+        {
+          "definition": "JSON",
+          "name": "metadata"
+        },
+        {
+          "definition": "public.vector(1024)",
+          "name": "embedding"
+        }
+      ],
+      "constraints": [],
+      "name": "vector_store",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 214
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "created_at"
+        },
+        {
+          "definition": "TEXT",
+          "name": "improvements_json"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "interview_date"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "interviewer_role"
+        },
+        {
+          "definition": "TEXT",
+          "name": "overall_feedback"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "overall_score"
+        },
+        {
+          "definition": "TEXT",
+          "name": "question_evaluations_json"
+        },
+        {
+          "definition": "TEXT",
+          "name": "reference_answers_json"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "session_id"
+        },
+        {
+          "definition": "TEXT",
+          "name": "strengths_json"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT ukijx8aelak8vqf9n4to88qqrna UNIQUE (session_id)"
+      ],
+      "name": "voice_interview_evaluations",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 221
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TEXT",
+          "name": "ai_generated_text"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "created_at"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "message_type"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "phase"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "sequence_num"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "session_id"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "timestamp"
+        },
+        {
+          "definition": "TEXT",
+          "name": "user_recognized_text"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT voice_interview_messages_phase_check CHECK (phase IN ('INTRO', 'TECH', 'PROJECT', 'HR', 'COMPLETED'))"
+      ],
+      "name": "voice_interview_messages",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 236
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "actual_duration"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "created_at"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "current_phase"
+        },
+        {
+          "definition": "TEXT",
+          "name": "custom_jd_text"
+        },
+        {
+          "definition": "VARCHAR(16)",
+          "name": "difficulty"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "end_time"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "evaluate_error"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "evaluate_status"
+        },
+        {
+          "definition": "BOOLEAN",
+          "name": "hr_enabled"
+        },
+        {
+          "definition": "BOOLEAN",
+          "name": "intro_enabled"
+        },
+        {
+          "definition": "VARCHAR(50)",
+          "name": "llm_provider"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "paused_at"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "planned_duration"
+        },
+        {
+          "definition": "BOOLEAN",
+          "name": "project_enabled"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "resume_id"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "resumed_at"
+        },
+        {
+          "definition": "VARCHAR(255) NOT NULL",
+          "name": "role_type"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "skill_id"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "start_time"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "status"
+        },
+        {
+          "definition": "BOOLEAN",
+          "name": "tech_enabled"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "updated_at"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "user_id"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT voice_interview_sessions_current_phase_check CHECK (current_phase IN ('INTRO', 'TECH', 'PROJECT', 'HR', 'COMPLETED'))",
+        "CONSTRAINT voice_interview_sessions_evaluate_status_check CHECK (evaluate_status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'))",
+        "CONSTRAINT voice_interview_sessions_status_check CHECK (status IN ('IN_PROGRESS', 'PAUSED', 'COMPLETED', 'FAILED'))"
+      ],
+      "name": "voice_interview_sessions",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
+        "line": 250
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "UUID DEFAULT public.uuid_generate_v4() NOT NULL PRIMARY KEY",
+          "name": "id"
+        },
+        {
+          "definition": "TEXT",
+          "name": "content"
+        },
+        {
+          "definition": "JSON",
+          "name": "metadata"
+        },
+        {
+          "definition": "public.vector(1024)",
+          "name": "embedding"
+        }
+      ],
+      "constraints": [],
+      "name": "vector_store",
+      "source": {
+        "file": "app/src/main/resources/db/migration/V20260723__ensure_pgvector_store.sql",
+        "line": 16
+      }
+    }
+  ]
+}

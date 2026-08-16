@@ -18,6 +18,17 @@
 
 InterviewGuide 是一个集成了简历分析、模拟面试（文字 + 语音）、面试安排、知识库管理、知识库题库面试和多模型配置的智能面试辅助平台。系统利用大语言模型（LLM）、向量数据库、Redis Stream 异步任务和实时语音技术，为求职者、HR 和培训机构提供智能化的简历评估、面试练习、知识库问答和面试日程管理能力。
 
+## Python 后端迁移
+
+仓库正在按 [`docs/MIGRATION_PLAN.md`](docs/MIGRATION_PLAN.md) 将 Java/Spring 后端迁移到
+Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不变。阶段 0 清单通过以下命令
+生成并由 CI 检查是否与源码同步：
+
+```bash
+./migration/scripts/generate-manifests.sh
+./migration/scripts/check-manifests.sh
+```
+
 ## 系统架构
 
 ![系统架构图](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/interview-guide-architecture-diagram.png)

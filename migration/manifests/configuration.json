@@ -1,0 +1,3210 @@
+{
+  "configurationValues": [
+    {
+      "environmentReferences": [],
+      "property": "logging.charset.console",
+      "rawValue": "UTF-8",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 6
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "logging.charset.file",
+      "rawValue": "UTF-8",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 7
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "server.port",
+      "rawValue": "8080",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 10
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "server.servlet.encoding.charset",
+      "rawValue": "UTF-8",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 14
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "server.servlet.encoding.enabled",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 15
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "server.servlet.encoding.force",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 16
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "springdoc.swagger-ui.path",
+      "rawValue": "/swagger-ui.html",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 21
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "springdoc.swagger-ui.tags-sorter",
+      "rawValue": "alpha",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 22
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "springdoc.swagger-ui.operations-sorter",
+      "rawValue": "alpha",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 23
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "springdoc.api-docs.path",
+      "rawValue": "/v3/api-docs",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 25
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "springdoc.packages-to-scan",
+      "rawValue": "interview.guide.modules",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 26
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.config.import",
+      "rawValue": "optional:classpath:voice-interview-opening.yml",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 30
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.application.name",
+      "rawValue": "ai-interview-platform",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 32
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.threads.virtual.enabled",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 38
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "localhost",
+          "name": "POSTGRES_HOST",
+          "sensitive": false
+        },
+        {
+          "default": "5432",
+          "name": "POSTGRES_PORT",
+          "sensitive": false
+        },
+        {
+          "default": "interview_guide",
+          "name": "POSTGRES_DB",
+          "sensitive": false
+        }
+      ],
+      "property": "spring.datasource.url",
+      "rawValue": "jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:interview_guide}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 42
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "postgres",
+          "name": "POSTGRES_USER",
+          "sensitive": false
+        }
+      ],
+      "property": "spring.datasource.username",
+      "rawValue": "${POSTGRES_USER:postgres}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 43
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "123456",
+          "name": "POSTGRES_PASSWORD",
+          "sensitive": true
+        }
+      ],
+      "property": "spring.datasource.password",
+      "rawValue": "${POSTGRES_PASSWORD:123456}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 45
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.datasource.driver-class-name",
+      "rawValue": "org.postgresql.Driver",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 46
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.jpa.hibernate.ddl-auto",
+      "rawValue": "validate",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 50
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.jpa.show-sql",
+      "rawValue": "false",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 51
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.jpa.properties.hibernate.format_sql",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 54
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.flyway.enabled",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 57
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.flyway.locations",
+      "rawValue": "classpath:db/migration",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 58
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.flyway.baseline-on-migrate",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 59
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.flyway.baseline-version",
+      "rawValue": "1",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 60
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.servlet.multipart.enabled",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 64
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.servlet.multipart.max-file-size",
+      "rawValue": "50MB  # 支持知识库上传（简历限制在业务层检查）",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 65
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.servlet.multipart.max-request-size",
+      "rawValue": "50MB",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 66
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "localhost",
+          "name": "REDIS_HOST",
+          "sensitive": false
+        },
+        {
+          "default": "6379",
+          "name": "REDIS_PORT",
+          "sensitive": false
+        }
+      ],
+      "property": "spring.redis.redisson.config.singleServerConfig.address",
+      "rawValue": "\"redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}\"",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 74
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.redis.redisson.config.singleServerConfig.database",
+      "rawValue": "0",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 75
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.redis.redisson.config.singleServerConfig.connectionMinimumIdleSize",
+      "rawValue": "10",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 76
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.redis.redisson.config.singleServerConfig.connectionPoolSize",
+      "rawValue": "64",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 77
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.redis.redisson.config.singleServerConfig.subscriptionConnectionMinimumIdleSize",
+      "rawValue": "1",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 78
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.redis.redisson.config.singleServerConfig.subscriptionConnectionPoolSize",
+      "rawValue": "50",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 79
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.ai.retry.max-attempts",
+      "rawValue": "1  # 不重试，失败立即返回",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 85
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.ai.retry.on-client-errors",
+      "rawValue": "false",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 86
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.ai.vectorstore.pgvector.index-type",
+      "rawValue": "HNSW",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 90
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.ai.vectorstore.pgvector.distance-type",
+      "rawValue": "COSINE_DISTANCE",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 91
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.ai.vectorstore.pgvector.dimensions",
+      "rawValue": "1024  # text-embedding-v3实际生成的向量维度",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 92
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.ai.vectorstore.pgvector.initialize-schema",
+      "rawValue": "false # schema 统一由 Flyway 管理",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 93
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "spring.ai.vectorstore.pgvector.remove-existing-vector-store-table",
+      "rawValue": "false  # 保留现有表和数据",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 94
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.default-provider",
+      "rawValue": "dashscope",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 99
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.default-embedding-provider",
+      "rawValue": "dashscope",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 100
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "1024",
+          "name": "APP_AI_EMBEDDING_DIMENSIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.embedding-dimensions",
+      "rawValue": "${APP_AI_EMBEDDING_DIMENSIONS:1024}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 101
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "",
+          "name": "APP_AI_CONFIG_ENCRYPTION_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.security.api-key-encryption-key",
+      "rawValue": "${APP_AI_CONFIG_ENCRYPTION_KEY:}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 103
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_CONFIG_REQUIRE_ENCRYPTION_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.security.require-encryption-key",
+      "rawValue": "${APP_AI_CONFIG_REQUIRE_ENCRYPTION_KEY:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 104
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "false",
+          "name": "APP_AI_CONFIG_ALLOW_FALLBACK_ENCRYPTION_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.security.allow-fallback-encryption-key",
+      "rawValue": "${APP_AI_CONFIG_ALLOW_FALLBACK_ENCRYPTION_KEY:false}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 105
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "${user.home",
+          "name": "APP_AI_CONFIG_YAML_PATH",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.config-yaml-path",
+      "rawValue": "${APP_AI_CONFIG_YAML_PATH:${user.home}/.interview-guide/llm-providers.yml}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 108
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "${user.home",
+          "name": "APP_AI_CONFIG_ENV_PATH",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.config-env-path",
+      "rawValue": "${APP_AI_CONFIG_ENV_PATH:${user.home}/.interview-guide/llm-providers.env}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 109
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "classpath:skills",
+          "name": "APP_AI_AGENT_UTILS_SKILLS_ROOT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.agent-utils.skills-root",
+      "rawValue": "${APP_AI_AGENT_UTILS_SKILLS_ROOT:classpath:skills}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 111
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.dashscope.base-url",
+      "rawValue": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 114
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": null,
+          "name": "AI_BAILIAN_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.providers.dashscope.api-key",
+      "rawValue": "${AI_BAILIAN_API_KEY}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 115
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "qwen3.5-flash",
+          "name": "AI_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.providers.dashscope.model",
+      "rawValue": "${AI_MODEL:qwen3.5-flash}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 116
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.dashscope.embedding-model",
+      "rawValue": "text-embedding-v3",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 117
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.dashscope.embedding-dimensions",
+      "rawValue": "1024",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 118
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.dashscope.supports-embedding",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 119
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.lmstudio.base-url",
+      "rawValue": "http://localhost:1234",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 121
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "lm-studio",
+          "name": "PROVIDER_LMSTUDIO_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.providers.lmstudio.api-key",
+      "rawValue": "${PROVIDER_LMSTUDIO_API_KEY:lm-studio}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 122
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.lmstudio.model",
+      "rawValue": "qwen2.5-7b-instruct",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 123
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.lmstudio.supports-embedding",
+      "rawValue": "false",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 124
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.kimi.base-url",
+      "rawValue": "https://api.moonshot.cn/v1",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 128
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "",
+          "name": "PROVIDER_KIMI_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.providers.kimi.api-key",
+      "rawValue": "${PROVIDER_KIMI_API_KEY:}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 129
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "kimi-latest",
+          "name": "PROVIDER_KIMI_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.providers.kimi.model",
+      "rawValue": "${PROVIDER_KIMI_MODEL:kimi-latest}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 130
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.kimi.temperature",
+      "rawValue": "1",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 131
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.kimi.supports-embedding",
+      "rawValue": "false",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 132
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.deepseek.base-url",
+      "rawValue": "https://api.deepseek.com",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 135
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "",
+          "name": "PROVIDER_DEEPSEEK_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.providers.deepseek.api-key",
+      "rawValue": "${PROVIDER_DEEPSEEK_API_KEY:}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 136
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "deepseek-v4-flash",
+          "name": "PROVIDER_DEEPSEEK_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.providers.deepseek.model",
+      "rawValue": "${PROVIDER_DEEPSEEK_MODEL:deepseek-v4-flash}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 137
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.deepseek.supports-embedding",
+      "rawValue": "false",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 138
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.glm.base-url",
+      "rawValue": "https://open.bigmodel.cn/api/coding/paas/v4",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 141
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "",
+          "name": "PROVIDER_GLM_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.ai.providers.glm.api-key",
+      "rawValue": "${PROVIDER_GLM_API_KEY:}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 142
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "glm-5",
+          "name": "PROVIDER_GLM_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.providers.glm.model",
+      "rawValue": "${PROVIDER_GLM_MODEL:glm-5}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 143
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.glm.embedding-model",
+      "rawValue": "embedding-3",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 144
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.glm.embedding-dimensions",
+      "rawValue": "1024",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 145
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.ai.providers.glm.supports-embedding",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 146
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_ADVISORS_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.advisors.enabled",
+      "rawValue": "${APP_AI_ADVISORS_ENABLED:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 148
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_ADVISORS_TOOL_CALL_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.advisors.tool-call-enabled",
+      "rawValue": "${APP_AI_ADVISORS_TOOL_CALL_ENABLED:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 149
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "false",
+          "name": "APP_AI_ADVISORS_TOOL_CALL_CONVERSATION_HISTORY_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.advisors.tool-call-conversation-history-enabled",
+      "rawValue": "${APP_AI_ADVISORS_TOOL_CALL_CONVERSATION_HISTORY_ENABLED:false}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 150
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "false",
+          "name": "APP_AI_ADVISORS_MESSAGE_CHAT_MEMORY_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.advisors.message-chat-memory-enabled",
+      "rawValue": "${APP_AI_ADVISORS_MESSAGE_CHAT_MEMORY_ENABLED:false}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 151
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "120",
+          "name": "APP_AI_ADVISORS_MESSAGE_CHAT_MEMORY_MAX_MESSAGES",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.advisors.message-chat-memory-max-messages",
+      "rawValue": "${APP_AI_ADVISORS_MESSAGE_CHAT_MEMORY_MAX_MESSAGES:120}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 152
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "false",
+          "name": "APP_AI_ADVISORS_SIMPLE_LOGGER_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.advisors.simple-logger-enabled",
+      "rawValue": "${APP_AI_ADVISORS_SIMPLE_LOGGER_ENABLED:false}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 153
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2",
+          "name": "APP_AI_STRUCTURED_MAX_ATTEMPTS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.structured-max-attempts",
+      "rawValue": "${APP_AI_STRUCTURED_MAX_ATTEMPTS:2}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 155
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_STRUCTURED_INCLUDE_LAST_ERROR",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.structured-include-last-error",
+      "rawValue": "${APP_AI_STRUCTURED_INCLUDE_LAST_ERROR:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 157
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_STRUCTURED_RETRY_USE_REPAIR_PROMPT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.structured-retry-use-repair-prompt",
+      "rawValue": "${APP_AI_STRUCTURED_RETRY_USE_REPAIR_PROMPT:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 159
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_STRUCTURED_RETRY_APPEND_STRICT_JSON_INSTRUCTION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.structured-retry-append-strict-json-instruction",
+      "rawValue": "${APP_AI_STRUCTURED_RETRY_APPEND_STRICT_JSON_INSTRUCTION:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 161
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "200",
+          "name": "APP_AI_STRUCTURED_ERROR_MESSAGE_MAX_LENGTH",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.structured-error-message-max-length",
+      "rawValue": "${APP_AI_STRUCTURED_ERROR_MESSAGE_MAX_LENGTH:200}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 163
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_STRUCTURED_METRICS_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.structured-metrics-enabled",
+      "rawValue": "${APP_AI_STRUCTURED_METRICS_ENABLED:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 165
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_STRUCTURED_SCHEMA_VALIDATION_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.structured-schema-validation-enabled",
+      "rawValue": "${APP_AI_STRUCTURED_SCHEMA_VALIDATION_ENABLED:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 167
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_AI_RAG_REWRITE_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.rag.rewrite.enabled",
+      "rawValue": "${APP_AI_RAG_REWRITE_ENABLED:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 170
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "4",
+          "name": "APP_AI_RAG_SHORT_QUERY_LENGTH",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.rag.search.short-query-length",
+      "rawValue": "${APP_AI_RAG_SHORT_QUERY_LENGTH:4}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 172
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "20",
+          "name": "APP_AI_RAG_TOPK_SHORT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.rag.search.topk-short",
+      "rawValue": "${APP_AI_RAG_TOPK_SHORT:20}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 173
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "12",
+          "name": "APP_AI_RAG_TOPK_MEDIUM",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.rag.search.topk-medium",
+      "rawValue": "${APP_AI_RAG_TOPK_MEDIUM:12}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 174
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_AI_RAG_TOPK_LONG",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.rag.search.topk-long",
+      "rawValue": "${APP_AI_RAG_TOPK_LONG:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 175
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "0.18",
+          "name": "APP_AI_RAG_MIN_SCORE_SHORT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.rag.search.min-score-short",
+      "rawValue": "${APP_AI_RAG_MIN_SCORE_SHORT:0.18}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 176
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "0.28",
+          "name": "APP_AI_RAG_MIN_SCORE_DEFAULT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.ai.rag.search.min-score-default",
+      "rawValue": "${APP_AI_RAG_MIN_SCORE_DEFAULT:0.28}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 177
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "1",
+          "name": "APP_INTERVIEW_FOLLOW_UP_COUNT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.interview.follow-up-count",
+      "rawValue": "${APP_INTERVIEW_FOLLOW_UP_COUNT:1}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 180
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+          "sensitive": false
+        }
+      ],
+      "property": "app.interview.evaluation.batch-size",
+      "rawValue": "${APP_INTERVIEW_EVALUATION_BATCH_SIZE:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 182
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": null,
+          "name": "java.io.tmpdir",
+          "sensitive": false
+        }
+      ],
+      "property": "app.resume.upload-dir",
+      "rawValue": "${java.io.tmpdir}/ai-interview/resumes",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 184
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "http://localhost:9000",
+          "name": "APP_STORAGE_ENDPOINT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.storage.endpoint",
+      "rawValue": "${APP_STORAGE_ENDPOINT:http://localhost:9000}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 193
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "",
+          "name": "APP_STORAGE_ACCESS_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.storage.access-key",
+      "rawValue": "${APP_STORAGE_ACCESS_KEY:}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 194
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "",
+          "name": "APP_STORAGE_SECRET_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.storage.secret-key",
+      "rawValue": "${APP_STORAGE_SECRET_KEY:}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 195
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "interview-guide",
+          "name": "APP_STORAGE_BUCKET",
+          "sensitive": false
+        }
+      ],
+      "property": "app.storage.bucket",
+      "rawValue": "${APP_STORAGE_BUCKET:interview-guide}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 196
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "us-east-1",
+          "name": "APP_STORAGE_REGION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.storage.region",
+      "rawValue": "${APP_STORAGE_REGION:us-east-1}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 197
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "60s",
+          "name": "APP_STORAGE_API_CALL_TIMEOUT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.storage.api-call-timeout",
+      "rawValue": "${APP_STORAGE_API_CALL_TIMEOUT:60s}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 198
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "20s",
+          "name": "APP_STORAGE_API_CALL_ATTEMPT_TIMEOUT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.storage.api-call-attempt-timeout",
+      "rawValue": "${APP_STORAGE_API_CALL_ATTEMPT_TIMEOUT:20s}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 199
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_STORAGE_AUTO_CREATE_BUCKET",
+          "sensitive": false
+        }
+      ],
+      "property": "app.storage.auto-create-bucket",
+      "rawValue": "${APP_STORAGE_AUTO_CREATE_BUCKET:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 200
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "http://localhost:5173,http://localhost:5174,http://localhost:80,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:80",
+          "name": "CORS_ALLOWED_ORIGINS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.cors.allowed-origins",
+      "rawValue": "${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:80,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:80}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 204
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "3",
+          "name": "APP_VOICE_INTERVIEW_PHASE_INTRO_MIN_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.intro.min-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_INTRO_MIN_DURATION:3}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 211
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "5",
+          "name": "APP_VOICE_INTERVIEW_PHASE_INTRO_SUGGESTED_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.intro.suggested-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_INTRO_SUGGESTED_DURATION:5}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 212
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_VOICE_INTERVIEW_PHASE_INTRO_MAX_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.intro.max-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_INTRO_MAX_DURATION:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 213
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2",
+          "name": "APP_VOICE_INTERVIEW_PHASE_INTRO_MIN_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.intro.min-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_INTRO_MIN_QUESTIONS:2}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 214
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "5",
+          "name": "APP_VOICE_INTERVIEW_PHASE_INTRO_MAX_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.intro.max-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_INTRO_MAX_QUESTIONS:5}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 215
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_VOICE_INTERVIEW_PHASE_TECH_MIN_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.tech.min-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_TECH_MIN_DURATION:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 217
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "10",
+          "name": "APP_VOICE_INTERVIEW_PHASE_TECH_SUGGESTED_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.tech.suggested-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_TECH_SUGGESTED_DURATION:10}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 218
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "15",
+          "name": "APP_VOICE_INTERVIEW_PHASE_TECH_MAX_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.tech.max-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_TECH_MAX_DURATION:15}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 219
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "3",
+          "name": "APP_VOICE_INTERVIEW_PHASE_TECH_MIN_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.tech.min-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_TECH_MIN_QUESTIONS:3}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 220
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_VOICE_INTERVIEW_PHASE_TECH_MAX_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.tech.max-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_TECH_MAX_QUESTIONS:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 221
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_VOICE_INTERVIEW_PHASE_PROJECT_MIN_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.project.min-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_PROJECT_MIN_DURATION:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 223
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "10",
+          "name": "APP_VOICE_INTERVIEW_PHASE_PROJECT_SUGGESTED_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.project.suggested-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_PROJECT_SUGGESTED_DURATION:10}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 224
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "15",
+          "name": "APP_VOICE_INTERVIEW_PHASE_PROJECT_MAX_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.project.max-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_PROJECT_MAX_DURATION:15}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 225
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2",
+          "name": "APP_VOICE_INTERVIEW_PHASE_PROJECT_MIN_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.project.min-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_PROJECT_MIN_QUESTIONS:2}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 226
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "5",
+          "name": "APP_VOICE_INTERVIEW_PHASE_PROJECT_MAX_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.project.max-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_PROJECT_MAX_QUESTIONS:5}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 227
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "3",
+          "name": "APP_VOICE_INTERVIEW_PHASE_HR_MIN_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.hr.min-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_HR_MIN_DURATION:3}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 229
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "5",
+          "name": "APP_VOICE_INTERVIEW_PHASE_HR_SUGGESTED_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.hr.suggested-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_HR_SUGGESTED_DURATION:5}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 230
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_VOICE_INTERVIEW_PHASE_HR_MAX_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.hr.max-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_HR_MAX_DURATION:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 231
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2",
+          "name": "APP_VOICE_INTERVIEW_PHASE_HR_MIN_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.hr.min-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_HR_MIN_QUESTIONS:2}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 232
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "5",
+          "name": "APP_VOICE_INTERVIEW_PHASE_HR_MAX_QUESTIONS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.phase.hr.max-questions",
+      "rawValue": "${APP_VOICE_INTERVIEW_PHASE_HR_MAX_QUESTIONS:5}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 233
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "siyue",
+          "name": "APP_VOICE_INTERVIEW_TTS_DEFAULT_VOICE",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.tts.default-voice",
+      "rawValue": "${APP_VOICE_INTERVIEW_TTS_DEFAULT_VOICE:siyue}  # 思悦 - 温柔自然的女声",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 237
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.url",
+      "rawValue": "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 242
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.model",
+      "rawValue": "qwen3-asr-flash-realtime",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 243
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": null,
+          "name": "AI_BAILIAN_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.voice-interview.qwen.asr.api-key",
+      "rawValue": "${AI_BAILIAN_API_KEY}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 244
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.language",
+      "rawValue": "zh",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 245
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.format",
+      "rawValue": "pcm",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 246
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.sample-rate",
+      "rawValue": "16000",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 247
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.enable-turn-detection",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 248
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.turn-detection-type",
+      "rawValue": "server_vad",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 249
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.asr.turn-detection-threshold",
+      "rawValue": "0.0",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 250
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2000",
+          "name": "APP_VOICE_ASR_SILENCE_MS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.qwen.asr.turn-detection-silence-duration-ms",
+      "rawValue": "${APP_VOICE_ASR_SILENCE_MS:2000}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 252
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.model",
+      "rawValue": "qwen3-tts-flash-realtime",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 257
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": null,
+          "name": "AI_BAILIAN_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "app.voice-interview.qwen.tts.api-key",
+      "rawValue": "${AI_BAILIAN_API_KEY}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 258
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.voice",
+      "rawValue": "Cherry",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 259
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.format",
+      "rawValue": "pcm",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 260
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.sample-rate",
+      "rawValue": "24000",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 261
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.mode",
+      "rawValue": "commit",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 262
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.language-type",
+      "rawValue": "Chinese",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 263
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.speech-rate",
+      "rawValue": "1.0",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 264
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "app.voice-interview.qwen.tts.volume",
+      "rawValue": "60",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 265
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2500",
+          "name": "APP_VOICE_USER_UTTERANCE_DEBOUNCE_MS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.user-utterance-debounce-ms",
+      "rawValue": "${APP_VOICE_USER_UTTERANCE_DEBOUNCE_MS:2500}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 268
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2500",
+          "name": "APP_VOICE_MIN_SILENCE_BEFORE_COMMIT_MS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.min-silence-before-commit-ms",
+      "rawValue": "${APP_VOICE_MIN_SILENCE_BEFORE_COMMIT_MS:2500}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 270
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "20",
+          "name": "APP_VOICE_MIN_COMMIT_CHARS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.min-commit-chars",
+      "rawValue": "${APP_VOICE_MIN_COMMIT_CHARS:20}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 272
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "7000",
+          "name": "APP_VOICE_MAX_WAIT_FOR_CONTINUATION_MS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.max-wait-for-continuation-ms",
+      "rawValue": "${APP_VOICE_MAX_WAIT_FOR_CONTINUATION_MS:7000}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 274
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "120",
+          "name": "APP_VOICE_AI_QUESTION_MAX_CHARS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.ai-question-max-chars",
+      "rawValue": "${APP_VOICE_AI_QUESTION_MAX_CHARS:120}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 276
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "true",
+          "name": "APP_VOICE_CHUNKED_AUDIO_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.chunked-audio-enabled",
+      "rawValue": "${APP_VOICE_CHUNKED_AUDIO_ENABLED:true}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 278
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "8",
+          "name": "APP_VOICE_TTS_TIMEOUT_SECONDS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.tts-timeout-seconds",
+      "rawValue": "${APP_VOICE_TTS_TIMEOUT_SECONDS:8}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 280
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "5",
+          "name": "APP_VOICE_TTS_CONNECT_TIMEOUT_SECONDS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.tts-connect-timeout-seconds",
+      "rawValue": "${APP_VOICE_TTS_CONNECT_TIMEOUT_SECONDS:5}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 282
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "3",
+          "name": "APP_VOICE_MAX_CONCURRENT_TTS_PER_SESSION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.max-concurrent-tts-per-session",
+      "rawValue": "${APP_VOICE_MAX_CONCURRENT_TTS_PER_SESSION:3}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 284
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "false",
+          "name": "APP_VOICE_OPENING_AUDIO_WARMUP_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.opening-audio-warmup-enabled",
+      "rawValue": "${APP_VOICE_OPENING_AUDIO_WARMUP_ENABLED:false}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 286
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "10",
+          "name": "APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_PER_SESSION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.rate-limit.max-per-session",
+      "rawValue": "${APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_PER_SESSION:10}  # messages per second",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 290
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "3",
+          "name": "APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_PER_IP",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.rate-limit.max-per-ip",
+      "rawValue": "${APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_PER_IP:3}  # interviews per hour",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 291
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "50",
+          "name": "APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_CONCURRENT",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.rate-limit.max-concurrent",
+      "rawValue": "${APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_CONCURRENT:50}  # global concurrent interviews",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 292
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "opus",
+          "name": "APP_VOICE_INTERVIEW_AUDIO_CODEC",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.audio.codec",
+      "rawValue": "${APP_VOICE_INTERVIEW_AUDIO_CODEC:opus}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 296
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "16000",
+          "name": "APP_VOICE_INTERVIEW_AUDIO_SAMPLE_RATE",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.audio.sample-rate",
+      "rawValue": "${APP_VOICE_INTERVIEW_AUDIO_SAMPLE_RATE:16000}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 297
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "24000",
+          "name": "APP_VOICE_INTERVIEW_AUDIO_BIT_RATE",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.audio.bit-rate",
+      "rawValue": "${APP_VOICE_INTERVIEW_AUDIO_BIT_RATE:24000}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 298
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "1",
+          "name": "APP_VOICE_INTERVIEW_AUDIO_CHANNELS",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.audio.channels",
+      "rawValue": "${APP_VOICE_INTERVIEW_AUDIO_CHANNELS:1}",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 299
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "2000",
+          "name": "APP_VOICE_INTERVIEW_AUDIO_CHUNK_DURATION",
+          "sensitive": false
+        }
+      ],
+      "property": "app.voice-interview.audio.chunk-duration",
+      "rawValue": "${APP_VOICE_INTERVIEW_AUDIO_CHUNK_DURATION:2000}  # 2 seconds",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 300
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "management.endpoints.web.exposure.include",
+      "rawValue": "health,info,metrics,prometheus",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 306
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "management.endpoint.health.probes.enabled",
+      "rawValue": "true",
+      "source": {
+        "file": "app/src/main/resources/application.yml",
+        "line": 310
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.image",
+      "rawValue": "pgvector/pgvector:pg16",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 8
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.container_name",
+      "rawValue": "interview-postgres",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 9
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-postgres",
+          "name": "POSTGRES_USER",
+          "sensitive": false
+        }
+      ],
+      "property": "services.postgres.environment.POSTGRES_USER",
+      "rawValue": "${POSTGRES_USER:-postgres}",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 11
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-123456",
+          "name": "POSTGRES_PASSWORD",
+          "sensitive": true
+        }
+      ],
+      "property": "services.postgres.environment.POSTGRES_PASSWORD",
+      "rawValue": "${POSTGRES_PASSWORD:-123456}",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 12
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-interview_guide",
+          "name": "POSTGRES_DB",
+          "sensitive": false
+        }
+      ],
+      "property": "services.postgres.environment.POSTGRES_DB",
+      "rawValue": "${POSTGRES_DB:-interview_guide}",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 13
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.test",
+      "rawValue": "[\"CMD-SHELL\", \"pg_isready -U postgres\"]",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 20
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 21
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.timeout",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 22
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.retries",
+      "rawValue": "5",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 23
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.image",
+      "rawValue": "redis:7",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 26
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.container_name",
+      "rawValue": "interview-redis",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 27
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.test",
+      "rawValue": "[\"CMD\", \"redis-cli\", \"ping\"]",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 33
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 34
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.timeout",
+      "rawValue": "3s",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 35
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.retries",
+      "rawValue": "5",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 36
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.image",
+      "rawValue": "rustfs/rustfs:latest",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 39
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.container_name",
+      "rawValue": "interview-rustfs",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 40
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.command",
+      "rawValue": "[\"/data\"]",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 41
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-rustfsadmin",
+          "name": "RUSTFS_ACCESS_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "services.rustfs.environment.RUSTFS_ACCESS_KEY",
+      "rawValue": "${RUSTFS_ACCESS_KEY:-rustfsadmin}",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 43
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-rustfsadmin",
+          "name": "RUSTFS_SECRET_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "services.rustfs.environment.RUSTFS_SECRET_KEY",
+      "rawValue": "${RUSTFS_SECRET_KEY:-rustfsadmin}",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 44
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.environment.RUSTFS_CONSOLE_ENABLE",
+      "rawValue": "\"true\"",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 45
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.healthcheck.test",
+      "rawValue": "[\"CMD\", \"/usr/bin/nc\", \"-z\", \"localhost\", \"9000\"]",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 53
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 54
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.healthcheck.timeout",
+      "rawValue": "3s",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 55
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.healthcheck.retries",
+      "rawValue": "5",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 56
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.image",
+      "rawValue": "pgvector/pgvector:pg16",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 15
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.container_name",
+      "rawValue": "interview-postgres",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 16
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.environment.POSTGRES_USER",
+      "rawValue": "postgres",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 18
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-password",
+          "name": "POSTGRES_PASSWORD",
+          "sensitive": true
+        }
+      ],
+      "property": "services.postgres.environment.POSTGRES_PASSWORD",
+      "rawValue": "${POSTGRES_PASSWORD:-password}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 19
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.environment.POSTGRES_DB",
+      "rawValue": "interview_guide",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 20
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.test",
+      "rawValue": "[\"CMD-SHELL\", \"pg_isready -U postgres\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 32
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 33
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.timeout",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 34
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.healthcheck.retries",
+      "rawValue": "5",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 35
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.image",
+      "rawValue": "redis:7",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 48
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.container_name",
+      "rawValue": "interview-redis",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 49
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.test",
+      "rawValue": "[\"CMD\", \"redis-cli\", \"ping\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 55
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 56
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.timeout",
+      "rawValue": "3s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 57
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.healthcheck.retries",
+      "rawValue": "5",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 58
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.image",
+      "rawValue": "minio/minio",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 73
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.container_name",
+      "rawValue": "interview-minio",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 74
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.command",
+      "rawValue": "server /data --console-address \":9001\"",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 76
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.environment.MINIO_ROOT_USER",
+      "rawValue": "minioadmin",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 78
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.environment.MINIO_ROOT_PASSWORD",
+      "rawValue": "minioadmin",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 79
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.healthcheck.test",
+      "rawValue": "[\"CMD\", \"curl\", \"-f\", \"http://localhost:9000/minio/health/live\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 86
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 87
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.healthcheck.timeout",
+      "rawValue": "3s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 88
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.healthcheck.retries",
+      "rawValue": "5",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 89
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.createbuckets.image",
+      "rawValue": "minio/mc",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 103
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.createbuckets.depends_on.minio.condition",
+      "rawValue": "service_healthy # 必须等待 MinIO 服务健康（不仅仅是启动）",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 106
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.build.context",
+      "rawValue": ".",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 128
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.build.dockerfile",
+      "rawValue": "app/Dockerfile",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 129
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.container_name",
+      "rawValue": "interview-app",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 130
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.depends_on.postgres.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 134
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.depends_on.redis.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 136
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.depends_on.minio.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 138
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.depends_on.createbuckets.condition",
+      "rawValue": "service_completed_successfully # 等待初始化任务完成",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 140
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.POSTGRES_HOST",
+      "rawValue": "postgres",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 144
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.POSTGRES_PORT",
+      "rawValue": "5432",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 145
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.POSTGRES_DB",
+      "rawValue": "interview_guide",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 146
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.POSTGRES_USER",
+      "rawValue": "postgres",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 147
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-password",
+          "name": "POSTGRES_PASSWORD",
+          "sensitive": true
+        }
+      ],
+      "property": "services.app.environment.POSTGRES_PASSWORD",
+      "rawValue": "${POSTGRES_PASSWORD:-password}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 148
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.REDIS_HOST",
+      "rawValue": "redis",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 151
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.REDIS_PORT",
+      "rawValue": "6379",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 152
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.APP_STORAGE_ENDPOINT",
+      "rawValue": "http://minio:9000",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 156
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.APP_STORAGE_ACCESS_KEY",
+      "rawValue": "minioadmin",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 157
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.APP_STORAGE_SECRET_KEY",
+      "rawValue": "minioadmin",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 158
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.APP_STORAGE_BUCKET",
+      "rawValue": "interview-guide",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 159
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.environment.APP_STORAGE_REGION",
+      "rawValue": "us-east-1",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 160
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": null,
+          "name": "AI_BAILIAN_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "services.app.environment.AI_BAILIAN_API_KEY",
+      "rawValue": "${AI_BAILIAN_API_KEY}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 164
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-qwen3.5-flash",
+          "name": "AI_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "services.app.environment.AI_MODEL",
+      "rawValue": "${AI_MODEL:-qwen3.5-flash}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 165
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": null,
+          "name": "APP_AI_CONFIG_ENCRYPTION_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "services.app.environment.APP_AI_CONFIG_ENCRYPTION_KEY",
+      "rawValue": "${APP_AI_CONFIG_ENCRYPTION_KEY}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 166
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-1",
+          "name": "APP_INTERVIEW_FOLLOW_UP_COUNT",
+          "sensitive": false
+        }
+      ],
+      "property": "services.app.environment.APP_INTERVIEW_FOLLOW_UP_COUNT",
+      "rawValue": "${APP_INTERVIEW_FOLLOW_UP_COUNT:-1}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 169
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-8",
+          "name": "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+          "sensitive": false
+        }
+      ],
+      "property": "services.app.environment.APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+      "rawValue": "${APP_INTERVIEW_EVALUATION_BATCH_SIZE:-8}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 170
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.frontend.build",
+      "rawValue": "./frontend",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 182
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.frontend.container_name",
+      "rawValue": "interview-frontend",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 183
+      }
+    }
+  ],
+  "envExample": [
+    {
+      "default": "your_dashscope_api_key_here",
+      "name": "AI_BAILIAN_API_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 6
+      }
+    },
+    {
+      "default": "change_me_provider_api_key_encryption_key",
+      "name": "APP_AI_CONFIG_ENCRYPTION_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 9
+      }
+    },
+    {
+      "default": "",
+      "name": "PROVIDER_KIMI_API_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 19
+      }
+    },
+    {
+      "default": "kimi-k2.6",
+      "name": "PROVIDER_KIMI_MODEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 20
+      }
+    },
+    {
+      "default": "",
+      "name": "PROVIDER_DEEPSEEK_API_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 23
+      }
+    },
+    {
+      "default": "deepseek-v4-flash",
+      "name": "PROVIDER_DEEPSEEK_MODEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 24
+      }
+    },
+    {
+      "default": "",
+      "name": "PROVIDER_GLM_API_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 27
+      }
+    },
+    {
+      "default": "glm-5",
+      "name": "PROVIDER_GLM_MODEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 28
+      }
+    },
+    {
+      "default": "localhost",
+      "name": "POSTGRES_HOST",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 39
+      }
+    },
+    {
+      "default": "5432",
+      "name": "POSTGRES_PORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 40
+      }
+    },
+    {
+      "default": "interview_guide",
+      "name": "POSTGRES_DB",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 41
+      }
+    },
+    {
+      "default": "postgres",
+      "name": "POSTGRES_USER",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 42
+      }
+    },
+    {
+      "default": "password",
+      "name": "POSTGRES_PASSWORD",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 43
+      }
+    },
+    {
+      "default": "localhost",
+      "name": "REDIS_HOST",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 46
+      }
+    },
+    {
+      "default": "6379",
+      "name": "REDIS_PORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 47
+      }
+    },
+    {
+      "default": "http://localhost:9000",
+      "name": "APP_STORAGE_ENDPOINT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 50
+      }
+    },
+    {
+      "default": "rustfsadmin",
+      "name": "APP_STORAGE_ACCESS_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 51
+      }
+    },
+    {
+      "default": "rustfsadmin",
+      "name": "APP_STORAGE_SECRET_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 52
+      }
+    },
+    {
+      "default": "interview-guide",
+      "name": "APP_STORAGE_BUCKET",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 53
+      }
+    },
+    {
+      "default": "qwen3.5-flash",
+      "name": "AI_MODEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 56
+      }
+    }
+  ],
+  "envReferencedButUndocumented": [
+    "APP_AI_ADVISORS_ENABLED",
+    "APP_AI_ADVISORS_MESSAGE_CHAT_MEMORY_ENABLED",
+    "APP_AI_ADVISORS_MESSAGE_CHAT_MEMORY_MAX_MESSAGES",
+    "APP_AI_ADVISORS_SIMPLE_LOGGER_ENABLED",
+    "APP_AI_ADVISORS_TOOL_CALL_CONVERSATION_HISTORY_ENABLED",
+    "APP_AI_ADVISORS_TOOL_CALL_ENABLED",
+    "APP_AI_AGENT_UTILS_SKILLS_ROOT",
+    "APP_AI_CONFIG_ALLOW_FALLBACK_ENCRYPTION_KEY",
+    "APP_AI_CONFIG_ENV_PATH",
+    "APP_AI_CONFIG_REQUIRE_ENCRYPTION_KEY",
+    "APP_AI_CONFIG_YAML_PATH",
+    "APP_AI_EMBEDDING_DIMENSIONS",
+    "APP_AI_RAG_MIN_SCORE_DEFAULT",
+    "APP_AI_RAG_MIN_SCORE_SHORT",
+    "APP_AI_RAG_REWRITE_ENABLED",
+    "APP_AI_RAG_SHORT_QUERY_LENGTH",
+    "APP_AI_RAG_TOPK_LONG",
+    "APP_AI_RAG_TOPK_MEDIUM",
+    "APP_AI_RAG_TOPK_SHORT",
+    "APP_AI_STRUCTURED_ERROR_MESSAGE_MAX_LENGTH",
+    "APP_AI_STRUCTURED_INCLUDE_LAST_ERROR",
+    "APP_AI_STRUCTURED_MAX_ATTEMPTS",
+    "APP_AI_STRUCTURED_METRICS_ENABLED",
+    "APP_AI_STRUCTURED_RETRY_APPEND_STRICT_JSON_INSTRUCTION",
+    "APP_AI_STRUCTURED_RETRY_USE_REPAIR_PROMPT",
+    "APP_AI_STRUCTURED_SCHEMA_VALIDATION_ENABLED",
+    "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+    "APP_INTERVIEW_FOLLOW_UP_COUNT",
+    "APP_STORAGE_API_CALL_ATTEMPT_TIMEOUT",
+    "APP_STORAGE_API_CALL_TIMEOUT",
+    "APP_STORAGE_AUTO_CREATE_BUCKET",
+    "APP_STORAGE_REGION",
+    "APP_VOICE_AI_QUESTION_MAX_CHARS",
+    "APP_VOICE_ASR_SILENCE_MS",
+    "APP_VOICE_CHUNKED_AUDIO_ENABLED",
+    "APP_VOICE_INTERVIEW_AUDIO_BIT_RATE",
+    "APP_VOICE_INTERVIEW_AUDIO_CHANNELS",
+    "APP_VOICE_INTERVIEW_AUDIO_CHUNK_DURATION",
+    "APP_VOICE_INTERVIEW_AUDIO_CODEC",
+    "APP_VOICE_INTERVIEW_AUDIO_SAMPLE_RATE",
+    "APP_VOICE_INTERVIEW_PHASE_HR_MAX_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_HR_MAX_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_HR_MIN_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_HR_MIN_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_HR_SUGGESTED_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_INTRO_MAX_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_INTRO_MAX_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_INTRO_MIN_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_INTRO_MIN_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_INTRO_SUGGESTED_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_PROJECT_MAX_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_PROJECT_MAX_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_PROJECT_MIN_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_PROJECT_MIN_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_PROJECT_SUGGESTED_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_TECH_MAX_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_TECH_MAX_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_TECH_MIN_DURATION",
+    "APP_VOICE_INTERVIEW_PHASE_TECH_MIN_QUESTIONS",
+    "APP_VOICE_INTERVIEW_PHASE_TECH_SUGGESTED_DURATION",
+    "APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_CONCURRENT",
+    "APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_PER_IP",
+    "APP_VOICE_INTERVIEW_RATE_LIMIT_MAX_PER_SESSION",
+    "APP_VOICE_INTERVIEW_TTS_DEFAULT_VOICE",
+    "APP_VOICE_MAX_CONCURRENT_TTS_PER_SESSION",
+    "APP_VOICE_MAX_WAIT_FOR_CONTINUATION_MS",
+    "APP_VOICE_MIN_COMMIT_CHARS",
+    "APP_VOICE_MIN_SILENCE_BEFORE_COMMIT_MS",
+    "APP_VOICE_OPENING_AUDIO_WARMUP_ENABLED",
+    "APP_VOICE_TTS_CONNECT_TIMEOUT_SECONDS",
+    "APP_VOICE_TTS_TIMEOUT_SECONDS",
+    "APP_VOICE_USER_UTTERANCE_DEBOUNCE_MS",
+    "CORS_ALLOWED_ORIGINS",
+    "PROVIDER_LMSTUDIO_API_KEY",
+    "RUSTFS_ACCESS_KEY",
+    "RUSTFS_SECRET_KEY",
+    "java.io.tmpdir"
+  ],
+  "propertyBindings": [
+    {
+      "class": "AgentUtilsProperties",
+      "prefix": "app.ai.agent-utils",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/ai/AgentUtilsProperties.java",
+        "line": 9
+      }
+    },
+    {
+      "class": "StructuredOutputProperties",
+      "prefix": "app.ai",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/ai/StructuredOutputProperties.java",
+        "line": 9
+      }
+    },
+    {
+      "class": "AppConfigProperties",
+      "prefix": "app.resume",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/config/AppConfigProperties.java",
+        "line": 12
+      }
+    },
+    {
+      "class": "CorsProperties",
+      "prefix": "app.cors",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/config/CorsProperties.java",
+        "line": 9
+      }
+    },
+    {
+      "class": "LlmProviderProperties",
+      "prefix": "app.ai",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/config/LlmProviderProperties.java",
+        "line": 12
+      }
+    },
+    {
+      "class": "StorageConfigProperties",
+      "prefix": "app.storage",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/config/StorageConfigProperties.java",
+        "line": 13
+      }
+    },
+    {
+      "class": "InterviewEvaluationProperties",
+      "prefix": "app.interview.evaluation",
+      "source": {
+        "file": "app/src/main/java/interview/guide/common/evaluation/InterviewEvaluationProperties.java",
+        "line": 9
+      }
+    },
+    {
+      "class": "InterviewQuestionProperties",
+      "prefix": "app.interview",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/interview/service/InterviewQuestionProperties.java",
+        "line": 9
+      }
+    },
+    {
+      "class": "KnowledgeBaseQueryProperties",
+      "prefix": "app.ai.rag",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/knowledgebase/service/KnowledgeBaseQueryProperties.java",
+        "line": 9
+      }
+    },
+    {
+      "class": "ResumeAnalysisProperties",
+      "prefix": "app.resume.analysis",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/resume/service/ResumeAnalysisProperties.java",
+        "line": 9
+      }
+    },
+    {
+      "class": "VoiceInterviewProperties",
+      "prefix": "app.voice-interview",
+      "source": {
+        "file": "app/src/main/java/interview/guide/modules/voiceinterview/config/VoiceInterviewProperties.java",
+        "line": 16
+      }
+    }
+  ],
+  "schemaVersion": 1,
+  "summary": {
+    "configurationValueCount": 244,
+    "envExampleCount": 20,
+    "envReferencedButUndocumentedCount": 77,
+    "propertyBindingCount": 11
+  },
+  "valueInjections": []
+}
