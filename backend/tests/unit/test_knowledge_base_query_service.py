@@ -424,6 +424,41 @@ async def test_explicit_fake_stream_cancel_closes_upstream_without_extra_output(
     assert adapter.stream_closed is True
 
 
+@pytest.mark.asyncio
+async def test_explicit_fake_rag_history_is_used_for_rewrite_and_answer() -> None:
+    repository = ExplicitFakeQueryRepository(search_results=[[VectorSearchHit("固定原文", 1.0)]])
+    adapter = ExplicitFakeLlmAdapter(
+        chat_contents=["改写后的问题"],
+        stream_chunks=["固定流式回答"],
+    )
+    service = query_service(repository, adapter, rewrite_enabled=True)
+    history = [
+        {"role": "user", "content": "上一问"},
+        {"role": "assistant", "content": "上一答"},
+    ]
+
+    stream = await service.answer_question_stream([1], "追问", history)
+    assert [chunk async for chunk in stream] == ["固定流式回答"]
+
+    assert "用户: 上一问" in adapter.chat_messages[0][0]["content"]
+    assert "助手: 上一答" in adapter.chat_messages[0][0]["content"]
+    assert [message["role"] for message in adapter.chat_messages[1]] == [
+        "system",
+        "user",
+        "assistant",
+        "user",
+    ]
+    assert adapter.chat_messages[1][1:3] == history
+
+
+def test_rag_history_truncates_by_java_utf16_units() -> None:
+    formatted = KnowledgeBaseQueryService._format_history_for_rewrite(
+        [{"role": "assistant", "content": "😀" * 101}]
+    )
+
+    assert formatted == f"助手: {'😀' * 100}..."
+
+
 def test_sse_data_matches_spring_string_event_framing() -> None:
     assert sse_data("第一行\r\n第二行\n") == (
         b"data:\xe7\xac\xac\xe4\xb8\x80\xe8\xa1\x8c\n"

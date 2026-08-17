@@ -128,7 +128,7 @@
         "line": 124
       },
       "status": "sample-required",
-      "summary": "语音 WebSocket 连接开始时没有先完整校验会话状态，再启动 ASR。"
+      "summary": "RAG 会话关联知识库使用 `HashSet`，ID、名称和详情数组在不同请求中的顺序可能变化。"
     },
     {
       "id": "KNOWN-014",
@@ -138,7 +138,7 @@
         "line": 125
       },
       "status": "sample-required",
-      "summary": "语音配置中的连接数量限制当前没有真正使用。"
+      "summary": "语音 WebSocket 连接开始时没有先完整校验会话状态，再启动 ASR。"
     },
     {
       "id": "KNOWN-015",
@@ -148,7 +148,7 @@
         "line": 126
       },
       "status": "sample-required",
-      "summary": "同一 sessionId 建立第二条语音连接时，当前进程内状态可能互相覆盖。"
+      "summary": "语音配置中的连接数量限制当前没有真正使用。"
     },
     {
       "id": "KNOWN-016",
@@ -158,7 +158,7 @@
         "line": 127
       },
       "status": "sample-required",
-      "summary": "部分语音配置项写在 `application.yml` 中，但没有对应代码读取，当前实际无效。"
+      "summary": "同一 sessionId 建立第二条语音连接时，当前进程内状态可能互相覆盖。"
     },
     {
       "id": "KNOWN-017",
@@ -168,7 +168,7 @@
         "line": 128
       },
       "status": "sample-required",
-      "summary": "部分语音单元测试和集成测试被禁用。"
+      "summary": "部分语音配置项写在 `application.yml` 中，但没有对应代码读取，当前实际无效。"
     },
     {
       "id": "KNOWN-018",
@@ -178,7 +178,7 @@
         "line": 129
       },
       "status": "sample-required",
-      "summary": "当前 Nginx 配置代理 `/api`，但没有完整覆盖 `/ws`。"
+      "summary": "部分语音单元测试和集成测试被禁用。"
     },
     {
       "id": "KNOWN-019",
@@ -188,7 +188,7 @@
         "line": 130
       },
       "status": "sample-required",
-      "summary": "README、前端 Dockerfile 和 CI 使用的 Node 版本不一致。"
+      "summary": "当前 Nginx 配置代理 `/api`，但没有完整覆盖 `/ws`。"
     },
     {
       "id": "KNOWN-020",
@@ -198,11 +198,21 @@
         "line": 131
       },
       "status": "sample-required",
+      "summary": "README、前端 Dockerfile 和 CI 使用的 Node 版本不一致。"
+    },
+    {
+      "id": "KNOWN-021",
+      "requiredAction": "Add a fixed sample that preserves the current behavior.",
+      "source": {
+        "file": "docs/MIGRATION_PLAN.md",
+        "line": 132
+      },
+      "status": "sample-required",
       "summary": "`.env.example` 与开发 Compose 的默认 PostgreSQL 密码不一致。"
     }
   ],
   "schemaVersion": 1,
   "summary": {
-    "knownIssueCount": 20
+    "knownIssueCount": 21
   }
 }

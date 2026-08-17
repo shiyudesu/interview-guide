@@ -31,6 +31,9 @@ from interview_guide.modules.interview_skill.api import (
 from interview_guide.modules.knowledge_base.api import (
     router as knowledge_base_router,
 )
+from interview_guide.modules.knowledge_base.rag_chat_api import (
+    router as rag_chat_router,
+)
 from interview_guide.modules.llm_provider.api import router as llm_provider_router
 from interview_guide.modules.resume.api import router as resume_router
 
@@ -81,6 +84,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(llm_provider_router)
     app.include_router(resume_router)
     app.include_router(knowledge_base_router)
+    app.include_router(rag_chat_router)
     app.add_middleware(
         RequestContextMiddleware,
         metrics=metrics,

@@ -372,7 +372,7 @@
       "skill": 40,
       "voice-config": 1
     },
-    "testFileCount": 48
+    "testFileCount": 49
   },
   "tests": [
     {
@@ -464,6 +464,11 @@
       "disabledMarkers": 0,
       "file": "app/src/test/java/interview/guide/modules/interview/service/InterviewSessionIdempotencyTest.java",
       "sha256": "57975aa53b696252808046df67aa5557211c5cc8611fb4c59c7215c747bf06d2"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "app/src/test/java/interview/guide/modules/knowledgebase/RagChatControllerStreamBehaviorTest.java",
+      "sha256": "dd2161abb163c6c4da99311ef36017a1829e847d5be4e9133d0b55dc865564e9"
     },
     {
       "disabledMarkers": 0,

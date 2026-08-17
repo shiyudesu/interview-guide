@@ -151,6 +151,7 @@ docker compose -f docker-compose.dev.yml up -d
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
+./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh

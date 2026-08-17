@@ -11,7 +11,7 @@
     },
     "configuration.json": {
       "configurationValueCount": 244,
-      "envExampleCount": 27,
+      "envExampleCount": 29,
       "envReferencedButUndocumentedCount": 70,
       "propertyBindingCount": 11
     },
@@ -23,7 +23,7 @@
       "tableCount": 17
     },
     "known-issues.json": {
-      "knownIssueCount": 20
+      "knownIssueCount": 21
     },
     "redis.json": {
       "constantCount": 49,
@@ -41,7 +41,7 @@
         "skill": 40,
         "voice-config": 1
       },
-      "testFileCount": 48
+      "testFileCount": 49
     }
   },
   "nextRequiredWork": [

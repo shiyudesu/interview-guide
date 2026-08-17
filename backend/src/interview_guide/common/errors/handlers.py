@@ -26,6 +26,7 @@ MISSING_FIELD_MESSAGES = {
     "question": "问题不能为空",
     "rawText": "文本不能为空",
     "raw_text": "文本不能为空",
+    "title": "标题不能为空",
 }
 
 

@@ -22,6 +22,7 @@ NO_RESULT_RESPONSE = (
 )
 STREAM_ERROR_RESPONSE = "【错误】知识库查询失败：AI服务暂时不可用，请稍后重试。"
 STREAM_PROBE_CHARS = 120
+MAX_REWRITE_HISTORY_CHARS = 200
 MEDIUM_QUERY_LENGTH = 12
 WHITESPACE = re.compile(r"[ \t\n\x0b\f\r]+")
 NO_RESULT_MARKERS = (
@@ -204,6 +205,7 @@ class KnowledgeBaseQueryService:
         self,
         knowledge_base_ids: Sequence[int | None] | None,
         question: str | None,
+        history: Sequence[dict[str, str]] | None = None,
     ) -> AsyncIterator[str]:
         normalized_question = self._normalize_question(question)
         if not knowledge_base_ids or not normalized_question:
@@ -212,7 +214,11 @@ class KnowledgeBaseQueryService:
         try:
             validated_ids = self._validated_ids(knowledge_base_ids)
             await self._repository.increment_question_counts(validated_ids)
-            context = await self._build_query_context(normalized_question)
+            effective_history = list(history or ())
+            context = await self._build_query_context(
+                normalized_question,
+                effective_history,
+            )
             relevant_documents = await self._retrieve_relevant_documents(
                 context,
                 validated_ids,
@@ -226,6 +232,7 @@ class KnowledgeBaseQueryService:
                     self._answer_messages(
                         relevant_documents,
                         normalized_question,
+                        effective_history,
                     ),
                     tools=self._tools or None,
                 )
@@ -241,8 +248,12 @@ class KnowledgeBaseQueryService:
     async def _build_query_context(
         self,
         normalized_question: str,
+        history: Sequence[dict[str, str]] = (),
     ) -> QueryContext:
-        rewritten_question = await self._rewrite_question(normalized_question)
+        rewritten_question = await self._rewrite_question(
+            normalized_question,
+            history,
+        )
         candidates = tuple(dict.fromkeys((rewritten_question, normalized_question)))
         return QueryContext(
             original_question=normalized_question,
@@ -250,14 +261,21 @@ class KnowledgeBaseQueryService:
             search=self._resolve_search_parameters(normalized_question),
         )
 
-    async def _rewrite_question(self, question: str) -> str:
+    async def _rewrite_question(
+        self,
+        question: str,
+        history: Sequence[dict[str, str]] = (),
+    ) -> str:
         if not self._configuration.rewrite_enabled or not question:
             return question
         try:
             provider = await self._registry.get_chat()
             prompt = self._prompts.render(
                 "knowledgebase-query-rewrite.st",
-                {"question": question, "history": ""},
+                {
+                    "question": question,
+                    "history": self._format_history_for_rewrite(history),
+                },
             )
             prompt = prompt.rstrip("\n") + "\n"
             result = await self._adapter.chat(
@@ -337,6 +355,7 @@ class KnowledgeBaseQueryService:
         self,
         documents: Sequence[VectorSearchHit],
         question: str,
+        history: Sequence[dict[str, str]] = (),
     ) -> list[dict[str, str]]:
         context = "\n\n---\n\n".join(document.content for document in documents)
         system_prompt = (
@@ -348,8 +367,30 @@ class KnowledgeBaseQueryService:
         )
         return [
             {"role": "system", "content": system_prompt},
+            *history,
             {"role": "user", "content": user_prompt},
         ]
+
+    @staticmethod
+    def _format_history_for_rewrite(
+        history: Sequence[dict[str, str]],
+    ) -> str:
+        lines: list[str] = []
+        for message in history:
+            role = message.get("role")
+            content = message.get("content", "")
+            if role == "user":
+                lines.append(f"用户: {content}")
+            elif role == "assistant":
+                if java_string_length(content) > MAX_REWRITE_HISTORY_CHARS:
+                    content = (
+                        content.encode("utf-16-le", errors="surrogatepass")[
+                            : MAX_REWRITE_HISTORY_CHARS * 2
+                        ].decode("utf-16-le", errors="surrogatepass")
+                        + "..."
+                    )
+                lines.append(f"助手: {content}")
+        return java_trim("\n".join(lines))
 
     def _resolve_search_parameters(self, question: str) -> SearchParameters:
         compact_length = java_string_length(WHITESPACE.sub("", question))

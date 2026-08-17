@@ -38,13 +38,15 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
+./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/stop-comparison-env.sh
 ```
 
 真实模型兼容测试使用 `migration/model-proxy/` 中的本地 HTTP/WebSocket 透传记录代理；
 正常结果不会被代理修改，故障注入默认关闭。
 普通知识库查询在常规比较中只验证无需真实模型的校验、缺失知识库和 SSE 错误分帧；
-真实改写、Embedding、同步回答和流式回答由受保护的 `real-model.yml` 记录并验收。
+RAG Chat 常规比较覆盖 CRUD、关联、无模型 SSE 和消息落库。真实改写、Embedding、同步回答、
+流式回答以及 RAG Chat 正常/故障保存结构由受保护的 `real-model.yml` 记录并验收。
 
 Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
 LibreOffice 7.4.7-1+deb12u14，不包含 JVM。

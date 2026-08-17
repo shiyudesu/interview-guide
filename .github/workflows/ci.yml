@@ -297,6 +297,9 @@ jobs:
       - name: Compare knowledge base foundation
         run: ./migration/scripts/run-knowledge-base-comparison.sh
 
+      - name: Compare RAG Chat CRUD and no-model streaming
+        run: ./migration/scripts/run-rag-chat-comparison.sh
+
       - name: Run frontend against real Python backend
         working-directory: frontend
         env:

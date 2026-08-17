@@ -3091,6 +3091,24 @@
         "file": ".env.example",
         "line": 65
       }
+    },
+    {
+      "default": "true",
+      "name": "APP_AI_RAG_HISTORY_ENABLED",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 66
+      }
+    },
+    {
+      "default": "10",
+      "name": "APP_AI_RAG_HISTORY_MAX_MESSAGES",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 67
+      }
     }
   ],
   "envReferencedButUndocumented": [
@@ -3258,7 +3276,7 @@
   "schemaVersion": 1,
   "summary": {
     "configurationValueCount": 244,
-    "envExampleCount": 27,
+    "envExampleCount": 29,
     "envReferencedButUndocumentedCount": 70,
     "propertyBindingCount": 11
   },

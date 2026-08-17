@@ -172,6 +172,15 @@ class Settings(BaseSettings):
         default=0.28,
         validation_alias="APP_AI_RAG_MIN_SCORE_DEFAULT",
     )
+    ai_rag_history_enabled: bool = Field(
+        default=True,
+        validation_alias="APP_AI_RAG_HISTORY_ENABLED",
+    )
+    ai_rag_history_max_messages: int = Field(
+        default=10,
+        ge=0,
+        validation_alias="APP_AI_RAG_HISTORY_MAX_MESSAGES",
+    )
     provider_lmstudio_api_key: SecretStr = Field(
         default=SecretStr("lm-studio"),
         validation_alias="PROVIDER_LMSTUDIO_API_KEY",

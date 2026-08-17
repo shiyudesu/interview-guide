@@ -121,6 +121,7 @@ Redisson、Apache Tika、iText 和 DashScope Java SDK。
 - RAG Chat 客户端中途断开时，当前不会保存已经生成的部分内容。
 - RAG 慢客户端当前没有明确的缓冲上限。
 - 同一 RAG 会话并发发送可能出现消息顺序竞争。
+- RAG 会话关联知识库使用 `HashSet`，ID、名称和详情数组在不同请求中的顺序可能变化。
 - 语音 WebSocket 连接开始时没有先完整校验会话状态，再启动 ASR。
 - 语音配置中的连接数量限制当前没有真正使用。
 - 同一 sessionId 建立第二条语音连接时，当前进程内状态可能互相覆盖。
@@ -1516,6 +1517,7 @@ docker history <python-image>
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
+./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh

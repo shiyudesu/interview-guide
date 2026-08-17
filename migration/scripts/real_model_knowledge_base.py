@@ -21,6 +21,7 @@ CONTEXT = "本系统知识库使用固定的 1024 维向量，并使用余弦相
 NO_RESULT_RESPONSE = (
     "抱歉，在选定的知识库中未检索到相关信息。请换一个更具体的关键词或补充上下文后再试。"
 )
+MODEL_PROXY_CONTROL = "http://127.0.0.1:18090/__control"
 
 
 @dataclass(frozen=True)
@@ -164,6 +165,42 @@ def result_payload(response: httpx.Response) -> dict[str, Any]:
     return payload
 
 
+def success_data(response: httpx.Response) -> Any:
+    response.raise_for_status()
+    payload = response.json()
+    if payload.get("code") != 200 or payload.get("success") is not True:
+        raise AssertionError(f"Unexpected business response: {payload}")
+    return payload.get("data")
+
+
+def configure_fault(count: int) -> None:
+    response = httpx.post(
+        f"{MODEL_PROXY_CONTROL}/fault",
+        json={"count": count, "mode": "status", "status": 503},
+        timeout=10,
+    )
+    response.raise_for_status()
+
+
+def reset_fault() -> None:
+    response = httpx.post(f"{MODEL_PROXY_CONTROL}/reset", timeout=10)
+    response.raise_for_status()
+
+
+def tracked_sse_headers(response: httpx.Response) -> dict[str, str]:
+    return {
+        key.lower(): value
+        for key, value in response.headers.items()
+        if key.lower()
+        in {
+            "content-type",
+            "cache-control",
+            "connection",
+            "x-accel-buffering",
+        }
+    }
+
+
 def request_summaries(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     summaries: list[dict[str, Any]] = []
     for record in records:
@@ -210,6 +247,37 @@ def request_summaries(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return summaries
 
 
+def rag_message_state(
+    target: Target,
+    session_id: int,
+) -> list[dict[str, Any]]:
+    with target.database_connection() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT type, content, message_order, completed
+            FROM rag_chat_messages
+            WHERE session_id = %s
+            ORDER BY message_order
+            """,
+            (session_id,),
+        )
+        return [
+            {
+                "type": message_type,
+                "content": content,
+                "messageOrder": message_order,
+                "completed": completed,
+            }
+            for message_type, content, message_order, completed in cursor.fetchall()
+        ]
+
+
+def rag_stream_text(record: dict[str, Any]) -> str:
+    return "".join(
+        str(frame["data"]).replace("\\n", "\n").replace("\\r", "\r") for frame in record["frames"]
+    )
+
+
 def capture_target(target: Target, knowledge_base_id: int) -> dict[str, Any]:
     before = len(model_records())
     request = {
@@ -248,6 +316,44 @@ def capture_target(target: Target, knowledge_base_id: int) -> dict[str, Any]:
                 cancelled=True,
                 completed=False,
             )
+        rag_session = success_data(
+            client.post(
+                "/api/rag-chat/sessions",
+                json={
+                    "knowledgeBaseIds": [knowledge_base_id],
+                    "title": "真实模型 RAG Chat",
+                },
+            )
+        )
+        if not isinstance(rag_session, dict):
+            raise AssertionError(f"Missing RAG Chat session: {rag_session}")
+        rag_session_id = int(rag_session["id"])
+        rag_normal_response = client.post(
+            f"/api/rag-chat/sessions/{rag_session_id}/messages/stream",
+            json={"question": QUESTION},
+        )
+        rag_normal = sse_record(
+            rag_normal_response.content,
+            rag_normal_response.status_code,
+            tracked_sse_headers(rag_normal_response),
+        )
+        rag_normal_text = rag_stream_text(rag_normal)
+        normal_records = model_records()[before:]
+
+        configure_fault(3)
+        try:
+            rag_error_response = client.post(
+                f"/api/rag-chat/sessions/{rag_session_id}/messages/stream",
+                json={"question": "请再次说明向量维度"},
+            )
+        finally:
+            reset_fault()
+        rag_error = sse_record(
+            rag_error_response.content,
+            rag_error_response.status_code,
+            tracked_sse_headers(rag_error_response),
+        )
+        rag_error_text = rag_stream_text(rag_error)
     stream = sse_record(
         stream_response.content,
         stream_response.status_code,
@@ -283,7 +389,24 @@ def capture_target(target: Target, knowledge_base_id: int) -> dict[str, Any]:
         question_count = int(cursor.fetchone()[0])
         cursor.execute("SELECT count(*) FROM rag_chat_messages")
         rag_message_count = int(cursor.fetchone()[0])
-    records = model_records()[before:]
+    rag_messages = rag_message_state(target, rag_session_id)
+    if (
+        not rag_normal_text.strip()
+        or rag_normal_text == NO_RESULT_RESPONSE
+        or "【错误】" in rag_normal_text
+    ):
+        raise AssertionError(f"Real RAG Chat stream failed for {target.name}: {rag_normal}")
+    if not rag_error_text.startswith("【错误】"):
+        raise AssertionError(f"RAG Chat fault was not recorded for {target.name}: {rag_error}")
+    if len(rag_messages) != 4:
+        raise AssertionError(f"Unexpected RAG Chat message state: {rag_messages}")
+    if (
+        rag_messages[1]["content"] != rag_normal_text
+        or rag_messages[1]["completed"] is not True
+        or rag_messages[3]["content"] != rag_error_text
+        or rag_messages[3]["completed"] is not True
+    ):
+        raise AssertionError(f"RAG Chat persistence mismatch: {rag_messages}")
     return {
         "sync": sync,
         "stream": stream,
@@ -291,7 +414,15 @@ def capture_target(target: Target, knowledge_base_id: int) -> dict[str, Any]:
         "streamText": stream_text,
         "questionCount": question_count,
         "ragMessageCount": rag_message_count,
-        "requests": request_summaries(records),
+        "requests": request_summaries(normal_records),
+        "ragChat": {
+            "session": rag_session,
+            "normal": rag_normal,
+            "normalText": rag_normal_text,
+            "error": rag_error,
+            "errorText": rag_error_text,
+            "messages": rag_messages,
+        },
     }
 
 
@@ -308,10 +439,12 @@ def main() -> None:
     python_requests = captures["python"]["requests"]
     request_shape_passed = java_requests == python_requests
     functional_passed = all(
-        capture["questionCount"] == 3
-        and capture["ragMessageCount"] == 0
+        capture["questionCount"] == 5
+        and capture["ragMessageCount"] == 4
         and capture["cancelledStream"]["cancelled"] is True
         and capture["cancelledStream"]["completed"] is False
+        and capture["ragChat"]["normal"]["completed"] is True
+        and capture["ragChat"]["error"]["completed"] is True
         for capture in captures.values()
     )
     report = {
