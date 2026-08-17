@@ -344,21 +344,23 @@ class VoiceWebSocketRuntime:
 
     async def disconnect(self, session_id: int) -> None:
         connection = await self.connections.pop(session_id)
-        if connection is not None:
-            await self._cancel_tasks(connection.state)
-            if connection.state.asr is not None:
-                await connection.state.asr.close()
         try:
-            await self._service.end_session(
-                session_id,
-                only_if_in_progress=True,
-            )
-        except Exception:
-            logger.warning(
-                "failed to auto-end voice session sessionId=%s",
-                session_id,
-                exc_info=True,
-            )
+            if connection is not None:
+                await self._cancel_tasks(connection.state)
+                if connection.state.asr is not None:
+                    await connection.state.asr.close()
+        finally:
+            try:
+                await self._service.end_session(
+                    session_id,
+                    only_if_in_progress=True,
+                )
+            except Exception:
+                logger.warning(
+                    "failed to auto-end voice session sessionId=%s",
+                    session_id,
+                    exc_info=True,
+                )
 
     async def close(self) -> None:
         for session_id in self.connections.session_ids():
