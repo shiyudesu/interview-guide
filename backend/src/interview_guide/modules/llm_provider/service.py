@@ -42,8 +42,7 @@ class LlmProviderService:
         self._settings = settings
 
     async def list(self) -> list[ProviderResponse]:
-        setting = await self._repository.global_setting()
-        providers = await self._repository.all_providers()
+        setting, providers = await self._repository.provider_listing()
         return [
             self._response(
                 provider,

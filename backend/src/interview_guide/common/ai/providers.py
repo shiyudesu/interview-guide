@@ -160,6 +160,19 @@ class ProviderRepository:
             result = await session.scalars(select(LlmProviderConfig))
             return list(result)
 
+    async def provider_listing(
+        self,
+    ) -> tuple[LlmGlobalSetting, list[LlmProviderConfig]]:
+        async with self._sessions() as session:
+            setting = await session.get(LlmGlobalSetting, GLOBAL_SETTING_ID)
+            if setting is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "读取 Provider 配置失败",
+                )
+            providers = await session.scalars(select(LlmProviderConfig))
+            return setting, list(providers)
+
     async def get_provider(self, provider_id: str) -> LlmProviderConfig:
         async with self._sessions() as session:
             provider = await session.get(LlmProviderConfig, provider_id)
