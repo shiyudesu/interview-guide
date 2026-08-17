@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Body
@@ -137,15 +139,23 @@ def test_openapi_metadata_and_dynamic_server_url() -> None:
     with TestClient(app, base_url="http://comparison:28080") as client:
         response = client.get("/v3/api-docs")
 
-    document = response.json()
-    assert document["info"] == {
-        "title": "智能 AI 面试官平台 API",
-        "description": "简历分析、模拟面试、知识库管理 RESTful API 文档",
-        "version": "1.0.0",
-    }
-    assert document["servers"] == [
+    baseline_path = (
+        Path(__file__).resolve().parents[2] / "resources/contracts/java-http-baseline.json"
+    )
+    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    openapi_case = next(case for case in baseline["cases"] if case["id"] == "openapi")
+    document = json.loads(openapi_case["response"]["body"])
+    document["servers"] = [
         {
             "url": "http://comparison:28080",
             "description": "Generated server url",
         }
     ]
+    assert (
+        response.content
+        == json.dumps(
+            document,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode()
+    )

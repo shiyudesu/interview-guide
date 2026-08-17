@@ -10,6 +10,11 @@ from pathlib import Path
 
 DIRECTORIES = ("fonts", "prompts", "scripts", "skills")
 FILES = ("voice-interview-opening.yml",)
+CONTRACT_FILES = {
+    "migration/samples/http/java-baseline.json": (
+        "contracts/java-http-baseline.json"
+    ),
+}
 
 
 def sha256(path: Path) -> str:
@@ -30,6 +35,8 @@ def expected_files(root: Path) -> dict[Path, Path]:
     for filename in FILES:
         source = source_root / filename
         mappings[source] = target_root / filename
+    for source_name, target_name in CONTRACT_FILES.items():
+        mappings[root / source_name] = target_root / target_name
     return mappings
 
 

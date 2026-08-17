@@ -4,6 +4,8 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/comparison-common.sh"
 
 mkdir -p "$comparison_reports"
+compose exec -T java-redis redis-cli FLUSHDB >/dev/null
+compose exec -T python-redis redis-cli FLUSHDB >/dev/null
 "$repo_root/migration/scripts/seed-comparison-data.sh"
 
 python3 "$repo_root/migration/scripts/comparison.py" capture-http \

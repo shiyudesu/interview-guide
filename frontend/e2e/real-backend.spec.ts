@@ -32,10 +32,18 @@ test.describe('真实 Python 后端 @real-backend', () => {
     await expect(page.getByText('Backend Engineer').first()).toBeVisible();
   });
 
-  test('设置页读取真实 Provider 列表', async ({ page }) => {
+  test('设置页读取真实 Provider 列表', async ({ page, request }) => {
+    const providersResponse = await request.get(`${backendUrl}/api/llm-provider/list`);
+    expect(providersResponse.ok()).toBe(true);
+    const providers = await providersResponse.json() as {
+      data: { id: string; model: string }[];
+    };
+    const dashscope = providers.data.find(provider => provider.id === 'dashscope');
+    expect(dashscope).toBeDefined();
+
     await page.goto('/settings');
 
     await expect(page.getByText('DashScope', { exact: false }).first()).toBeVisible();
-    await expect(page.getByText('qwen3.5-flash', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText(dashscope!.model, { exact: false }).first()).toBeVisible();
   });
 });

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from copy import deepcopy
-from typing import Any
+from pathlib import Path
+from typing import Any, cast
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -51,6 +53,18 @@ from interview_guide.modules.voice_interview.websocket_api import (
 )
 
 ACTUATOR_MEDIA_TYPE = "application/vnd.spring-boot.actuator.v3+json"
+
+
+def load_java_openapi_contract() -> dict[str, Any]:
+    baseline_path = (
+        Path(__file__).resolve().parents[2] / "resources/contracts/java-http-baseline.json"
+    )
+    baseline: dict[str, Any] = json.loads(baseline_path.read_text(encoding="utf-8"))
+    openapi_case = next(case for case in baseline["cases"] if case["id"] == "openapi")
+    return cast(dict[str, Any], json.loads(openapi_case["response"]["body"]))
+
+
+JAVA_OPENAPI_CONTRACT = load_java_openapi_contract()
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -150,7 +164,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/v3/api-docs", include_in_schema=False)
     async def openapi_document(request: Request) -> JSONResponse:
-        schema: dict[str, Any] = deepcopy(app.openapi())
+        schema = deepcopy(JAVA_OPENAPI_CONTRACT)
         schema["servers"] = [
             {
                 "url": str(request.base_url).rstrip("/"),
