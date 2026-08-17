@@ -53,6 +53,12 @@ jobs:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
         run: ./migration/scripts/run-real-model-smoke.sh
 
+      - name: Compare real-provider performance
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+          PERFORMANCE_ITERATIONS: "5"
+        run: ./migration/scripts/run-performance-acceptance.sh
+
       - name: Verify real ASR and TTS protocol adapters
         env:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
@@ -109,6 +115,7 @@ jobs:
             migration/reports/real-model-knowledge-base.json
             migration/reports/real-model-knowledge-base-interview.json
             migration/reports/real-model-smoke.json
+            migration/reports/performance-provider-connectivity.json
             migration/reports/real-model-voice.json
             migration/reports/real-model-voice-evaluation.json
           if-no-files-found: ignore

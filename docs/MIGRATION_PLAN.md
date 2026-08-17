@@ -1430,6 +1430,11 @@ FastAPI 必须设置与 Java 一致的：
 - 报告真实调用次数、Token、音频时长和费用。
 - 单独运行不调用模型的基础接口测试，但不能用它替代 AI 接口性能结果。
 
+受保护的 `real-model.yml` 先通过
+`./migration/scripts/run-performance-acceptance.sh` 交替运行至少五次 Java/Python
+Provider 连通性请求，保存请求一致性、应用延迟、Provider 网络延迟、Token 和版本化价格估算。
+这个报告只覆盖单并发 REST 真实模型场景，不能替代下列其余性能场景。
+
 测试场景：
 
 - REST 1、10、50 并发。
@@ -1530,6 +1535,7 @@ docker history <python-image>
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
 ./migration/scripts/run-knowledge-base-interview-comparison.sh
+./migration/scripts/run-performance-acceptance.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh

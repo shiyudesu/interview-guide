@@ -154,6 +154,7 @@ docker compose -f docker-compose.dev.yml up -d
 ./migration/scripts/run-voice-websocket-comparison.sh
 ./migration/scripts/run-voice-evaluation-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
+./migration/scripts/run-performance-acceptance.sh
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
 ./migration/scripts/run-knowledge-base-interview-comparison.sh

@@ -44,6 +44,7 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
 ./migration/scripts/run-knowledge-base-interview-comparison.sh
+./migration/scripts/run-performance-acceptance.sh
 ./migration/scripts/stop-comparison-env.sh
 ```
 
@@ -63,6 +64,9 @@ Embedding 与 LLM，并保存 Provider、模型、耗时和 Token 记录。
 reclaim 和恢复阈值。真实 ASR/TTS 与语音评估 LLM 仅由受保护工作流通过记录代理验收，并保存
 Provider、模型、耗时、Token 和 Provider 是否返回费用信息；缺少受保护 Key 时工作流直接失败，
 不会生成“真实模型已通过”的报告。
+受保护工作流还会交替执行至少五次 Java/Python 真实 Provider 连通性请求，校验请求模型和参数
+一致，并保存应用延迟、Provider 网络延迟、Token 与基于官方版本化单价的估算费用。该单场景
+报告不能替代迁移计划阶段 7 中其余并发、SSE、WebSocket、Worker 和大文件性能验收。
 
 Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
 LibreOffice 7.4.7-1+deb12u14，不包含 JVM。

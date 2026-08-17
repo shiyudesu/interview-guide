@@ -1,0 +1,82 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+SCRIPT = ROOT / "migration/scripts/performance_compare.py"
+SPEC = importlib.util.spec_from_file_location("performance_compare", SCRIPT)
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError(f"Unable to load {SCRIPT}")
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+
+
+class PerformanceCompareTest(unittest.TestCase):
+    def test_summary_uses_median_p95_and_p99(self) -> None:
+        samples = [
+            {"elapsedMs": value, "model": "fixed", "response": {}} for value in (10, 20, 30, 40, 50)
+        ]
+        summary = MODULE.summary(samples)
+        self.assertEqual(30, summary["medianMs"])
+        self.assertEqual(50, summary["p95Ms"])
+        self.assertEqual(50, summary["p99Ms"])
+
+    def test_proxy_capture_separates_alternating_targets(self) -> None:
+        events = []
+        for index in range(4):
+            correlation_id = f"request-{index}"
+            events.extend(
+                [
+                    {
+                        "body": {
+                            "json": {
+                                "max_tokens": 1,
+                                "messages": [{"content": "Reply with OK only.", "role": "user"}],
+                                "model": "qwen3.5-flash",
+                            }
+                        },
+                        "correlationId": correlation_id,
+                        "kind": "http-request",
+                    },
+                    {
+                        "body": {
+                            "json": {
+                                "usage": {
+                                    "completion_tokens": 1,
+                                    "prompt_tokens": 6,
+                                }
+                            }
+                        },
+                        "correlationId": correlation_id,
+                        "durationMs": 10 + index,
+                        "kind": "http-response",
+                        "status": 200,
+                    },
+                ]
+            )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "proxy.jsonl"
+            path.write_text(
+                "".join(json.dumps(event) + "\n" for event in events),
+                encoding="utf-8",
+            )
+            capture = MODULE.proxy_capture(path, 0, 4)
+
+        self.assertTrue(capture["requestsIdentical"])
+        self.assertEqual(12, capture["targets"]["java"]["usage"]["inputTokens"])
+        self.assertEqual(
+            [10.0, 12.0],
+            capture["targets"]["java"]["providerNetwork"]["samplesMs"],
+        )
+        self.assertGreater(
+            capture["targets"]["python"]["cost"]["estimated"],
+            0,
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
