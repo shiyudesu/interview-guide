@@ -19,6 +19,8 @@ def test_existing_environment_names_are_supported() -> None:
     settings = Settings(
         _env_file=None,
         APP_AI_CONFIG_ENCRYPTION_KEY="test-key",
+        APP_DATABASE_MAX_OVERFLOW=3,
+        APP_DATABASE_POOL_SIZE=12,
         CORS_ALLOWED_ORIGINS="http://localhost:5173,http://localhost:5174",
         POSTGRES_DB="comparison",
         POSTGRES_PASSWORD="secret",
@@ -26,9 +28,26 @@ def test_existing_environment_names_are_supported() -> None:
     )
 
     assert settings.server_port == 28080
+    assert settings.database_pool_size == 12
+    assert settings.database_max_overflow == 3
     assert settings.postgres_db == "comparison"
     assert settings.postgres_password.get_secret_value() == "secret"
     assert settings.allowed_origins == (
         "http://localhost:5173",
         "http://localhost:5174",
     )
+
+
+def test_database_pool_limits_reject_invalid_values() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            APP_AI_CONFIG_ENCRYPTION_KEY="test-key",
+            APP_DATABASE_POOL_SIZE=0,
+        )
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            APP_AI_CONFIG_ENCRYPTION_KEY="test-key",
+            APP_DATABASE_MAX_OVERFLOW=-1,
+        )
