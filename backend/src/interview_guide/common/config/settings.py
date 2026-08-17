@@ -261,6 +261,10 @@ class Settings(BaseSettings):
         default="qwen3-tts-flash-realtime",
         validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_MODEL",
     )
+    voice_tts_url: str = Field(
+        default="wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
+        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_URL",
+    )
     voice_tts_voice: str = Field(
         default="Cherry",
         validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_VOICE",
@@ -288,6 +292,41 @@ class Settings(BaseSettings):
     voice_tts_volume: int = Field(
         default=60,
         validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_VOLUME",
+    )
+    voice_tts_connect_timeout_seconds: float = Field(
+        default=5,
+        ge=1,
+        validation_alias="APP_VOICE_TTS_CONNECT_TIMEOUT_SECONDS",
+    )
+    voice_tts_timeout_seconds: float = Field(
+        default=8,
+        ge=5,
+        validation_alias="APP_VOICE_TTS_TIMEOUT_SECONDS",
+    )
+    voice_max_concurrent_tts_per_session: int = Field(
+        default=3,
+        ge=1,
+        validation_alias="APP_VOICE_MAX_CONCURRENT_TTS_PER_SESSION",
+    )
+    voice_llm_stream_push_interval_ms: int = Field(
+        default=180,
+        ge=80,
+        validation_alias="APP_VOICE_AI_STREAM_PUSH_INTERVAL_MS",
+    )
+    voice_llm_stream_min_chars_delta: int = Field(
+        default=12,
+        ge=4,
+        validation_alias="APP_VOICE_AI_STREAM_MIN_CHARS_DELTA",
+    )
+    voice_ai_question_max_chars: int = Field(
+        default=120,
+        ge=80,
+        validation_alias="APP_VOICE_AI_QUESTION_MAX_CHARS",
+    )
+    voice_timeout_check_interval_seconds: float = Field(
+        default=30,
+        gt=0,
+        validation_alias="APP_VOICE_TIMEOUT_CHECK_INTERVAL_SECONDS",
     )
     voice_context_compression_enabled: bool = Field(
         default=False,
@@ -349,6 +388,10 @@ class Settings(BaseSettings):
     migration_prompt_boundary_uuid: str | None = Field(
         default=None,
         validation_alias="MIGRATION_PROMPT_BOUNDARY_UUID",
+    )
+    migration_voice_fake_enabled: bool = Field(
+        default=False,
+        validation_alias="MIGRATION_VOICE_FAKE_ENABLED",
     )
 
     @model_validator(mode="after")

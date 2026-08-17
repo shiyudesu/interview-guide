@@ -151,6 +151,7 @@ docker compose -f docker-compose.dev.yml up -d
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-voice-rest-comparison.sh
+./migration/scripts/run-voice-websocket-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
@@ -178,7 +179,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
 uv run pytest
-uv run uvicorn interview_guide.main:app --host 0.0.0.0 --port 8080
+uv run uvicorn interview_guide.main:app --host 0.0.0.0 --port 8080 --ws-max-size 2097152
 docker build -f Dockerfile -t interview-guide-python ..
 ```
 

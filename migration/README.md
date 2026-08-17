@@ -33,6 +33,7 @@ instances, ports, and S3 buckets:
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-voice-rest-comparison.sh
+./migration/scripts/run-voice-websocket-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
@@ -57,6 +58,11 @@ uv run python ../migration/scripts/realtime_artifact.py --help
 The knowledge-base comparison uses the committed TXT/Markdown fixtures under
 `samples/knowledge-base/`. It compares synchronous HTTP, PostgreSQL, Redis Stream,
 and S3 state. It does not invoke or claim validation of a real Embedding model.
+
+The voice WebSocket comparison seeds an existing dialogue row and captures only the
+deterministic welcome branch, so it does not invoke or claim real ASR, TTS, or LLM
+validation. Provider protocol adapters and orchestration use explicit fakes in normal
+tests; protected workflow evidence is required for real voice-model acceptance.
 
 Java production defaults remain unchanged. Comparison processes opt into deterministic
 values with `interview.guide.migration.*` system properties:

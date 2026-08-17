@@ -43,6 +43,12 @@ from interview_guide.modules.resume.api import router as resume_router
 from interview_guide.modules.voice_interview.api import (
     router as voice_interview_router,
 )
+from interview_guide.modules.voice_interview.runtime import (
+    create_voice_websocket_runtime,
+)
+from interview_guide.modules.voice_interview.websocket_api import (
+    router as voice_interview_websocket_router,
+)
 
 ACTUATOR_MEDIA_TYPE = "application/vnd.spring-boot.actuator.v3+json"
 
@@ -57,6 +63,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.accepting_tasks = True
         infrastructure: RuntimeInfrastructure | None = None
+        voice_runtime = None
         try:
             if resolved_settings.infrastructure_startup_enabled:
                 infrastructure = RuntimeInfrastructure(
@@ -65,9 +72,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 )
                 await infrastructure.start()
                 app.state.infrastructure = infrastructure
+                voice_runtime = create_voice_websocket_runtime(
+                    infrastructure,
+                    resolved_settings,
+                )
+                app.state.voice_websocket_runtime = voice_runtime
             yield
         finally:
             app.state.accepting_tasks = False
+            if voice_runtime is not None:
+                await voice_runtime.close()
             if infrastructure is not None:
                 await infrastructure.close()
             await blocking_executor.shutdown()
@@ -92,6 +106,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(llm_provider_router)
     app.include_router(resume_router)
     app.include_router(voice_interview_router)
+    app.include_router(voice_interview_websocket_router)
     app.include_router(knowledge_base_router)
     app.include_router(knowledge_base_interview_router)
     app.include_router(rag_chat_router)
@@ -165,4 +180,5 @@ def run() -> None:
         host=settings.server_host,
         port=settings.server_port,
         workers=1,
+        ws_max_size=2 * 1024 * 1024,
     )

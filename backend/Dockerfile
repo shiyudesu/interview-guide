@@ -42,4 +42,4 @@ COPY --from=builder /workspace/backend/alembic.ini ./alembic.ini
 USER interview-guide
 EXPOSE 8080
 
-CMD ["uvicorn", "interview_guide.main:app", "--app-dir", "/app/src", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+CMD ["uvicorn", "interview_guide.main:app", "--app-dir", "/app/src", "--host", "0.0.0.0", "--port", "8080", "--workers", "1", "--ws-max-size", "2097152"]

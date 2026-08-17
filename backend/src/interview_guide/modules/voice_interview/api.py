@@ -33,9 +33,10 @@ def runtime_now(settings: Any) -> datetime:
     )
 
 
-async def service_dependency(request: Request) -> VoiceInterviewService:
-    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    settings = request.app.state.settings
+def build_service(
+    infrastructure: RuntimeInfrastructure,
+    settings: Any,
+) -> VoiceInterviewService:
     repository = VoiceInterviewRepository(
         infrastructure.database.sessions,
         lambda: runtime_now(settings),
@@ -51,6 +52,11 @@ async def service_dependency(request: Request) -> VoiceInterviewService:
         producer,
         lambda: runtime_now(settings),
     )
+
+
+async def service_dependency(request: Request) -> VoiceInterviewService:
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    return build_service(infrastructure, request.app.state.settings)
 
 
 Service = Annotated[VoiceInterviewService, Depends(service_dependency)]

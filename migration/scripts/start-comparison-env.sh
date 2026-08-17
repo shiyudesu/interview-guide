@@ -229,6 +229,7 @@ start_python() {
         --host 127.0.0.1 \
         --port 28080 \
         --workers 1 \
+        --ws-max-size 2097152 \
       >"$log_file" 2>&1 &
     echo "$!" >"$pid_file"
   )

@@ -44,6 +44,14 @@ jobs:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
         run: ./migration/scripts/run-real-model-smoke.sh
 
+      - name: Verify real ASR and TTS protocol adapters
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+          APP_VOICE_INTERVIEW_QWEN_ASR_URL: ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime
+          APP_VOICE_INTERVIEW_QWEN_TTS_URL: ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime
+        working-directory: backend
+        run: uv run --frozen python ../migration/scripts/real_model_voice.py
+
       - name: Prepare real question generation data
         env:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
@@ -76,6 +84,7 @@ jobs:
             migration/reports/real-model-knowledge-base.json
             migration/reports/real-model-knowledge-base-interview.json
             migration/reports/real-model-smoke.json
+            migration/reports/real-model-voice.json
           if-no-files-found: ignore
 
       - name: Stop comparison workers

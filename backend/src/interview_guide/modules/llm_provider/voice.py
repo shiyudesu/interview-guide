@@ -95,6 +95,10 @@ class VoiceConfigStore:
                 turn_detection_silence_duration_ms=(self._asr.turn_detection_silence_duration_ms),
             )
 
+    async def asr_config(self) -> AsrConfig:
+        async with self._lock:
+            return self._asr
+
     async def tts(self) -> TtsConfigResponse:
         async with self._lock:
             return TtsConfigResponse(
@@ -108,6 +112,10 @@ class VoiceConfigStore:
                 speech_rate=self._tts.speech_rate,
                 volume=self._tts.volume,
             )
+
+    async def tts_config(self) -> TtsConfig:
+        async with self._lock:
+            return self._tts
 
     async def update_asr(self, request: AsrConfigRequest) -> None:
         async with self._lock:
