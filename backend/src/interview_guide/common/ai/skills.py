@@ -10,6 +10,30 @@ import yaml
 from interview_guide.common.errors import BusinessException, ErrorCode
 
 FRONT_MATTER = re.compile(r"^---\s*\n(.*?)\n---\s*\n?(.*)$", re.DOTALL)
+SKILLS_TOOL_DESCRIPTION = (
+    "Execute a skill within the main conversation\n\n"
+    "<skills_instructions>\n"
+    "When users ask you to perform tasks, check if any of the available skills below "
+    "can help complete the task more effectively. Skills provide specialized "
+    "capabilities and domain knowledge.\n\n"
+    "How to use skills:\n"
+    "- Invoke skills using this tool with the skill name only (no arguments)\n"
+    '- When you invoke a skill, you will see <command-message>The "{{name}}" skill '
+    "is loading</command-message>\n"
+    "- The skill's prompt will expand and provide detailed instructions on how to "
+    "complete the task\n\n"
+    "NOTE: Response always starts start with the base directory of the skill execution "
+    "environment. You can use this to retrieve additional files of call shell "
+    "commands.\n"
+    "Skill description follows after the base directory line.\n\n"
+    "Important:\n"
+    "- Only use skills listed in <available_skills> below\n"
+    "- Do not invoke a skill that is already running\n"
+    "</skills_instructions>\n\n"
+    "<available_skills>\n"
+    "{skills}\n"
+    "</available_skills>\n"
+)
 
 
 @dataclass(frozen=True)
@@ -70,6 +94,37 @@ class SkillRepository:
         else:
             path = self._skills_dir / skill_id / category.ref
         return path.read_text(encoding="utf-8") if path.is_file() else None
+
+    def tool_definition(self) -> dict[str, Any]:
+        skills = "\n".join(
+            (
+                "<skill>\n"
+                f"  <name>{skill.name}</name>\n"
+                f"  <description>{skill.description}</description>\n"
+                "</skill>"
+            )
+            for skill in self.all()
+        )
+        return {
+            "type": "function",
+            "function": {
+                "name": "Skill",
+                "description": SKILLS_TOOL_DESCRIPTION.format(skills=skills),
+                "parameters": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "additionalProperties": False,
+                    "properties": {
+                        "command": {
+                            "description": ('The skill name (no arguments). E.g., "pdf" or "xlsx"'),
+                            "type": "string",
+                        }
+                    },
+                    "required": ["command"],
+                    "strict": True,
+                    "type": "object",
+                },
+            },
+        }
 
     def _load(self) -> dict[str, Skill]:
         skills: dict[str, Skill] = {}

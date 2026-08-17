@@ -144,6 +144,34 @@ class Settings(BaseSettings):
         default="https://dashscope.aliyuncs.com/compatible-mode/v1",
         validation_alias="APP_AI_PROVIDERS_DASHSCOPE_BASE_URL",
     )
+    ai_rag_rewrite_enabled: bool = Field(
+        default=True,
+        validation_alias="APP_AI_RAG_REWRITE_ENABLED",
+    )
+    ai_rag_short_query_length: int = Field(
+        default=4,
+        validation_alias="APP_AI_RAG_SHORT_QUERY_LENGTH",
+    )
+    ai_rag_topk_short: int = Field(
+        default=20,
+        validation_alias="APP_AI_RAG_TOPK_SHORT",
+    )
+    ai_rag_topk_medium: int = Field(
+        default=12,
+        validation_alias="APP_AI_RAG_TOPK_MEDIUM",
+    )
+    ai_rag_topk_long: int = Field(
+        default=8,
+        validation_alias="APP_AI_RAG_TOPK_LONG",
+    )
+    ai_rag_min_score_short: float = Field(
+        default=0.18,
+        validation_alias="APP_AI_RAG_MIN_SCORE_SHORT",
+    )
+    ai_rag_min_score_default: float = Field(
+        default=0.28,
+        validation_alias="APP_AI_RAG_MIN_SCORE_DEFAULT",
+    )
     provider_lmstudio_api_key: SecretStr = Field(
         default=SecretStr("lm-studio"),
         validation_alias="PROVIDER_LMSTUDIO_API_KEY",

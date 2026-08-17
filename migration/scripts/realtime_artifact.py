@@ -48,10 +48,15 @@ def sse_record(
     raw: bytes,
     status: int,
     headers: dict[str, str],
+    *,
+    cancelled: bool = False,
+    completed: bool = True,
 ) -> dict[str, Any]:
     return {
         "bodyBytes": len(raw),
         "bodySha256": hashlib.sha256(raw).hexdigest(),
+        "cancelled": cancelled,
+        "completed": completed,
         "frames": sse_frames(raw),
         "headers": dict(sorted(headers.items())),
         "rawBase64": base64.b64encode(raw).decode(),
@@ -128,11 +133,7 @@ def comparison_report(left: Any, right: Any) -> dict[str, Any]:
 async def capture_websocket(args: argparse.Namespace) -> int:
     import websockets
 
-    sent = [
-        line
-        for line in args.messages.read_text(encoding="utf-8").splitlines()
-        if line
-    ]
+    sent = [line for line in args.messages.read_text(encoding="utf-8").splitlines() if line]
     received: list[str] = []
     close_code: int | None = None
     close_reason: str | None = None
@@ -169,21 +170,43 @@ def capture_sse(args: argparse.Namespace) -> int:
 
     body = args.body.read_bytes() if args.body else None
     headers = json.loads(args.headers) if args.headers else {}
-    with httpx.Client(timeout=args.timeout) as client:
-        response = client.request(
+    with (
+        httpx.Client(timeout=args.timeout) as client,
+        client.stream(
             args.method,
             args.url,
             content=body,
             headers=headers,
-        )
-    tracked = {
-        key.lower(): value
-        for key, value in response.headers.items()
-        if key.lower() in {"content-type", "cache-control", "connection"}
-    }
+        ) as response,
+    ):
+        raw = bytearray()
+        cancelled = False
+        for chunk in response.iter_raw():
+            raw.extend(chunk)
+            if args.cancel_after_bytes is not None and len(raw) >= args.cancel_after_bytes:
+                cancelled = True
+                break
+        tracked = {
+            key.lower(): value
+            for key, value in response.headers.items()
+            if key.lower()
+            in {
+                "content-type",
+                "cache-control",
+                "connection",
+                "x-accel-buffering",
+            }
+        }
+        status = response.status_code
     write_json(
         args.output,
-        sse_record(response.content, response.status_code, tracked),
+        sse_record(
+            bytes(raw),
+            status,
+            tracked,
+            cancelled=cancelled,
+            completed=not cancelled,
+        ),
     )
     return 0
 
@@ -205,11 +228,7 @@ def capture_file(args: argparse.Namespace) -> int:
         pdf_evidence = {
             "encrypted": reader.is_encrypted,
             "pageCount": len(reader.pages) if not reader.is_encrypted else None,
-            "text": (
-                extract_text(BytesIO(response.content))
-                if not reader.is_encrypted
-                else None
-            ),
+            "text": (extract_text(BytesIO(response.content)) if not reader.is_encrypted else None),
         }
     args.body_output.parent.mkdir(parents=True, exist_ok=True)
     args.body_output.write_bytes(response.content)
@@ -239,6 +258,7 @@ def parser() -> argparse.ArgumentParser:
 
     sse = subparsers.add_parser("capture-sse")
     sse.add_argument("--body", type=Path)
+    sse.add_argument("--cancel-after-bytes", type=int)
     sse.add_argument("--headers")
     sse.add_argument("--method", default="POST")
     sse.add_argument("--output", type=Path, required=True)

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import base64
 import json
+import struct
 
 import httpx
 import pytest
@@ -109,7 +111,9 @@ async def test_http_failure_is_not_retried() -> None:
 @pytest.mark.asyncio
 async def test_embedding_batch_limit_and_order() -> None:
     async def handler(request: httpx.Request) -> httpx.Response:
-        assert json.loads(request.content)["dimensions"] == 1024
+        request_body = json.loads(request.content)
+        assert request_body["dimensions"] == 1024
+        assert request_body["encoding_format"] == "base64"
         return httpx.Response(
             200,
             json={
@@ -129,6 +133,25 @@ async def test_embedding_batch_limit_and_order() -> None:
     ]
     with pytest.raises(ValueError, match="最多 10 条"):
         await adapter.embed(provider(), ["x"] * 11)
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_base64_embedding_response_is_decoded_as_float32() -> None:
+    encoded = base64.b64encode(struct.pack("<2f", 0.25, -0.5)).decode()
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        del request
+        return httpx.Response(
+            200,
+            json={"data": [{"index": 0, "embedding": encoded}]},
+        )
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    adapter = LlmAdapter(client)
+
+    embeddings = await adapter.embed(provider(), ["fixed"])
+    assert embeddings[0] == pytest.approx([0.25, -0.5])
     await client.aclose()
 
 

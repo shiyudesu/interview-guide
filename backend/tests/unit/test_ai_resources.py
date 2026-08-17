@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import base64
+import hashlib
+import json
 import uuid
 from pathlib import Path
 
@@ -91,3 +93,35 @@ def test_skill_repository_loads_sorted_presets_and_references() -> None:
     assert java_skill.display_name == "Java 后端开发"
     assert java_skill.categories[0].key == "JAVA"
     assert "Java" in (skills.reference("java-backend", "JAVA") or "")
+
+
+def test_skill_tool_definition_matches_java_agent_utils() -> None:
+    tool = SkillRepository(RESOURCES).tool_definition()
+    function = tool["function"]
+    description = function["description"]
+
+    assert function["name"] == "Skill"
+    assert hashlib.sha256(description.encode()).hexdigest() == (
+        "03b1eef5e6e0043e7aae4e270e9dbb54149510c69736b1b0d5ef83003036847b"
+    )
+    assert json.dumps(
+        function["parameters"],
+        ensure_ascii=False,
+        sort_keys=True,
+    ) == json.dumps(
+        {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": False,
+            "properties": {
+                "command": {
+                    "description": ('The skill name (no arguments). E.g., "pdf" or "xlsx"'),
+                    "type": "string",
+                }
+            },
+            "required": ["command"],
+            "strict": True,
+            "type": "object",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )

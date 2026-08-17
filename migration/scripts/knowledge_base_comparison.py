@@ -11,6 +11,7 @@ import httpx
 import psycopg
 import redis
 from botocore.config import Config
+from realtime_artifact import sse_record
 
 ROOT = Path(__file__).resolve().parents[2]
 SAMPLES = ROOT / "migration" / "samples" / "knowledge-base"
@@ -89,7 +90,11 @@ def reset_target(target: Target) -> None:
             RESTART IDENTITY CASCADE
             """
         )
-    target.redis_connection().delete(STREAM_KEY)
+    redis_client = target.redis_connection()
+    redis_client.delete(STREAM_KEY)
+    rate_limit_keys = list(redis_client.scan_iter("ratelimit:{KnowledgeBaseController:*"))
+    if rate_limit_keys:
+        redis_client.delete(*rate_limit_keys)
     storage = target.storage()
     response = storage.list_objects_v2(
         Bucket=target.bucket,
@@ -135,6 +140,20 @@ def get_json(
     params: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     return result(client.get(path, params=params))
+
+
+def tracked_sse_headers(response: httpx.Response) -> dict[str, str]:
+    return {
+        key.lower(): value
+        for key, value in response.headers.items()
+        if key.lower()
+        in {
+            "content-type",
+            "cache-control",
+            "connection",
+            "x-accel-buffering",
+        }
+    }
 
 
 def database_row(target: Target, sql: str, parameters: tuple[Any, ...]) -> list[Any]:
@@ -286,9 +305,7 @@ def capture_target(target: Target) -> dict[str, Any]:
 
         redis_client = target.redis_connection()
         redis_client.delete(STREAM_KEY)
-        revectorize = result(
-            client.post(f"/api/knowledgebase/{first_id}/revectorize")
-        )
+        revectorize = result(client.post(f"/api/knowledgebase/{first_id}/revectorize"))
         stream_messages = redis_client.xrange(STREAM_KEY)
         revectorize_database = database_row(
             target,
@@ -303,6 +320,109 @@ def capture_target(target: Target) -> dict[str, Any]:
             "response": revectorize,
             "database": revectorize_database,
             "stream": [fields for _, fields in stream_messages],
+        }
+
+        empty_ids_query = client.post(
+            "/api/knowledgebase/query",
+            json={"knowledgeBaseIds": [], "question": "固定问题"},
+        )
+        blank_question_query = client.post(
+            "/api/knowledgebase/query",
+            json={"knowledgeBaseIds": [first_id], "question": " \t"},
+        )
+        missing_ids_query = client.post(
+            "/api/knowledgebase/query",
+            json={"question": "固定问题"},
+        )
+        missing_question_query = client.post(
+            "/api/knowledgebase/query",
+            json={"knowledgeBaseIds": [first_id]},
+        )
+        empty_ids_stream = client.post(
+            "/api/knowledgebase/query/stream",
+            json={"knowledgeBaseIds": [], "question": "固定问题"},
+        )
+        null_id_sync = client.post(
+            "/api/knowledgebase/query",
+            json={"knowledgeBaseIds": [None], "question": "固定问题"},
+        )
+        null_id_stream = client.post(
+            "/api/knowledgebase/query/stream",
+            json={"knowledgeBaseIds": [None], "question": "固定问题"},
+        )
+        missing_id = 9223372036854775807
+        missing_sync = client.post(
+            "/api/knowledgebase/query",
+            json={"knowledgeBaseIds": [missing_id], "question": "固定问题"},
+        )
+        missing_stream = client.post(
+            "/api/knowledgebase/query/stream",
+            json={"knowledgeBaseIds": [missing_id], "question": "固定问题"},
+        )
+        non_model_query_state = {
+            "validation": {
+                "emptyIdsSync": {
+                    "body": empty_ids_query.json(),
+                    "contentType": empty_ids_query.headers.get("content-type"),
+                    "status": empty_ids_query.status_code,
+                },
+                "blankQuestionSync": {
+                    "body": blank_question_query.json(),
+                    "contentType": blank_question_query.headers.get("content-type"),
+                    "status": blank_question_query.status_code,
+                },
+                "missingIdsSync": {
+                    "body": missing_ids_query.json(),
+                    "contentType": missing_ids_query.headers.get("content-type"),
+                    "status": missing_ids_query.status_code,
+                },
+                "missingQuestionSync": {
+                    "body": missing_question_query.json(),
+                    "contentType": missing_question_query.headers.get("content-type"),
+                    "status": missing_question_query.status_code,
+                },
+                "emptyIdsStream": {
+                    "body": empty_ids_stream.json(),
+                    "contentType": empty_ids_stream.headers.get("content-type"),
+                    "status": empty_ids_stream.status_code,
+                },
+            },
+            "nullKnowledgeBaseId": {
+                "sync": {
+                    "body": null_id_sync.json(),
+                    "contentType": null_id_sync.headers.get("content-type"),
+                    "status": null_id_sync.status_code,
+                },
+                "stream": sse_record(
+                    null_id_stream.content,
+                    null_id_stream.status_code,
+                    tracked_sse_headers(null_id_stream),
+                ),
+            },
+            "missingKnowledgeBase": {
+                "sync": {
+                    "body": missing_sync.json(),
+                    "contentType": missing_sync.headers.get("content-type"),
+                    "status": missing_sync.status_code,
+                },
+                "stream": sse_record(
+                    missing_stream.content,
+                    missing_stream.status_code,
+                    tracked_sse_headers(missing_stream),
+                ),
+            },
+            "database": {
+                "firstQuestionCount": database_row(
+                    target,
+                    "SELECT question_count FROM knowledge_bases WHERE id = %s",
+                    (first_id,),
+                )[0],
+                "ragMessageCount": database_row(
+                    target,
+                    "SELECT count(*) FROM rag_chat_messages",
+                    (),
+                )[0],
+            },
         }
 
         seed_delete_graph(target, second_id)
@@ -371,6 +491,7 @@ def capture_target(target: Target) -> dict[str, Any]:
         "categoryReads": category_reads,
         "download": download_state,
         "revectorize": revectorize_state,
+        "nonModelQuery": non_model_query_state,
         "deletePreconditions": delete_preconditions,
         "delete": delete_state,
         "objectKeys": {
@@ -385,9 +506,7 @@ def main() -> None:
     for target in TARGETS:
         reset_target(target)
     captures = {target.name: capture_target(target) for target in TARGETS}
-    normalized = {
-        target.name: normalize(captures[target.name], target) for target in TARGETS
-    }
+    normalized = {target.name: normalize(captures[target.name], target) for target in TARGETS}
     left = dict(normalized["java"])
     right = dict(normalized["python"])
     left.pop("rawMapOfResponses")
@@ -395,7 +514,9 @@ def main() -> None:
     report = {
         "schemaVersion": 1,
         "fakeEmbedding": False,
+        "fakeModel": False,
         "realEmbeddingValidated": False,
+        "realModelValidated": False,
         "knownVariants": ["knowledge-base-upload-map-field-order"],
         "passed": left == right,
         "java": captures["java"],

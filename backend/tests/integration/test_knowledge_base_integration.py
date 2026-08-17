@@ -2,19 +2,23 @@ from __future__ import annotations
 
 import os
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlsplit
 
 import pytest
 from redis.asyncio import Redis
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
+from interview_guide.common.ai.adapter import ChatResult, ProviderConfig
+from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.models import (
     KnowledgeBase,
+    RagChatMessage,
     RagChatSession,
     RagSessionKnowledgeBase,
     VectorStore,
@@ -27,6 +31,14 @@ from interview_guide.infrastructure.file.document import create_document_parser
 from interview_guide.infrastructure.file.hash import sha256_bytes
 from interview_guide.infrastructure.storage.keys import FileKeyGenerator
 from interview_guide.infrastructure.storage.s3 import S3Storage
+from interview_guide.modules.knowledge_base.models import QueryRequest
+from interview_guide.modules.knowledge_base.query_service import (
+    KnowledgeBaseQueryService,
+    QueryConfiguration,
+)
+from interview_guide.modules.knowledge_base.repository import (
+    KnowledgeBaseQueryRepository,
+)
 from interview_guide.modules.knowledge_base.service import KnowledgeBaseService
 from interview_guide.modules.knowledge_base.vectorization import EMBEDDING_DIMENSIONS
 
@@ -35,6 +47,7 @@ REDIS_URL = os.getenv("TEST_REDIS_URL")
 S3_ENDPOINT = os.getenv("TEST_S3_ENDPOINT")
 FIXED_NOW = datetime(2026, 8, 16, 8, 0)
 SAMPLES = Path(__file__).resolve().parents[3] / "migration" / "samples" / "knowledge-base"
+RESOURCES = Path(__file__).resolve().parents[2] / "resources"
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(
@@ -401,3 +414,216 @@ async def test_batch_question_count_rolls_back_for_missing_id(
         entity = await verification.get(KnowledgeBase, knowledge_base_id)
         assert entity is not None
         assert entity.question_count == 0
+
+
+def fixed_query_vector(x: float, y: float) -> list[float]:
+    return [x, y] + [0.0] * (EMBEDDING_DIMENSIONS - 2)
+
+
+class FixedFakeQueryRegistry:
+    def __init__(self) -> None:
+        self.chat_provider = ProviderConfig(
+            provider_id="fixed-fake-chat",
+            base_url="https://fake.invalid",
+            api_key="fixed-fake-key",
+            model="fixed-fake-chat",
+        )
+        self.embedding_provider = ProviderConfig(
+            provider_id="fixed-fake-embedding",
+            base_url="https://fake.invalid",
+            api_key="fixed-fake-key",
+            model="fixed-fake-chat",
+            embedding_model="fixed-fake-embedding",
+            embedding_dimensions=EMBEDDING_DIMENSIONS,
+            supports_embedding=True,
+        )
+
+    async def get_chat(self, provider_id: str | None = None) -> ProviderConfig:
+        del provider_id
+        return self.chat_provider
+
+    async def get_embedding(
+        self,
+        provider_id: str | None = None,
+    ) -> ProviderConfig:
+        del provider_id
+        return self.embedding_provider
+
+
+class FixedFakeQueryAdapter:
+    def __init__(self) -> None:
+        self.messages: list[list[dict[str, Any]]] = []
+        self.stream_sequences = [
+            ["固定", "流式回答"],
+            ["取" * 120, "取消后不应读取"],
+        ]
+        self.stream_close_count = 0
+
+    async def chat(
+        self,
+        provider: ProviderConfig,
+        messages: Sequence[dict[str, Any]],
+        *,
+        tools: Sequence[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
+        temperature: float | None = None,
+    ) -> ChatResult:
+        del provider, tools, tool_choice, temperature
+        self.messages.append(list(messages))
+        return ChatResult(
+            content="固定同步回答",
+            message={"role": "assistant", "content": "固定同步回答"},
+            usage=None,
+            raw={},
+        )
+
+    async def stream_chat(
+        self,
+        provider: ProviderConfig,
+        messages: Sequence[dict[str, Any]],
+        *,
+        tools: Sequence[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
+        temperature: float | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        del provider, tools, tool_choice, temperature
+        self.messages.append(list(messages))
+        chunks = self.stream_sequences.pop(0)
+        try:
+            for chunk in chunks:
+                yield {"choices": [{"delta": {"content": chunk}}]}
+        finally:
+            self.stream_close_count += 1
+
+    async def embed(
+        self,
+        provider: ProviderConfig,
+        inputs: Sequence[str],
+    ) -> list[list[float]]:
+        del provider
+        assert inputs
+        return [fixed_query_vector(1.0, 0.0) for _ in inputs]
+
+
+@pytest.mark.asyncio
+async def test_fixed_fake_query_uses_real_postgres_pgvector_and_leaves_redis_clean(
+    knowledge_base_resources: KnowledgeBaseResources,
+) -> None:
+    resources = knowledge_base_resources
+    text = (SAMPLES / "fixed-knowledge-base.txt").read_bytes()
+    markdown = (SAMPLES / "fixed-knowledge-base.md").read_bytes()
+    async with resources.database.sessions() as session:
+        knowledge_bases = service(resources, session)
+        first = await knowledge_bases.upload(
+            text,
+            "fixed-knowledge-base.txt",
+            "text/plain",
+            "固定查询库一",
+            None,
+        )
+        second = await knowledge_bases.upload(
+            markdown,
+            "fixed-knowledge-base.md",
+            "text/markdown",
+            "固定查询库二",
+            None,
+        )
+        first_data = first["knowledgeBase"]
+        second_data = second["knowledgeBase"]
+        first_storage = first["storage"]
+        second_storage = second["storage"]
+        assert isinstance(first_data, dict)
+        assert isinstance(second_data, dict)
+        assert isinstance(first_storage, dict)
+        assert isinstance(second_storage, dict)
+        first_id = int(first_data["id"])
+        second_id = int(second_data["id"])
+        resources.object_keys.extend(
+            [
+                str(first_storage["fileKey"]),
+                str(second_storage["fileKey"]),
+            ]
+        )
+
+    async with resources.database.sessions() as seed_session, seed_session.begin():
+        seed_session.add_all(
+            [
+                VectorStore(
+                    content="第一相关片段",
+                    metadata_json={"kb_id": str(first_id)},
+                    embedding=fixed_query_vector(1.0, 0.0),
+                ),
+                VectorStore(
+                    content="第二相关片段",
+                    metadata_json={"kb_id": str(first_id)},
+                    embedding=fixed_query_vector(0.8, 0.6),
+                ),
+                VectorStore(
+                    content="低分片段",
+                    metadata_json={"kb_id": str(first_id)},
+                    embedding=fixed_query_vector(0.0, 1.0),
+                ),
+                VectorStore(
+                    content="另一个知识库片段",
+                    metadata_json={"kb_id": str(second_id)},
+                    embedding=fixed_query_vector(0.6, 0.8),
+                ),
+            ]
+        )
+
+    query_repository = KnowledgeBaseQueryRepository(resources.database.sessions)
+    hits = await query_repository.similarity_search(
+        [first_id],
+        fixed_query_vector(1.0, 0.0),
+        10,
+        0.5,
+    )
+    assert [hit.content for hit in hits] == ["第一相关片段", "第二相关片段"]
+    assert [hit.score for hit in hits] == pytest.approx([1.0, 0.8])
+
+    await resources.redis.delete(KB_VECTORIZE.key)
+    adapter = FixedFakeQueryAdapter()
+    query_service = KnowledgeBaseQueryService(
+        query_repository,
+        FixedFakeQueryRegistry(),
+        adapter,
+        PromptRepository(RESOURCES),
+        QueryConfiguration(rewrite_enabled=False),
+    )
+    response = await query_service.query(
+        QueryRequest(
+            knowledgeBaseIds=[first_id, second_id, first_id],
+            question="固定问题",
+        )
+    )
+    assert response.answer == "固定同步回答"
+    assert response.knowledge_base_id == first_id
+    assert response.knowledge_base_name == "固定查询库一、固定查询库二、固定查询库一"
+
+    stream = await query_service.answer_question_stream([first_id], "固定问题")
+    assert [chunk async for chunk in stream] == ["固定流式回答"]
+
+    cancelled_stream = await query_service.answer_question_stream(
+        [first_id],
+        "固定问题",
+    )
+    assert await anext(cancelled_stream) == "取" * 120
+    await cancelled_stream.aclose()
+    assert adapter.stream_close_count == 2
+
+    assert await resources.redis.xrange(KB_VECTORIZE.key) == []
+    async with resources.database.sessions() as verification:
+        first_entity = await verification.get(KnowledgeBase, first_id)
+        second_entity = await verification.get(KnowledgeBase, second_id)
+        assert first_entity is not None
+        assert second_entity is not None
+        assert first_entity.question_count == 3
+        assert second_entity.question_count == 1
+        message_count = await verification.scalar(select(func.count()).select_from(RagChatMessage))
+        assert message_count == 0
+        vector_count = await verification.scalar(
+            select(func.count())
+            .select_from(VectorStore)
+            .where(VectorStore.metadata_json["kb_id"].astext.in_([str(first_id), str(second_id)]))
+        )
+        assert vector_count == 4

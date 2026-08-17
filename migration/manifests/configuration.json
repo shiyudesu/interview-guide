@@ -3028,6 +3028,69 @@
         "file": ".env.example",
         "line": 56
       }
+    },
+    {
+      "default": "true",
+      "name": "APP_AI_RAG_REWRITE_ENABLED",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 59
+      }
+    },
+    {
+      "default": "4",
+      "name": "APP_AI_RAG_SHORT_QUERY_LENGTH",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 60
+      }
+    },
+    {
+      "default": "20",
+      "name": "APP_AI_RAG_TOPK_SHORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 61
+      }
+    },
+    {
+      "default": "12",
+      "name": "APP_AI_RAG_TOPK_MEDIUM",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 62
+      }
+    },
+    {
+      "default": "8",
+      "name": "APP_AI_RAG_TOPK_LONG",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 63
+      }
+    },
+    {
+      "default": "0.18",
+      "name": "APP_AI_RAG_MIN_SCORE_SHORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 64
+      }
+    },
+    {
+      "default": "0.28",
+      "name": "APP_AI_RAG_MIN_SCORE_DEFAULT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 65
+      }
     }
   ],
   "envReferencedButUndocumented": [
@@ -3043,13 +3106,6 @@
     "APP_AI_CONFIG_REQUIRE_ENCRYPTION_KEY",
     "APP_AI_CONFIG_YAML_PATH",
     "APP_AI_EMBEDDING_DIMENSIONS",
-    "APP_AI_RAG_MIN_SCORE_DEFAULT",
-    "APP_AI_RAG_MIN_SCORE_SHORT",
-    "APP_AI_RAG_REWRITE_ENABLED",
-    "APP_AI_RAG_SHORT_QUERY_LENGTH",
-    "APP_AI_RAG_TOPK_LONG",
-    "APP_AI_RAG_TOPK_MEDIUM",
-    "APP_AI_RAG_TOPK_SHORT",
     "APP_AI_STRUCTURED_ERROR_MESSAGE_MAX_LENGTH",
     "APP_AI_STRUCTURED_INCLUDE_LAST_ERROR",
     "APP_AI_STRUCTURED_MAX_ATTEMPTS",
@@ -3202,8 +3258,8 @@
   "schemaVersion": 1,
   "summary": {
     "configurationValueCount": 244,
-    "envExampleCount": 20,
-    "envReferencedButUndocumentedCount": 77,
+    "envExampleCount": 27,
+    "envReferencedButUndocumentedCount": 70,
     "propertyBindingCount": 11
   },
   "valueInjections": []

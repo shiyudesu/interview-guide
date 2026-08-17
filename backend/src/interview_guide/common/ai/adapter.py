@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import base64
 import json
 import re
+import struct
 from collections.abc import AsyncIterator, Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -165,6 +167,7 @@ class LlmAdapter:
                 "model": provider.embedding_model,
                 "input": list(inputs),
                 "dimensions": provider.embedding_dimensions,
+                "encoding_format": "base64",
             },
         )
         document = self._json(response)
@@ -175,7 +178,7 @@ class LlmAdapter:
                 "AI服务调用失败，请稍后重试",
             )
         ordered = sorted(data, key=lambda item: int(item["index"]))
-        return [[float(value) for value in item["embedding"]] for item in ordered]
+        return [self._embedding_values(item["embedding"]) for item in ordered]
 
     async def _request(
         self,
@@ -247,6 +250,23 @@ class LlmAdapter:
     @staticmethod
     def _url(provider: ProviderConfig, path: str) -> str:
         return f"{resolve_versioned_base_url(provider.base_url)}/{path}"
+
+    @staticmethod
+    def _embedding_values(value: Any) -> list[float]:
+        if isinstance(value, list):
+            return [float(item) for item in value]
+        if isinstance(value, str):
+            raw = base64.b64decode(value, validate=True)
+            if len(raw) % 4 != 0:
+                raise BusinessException(
+                    ErrorCode.AI_SERVICE_ERROR,
+                    "AI服务调用失败，请稍后重试",
+                )
+            return list(struct.unpack(f"<{len(raw) // 4}f", raw))
+        raise BusinessException(
+            ErrorCode.AI_SERVICE_ERROR,
+            "AI服务调用失败，请稍后重试",
+        )
 
     @staticmethod
     def _chat_payload(

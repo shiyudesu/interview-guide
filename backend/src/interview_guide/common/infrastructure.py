@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from interview_guide.common.ai.adapter import LlmAdapter
 from interview_guide.common.ai.encryption import (
@@ -18,6 +19,7 @@ from interview_guide.common.ai.providers import (
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.session import Database
 from interview_guide.common.redis import RedisConnection
+from interview_guide.common.redis.rate_limit import RateLimiter
 from interview_guide.common.redis.streams import RedisStreamService
 from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.infrastructure.file.document import create_document_parser
@@ -39,6 +41,11 @@ class RuntimeInfrastructure:
         self.database = Database(settings)
         self.redis = RedisConnection(settings)
         self.streams = RedisStreamService(self.redis.client)
+        resources = Path(__file__).resolve().parents[3] / "resources"
+        self.rate_limiter = RateLimiter(
+            self.redis.client,
+            resources / "scripts/rate_limit_single.lua",
+        )
         encryption = ApiKeyEncryption(
             resolve_configured_key(settings),
             nonce_factory=provider_nonce_factory(settings),
@@ -85,6 +92,7 @@ class RuntimeInfrastructure:
 
     async def start(self) -> None:
         await self.redis.start()
+        await self.rate_limiter.start()
         await self.storage.start()
         await self.provider_repository.bootstrap(
             self._settings,

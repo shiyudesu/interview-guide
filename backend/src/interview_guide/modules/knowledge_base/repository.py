@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import cast
 
-from sqlalchemy import BigInteger, delete, func, or_, select, update
+from sqlalchemy import BigInteger, delete, func, or_, select, text
 from sqlalchemy import cast as sql_cast
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from interview_guide.common.db.models import (
     KnowledgeBase,
@@ -33,6 +34,13 @@ class KnowledgeBaseStatistics:
     total_access_count: int
     completed_count: int
     processing_count: int
+
+
+@dataclass(frozen=True)
+class VectorSearchHit:
+    content: str
+    score: float
+    knowledge_base_id: int | None = None
 
 
 class KnowledgeBaseRepository:
@@ -151,23 +159,192 @@ class KnowledgeBaseRepository:
             )
         )
 
-    async def increment_question_counts(self, knowledge_base_ids: list[int]) -> None:
-        unique_ids: list[int] = list(dict.fromkeys(knowledge_base_ids))
-        if not unique_ids:
+    async def increment_question_counts(
+        self,
+        knowledge_base_ids: Sequence[int],
+    ) -> None:
+        if not knowledge_base_ids:
             return
-        existing_ids = set(
-            await self._session.scalars(
-                select(KnowledgeBase.id).where(KnowledgeBase.id.in_(unique_ids))
-            )
-        )
-        for knowledge_base_id in unique_ids:
-            if knowledge_base_id not in existing_ids:
-                raise BusinessException(
-                    ErrorCode.NOT_FOUND,
-                    f"知识库不存在: {knowledge_base_id}",
+        result = await self._session.execute(
+            text(
+                """
+                WITH requested AS (
+                    SELECT id, min(ordinality) AS first_ordinal
+                    FROM unnest(CAST(:ids AS bigint[]))
+                        WITH ORDINALITY AS input(id, ordinality)
+                    GROUP BY id
+                ),
+                updated AS (
+                    UPDATE knowledge_bases AS knowledge_base
+                    SET question_count = knowledge_base.question_count + 1
+                    FROM requested
+                    WHERE knowledge_base.id = requested.id
+                    RETURNING knowledge_base.id
                 )
-        await self._session.execute(
-            update(KnowledgeBase)
-            .where(KnowledgeBase.id.in_(unique_ids))
-            .values(question_count=KnowledgeBase.question_count + 1)
+                SELECT requested.id
+                FROM requested
+                LEFT JOIN updated ON updated.id = requested.id
+                WHERE updated.id IS NULL
+                ORDER BY requested.first_ordinal
+                LIMIT 1
+                """
+            ),
+            {"ids": list(knowledge_base_ids)},
         )
+        missing_id = result.scalar_one_or_none()
+        if missing_id is not None:
+            raise BusinessException(
+                ErrorCode.NOT_FOUND,
+                f"知识库不存在: {missing_id}",
+            )
+
+    async def knowledge_base_names(
+        self,
+        knowledge_base_ids: Sequence[int],
+    ) -> list[str]:
+        unique_ids = list(dict.fromkeys(knowledge_base_ids))
+        rows = await self._session.execute(
+            select(KnowledgeBase.id, KnowledgeBase.name).where(KnowledgeBase.id.in_(unique_ids))
+        )
+        names = {int(knowledge_base_id): name for knowledge_base_id, name in rows}
+        return [
+            names.get(knowledge_base_id, "未知知识库") for knowledge_base_id in knowledge_base_ids
+        ]
+
+    async def similarity_search(
+        self,
+        knowledge_base_ids: Sequence[int],
+        embedding: Sequence[float],
+        top_k: int,
+        min_score: float,
+    ) -> list[VectorSearchHit]:
+        result = await self._session.execute(
+            text(
+                """
+                SELECT
+                    content,
+                    1 - (embedding <=> CAST(:embedding AS vector)) AS score,
+                    metadata->>'kb_id' AS knowledge_base_id
+                FROM vector_store
+                WHERE metadata->>'kb_id' = ANY(CAST(:knowledge_base_ids AS text[]))
+                  AND embedding IS NOT NULL
+                  AND (
+                      :min_score <= 0
+                      OR 1 - (embedding <=> CAST(:embedding AS vector)) >= :min_score
+                  )
+                ORDER BY embedding <=> CAST(:embedding AS vector)
+                LIMIT :top_k
+                """
+            ),
+            {
+                "embedding": "[" + ",".join(str(float(value)) for value in embedding) + "]",
+                "knowledge_base_ids": [str(value) for value in knowledge_base_ids],
+                "min_score": min_score,
+                "top_k": max(top_k, 1),
+            },
+        )
+        return [
+            VectorSearchHit(
+                content=str(content),
+                score=float(score),
+                knowledge_base_id=self._parse_knowledge_base_id(knowledge_base_id),
+            )
+            for content, score, knowledge_base_id in result
+            if content is not None
+        ]
+
+    async def similarity_search_unfiltered(
+        self,
+        embedding: Sequence[float],
+        top_k: int,
+        min_score: float,
+    ) -> list[VectorSearchHit]:
+        result = await self._session.execute(
+            text(
+                """
+                SELECT
+                    content,
+                    1 - (embedding <=> CAST(:embedding AS vector)) AS score,
+                    metadata->>'kb_id' AS knowledge_base_id
+                FROM vector_store
+                WHERE embedding IS NOT NULL
+                  AND (
+                      :min_score <= 0
+                      OR 1 - (embedding <=> CAST(:embedding AS vector)) >= :min_score
+                  )
+                ORDER BY embedding <=> CAST(:embedding AS vector)
+                LIMIT :top_k
+                """
+            ),
+            {
+                "embedding": "[" + ",".join(str(float(value)) for value in embedding) + "]",
+                "min_score": min_score,
+                "top_k": max(top_k, 1),
+            },
+        )
+        return [
+            VectorSearchHit(
+                content=str(content),
+                score=float(score),
+                knowledge_base_id=self._parse_knowledge_base_id(knowledge_base_id),
+            )
+            for content, score, knowledge_base_id in result
+            if content is not None
+        ]
+
+    @staticmethod
+    def _parse_knowledge_base_id(value: object) -> int | None:
+        try:
+            return int(str(value))
+        except (TypeError, ValueError):
+            return None
+
+
+class KnowledgeBaseQueryRepository:
+    def __init__(
+        self,
+        sessions: async_sessionmaker[AsyncSession],
+    ) -> None:
+        self._sessions = sessions
+
+    async def increment_question_counts(
+        self,
+        knowledge_base_ids: Sequence[int],
+    ) -> None:
+        async with self._sessions() as session, session.begin():
+            await KnowledgeBaseRepository(session).increment_question_counts(knowledge_base_ids)
+
+    async def knowledge_base_names(
+        self,
+        knowledge_base_ids: Sequence[int],
+    ) -> list[str]:
+        async with self._sessions() as session:
+            return await KnowledgeBaseRepository(session).knowledge_base_names(knowledge_base_ids)
+
+    async def similarity_search(
+        self,
+        knowledge_base_ids: Sequence[int],
+        embedding: Sequence[float],
+        top_k: int,
+        min_score: float,
+    ) -> list[VectorSearchHit]:
+        async with self._sessions() as session:
+            return await KnowledgeBaseRepository(session).similarity_search(
+                knowledge_base_ids,
+                embedding,
+                top_k,
+                min_score,
+            )
+
+    async def similarity_search_unfiltered(
+        self,
+        embedding: Sequence[float],
+        top_k: int,
+        min_score: float,
+    ) -> list[VectorSearchHit]:
+        async with self._sessions() as session:
+            return await KnowledgeBaseRepository(session).similarity_search_unfiltered(
+                embedding,
+                top_k,
+                min_score,
+            )

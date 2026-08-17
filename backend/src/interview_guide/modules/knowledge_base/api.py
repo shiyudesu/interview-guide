@@ -1,18 +1,36 @@
 from __future__ import annotations
 
+import time
 from collections.abc import AsyncIterator
 from datetime import datetime
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, File, Form, Request, UploadFile
-from starlette.responses import Response
+from starlette.responses import Response, StreamingResponse
 
+from interview_guide.common.ai.prompts import PromptRepository
+from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.api.responses import result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
+from interview_guide.common.redis.rate_limit import (
+    RateLimitDimension,
+    RateLimitRule,
+)
 from interview_guide.common.result import Result
+from interview_guide.modules.knowledge_base.models import QueryRequest
+from interview_guide.modules.knowledge_base.query_service import (
+    KnowledgeBaseQueryService,
+    QueryConfiguration,
+)
+from interview_guide.modules.knowledge_base.repository import (
+    KnowledgeBaseQueryRepository,
+)
 from interview_guide.modules.knowledge_base.service import KnowledgeBaseService
 
 router = APIRouter(prefix="/api/knowledgebase")
+RESOURCES = Path(__file__).resolve().parents[4] / "resources"
+QUERY_TOOLS = [SkillRepository(RESOURCES).tool_definition()]
 
 
 async def knowledge_base_service(
@@ -42,6 +60,67 @@ ServiceDependency = Annotated[
 ]
 
 
+def knowledge_base_query_service(
+    request: Request,
+) -> KnowledgeBaseQueryService:
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    return KnowledgeBaseQueryService(
+        KnowledgeBaseQueryRepository(infrastructure.database.sessions),
+        infrastructure.provider_registry,
+        infrastructure.llm_adapter,
+        PromptRepository(RESOURCES),
+        QueryConfiguration.from_settings(request.app.state.settings),
+        QUERY_TOOLS,
+    )
+
+
+QueryServiceDependency = Annotated[
+    KnowledgeBaseQueryService,
+    Depends(knowledge_base_query_service),
+]
+
+
+def client_ip(request: Request) -> str:
+    for header in (
+        "x-forwarded-for",
+        "x-real-ip",
+        "proxy-client-ip",
+        "wl-proxy-client-ip",
+    ):
+        value = request.headers.get(header)
+        if value and value.lower() != "unknown":
+            return value.split(",", 1)[0].strip()
+    return request.client.host if request.client is not None else "unknown"
+
+
+async def enforce_query_rate_limit(
+    request: Request,
+    method_name: str,
+    count: int,
+) -> None:
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    await infrastructure.rate_limiter.check(
+        class_name="KnowledgeBaseController",
+        method_name=method_name,
+        rules=(
+            RateLimitRule(RateLimitDimension.GLOBAL, float(count)),
+            RateLimitRule(RateLimitDimension.IP, float(count)),
+        ),
+        client_ip=client_ip(request),
+        now_ms=time.time_ns() // 1_000_000,
+    )
+
+
+def sse_data(content: str) -> bytes:
+    normalized = content.replace("\r\n", "\n").replace("\r", "\n")
+    return ("".join(f"data:{line}\n" for line in normalized.split("\n")) + "\n").encode()
+
+
+async def sse_stream(chunks: AsyncIterator[str]) -> AsyncIterator[bytes]:
+    async for chunk in chunks:
+        yield sse_data(chunk)
+
+
 @router.get("/list")
 async def list_knowledge_bases(
     service: ServiceDependency,
@@ -52,6 +131,35 @@ async def list_knowledge_bases(
     if status not in {None, "PENDING", "PROCESSING", "COMPLETED", "FAILED"}:
         return result_response(Result.error(500, f"无效的向量化状态: {vectorStatus}"))
     return result_response(Result.ok(await service.list_items(status, sortBy)))
+
+
+@router.post("/query")
+async def query_knowledge_base(
+    request: Request,
+    payload: QueryRequest,
+    service: QueryServiceDependency,
+) -> Response:
+    await enforce_query_rate_limit(request, "queryKnowledgeBase", 10)
+    response = await service.query(payload)
+    return result_response(Result.ok(response))
+
+
+@router.post("/query/stream")
+async def query_knowledge_base_stream(
+    request: Request,
+    payload: QueryRequest,
+    service: QueryServiceDependency,
+) -> Response:
+    await enforce_query_rate_limit(request, "queryKnowledgeBaseStream", 5)
+    chunks = await service.answer_question_stream(
+        payload.knowledge_base_ids,
+        payload.question,
+    )
+    return StreamingResponse(
+        sse_stream(chunks),
+        media_type="text/event-stream",
+        headers={"Content-Type": "text/event-stream"},
+    )
 
 
 @router.post("/upload")

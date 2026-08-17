@@ -20,7 +20,10 @@ MISSING_FIELD_MESSAGES = {
     "company_name": "公司名称不能为空",
     "interviewTime": "面试时间不能为空",
     "interview_time": "面试时间不能为空",
+    "knowledgeBaseIds": "至少选择一个知识库",
+    "knowledge_base_ids": "至少选择一个知识库",
     "position": "岗位不能为空",
+    "question": "问题不能为空",
     "rawText": "文本不能为空",
     "raw_text": "文本不能为空",
 }

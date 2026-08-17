@@ -40,3 +40,8 @@ if results["java"]["data"]["model"] != results["python"]["data"]["model"]:
 PY
 
 echo "Real model smoke test passed"
+
+(
+  cd "$repo_root/backend"
+  uv run --frozen python ../migration/scripts/real_model_knowledge_base.py
+)

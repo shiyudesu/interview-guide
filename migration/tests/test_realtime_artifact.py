@@ -27,6 +27,20 @@ class RealtimeArtifactTest(unittest.TestCase):
         self.assertEqual("token", record["frames"][0]["event"])
         self.assertEqual("first\nsecond", record["frames"][0]["data"])
         self.assertEqual("[DONE]", record["frames"][1]["data"])
+        self.assertFalse(record["cancelled"])
+        self.assertTrue(record["completed"])
+
+    def test_sse_records_client_cancellation(self) -> None:
+        record = MODULE.sse_record(
+            b"data: partial\n\n",
+            200,
+            {"content-type": "text/event-stream"},
+            cancelled=True,
+            completed=False,
+        )
+
+        self.assertTrue(record["cancelled"])
+        self.assertFalse(record["completed"])
 
     def test_websocket_transcript_keeps_order_and_raw_json(self) -> None:
         record = MODULE.transcript_record(

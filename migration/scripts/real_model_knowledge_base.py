@@ -1,0 +1,342 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import httpx
+import psycopg
+import redis
+from realtime_artifact import sse_record
+
+ROOT = Path(__file__).resolve().parents[2]
+REPORTS = ROOT / "migration" / "reports"
+MODEL_RECORDS = REPORTS / "model-proxy.jsonl"
+QUESTION = "知识库向量维度是多少？"
+CONTEXT = "本系统知识库使用固定的 1024 维向量，并使用余弦相似度执行检索。"
+NO_RESULT_RESPONSE = (
+    "抱歉，在选定的知识库中未检索到相关信息。请换一个更具体的关键词或补充上下文后再试。"
+)
+
+
+@dataclass(frozen=True)
+class Target:
+    name: str
+    base_url: str
+    postgres_port: int
+    redis_port: int
+    database: str
+
+    def database_connection(self) -> psycopg.Connection[Any]:
+        return psycopg.connect(
+            host="127.0.0.1",
+            port=self.postgres_port,
+            dbname=self.database,
+            user="postgres",
+            password="comparison-password",
+        )
+
+    def redis_connection(self) -> redis.Redis:
+        return redis.Redis(
+            host="127.0.0.1",
+            port=self.redis_port,
+            decode_responses=True,
+        )
+
+
+TARGETS = (
+    Target("java", "http://127.0.0.1:18080", 15432, 16379, "interview_guide_java"),
+    Target("python", "http://127.0.0.1:28080", 25432, 26379, "interview_guide_python"),
+)
+
+
+def model_records() -> list[dict[str, Any]]:
+    if not MODEL_RECORDS.exists():
+        return []
+    return [
+        json.loads(line) for line in MODEL_RECORDS.read_text(encoding="utf-8").splitlines() if line
+    ]
+
+
+def embed_question(api_key: str) -> list[float]:
+    response = httpx.post(
+        ("http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1/embeddings"),
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={
+            "model": "text-embedding-v3",
+            "input": [QUESTION],
+            "dimensions": 1024,
+        },
+        timeout=60,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    embedding = payload["data"][0]["embedding"]
+    values = [float(value) for value in embedding]
+    if len(values) != 1024:
+        raise AssertionError(f"Expected 1024 embedding dimensions, got {len(values)}")
+    return values
+
+
+def reset_and_seed(target: Target, embedding: list[float]) -> int:
+    with target.database_connection() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """
+            TRUNCATE TABLE
+                rag_chat_messages,
+                rag_session_knowledge_bases,
+                rag_chat_sessions,
+                knowledge_base_questions,
+                vector_store,
+                knowledge_bases
+            RESTART IDENTITY CASCADE
+            """
+        )
+        cursor.execute(
+            """
+            INSERT INTO knowledge_bases (
+                access_count,
+                chunk_count,
+                content_type,
+                file_hash,
+                file_size,
+                name,
+                original_filename,
+                question_count,
+                uploaded_at,
+                vector_status
+            )
+            VALUES (
+                1,
+                1,
+                'text/plain',
+                %s,
+                %s,
+                '真实模型知识库',
+                'real-model-knowledge-base.txt',
+                0,
+                TIMESTAMP '2026-08-16 08:00:00',
+                'COMPLETED'
+            )
+            RETURNING id
+            """,
+            (
+                hashlib.sha256(CONTEXT.encode()).hexdigest(),
+                len(CONTEXT.encode()),
+            ),
+        )
+        knowledge_base_id = int(cursor.fetchone()[0])
+        cursor.execute(
+            """
+            INSERT INTO vector_store (content, metadata, embedding)
+            VALUES (%s, %s::json, %s::vector)
+            """,
+            (
+                CONTEXT,
+                json.dumps({"kb_id": str(knowledge_base_id)}),
+                "[" + ",".join(str(value) for value in embedding) + "]",
+            ),
+        )
+    redis_client = target.redis_connection()
+    keys = list(redis_client.scan_iter("ratelimit:{KnowledgeBaseController:*"))
+    if keys:
+        redis_client.delete(*keys)
+    return knowledge_base_id
+
+
+def result_payload(response: httpx.Response) -> dict[str, Any]:
+    response.raise_for_status()
+    payload = response.json()
+    data = payload.get("data")
+    if payload.get("code") != 200 or payload.get("success") is not True:
+        raise AssertionError(f"Real knowledge-base query failed: {payload}")
+    if not isinstance(data, dict):
+        raise AssertionError(f"Missing knowledge-base response data: {payload}")
+    answer = data.get("answer")
+    if not isinstance(answer, str) or not answer.strip():
+        raise AssertionError(f"Knowledge-base answer is empty: {payload}")
+    if answer == NO_RESULT_RESPONSE or answer.startswith("【错误】"):
+        raise AssertionError(f"Knowledge-base answer did not use the seeded hit: {payload}")
+    return payload
+
+
+def request_summaries(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    summaries: list[dict[str, Any]] = []
+    for record in records:
+        if record.get("kind") != "http-request":
+            continue
+        body = record.get("body") or {}
+        payload = body.get("json")
+        if not isinstance(payload, dict):
+            continue
+        upstream = str(record.get("upstream", ""))
+        if not upstream.endswith(("/chat/completions", "/embeddings")):
+            continue
+        messages = payload.get("messages")
+        tools = payload.get("tools")
+        summaries.append(
+            {
+                "endpoint": upstream.rsplit("/", 1)[-1],
+                "model": payload.get("model"),
+                "stream": payload.get("stream", False),
+                "temperature": payload.get("temperature"),
+                "dimensions": payload.get("dimensions"),
+                "encodingFormat": payload.get("encoding_format"),
+                "inputCount": (
+                    len(payload.get("input", []))
+                    if isinstance(payload.get("input"), list)
+                    else None
+                ),
+                "roles": (
+                    [message.get("role") for message in messages]
+                    if isinstance(messages, list)
+                    else None
+                ),
+                "toolNames": (
+                    [
+                        tool.get("function", {}).get("name")
+                        for tool in tools
+                        if isinstance(tool, dict)
+                    ]
+                    if isinstance(tools, list)
+                    else []
+                ),
+            }
+        )
+    return summaries
+
+
+def capture_target(target: Target, knowledge_base_id: int) -> dict[str, Any]:
+    before = len(model_records())
+    request = {
+        "knowledgeBaseIds": [knowledge_base_id],
+        "question": QUESTION,
+    }
+    with httpx.Client(base_url=target.base_url, timeout=180) as client:
+        sync = result_payload(client.post("/api/knowledgebase/query", json=request))
+        stream_response = client.post(
+            "/api/knowledgebase/query/stream",
+            json=request,
+        )
+        with client.stream(
+            "POST",
+            "/api/knowledgebase/query/stream",
+            json=request,
+        ) as cancelled_response:
+            cancelled_body = bytearray()
+            for chunk in cancelled_response.iter_raw():
+                cancelled_body.extend(chunk)
+                break
+            cancelled_stream = sse_record(
+                bytes(cancelled_body),
+                cancelled_response.status_code,
+                {
+                    key.lower(): value
+                    for key, value in cancelled_response.headers.items()
+                    if key.lower()
+                    in {
+                        "content-type",
+                        "cache-control",
+                        "connection",
+                        "x-accel-buffering",
+                    }
+                },
+                cancelled=True,
+                completed=False,
+            )
+    stream = sse_record(
+        stream_response.content,
+        stream_response.status_code,
+        {
+            key.lower(): value
+            for key, value in stream_response.headers.items()
+            if key.lower()
+            in {
+                "content-type",
+                "cache-control",
+                "connection",
+                "x-accel-buffering",
+            }
+        },
+    )
+    stream_text = "".join(frame["data"] for frame in stream["frames"])
+    if (
+        stream_response.status_code != 200
+        or not stream_text.strip()
+        or stream_text == NO_RESULT_RESPONSE
+        or "【错误】" in stream_text
+    ):
+        raise AssertionError(f"Real knowledge-base stream failed for {target.name}: {stream}")
+    with target.database_connection() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT question_count
+            FROM knowledge_bases
+            WHERE id = %s
+            """,
+            (knowledge_base_id,),
+        )
+        question_count = int(cursor.fetchone()[0])
+        cursor.execute("SELECT count(*) FROM rag_chat_messages")
+        rag_message_count = int(cursor.fetchone()[0])
+    records = model_records()[before:]
+    return {
+        "sync": sync,
+        "stream": stream,
+        "cancelledStream": cancelled_stream,
+        "streamText": stream_text,
+        "questionCount": question_count,
+        "ragMessageCount": rag_message_count,
+        "requests": request_summaries(records),
+    }
+
+
+def main() -> None:
+    api_key = os.environ.get("AI_BAILIAN_API_KEY", "").strip()
+    if not api_key:
+        raise SystemExit("AI_BAILIAN_API_KEY is required")
+    embedding = embed_question(api_key)
+    knowledge_base_ids = {target.name: reset_and_seed(target, embedding) for target in TARGETS}
+    captures = {
+        target.name: capture_target(target, knowledge_base_ids[target.name]) for target in TARGETS
+    }
+    java_requests = captures["java"]["requests"]
+    python_requests = captures["python"]["requests"]
+    request_shape_passed = java_requests == python_requests
+    functional_passed = all(
+        capture["questionCount"] == 3
+        and capture["ragMessageCount"] == 0
+        and capture["cancelledStream"]["cancelled"] is True
+        and capture["cancelledStream"]["completed"] is False
+        for capture in captures.values()
+    )
+    report = {
+        "schemaVersion": 1,
+        "provider": "dashscope",
+        "embeddingModel": "text-embedding-v3",
+        "embeddingDimensions": len(embedding),
+        "question": QUESTION,
+        "fakeModel": False,
+        "realEmbeddingValidated": len(embedding) == 1024,
+        "realModelValidated": functional_passed and request_shape_passed,
+        "requestShapePassed": request_shape_passed,
+        "functionalPassed": functional_passed,
+        **captures,
+    }
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    output = REPORTS / "real-model-knowledge-base.json"
+    output.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    if not report["realModelValidated"]:
+        raise SystemExit(f"Real knowledge-base model comparison failed: {output}")
+    print(f"Real knowledge-base model comparison passed: {output}")
+
+
+if __name__ == "__main__":
+    main()

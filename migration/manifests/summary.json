@@ -11,8 +11,8 @@
     },
     "configuration.json": {
       "configurationValueCount": 244,
-      "envExampleCount": 20,
-      "envReferencedButUndocumentedCount": 77,
+      "envExampleCount": 27,
+      "envReferencedButUndocumentedCount": 70,
       "propertyBindingCount": 11
     },
     "database.json": {
