@@ -33,6 +33,7 @@ instances, ports, and S3 buckets:
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-voice-rest-comparison.sh
+./migration/scripts/run-java-recovery-rehearsal.sh
 ./migration/scripts/run-voice-websocket-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-failure-cases.sh
@@ -53,6 +54,8 @@ backend dependencies:
 ```bash
 cd backend
 uv run python ../migration/scripts/realtime_artifact.py --help
+uv run --with pymupdf==1.28.2 \
+  python ../migration/scripts/pdf_visual_compare.py --help
 ```
 
 The knowledge-base comparison uses the committed TXT/Markdown fixtures under
