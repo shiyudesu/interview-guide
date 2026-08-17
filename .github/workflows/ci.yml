@@ -315,9 +315,6 @@ jobs:
       - name: Compare knowledge-base question bank and specialized interview
         run: ./migration/scripts/run-knowledge-base-interview-comparison.sh
 
-      - name: Compare no-model REST performance
-        run: ./migration/scripts/run-rest-performance-comparison.sh
-
       - name: Run frontend against real Python backend
         working-directory: frontend
         env:

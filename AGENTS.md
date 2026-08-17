@@ -348,6 +348,7 @@ Java 和 Python 对比环境必须使用不同端口、数据库、Redis 实例�
 - 使用 `git config core.hooksPath .githooks` 启用本地 hooks。
 - 当前 CI 在 `app/` 存在时运行 Java 基线，在 `backend/pyproject.toml` 存在后运行 Python
   检查，并始终运行前端和 hook 检查。
+- 共享 runner 上的性能比例不进入普通 CI；手动 `performance.yml` 保存严格 REST/RSS 报告。
 - 真实模型 CI 只能在有受保护密钥的 main 分支或手动任务中运行。
 - Fork PR 不能获得密钥，也不能被标记为完整迁移检查通过。
 - 迁移命令、Compose、CI 或最终技术方案变化时，同时更新 README、AGENTS.md 和迁移计划。

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import unittest
 from pathlib import Path
 
@@ -17,7 +18,7 @@ def target(p95: float, p99: float, throughput: float) -> dict[str, object]:
     return {
         "errorCount": 0,
         "latency": {"p95Ms": p95, "p99Ms": p99},
-        "response": '{"code": 200}',
+        "responseHash": "fixed",
         "responseVariants": 1,
         "throughputMedianRps": throughput,
     }
@@ -41,8 +42,8 @@ class RestPerformanceCompareTest(unittest.TestCase):
             [
                 {
                     "results": [
-                        {"body": "first", "elapsedMs": 10},
-                        {"body": "second", "elapsedMs": 20},
+                        {"bodyHash": "first", "elapsedMs": 10},
+                        {"bodyHash": "second", "elapsedMs": 20},
                         {"elapsedMs": 30, "error": "failure"},
                     ],
                     "throughputRps": 100,
@@ -52,6 +53,14 @@ class RestPerformanceCompareTest(unittest.TestCase):
         )
         self.assertEqual(1, summary["errorCount"])
         self.assertEqual(2, summary["responseVariants"])
+
+    def test_memory_summary_uses_peak_and_stable_window(self) -> None:
+        mebibyte = 1024 * 1024
+        summary = MODULE.memory_summary([100 * mebibyte, 130 * mebibyte, 110 * mebibyte])
+        self.assertEqual(100, summary["baselineMiB"])
+        self.assertEqual(130, summary["peakMiB"])
+        self.assertEqual(110, summary["stableMiB"])
+        self.assertGreater(MODULE.process_tree_rss_bytes(os.getpid()), 0)
 
 
 if __name__ == "__main__":
