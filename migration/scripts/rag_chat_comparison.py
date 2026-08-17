@@ -127,7 +127,6 @@ def tracked_sse_headers(response: httpx.Response) -> dict[str, str]:
         in {
             "content-type",
             "cache-control",
-            "connection",
             "x-accel-buffering",
         }
     }
