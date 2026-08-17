@@ -15,6 +15,11 @@ def question_count(user_prompt: str) -> int:
     return max(0, int(match.group(1))) if match else 0
 
 
+def knowledge_base_question_count(user_prompt: str) -> int:
+    match = re.search(r"生成 (\d+) 道面试题草稿", user_prompt)
+    return max(0, int(match.group(1))) if match else 0
+
+
 def response_content(messages: list[dict[str, Any]]) -> dict[str, Any]:
     system = str(messages[0].get("content") or "") if messages else ""
     user = str(messages[-1].get("content") or "") if messages else ""
@@ -58,6 +63,52 @@ def response_content(messages: list[dict[str, Any]]) -> dict[str, Any]:
                 for index in range(question_count(user))
             ]
         }
+    if "根据知识库内容生成可维护的面试题库草稿" in system:
+        templates = [
+            {
+                "category": "Redis",
+                "type": "REDIS",
+                "question": "请说明 Redis 的两种持久化方式及其取舍。",
+                "topicSummary": "Redis RDB 与 AOF 持久化",
+                "referenceAnswer": "RDB 是快照，AOF 记录写命令；需要结合恢复速度与数据安全取舍。",
+                "keyPoints": ["RDB", "AOF", "恢复速度", "数据安全"],
+                "scoringRubric": "覆盖两种方式及取舍得满分。",
+                "followUps": [
+                    {
+                        "question": "AOF 重写解决什么问题？",
+                        "referenceAnswer": "压缩历史命令，控制 AOF 文件体积。",
+                        "keyPoints": ["命令合并", "文件体积"],
+                        "scoringRubric": "说明压缩历史命令得满分。",
+                    },
+                    {
+                        "question": "如何选择持久化组合？",
+                        "referenceAnswer": "根据数据安全、恢复速度和资源开销选择。",
+                        "keyPoints": ["安全", "速度", "开销"],
+                        "scoringRubric": "覆盖三个权衡因素得满分。",
+                    },
+                ],
+            },
+            {
+                "category": "事务",
+                "type": "DATABASE",
+                "question": "为什么外部模型调用不应放在长数据库事务内？",
+                "topicSummary": "外部调用与事务边界",
+                "referenceAnswer": "长事务会持锁并放大超时与失败影响，应缩小事务边界。",
+                "keyPoints": ["持锁", "超时", "失败恢复"],
+                "scoringRubric": "说明锁、超时与失败恢复得满分。",
+                "followUps": [
+                    {
+                        "question": "如何保持外部可见结果一致？",
+                        "referenceAnswer": "使用状态机、幂等键和补偿恢复。",
+                        "keyPoints": ["状态机", "幂等", "补偿"],
+                        "scoringRubric": "覆盖状态机、幂等和补偿得满分。",
+                    }
+                ],
+            },
+        ]
+        return {
+            "questions": templates[: knowledge_base_question_count(user)]
+        }
     if "10 年以上经验" in system:
         indices = [int(value) - 1 for value in re.findall(r"问题(\d+) \[", user)]
         return {
@@ -95,7 +146,34 @@ class StubHandler(BaseHTTPRequestHandler):
         self.send_error(404)
 
     def do_POST(self) -> None:
-        if not self.path.rstrip("/").endswith("chat/completions"):
+        normalized_path = self.path.rstrip("/")
+        if normalized_path.endswith("embeddings"):
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length) or b"{}")
+            self.server.record_path.parent.mkdir(parents=True, exist_ok=True)
+            with self.server.record_path.open("a", encoding="utf-8") as output:
+                output.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n")
+            inputs = payload.get("input")
+            input_count = len(inputs) if isinstance(inputs, list) else 1
+            dimensions = int(payload.get("dimensions") or 1024)
+            embedding = [1.0] + [0.0] * (dimensions - 1)
+            self._json(
+                {
+                    "object": "list",
+                    "model": payload.get("model", "comparison-embedding"),
+                    "data": [
+                        {
+                            "object": "embedding",
+                            "index": index,
+                            "embedding": embedding,
+                        }
+                        for index in range(input_count)
+                    ],
+                    "usage": {"prompt_tokens": input_count, "total_tokens": input_count},
+                }
+            )
+            return
+        if not normalized_path.endswith("chat/completions"):
             self.send_error(404)
             return
         length = int(self.headers.get("Content-Length", "0"))

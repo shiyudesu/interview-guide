@@ -104,6 +104,54 @@ class InterviewService:
 
         return await self._cache.execute_create_locked(request_id, operation)
 
+    async def create_session_from_questions(
+        self,
+        questions: list[InterviewQuestion],
+        llm_provider: str | None,
+        skill_id: str,
+        difficulty: str,
+        knowledge_base_id: int,
+        interview_category: str | None,
+    ) -> InterviewSessionDTO:
+        if not questions:
+            raise BusinessException(
+                ErrorCode.INTERVIEW_QUESTION_NOT_FOUND,
+                "面试题目不能为空",
+            )
+        session_id = str(self._uuid_factory()).replace("-", "")[:16]
+        await self._repository.create_session(
+            session_id=session_id,
+            resume_id=None,
+            questions=questions,
+            llm_provider=llm_provider,
+            skill_id=skill_id,
+            difficulty=difficulty,
+            request_id=None,
+            source_type="KNOWLEDGE_BASE",
+            knowledge_base_id=knowledge_base_id,
+            interview_category=interview_category,
+        )
+        await self._cache.save_session(
+            session_id,
+            "",
+            None,
+            knowledge_base_id,
+            interview_category,
+            questions,
+            0,
+            InterviewSessionStatus.CREATED,
+        )
+        return InterviewSessionDTO(
+            session_id=session_id,
+            resume_text="",
+            total_questions=len(questions),
+            current_question_index=0,
+            questions=questions,
+            status=InterviewSessionStatus.CREATED,
+            knowledge_base_id=knowledge_base_id,
+            interview_category=interview_category,
+        )
+
     async def get_session(self, session_id: str) -> InterviewSessionDTO:
         cached = await self._cache.get_session(session_id)
         if cached is not None:

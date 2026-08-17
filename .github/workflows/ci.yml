@@ -303,6 +303,9 @@ jobs:
       - name: Compare text interview CRUD, idempotency, Redis and PDF
         run: ./migration/scripts/run-interview-comparison.sh
 
+      - name: Compare knowledge-base question bank and specialized interview
+        run: ./migration/scripts/run-knowledge-base-interview-comparison.sh
+
       - name: Run frontend against real Python backend
         working-directory: frontend
         env:

@@ -15,6 +15,7 @@ from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.redis import RedisConnection
 from interview_guide.common.redis.streams import (
     INTERVIEW_EVALUATE,
+    KB_QUESTION_GEN,
     KB_VECTORIZE,
     RESUME_ANALYZE,
     STREAM_DEFINITIONS,
@@ -29,6 +30,12 @@ from interview_guide.modules.interview.evaluation import (
 from interview_guide.modules.interview.question import InterviewSkillLibrary
 from interview_guide.modules.interview.repository import InterviewRepository
 from interview_guide.modules.interview.service import InterviewEvaluateHandler
+from interview_guide.modules.knowledge_base.question_service import (
+    KnowledgeBaseQuestionGenerationService,
+    QuestionGenerationStateService,
+    QuestionGenStreamHandler,
+    QuestionGenStreamProducer,
+)
 from interview_guide.modules.knowledge_base.vectorization import (
     KnowledgeBaseVectorizationService,
     KnowledgeBaseVectorRepository,
@@ -108,6 +115,33 @@ async def run_worker(
                     ),
                 ),
             )
+            question_generation_state = QuestionGenerationStateService(
+                infrastructure.database.sessions,
+                now=now_factory,
+            )
+            question_generation_producer = QuestionGenStreamProducer(
+                streams,
+                question_generation_state,
+            )
+            question_generation_consumer = SequentialStreamConsumer(
+                streams,
+                KB_QUESTION_GEN,
+                f"{KB_QUESTION_GEN.consumer_prefix}{str(uuid.uuid4())[:8]}",
+                QuestionGenStreamHandler(
+                    question_generation_state,
+                    question_generation_producer,
+                    KnowledgeBaseQuestionGenerationService(
+                        infrastructure.database.sessions,
+                        infrastructure.provider_registry,
+                        infrastructure.llm_adapter,
+                        StructuredOutputInvoker(infrastructure.llm_adapter),
+                        PromptRepository(resources),
+                        infrastructure.prompt_sanitizer,
+                        question_generation_state,
+                        now=now_factory,
+                    ),
+                ),
+            )
             skills = InterviewSkillLibrary(SkillRepository(resources), resources)
             interview_consumer = SequentialStreamConsumer(
                 streams,
@@ -132,7 +166,12 @@ async def run_worker(
                 ),
             )
             await run_stream_consumers(
-                (resume_consumer, vector_consumer, interview_consumer),
+                (
+                    resume_consumer,
+                    vector_consumer,
+                    question_generation_consumer,
+                    interview_consumer,
+                ),
                 resolved_stop_event,
             )
     finally:

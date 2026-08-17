@@ -44,6 +44,27 @@ jobs:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
         run: ./migration/scripts/run-real-model-smoke.sh
 
+      - name: Prepare real question generation data
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        working-directory: backend
+        run: >-
+          uv run --frozen python
+          ../migration/scripts/real_model_knowledge_base_interview.py prepare
+
+      - name: Start question generation workers
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        run: ./migration/scripts/start-comparison-workers.sh
+
+      - name: Run real question generation and specialized interview
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        working-directory: backend
+        run: >-
+          uv run --frozen python
+          ../migration/scripts/real_model_knowledge_base_interview.py capture
+
       - name: Upload redacted model records
         if: always()
         uses: actions/upload-artifact@v6
@@ -53,8 +74,13 @@ jobs:
             migration/reports/model-proxy.jsonl
             migration/reports/real-model-interview.json
             migration/reports/real-model-knowledge-base.json
+            migration/reports/real-model-knowledge-base-interview.json
             migration/reports/real-model-smoke.json
           if-no-files-found: ignore
+
+      - name: Stop comparison workers
+        if: always()
+        run: ./migration/scripts/stop-comparison-workers.sh
 
       - name: Stop comparison environment
         if: always()

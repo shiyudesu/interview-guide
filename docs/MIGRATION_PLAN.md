@@ -1246,6 +1246,9 @@ FastAPI 必须设置与 Java 一致的：
 - ACTIVE 题抽取。
 - 追问数量硬约束。
 - 文字面试和统一评估复用。
+- 固定任务 ID、随机选择、API/数据库/Redis Stream 的 Java/Python 比较通过
+  `run-knowledge-base-interview-comparison.sh` 执行；普通测试使用明确命名的 fake，
+  受保护工作流使用真实 Embedding 和 LLM 并保存请求、耗时、Token 与费用记录。
 
 ### 16.8 语音面试
 
@@ -1523,6 +1526,7 @@ docker history <python-image>
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
+./migration/scripts/run-knowledge-base-interview-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh

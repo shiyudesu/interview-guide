@@ -316,6 +316,18 @@ class Settings(BaseSettings):
         default=None,
         validation_alias="MIGRATION_INTERVIEW_SESSION_UUID",
     )
+    migration_question_generation_task_uuid: str | None = Field(
+        default=None,
+        validation_alias="MIGRATION_QUESTION_GENERATION_TASK_UUID",
+    )
+    migration_knowledgebase_main_selection_ints: str | None = Field(
+        default=None,
+        validation_alias="MIGRATION_KNOWLEDGEBASE_MAIN_SELECTION_INTS",
+    )
+    migration_knowledgebase_follow_up_selection_ints: str | None = Field(
+        default=None,
+        validation_alias="MIGRATION_KNOWLEDGEBASE_FOLLOW_UP_SELECTION_INTS",
+    )
     migration_prompt_boundary_uuid: str | None = Field(
         default=None,
         validation_alias="MIGRATION_PROMPT_BOUNDARY_UUID",

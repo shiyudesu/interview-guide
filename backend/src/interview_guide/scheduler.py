@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[import-untyped]
 
@@ -11,6 +12,11 @@ from interview_guide.common.logging.config import configure_logging
 from interview_guide.modules.interview_schedule.service import (
     InterviewScheduleService,
     schedule_now,
+)
+from interview_guide.modules.knowledge_base.question_service import (
+    QuestionGenerationRecoveryService,
+    QuestionGenerationStateService,
+    QuestionGenStreamProducer,
 )
 from interview_guide.process import install_shutdown_handlers
 
@@ -29,6 +35,13 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
         if settings.infrastructure_startup_enabled:
             infrastructure = RuntimeInfrastructure(settings)
             await infrastructure.start()
+            if settings.migration_fixed_time:
+                fixed_now = datetime.fromisoformat(settings.migration_fixed_time)
+
+                def now_factory() -> datetime:
+                    return fixed_now
+            else:
+                now_factory = datetime.now
 
             async def expire_interview_schedules() -> None:
                 assert infrastructure is not None
@@ -43,12 +56,33 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
                             updated,
                         )
 
+            state = QuestionGenerationStateService(
+                infrastructure.database.sessions,
+                now=now_factory,
+            )
+            recovery = QuestionGenerationRecoveryService(
+                state,
+                QuestionGenStreamProducer(infrastructure.streams, state),
+                now=now_factory,
+            )
+
+            async def recover_question_generation() -> None:
+                await recovery.recover()
+
             scheduler.add_job(
                 expire_interview_schedules,
                 trigger="cron",
                 minute=0,
                 second=0,
                 id="interview-schedule-expiry",
+                max_instances=1,
+                coalesce=False,
+            )
+            scheduler.add_job(
+                recover_question_generation,
+                trigger="interval",
+                seconds=60,
+                id="knowledge-base-question-generation-recovery",
                 max_instances=1,
                 coalesce=False,
             )
