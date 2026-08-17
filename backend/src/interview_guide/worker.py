@@ -19,6 +19,7 @@ from interview_guide.common.redis.streams import (
     KB_VECTORIZE,
     RESUME_ANALYZE,
     STREAM_DEFINITIONS,
+    VOICE_EVALUATE,
     RedisStreamService,
     SequentialStreamConsumer,
     run_stream_consumers,
@@ -44,6 +45,15 @@ from interview_guide.modules.knowledge_base.vectorization import (
 from interview_guide.modules.resume.analysis import (
     ResumeAnalyzeHandler,
     ResumeGradingService,
+)
+from interview_guide.modules.voice_interview.evaluation import (
+    VoiceEvaluateStreamHandler,
+    VoiceInterviewEvaluationService,
+)
+from interview_guide.modules.voice_interview.repository import VoiceInterviewRepository
+from interview_guide.modules.voice_interview.service import (
+    VoiceEvaluationProducer,
+    VoiceInterviewService,
 )
 from interview_guide.process import install_shutdown_handlers
 
@@ -143,6 +153,12 @@ async def run_worker(
                 ),
             )
             skills = InterviewSkillLibrary(SkillRepository(resources), resources)
+            unified_evaluation = UnifiedEvaluationService(
+                StructuredOutputInvoker(infrastructure.llm_adapter),
+                PromptRepository(resources),
+                batch_size=settings.interview_evaluation_batch_size,
+                tools=(skills.tool_definition(),),
+            )
             interview_consumer = SequentialStreamConsumer(
                 streams,
                 INTERVIEW_EVALUATE,
@@ -154,15 +170,42 @@ async def run_worker(
                     ),
                     streams,
                     AnswerEvaluationService(
-                        UnifiedEvaluationService(
-                            StructuredOutputInvoker(infrastructure.llm_adapter),
-                            PromptRepository(resources),
-                            batch_size=settings.interview_evaluation_batch_size,
-                            tools=(skills.tool_definition(),),
-                        ),
+                        unified_evaluation,
                         skills,
                     ),
                     infrastructure.provider_registry,
+                ),
+            )
+            voice_repository = VoiceInterviewRepository(
+                infrastructure.database.sessions,
+                now_factory,
+            )
+            voice_producer = VoiceEvaluationProducer(
+                streams,
+                voice_repository,
+                infrastructure.redis.client,
+            )
+            voice_service = VoiceInterviewService(
+                voice_repository,
+                infrastructure.redis.client,
+                voice_producer,
+                now_factory,
+            )
+            voice_consumer = SequentialStreamConsumer(
+                streams,
+                VOICE_EVALUATE,
+                f"{VOICE_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}",
+                VoiceEvaluateStreamHandler(
+                    voice_repository,
+                    streams,
+                    VoiceInterviewEvaluationService(
+                        voice_repository,
+                        unified_evaluation,
+                        infrastructure.provider_registry,
+                        skills,
+                        now_factory,
+                    ),
+                    voice_service,
                 ),
             )
             await run_stream_consumers(
@@ -171,6 +214,7 @@ async def run_worker(
                     vector_consumer,
                     question_generation_consumer,
                     interview_consumer,
+                    voice_consumer,
                 ),
                 resolved_stop_event,
             )

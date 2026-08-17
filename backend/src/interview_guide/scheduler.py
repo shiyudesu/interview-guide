@@ -18,6 +18,11 @@ from interview_guide.modules.knowledge_base.question_service import (
     QuestionGenerationStateService,
     QuestionGenStreamProducer,
 )
+from interview_guide.modules.voice_interview.repository import VoiceInterviewRepository
+from interview_guide.modules.voice_interview.service import (
+    VoiceEvaluationProducer,
+    VoiceInterviewService,
+)
 from interview_guide.process import install_shutdown_handlers
 
 logger = logging.getLogger(__name__)
@@ -69,6 +74,29 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
             async def recover_question_generation() -> None:
                 await recovery.recover()
 
+            voice_repository = VoiceInterviewRepository(
+                infrastructure.database.sessions,
+                now_factory,
+            )
+            voice_service = VoiceInterviewService(
+                voice_repository,
+                infrastructure.redis.client,
+                VoiceEvaluationProducer(
+                    infrastructure.streams,
+                    voice_repository,
+                    infrastructure.redis.client,
+                ),
+                now_factory,
+            )
+
+            async def recover_voice_interviews() -> None:
+                cleaned = await voice_service.cleanup_stale_sessions()
+                if cleaned:
+                    logger.info(
+                        "recovered stale voice interviews updated=%s",
+                        cleaned,
+                    )
+
             scheduler.add_job(
                 expire_interview_schedules,
                 trigger="cron",
@@ -83,6 +111,14 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
                 trigger="interval",
                 seconds=60,
                 id="knowledge-base-question-generation-recovery",
+                max_instances=1,
+                coalesce=False,
+            )
+            scheduler.add_job(
+                recover_voice_interviews,
+                trigger="interval",
+                seconds=60,
+                id="voice-interview-recovery",
                 max_instances=1,
                 coalesce=False,
             )

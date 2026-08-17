@@ -124,6 +124,13 @@ async def messages(session_id: int, service: Service) -> Response:
 
 def evaluation_detail(entity: Any) -> VoiceEvaluationDetail:
     raw_answers = json.loads(entity.question_evaluations_json or "[]")
+    raw_references = json.loads(entity.reference_answers_json or "[]")
+    references: dict[int, dict[str, Any]] = {}
+    for index, reference in enumerate(raw_references):
+        references.setdefault(
+            int(reference.get("questionIndex", index)),
+            reference,
+        )
     return VoiceEvaluationDetail(
         session_id=entity.session_id,
         total_questions=len(raw_answers),
@@ -139,8 +146,14 @@ def evaluation_detail(entity: Any) -> VoiceEvaluationDetail:
                 user_answer=answer.get("userAnswer"),
                 score=int(answer.get("score", 0)),
                 feedback=answer.get("feedback"),
-                reference_answer=answer.get("referenceAnswer"),
-                key_points=answer.get("keyPoints"),
+                reference_answer=references.get(
+                    int(answer.get("questionIndex", index)),
+                    {},
+                ).get("referenceAnswer"),
+                key_points=references.get(
+                    int(answer.get("questionIndex", index)),
+                    {},
+                ).get("keyPoints"),
             )
             for index, answer in enumerate(raw_answers)
         ],

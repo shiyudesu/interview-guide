@@ -15,6 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Require protected real-model secret
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        run: |
+          if [[ -z "$AI_BAILIAN_API_KEY" ]]; then
+            echo "AI_BAILIAN_API_KEY is required; no real-model result will be claimed" >&2
+            exit 1
+          fi
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -52,6 +61,27 @@ jobs:
         working-directory: backend
         run: uv run --frozen python ../migration/scripts/real_model_voice.py
 
+      - name: Prepare real voice evaluation data
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        working-directory: backend
+        run: >-
+          uv run --frozen python
+          ../migration/scripts/real_model_voice_evaluation.py prepare
+
+      - name: Start real-model stream workers
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        run: ./migration/scripts/start-comparison-workers.sh
+
+      - name: Run real voice evaluation
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        working-directory: backend
+        run: >-
+          uv run --frozen python
+          ../migration/scripts/real_model_voice_evaluation.py capture
+
       - name: Prepare real question generation data
         env:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
@@ -59,11 +89,6 @@ jobs:
         run: >-
           uv run --frozen python
           ../migration/scripts/real_model_knowledge_base_interview.py prepare
-
-      - name: Start question generation workers
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        run: ./migration/scripts/start-comparison-workers.sh
 
       - name: Run real question generation and specialized interview
         env:
@@ -85,6 +110,7 @@ jobs:
             migration/reports/real-model-knowledge-base-interview.json
             migration/reports/real-model-smoke.json
             migration/reports/real-model-voice.json
+            migration/reports/real-model-voice-evaluation.json
           if-no-files-found: ignore
 
       - name: Stop comparison workers

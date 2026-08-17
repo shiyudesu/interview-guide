@@ -39,6 +39,7 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-voice-rest-comparison.sh
 ./migration/scripts/run-voice-websocket-comparison.sh
+./migration/scripts/run-voice-evaluation-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
@@ -56,9 +57,12 @@ Stream、错误和 PDF 可见文本；真实出题与顺序评估由同一受保
 知识库题库与专项面试常规比较固定任务 ID、Prompt、Embedding、API、数据库和 Redis Stream，
 覆盖生成状态恢复、CRUD、严格容量、ACTIVE 抽题和统一评估复用；受保护工作流另行调用真实
 Embedding 与 LLM，并保存 Provider、模型、耗时和 Token 记录。
-语音 WebSocket 常规比较只覆盖固定历史会话的非模型 welcome transcript；Python 单元和
-FastAPI 集成测试使用明确命名的 fake 验证 ASR/LLM/TTS 编排，不作为真实语音模型验收。
-真实 ASR/TTS 仅由受保护工作流通过记录代理验收。
+语音 WebSocket 常规比较覆盖固定历史会话的非模型 welcome transcript；语音评估 Worker
+常规比较使用明确标记的固定模型 stub 对比 Java/Python 数据库和 Redis 状态，不作为真实模型
+验收。Python 单元和真实 PostgreSQL/Redis 集成测试中的 fake 只验证编排、重试、ACK、崩溃
+reclaim 和恢复阈值。真实 ASR/TTS 与语音评估 LLM 仅由受保护工作流通过记录代理验收，并保存
+Provider、模型、耗时、Token 和 Provider 是否返回费用信息；缺少受保护 Key 时工作流直接失败，
+不会生成“真实模型已通过”的报告。
 
 Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
 LibreOffice 7.4.7-1+deb12u14，不包含 JVM。

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from redis.asyncio import Redis
@@ -34,6 +34,9 @@ SESSION_CACHE_TTL_SECONDS = 60 * 60
 DEFAULT_USER_ID = "default"
 DEFAULT_SKILL_ID = "java-backend"
 DEFAULT_DIFFICULTY = "mid"
+STALE_SESSION_AGE = timedelta(hours=2)
+PENDING_EVALUATION_REQUEUE_DELAY = timedelta(minutes=3)
+PROCESSING_EVALUATION_TIMEOUT = timedelta(minutes=30)
 
 
 class VoiceEvaluationProducer:
@@ -251,6 +254,31 @@ class VoiceInterviewService:
                 session_id,
                 status,
             )
+
+    async def cleanup_stale_sessions(self) -> int:
+        now = self._now()
+        cleaned = 0
+        for entity in await self.repository.stale_in_progress(now - STALE_SESSION_AGE):
+            if await self.end_session(entity.id):
+                cleaned += 1
+        for entity in await self.repository.stale_evaluations(
+            "PENDING",
+            now - PENDING_EVALUATION_REQUEUE_DELAY,
+        ):
+            await self.update_evaluate_status(entity.id, "PENDING", None)
+            await self._producer.send(entity.id)
+            cleaned += 1
+        for entity in await self.repository.stale_evaluations(
+            "PROCESSING",
+            now - PROCESSING_EVALUATION_TIMEOUT,
+        ):
+            await self.update_evaluate_status(
+                entity.id,
+                "FAILED",
+                "评估超时，请重新触发",
+            )
+            cleaned += 1
+        return cleaned
 
     async def _cache_session(self, entity: VoiceInterviewSession) -> None:
         await self._redis.set(

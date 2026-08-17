@@ -1525,6 +1525,7 @@ docker history <python-image>
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-voice-rest-comparison.sh
 ./migration/scripts/run-voice-websocket-comparison.sh
+./migration/scripts/run-voice-evaluation-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh

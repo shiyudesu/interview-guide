@@ -300,6 +300,9 @@ jobs:
       - name: Compare voice interview WebSocket non-model transcript
         run: ./migration/scripts/run-voice-websocket-comparison.sh
 
+      - name: Compare voice evaluation Worker database and Redis state
+        run: ./migration/scripts/run-voice-evaluation-comparison.sh
+
       - name: Compare knowledge base foundation
         run: ./migration/scripts/run-knowledge-base-comparison.sh
 
