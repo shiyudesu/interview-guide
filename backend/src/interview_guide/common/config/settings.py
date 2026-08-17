@@ -289,6 +289,24 @@ class Settings(BaseSettings):
         default=60,
         validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_VOLUME",
     )
+    voice_context_compression_enabled: bool = Field(
+        default=False,
+        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_ENABLED",
+    )
+    voice_context_compression_mode: str = Field(
+        default="SUMMARY",
+        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_MODE",
+    )
+    voice_context_compression_window_size: int = Field(
+        default=20,
+        ge=1,
+        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_WINDOW_SIZE",
+    )
+    voice_context_compression_summary_batch_size: int = Field(
+        default=10,
+        ge=1,
+        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_SUMMARY_BATCH_SIZE",
+    )
 
     otel_enabled: bool = Field(default=True, validation_alias="OTEL_ENABLED")
     otel_service_name: str = Field(

@@ -1523,6 +1523,7 @@ docker history <python-image>
 ./migration/scripts/run-llm-provider-comparison.sh
 ./migration/scripts/run-resume-foundation-comparison.sh
 ./migration/scripts/run-resume-upload-comparison.sh
+./migration/scripts/run-voice-rest-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh

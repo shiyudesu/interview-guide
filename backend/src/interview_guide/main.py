@@ -40,6 +40,9 @@ from interview_guide.modules.knowledge_base.rag_chat_api import (
 )
 from interview_guide.modules.llm_provider.api import router as llm_provider_router
 from interview_guide.modules.resume.api import router as resume_router
+from interview_guide.modules.voice_interview.api import (
+    router as voice_interview_router,
+)
 
 ACTUATOR_MEDIA_TYPE = "application/vnd.spring-boot.actuator.v3+json"
 
@@ -88,6 +91,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(interview_skill_router)
     app.include_router(llm_provider_router)
     app.include_router(resume_router)
+    app.include_router(voice_interview_router)
     app.include_router(knowledge_base_router)
     app.include_router(knowledge_base_interview_router)
     app.include_router(rag_chat_router)
