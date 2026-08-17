@@ -7,12 +7,14 @@ from datetime import datetime
 from pathlib import Path
 
 from interview_guide.common.ai.prompts import PromptRepository
+from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.config.settings import get_settings
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.redis import RedisConnection
 from interview_guide.common.redis.streams import (
+    INTERVIEW_EVALUATE,
     KB_VECTORIZE,
     RESUME_ANALYZE,
     STREAM_DEFINITIONS,
@@ -20,6 +22,13 @@ from interview_guide.common.redis.streams import (
     SequentialStreamConsumer,
     run_stream_consumers,
 )
+from interview_guide.modules.interview.evaluation import (
+    AnswerEvaluationService,
+    UnifiedEvaluationService,
+)
+from interview_guide.modules.interview.question import InterviewSkillLibrary
+from interview_guide.modules.interview.repository import InterviewRepository
+from interview_guide.modules.interview.service import InterviewEvaluateHandler
 from interview_guide.modules.knowledge_base.vectorization import (
     KnowledgeBaseVectorizationService,
     KnowledgeBaseVectorRepository,
@@ -99,8 +108,31 @@ async def run_worker(
                     ),
                 ),
             )
+            skills = InterviewSkillLibrary(SkillRepository(resources), resources)
+            interview_consumer = SequentialStreamConsumer(
+                streams,
+                INTERVIEW_EVALUATE,
+                f"{INTERVIEW_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}",
+                InterviewEvaluateHandler(
+                    InterviewRepository(
+                        infrastructure.database.sessions,
+                        now=now_factory,
+                    ),
+                    streams,
+                    AnswerEvaluationService(
+                        UnifiedEvaluationService(
+                            StructuredOutputInvoker(infrastructure.llm_adapter),
+                            PromptRepository(resources),
+                            batch_size=settings.interview_evaluation_batch_size,
+                            tools=(skills.tool_definition(),),
+                        ),
+                        skills,
+                    ),
+                    infrastructure.provider_registry,
+                ),
+            )
             await run_stream_consumers(
-                (resume_consumer, vector_consumer),
+                (resume_consumer, vector_consumer, interview_consumer),
                 resolved_stop_event,
             )
     finally:

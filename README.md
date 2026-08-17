@@ -39,6 +39,7 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-rag-chat-comparison.sh
+./migration/scripts/run-interview-comparison.sh
 ./migration/scripts/stop-comparison-env.sh
 ```
 
@@ -47,6 +48,8 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 普通知识库查询在常规比较中只验证无需真实模型的校验、缺失知识库和 SSE 错误分帧；
 RAG Chat 常规比较覆盖 CRUD、关联、无模型 SSE 和消息落库。真实改写、Embedding、同步回答、
 流式回答以及 RAG Chat 正常/故障保存结构由受保护的 `real-model.yml` 记录并验收。
+文字面试常规比较使用明确标记的固定模型 stub，覆盖 CRUD、requestId 幂等、数据库、Redis
+Stream、错误和 PDF 可见文本；真实出题与顺序评估由同一受保护工作流记录请求和费用后验收。
 
 Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
 LibreOffice 7.4.7-1+deb12u14，不包含 JVM。

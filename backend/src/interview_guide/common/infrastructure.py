@@ -60,7 +60,16 @@ class RuntimeInfrastructure:
             settings,
         )
         self.llm_adapter = LlmAdapter()
-        self.prompt_sanitizer = PromptSanitizer()
+        prompt_boundary_uuid = (
+            uuid.UUID(settings.migration_prompt_boundary_uuid)
+            if settings.migration_prompt_boundary_uuid
+            else None
+        )
+        self.prompt_sanitizer = PromptSanitizer(
+            uuid_factory=(
+                (lambda: prompt_boundary_uuid) if prompt_boundary_uuid is not None else uuid.uuid4
+            )
+        )
         self.voice_config = VoiceConfigStore(settings)
         key_generator: FileKeyGenerator | None = None
         if settings.migration_fixed_time or settings.migration_file_uuid:

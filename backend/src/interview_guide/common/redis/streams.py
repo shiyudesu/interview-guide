@@ -274,7 +274,15 @@ class SequentialStreamConsumer[T]:
         except Exception as error:
             retry_count = message.retry_count
             if retry_count < MAX_RETRY_COUNT:
-                await self._handler.retry(payload, retry_count + 1)
+                try:
+                    await self._handler.retry(payload, retry_count + 1)
+                except Exception:
+                    logger.exception(
+                        "failed to requeue stream message; preserving pending stream=%s id=%s",
+                        self._definition.key,
+                        message.message_id,
+                    )
+                    return
             else:
                 detail = f"task failed after retry {retry_count}: {error}"
                 await self._handler.mark_failed(payload, detail[:500])

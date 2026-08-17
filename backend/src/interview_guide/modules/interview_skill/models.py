@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pydantic import field_validator
+
 from interview_guide.common.api.models import CamelModel
 
 
@@ -27,3 +29,14 @@ class SkillResponse(CamelModel):
     source_jd: str | None
     persona: str | None
     display: DisplayResponse | None
+
+
+class ParseJdRequest(CamelModel):
+    jd_text: str
+
+    @field_validator("jd_text")
+    @classmethod
+    def validate_jd_text(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("不能为空")
+        return value

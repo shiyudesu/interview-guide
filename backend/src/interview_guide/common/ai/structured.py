@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from collections.abc import Sequence
 from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
@@ -9,12 +11,53 @@ from interview_guide.common.ai.prompts import ANTI_INJECTION_INSTRUCTION
 from interview_guide.common.errors import BusinessException, ErrorCode
 
 T = TypeVar("T", bound=BaseModel)
+JAVA_FORMAT_PREFIX = "Your response should be in JSON format."
 
 STRICT_JSON_INSTRUCTION = """请仅返回可被 JSON 解析器直接解析的 JSON 对象，并严格满足字段结构要求：
 1) 不要输出 Markdown 代码块（如 ```json）。
 2) 不要输出任何解释文字、前后缀、注释。
 3) 所有字符串内引号必须正确转义。
 """
+
+
+def java_schema_json(value: object, indent: int = 0) -> str:
+    prefix = " " * indent
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        items = list(value.items())
+        lines = ["{"]
+        for index, (key, item) in enumerate(items):
+            rendered = java_schema_json(item, indent + 2)
+            lines.append(
+                f"{' ' * (indent + 2)}{json.dumps(str(key), ensure_ascii=False)} : "
+                f"{rendered}{',' if index + 1 < len(items) else ''}"
+            )
+        lines.append(f"{prefix}}}")
+        return "\n".join(lines)
+    if isinstance(value, list):
+        if all(not isinstance(item, (dict, list)) for item in value):
+            return "[ " + ", ".join(java_schema_json(item) for item in value) + " ]"
+        return (
+            "[\n"
+            + ",\n".join(
+                f"{' ' * (indent + 2)}{java_schema_json(item, indent + 2)}" for item in value
+            )
+            + f"\n{prefix}]"
+        )
+    return json.dumps(value, ensure_ascii=False)
+
+
+def java_bean_output_format(schema: dict[str, object]) -> str:
+    return (
+        f"{JAVA_FORMAT_PREFIX}\n"
+        "Do not include any explanations, only provide a RFC8259 compliant JSON "
+        "response following this format without deviation.\n"
+        "Do not include markdown code blocks in your response.\n"
+        "Remove the ```json markdown from the output.\n"
+        "Here is the JSON Schema instance your output must adhere to:\n"
+        f"```{java_schema_json(schema)}```\n"
+    )
 
 
 def repair_unescaped_quotes(content: str) -> str:
@@ -82,8 +125,16 @@ class StructuredOutputInvoker:
         output_type: type[T],
         error_code: ErrorCode,
         error_prefix: str,
+        *,
+        tools: Sequence[dict[str, object]] | None = None,
     ) -> T:
         secured_system_prompt = system_prompt_with_format + ANTI_INJECTION_INSTRUCTION
+        format_start = system_prompt_with_format.find(JAVA_FORMAT_PREFIX)
+        formatted_user_prompt = (
+            user_prompt + "\n" + system_prompt_with_format[format_start:]
+            if format_start >= 0
+            else user_prompt
+        )
         last_error: Exception | None = None
         for attempt in range(1, self._max_attempts + 1):
             system_prompt = (
@@ -92,12 +143,14 @@ class StructuredOutputInvoker:
                 else self._retry_prompt(secured_system_prompt, last_error)
             )
             try:
-                response = await self._adapter.chat(
-                    provider,
-                    [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": formatted_user_prompt},
+                ]
+                response = (
+                    await self._adapter.chat(provider, messages, tools=tools)
+                    if tools is not None
+                    else await self._adapter.chat(provider, messages)
                 )
                 return self._convert(response.content or "", output_type)
             except Exception as error:

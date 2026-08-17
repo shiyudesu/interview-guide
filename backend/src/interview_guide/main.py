@@ -22,6 +22,7 @@ from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.common.telemetry import configure_tracing
+from interview_guide.modules.interview.api import router as interview_router
 from interview_guide.modules.interview_schedule.api import (
     router as interview_schedule_router,
 )
@@ -80,6 +81,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     install_exception_handlers(app)
     app.include_router(interview_schedule_router)
+    app.include_router(interview_router)
     app.include_router(interview_skill_router)
     app.include_router(llm_provider_router)
     app.include_router(resume_router)

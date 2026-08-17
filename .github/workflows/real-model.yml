@@ -51,6 +51,7 @@ jobs:
           name: real-model-migration-records
           path: |
             migration/reports/model-proxy.jsonl
+            migration/reports/real-model-interview.json
             migration/reports/real-model-knowledge-base.json
             migration/reports/real-model-smoke.json
           if-no-files-found: ignore

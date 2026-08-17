@@ -65,6 +65,13 @@ class PromptRepository:
                 ErrorCode.INTERNAL_ERROR,
                 f"Prompt 缺少变量: {', '.join(missing)}",
             )
+        for variable, value in values.items():
+            if str(value) == "":
+                template = re.sub(
+                    rf"(?m)^[ \t]*\{{{re.escape(variable)}\}}[ \t]*(?:\n|$)",
+                    "",
+                    template,
+                )
         return VARIABLE.sub(lambda match: str(values[match.group(1)]), template)
 
 

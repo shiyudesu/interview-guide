@@ -300,6 +300,9 @@ jobs:
       - name: Compare RAG Chat CRUD and no-model streaming
         run: ./migration/scripts/run-rag-chat-comparison.sh
 
+      - name: Compare text interview CRUD, idempotency, Redis and PDF
+        run: ./migration/scripts/run-interview-comparison.sh
+
       - name: Run frontend against real Python backend
         working-directory: frontend
         env:

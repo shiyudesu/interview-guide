@@ -44,4 +44,5 @@ echo "Real model smoke test passed"
 (
   cd "$repo_root/backend"
   uv run --frozen python ../migration/scripts/real_model_knowledge_base.py
+  uv run --frozen python ../migration/scripts/real_model_interview.py
 )

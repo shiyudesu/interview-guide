@@ -181,6 +181,14 @@ class Settings(BaseSettings):
         ge=0,
         validation_alias="APP_AI_RAG_HISTORY_MAX_MESSAGES",
     )
+    interview_follow_up_count: int = Field(
+        default=1,
+        validation_alias="APP_INTERVIEW_FOLLOW_UP_COUNT",
+    )
+    interview_evaluation_batch_size: int = Field(
+        default=8,
+        validation_alias="APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+    )
     provider_lmstudio_api_key: SecretStr = Field(
         default=SecretStr("lm-studio"),
         validation_alias="PROVIDER_LMSTUDIO_API_KEY",
@@ -303,6 +311,14 @@ class Settings(BaseSettings):
     migration_file_uuid: str | None = Field(
         default=None,
         validation_alias="MIGRATION_FILE_UUID",
+    )
+    migration_interview_session_uuid: str | None = Field(
+        default=None,
+        validation_alias="MIGRATION_INTERVIEW_SESSION_UUID",
+    )
+    migration_prompt_boundary_uuid: str | None = Field(
+        default=None,
+        validation_alias="MIGRATION_PROMPT_BOUNDARY_UUID",
     )
 
     @model_validator(mode="after")

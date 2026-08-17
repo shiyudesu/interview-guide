@@ -1233,6 +1233,10 @@ FastAPI 必须设置与 Java 一致的：
 - 答案提交。
 - 完成和异步评估。
 - 历史、未完成、详情、报告和 PDF。
+- 常规无密钥比较使用明确标记的固定模型 stub，固定比较 CRUD、幂等、错误、数据库、Redis
+  Stream 和 PDF 可见文本，不得将该结果标记为真实模型验收。
+- 受保护真实模型任务必须记录出题、顺序分批评估和二次汇总请求，校验本地总分、保存结果、
+  Provider、模型、参数、耗时、Token 和费用。
 
 ### 16.7 知识库题库和专项面试
 
@@ -1518,6 +1522,7 @@ docker history <python-image>
 ./migration/scripts/run-resume-upload-comparison.sh
 ./migration/scripts/run-knowledge-base-comparison.sh
 ./migration/scripts/run-rag-chat-comparison.sh
+./migration/scripts/run-interview-comparison.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh
 ./migration/scripts/stop-comparison-env.sh
