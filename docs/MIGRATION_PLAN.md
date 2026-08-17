@@ -584,6 +584,11 @@ Python 的 Unicode 字符数与 Java UTF-16 code unit 不完全相同。涉及�
 
 ## 9. PostgreSQL 和事务迁移
 
+SQLAlchemy 连接池默认固定为 10 个常驻连接、0 overflow，与 Java Hikari 默认并发上限一致；
+允许通过 `APP_DATABASE_POOL_SIZE` 和 `APP_DATABASE_MAX_OVERFLOW` 显式覆盖。
+连接借用不启用 SQLAlchemy `pool_pre_ping`，避免每次借用增加隐藏 SQL 和隐式重连；真实断线
+按当前操作失败并进入已有恢复流程。
+
 ### 9.1 Alembic 初始版本
 
 因为开发数据允许清空，创建一个等价的 Alembic 初始版本，不逐条移植旧 Flyway 历史。

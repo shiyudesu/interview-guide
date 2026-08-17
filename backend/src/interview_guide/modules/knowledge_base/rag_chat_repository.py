@@ -215,9 +215,7 @@ class RagChatRepository:
                 updated_at=now,
                 session_id=session_id,
             )
-            session.add(user_message)
-            await session.flush()
-            session.add(assistant_message)
+            session.add_all((user_message, assistant_message))
             await session.flush()
             entity.message_count = next_order + 2
             entity.updated_at = now
@@ -240,18 +238,25 @@ class RagChatRepository:
         history_max_messages: int,
     ) -> StreamContext:
         async with self._sessions() as session:
-            exists = await session.scalar(
-                select(RagChatSession.id).where(RagChatSession.id == session_id)
-            )
-            if exists is None:
+            rows = (
+                await session.execute(
+                    select(
+                        RagChatSession.id,
+                        RagSessionKnowledgeBase.knowledge_base_id,
+                    )
+                    .outerjoin(
+                        RagSessionKnowledgeBase,
+                        RagSessionKnowledgeBase.session_id == RagChatSession.id,
+                    )
+                    .where(RagChatSession.id == session_id)
+                )
+            ).all()
+            if not rows:
                 raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
             knowledge_base_ids = tuple(
-                int(value)
-                for value in await session.scalars(
-                    select(RagSessionKnowledgeBase.knowledge_base_id).where(
-                        RagSessionKnowledgeBase.session_id == session_id
-                    )
-                )
+                int(knowledge_base_id)
+                for _, knowledge_base_id in rows
+                if knowledge_base_id is not None
             )
             if not history_enabled:
                 return StreamContext(knowledge_base_ids, ())

@@ -76,6 +76,9 @@ Python API 关闭 Uvicorn 重复 access log；项目中间件继续生成 reques
 记录普通请求、INFO 记录慢请求或 4xx、WARNING 记录 5xx，避免单 worker 被同步日志阻塞。
 OpenTelemetry 仅在同时启用并配置 `OTEL_EXPORTER_OTLP_ENDPOINT` 时挂载请求 instrumentation，
 避免创建最终不会导出的 span。
+SQLAlchemy 连接池显式固定为 10 个常驻连接、0 overflow，与 Java Hikari 默认并发上限一致；
+可通过 `APP_DATABASE_POOL_SIZE` 和 `APP_DATABASE_MAX_OVERFLOW` 覆盖。连接借用不执行隐式
+pre-ping，真实断线由当前操作显式失败并交给业务恢复流程。
 
 Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
 LibreOffice 7.4.7-1+deb12u14，不包含 JVM。

@@ -70,6 +70,16 @@ class Settings(BaseSettings):
         default=SecretStr("123456"),
         validation_alias="POSTGRES_PASSWORD",
     )
+    database_pool_size: int = Field(
+        default=10,
+        ge=1,
+        validation_alias="APP_DATABASE_POOL_SIZE",
+    )
+    database_max_overflow: int = Field(
+        default=0,
+        ge=0,
+        validation_alias="APP_DATABASE_MAX_OVERFLOW",
+    )
 
     redis_host: str = Field(default="localhost", validation_alias="REDIS_HOST")
     redis_port: int = Field(default=6379, validation_alias="REDIS_PORT")

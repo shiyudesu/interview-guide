@@ -2967,12 +2967,30 @@
       }
     },
     {
+      "default": "10",
+      "name": "APP_DATABASE_POOL_SIZE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 44
+      }
+    },
+    {
+      "default": "0",
+      "name": "APP_DATABASE_MAX_OVERFLOW",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 45
+      }
+    },
+    {
       "default": "localhost",
       "name": "REDIS_HOST",
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 46
+        "line": 48
       }
     },
     {
@@ -2981,7 +2999,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 47
+        "line": 49
       }
     },
     {
@@ -2990,7 +3008,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 50
+        "line": 52
       }
     },
     {
@@ -2999,7 +3017,7 @@
       "sensitive": true,
       "source": {
         "file": ".env.example",
-        "line": 51
+        "line": 53
       }
     },
     {
@@ -3008,7 +3026,7 @@
       "sensitive": true,
       "source": {
         "file": ".env.example",
-        "line": 52
+        "line": 54
       }
     },
     {
@@ -3017,7 +3035,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 53
+        "line": 55
       }
     },
     {
@@ -3026,7 +3044,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 56
+        "line": 58
       }
     },
     {
@@ -3035,7 +3053,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 59
+        "line": 61
       }
     },
     {
@@ -3044,7 +3062,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 60
+        "line": 62
       }
     },
     {
@@ -3053,7 +3071,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 61
+        "line": 63
       }
     },
     {
@@ -3062,7 +3080,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 62
+        "line": 64
       }
     },
     {
@@ -3071,7 +3089,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 63
+        "line": 65
       }
     },
     {
@@ -3080,7 +3098,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 64
+        "line": 66
       }
     },
     {
@@ -3089,7 +3107,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 65
+        "line": 67
       }
     },
     {
@@ -3098,7 +3116,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 66
+        "line": 68
       }
     },
     {
@@ -3107,7 +3125,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 67
+        "line": 69
       }
     }
   ],
@@ -3276,7 +3294,7 @@
   "schemaVersion": 1,
   "summary": {
     "configurationValueCount": 244,
-    "envExampleCount": 29,
+    "envExampleCount": 31,
     "envReferencedButUndocumentedCount": 70,
     "propertyBindingCount": 11
   },
