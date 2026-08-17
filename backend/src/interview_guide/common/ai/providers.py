@@ -146,20 +146,6 @@ class ProviderRepository:
                     )
                 )
 
-    async def enabled_providers(self) -> list[LlmProviderConfig]:
-        async with self._sessions() as session:
-            result = await session.scalars(
-                select(LlmProviderConfig)
-                .where(LlmProviderConfig.enabled.is_(True))
-                .order_by(LlmProviderConfig.id)
-            )
-            return list(result)
-
-    async def all_providers(self) -> list[LlmProviderConfig]:
-        async with self._sessions() as session:
-            result = await session.scalars(select(LlmProviderConfig))
-            return list(result)
-
     async def provider_listing(
         self,
     ) -> tuple[LlmGlobalSetting, list[LlmProviderConfig]]:
@@ -172,6 +158,42 @@ class ProviderRepository:
                 )
             providers = await session.scalars(select(LlmProviderConfig))
             return setting, list(providers)
+
+    async def provider_detail(
+        self,
+        provider_id: str,
+    ) -> tuple[LlmGlobalSetting, LlmProviderConfig]:
+        async with self._sessions() as session:
+            setting = await session.get(LlmGlobalSetting, GLOBAL_SETTING_ID)
+            if setting is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "读取 Provider 配置失败",
+                )
+            provider = await session.get(LlmProviderConfig, provider_id)
+            if provider is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_NOT_FOUND,
+                    f"Provider '{provider_id}' 不存在",
+                )
+            return setting, provider
+
+    async def enabled_provider_listing(
+        self,
+    ) -> tuple[list[LlmProviderConfig], LlmGlobalSetting]:
+        async with self._sessions() as session:
+            providers = await session.scalars(
+                select(LlmProviderConfig)
+                .where(LlmProviderConfig.enabled.is_(True))
+                .order_by(LlmProviderConfig.id)
+            )
+            setting = await session.get(LlmGlobalSetting, GLOBAL_SETTING_ID)
+            if setting is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "读取 Provider 配置失败",
+                )
+            return list(providers), setting
 
     async def get_provider(self, provider_id: str) -> LlmProviderConfig:
         async with self._sessions() as session:
@@ -379,8 +401,7 @@ class LlmProviderRegistry:
 
     async def reload(self) -> None:
         async with self._lock:
-            providers = await self._repository.enabled_providers()
-            setting = await self._repository.global_setting()
+            providers, setting = await self._repository.enabled_provider_listing()
             self._providers = {
                 provider.id: ProviderConfig(
                     provider_id=provider.id,

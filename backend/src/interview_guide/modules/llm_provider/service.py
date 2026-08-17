@@ -53,8 +53,7 @@ class LlmProviderService:
         ]
 
     async def get(self, provider_id: str) -> ProviderResponse:
-        setting = await self._repository.global_setting()
-        provider = await self._repository.get_provider(provider_id)
+        setting, provider = await self._repository.provider_detail(provider_id)
         return self._response(
             provider,
             setting.default_chat_provider_id,
