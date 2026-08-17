@@ -194,5 +194,6 @@ def run() -> None:
         host=settings.server_host,
         port=settings.server_port,
         workers=1,
+        access_log=False,
         ws_max_size=2 * 1024 * 1024,
     )

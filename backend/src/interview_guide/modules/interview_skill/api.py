@@ -9,7 +9,11 @@ from starlette.responses import Response
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
-from interview_guide.common.api.responses import result_response
+from interview_guide.common.api.responses import (
+    result_response,
+    serialized_result,
+    serialized_result_response,
+)
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.redis.rate_limit import (
     RateLimitDimension,
@@ -27,6 +31,8 @@ from interview_guide.modules.knowledge_base.api import client_ip
 router = APIRouter(prefix="/api/interview/skills")
 RESOURCES = Path(__file__).resolve().parents[4] / "resources"
 service = InterviewSkillService(SkillRepository(RESOURCES))
+skill_list_result = serialized_result(Result.ok(service.all()))
+skill_results = {skill.id: serialized_result(Result.ok(skill)) for skill in service.all()}
 skill_repository = SkillRepository(RESOURCES)
 skill_library = InterviewSkillLibrary(skill_repository, RESOURCES)
 prompts = PromptRepository(RESOURCES)
@@ -34,12 +40,15 @@ prompts = PromptRepository(RESOURCES)
 
 @router.get("")
 async def list_skills() -> Response:
-    return result_response(Result.ok(service.all()))
+    return serialized_result_response(skill_list_result)
 
 
 @router.get("/{skill_id}")
 async def get_skill(skill_id: str) -> Response:
-    return result_response(Result.ok(service.get(skill_id)))
+    content = skill_results.get(skill_id)
+    if content is None:
+        return result_response(Result.ok(service.get(skill_id)))
+    return serialized_result_response(content)
 
 
 @router.post("/parse-jd")

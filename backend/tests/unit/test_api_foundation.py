@@ -1,15 +1,21 @@
 from __future__ import annotations
 
 import json
+import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import Body
 from fastapi.testclient import TestClient
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
+from interview_guide.common.api.middleware import request_log_level
+from interview_guide.common.api.responses import result_response, serialized_result
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
+from interview_guide.common.result import Result
 from interview_guide.main import ACTUATOR_MEDIA_TYPE, create_app
 
 
@@ -32,6 +38,13 @@ def test_health_response_matches_java_contract() -> None:
     assert response.status_code == 200
     assert response.headers["content-type"] == ACTUATOR_MEDIA_TYPE
     assert response.content == b'{"groups":["liveness","readiness"],"status":"UP"}'
+
+
+def test_request_logging_keeps_normal_traffic_nonblocking_at_info_level() -> None:
+    assert request_log_level(200, 0.1) == logging.DEBUG
+    assert request_log_level(200, 1.0) == logging.INFO
+    assert request_log_level(404, 0.1) == logging.INFO
+    assert request_log_level(500, 0.1) == logging.WARNING
 
 
 def test_cors_preflight_matches_java_headers() -> None:
@@ -91,6 +104,41 @@ def test_business_and_routing_errors_keep_http_200() -> None:
 
 class Payload(BaseModel):
     company_name: str
+
+
+class ResponsePayload(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=lambda value: value.replace("_name", "Name"),
+        populate_by_name=True,
+    )
+
+    company_name: str
+    created_at: datetime
+    identifier: UUID
+    optional: str | None
+
+
+def test_result_response_preserves_compact_java_compatible_json() -> None:
+    result = Result.ok(
+        ResponsePayload(
+            company_name="示例公司",
+            created_at=datetime(2026, 8, 16, 8, 0),
+            identifier=UUID("11111111-1111-1111-1111-111111111111"),
+            optional=None,
+        )
+    )
+    response = result_response(result)
+
+    assert response.headers["content-type"] == "application/json"
+    expected = (
+        b'{"code":200,"data":{"companyName":"'
+        + "示例公司".encode()
+        + b'","created_at":"2026-08-16T08:00:00",'
+        b'"identifier":"11111111-1111-1111-1111-111111111111","optional":null},'
+        b'"message":"success","success":true}'
+    )
+    assert serialized_result(result) == expected
+    assert response.body == expected
 
 
 def test_malformed_json_matches_java_internal_error() -> None:

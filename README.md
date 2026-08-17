@@ -44,6 +44,7 @@ Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不�
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
 ./migration/scripts/run-knowledge-base-interview-comparison.sh
+./migration/scripts/run-rest-performance-comparison.sh
 ./migration/scripts/run-performance-acceptance.sh
 ./migration/scripts/stop-comparison-env.sh
 ```
@@ -67,6 +68,12 @@ Provider、模型、耗时、Token 和 Provider 是否返回费用信息；缺�
 受保护工作流还会交替执行至少五次 Java/Python 真实 Provider 连通性请求，校验请求模型和参数
 一致，并保存应用延迟、Provider 网络延迟、Token 与基于官方版本化单价的估算费用。该单场景
 报告不能替代迁移计划阶段 7 中其余并发、SSE、WebSocket、Worker 和大文件性能验收。
+常规 CI 另以固定 Skill 列表接口比较 1、10、50 并发下的 p95、p99、吞吐、错误率和响应一致性；
+该测试不调用模型，只作为基础 REST 性能基线。
+Python API 关闭 Uvicorn 重复 access log；项目中间件继续生成 requestId 和指标，并在 DEBUG
+记录普通请求、INFO 记录慢请求或 4xx、WARNING 记录 5xx，避免单 worker 被同步日志阻塞。
+OpenTelemetry 仅在同时启用并配置 `OTEL_EXPORTER_OTLP_ENDPOINT` 时挂载请求 instrumentation，
+避免创建最终不会导出的 span。
 
 Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
 LibreOffice 7.4.7-1+deb12u14，不包含 JVM。

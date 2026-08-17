@@ -573,6 +573,10 @@ Python 的 Unicode 字符数与 Java UTF-16 code unit 不完全相同。涉及�
 - requestId 写入 Stream 消息，并在 Worker 日志中继续使用。
 - WebSocket 每条连接使用稳定 connectionId。
 - 结构化日志记录模块、操作、业务 ID、耗时和结果。
+- 关闭 Uvicorn 重复 access log；普通 HTTP 完成日志使用 DEBUG，慢请求或 4xx 使用 INFO，
+  5xx 使用 WARNING，requestId 和 Prometheus 指标仍覆盖每个请求。
+- OpenTelemetry 仅在启用且配置 `OTEL_EXPORTER_OTLP_ENDPOINT` 时挂载 instrumentation；
+  未配置 exporter 时不得创建无法导出的 span。
 - 不记录完整 API Key、Authorization、简历正文、Prompt 私密内容和 Base64 音频。
 - 指标保留当前接口，并增加 API、Worker、Scheduler、LLM、Embedding、ASR、TTS、S3、
   文档解析和 Stream 指标。
@@ -1434,6 +1438,9 @@ FastAPI 必须设置与 Java 一致的：
 `./migration/scripts/run-performance-acceptance.sh` 交替运行至少五次 Java/Python
 Provider 连通性请求，保存请求一致性、应用延迟、Provider 网络延迟、Token 和版本化价格估算。
 这个报告只覆盖单并发 REST 真实模型场景，不能替代下列其余性能场景。
+常规 CI 通过 `./migration/scripts/run-rest-performance-comparison.sh` 对固定、无模型的 Skill
+列表接口执行 1、10、50 并发，检查 REST p95、p99、吞吐、错误率和响应一致性；该结果只用于
+区分应用基础开销，不能替代真实 Provider 场景。
 
 测试场景：
 
@@ -1535,6 +1542,7 @@ docker history <python-image>
 ./migration/scripts/run-rag-chat-comparison.sh
 ./migration/scripts/run-interview-comparison.sh
 ./migration/scripts/run-knowledge-base-interview-comparison.sh
+./migration/scripts/run-rest-performance-comparison.sh
 ./migration/scripts/run-performance-acceptance.sh
 ./migration/scripts/run-failure-cases.sh
 ./migration/scripts/stop-model-proxy.sh

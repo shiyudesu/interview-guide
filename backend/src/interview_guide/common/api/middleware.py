@@ -22,6 +22,14 @@ VARY_HEADERS = (
 )
 
 
+def request_log_level(status_code: int, duration_seconds: float) -> int:
+    if status_code >= 500:
+        return logging.WARNING
+    if status_code >= 400 or duration_seconds >= 1:
+        return logging.INFO
+    return logging.DEBUG
+
+
 class RequestContextMiddleware:
     def __init__(self, app: AsgiApp, metrics: ApplicationMetrics) -> None:
         self._app = app
@@ -59,7 +67,8 @@ class RequestContextMiddleware:
                 method=method,
                 pathTemplate=path_template,
             ).observe(duration)
-            logger.info(
+            logger.log(
+                request_log_level(status_code, duration),
                 "request completed method=%s path=%s status=%s durationMs=%.3f",
                 method,
                 path_template,
