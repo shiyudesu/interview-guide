@@ -28,6 +28,13 @@ def mask_api_key(api_key: str | None) -> str:
     return f"{api_key[:3]}***{api_key[-3:]}"
 
 
+def looks_like_chat_model(model: str) -> bool:
+    normalized = model.lower()
+    if "embedding" in normalized:
+        return False
+    return normalized.startswith(("glm-", "deepseek", "kimi", "moonshot", "qwen", "ernie"))
+
+
 class LlmProviderService:
     def __init__(
         self,
@@ -287,8 +294,7 @@ class LlmProviderService:
                 ErrorCode.BAD_REQUEST,
                 "支持 Embedding 的 Provider 必须填写 embeddingModel",
             )
-        normalized = embedding_model.lower()
-        if normalized.startswith(("glm-", "deepseek", "kimi", "moonshot", "qwen", "ernie")):
+        if looks_like_chat_model(embedding_model):
             recommendations = {
                 "dashscope": "text-embedding-v3",
                 "glm": "embedding-3",

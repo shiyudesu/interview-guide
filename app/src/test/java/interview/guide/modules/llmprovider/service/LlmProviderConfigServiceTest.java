@@ -142,6 +142,13 @@ class LlmProviderConfigServiceTest {
             assertTrue(body.containsKey("messages"));
             assertTrue(!body.containsKey("temperature"));
         }
+
+        @Test
+        @DisplayName("Qwen Embedding 模型不应被误判为聊天模型")
+        void qwenEmbeddingModelIsNotTreatedAsChat() throws Exception {
+            assertFalse(invokeLooksLikeChatModel("qwen3.7-text-embedding"));
+            assertTrue(invokeLooksLikeChatModel("qwen3.5-plus"));
+        }
     }
 
     @Nested
@@ -467,5 +474,15 @@ class LlmProviderConfigServiceTest {
         );
         method.setAccessible(true);
         return (Map<String, Object>) method.invoke(service, model);
+    }
+
+    private boolean invokeLooksLikeChatModel(String model)
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = LlmProviderConfigService.class.getDeclaredMethod(
+            "looksLikeChatModel",
+            String.class
+        );
+        method.setAccessible(true);
+        return (boolean) method.invoke(service, model);
     }
 }

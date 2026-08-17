@@ -800,6 +800,9 @@ public class LlmProviderConfigService {
 
   private boolean looksLikeChatModel(String model) {
     String lower = model.toLowerCase();
+    if (lower.contains("embedding")) {
+      return false;
+    }
     return lower.startsWith("glm-")
         || lower.startsWith("deepseek")
         || lower.startsWith("kimi")

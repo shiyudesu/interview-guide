@@ -33,6 +33,7 @@ const PROVIDER_PRESETS: Record<string, {
       { value: 'qwq-32b', label: 'QwQ-32B — 推理专用' },
     ],
     embeddingModels: [
+      { value: 'qwen3.7-text-embedding', label: 'Qwen3.7 Text Embedding — 最新' },
       { value: 'text-embedding-v3', label: 'text-embedding-v3 — 推荐' },
     ],
     embeddingDimensions: 1024,
