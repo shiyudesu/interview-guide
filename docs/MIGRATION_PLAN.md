@@ -1443,6 +1443,9 @@ FastAPI 必须设置与 Java 一致的：
 `./migration/scripts/run-performance-acceptance.sh` 交替运行至少五次 Java/Python
 Provider 连通性请求，保存请求一致性、应用延迟、Provider 网络延迟、Token 和版本化价格估算。
 这个报告只覆盖单并发 REST 真实模型场景，不能替代下列其余性能场景。
+真实 Provider 延迟会在相邻 Java/Python 请求间波动，因此该场景以
+`端到端耗时 - 同请求 Provider 网络耗时` 得到的应用开销执行阈值判断；端到端与 Provider
+p95/p99 仍完整保存，但不将模型网络波动误判为应用回归。
 手动 `performance.yml` 通过 `./migration/scripts/run-rest-performance-comparison.sh`
 对固定、无模型的 Skill 详情接口执行 1、10、50 并发，检查 REST p95、p99、吞吐、错误率和
 响应一致性；该结果只用于

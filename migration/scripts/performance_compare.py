@@ -54,6 +54,16 @@ def summary(samples: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def value_summary(values: list[float]) -> dict[str, Any]:
+    return {
+        "count": len(values),
+        "medianMs": round(statistics.median(values), 3),
+        "p95Ms": round(percentile(values, 0.95), 3),
+        "p99Ms": round(percentile(values, 0.99), 3),
+        "samplesMs": [round(value, 3) for value in values],
+    }
+
+
 def record_lines(path: Path) -> list[str]:
     return complete_jsonl_lines(path)
 
@@ -173,18 +183,31 @@ def main() -> None:
     provider = proxy_capture(args.proxy_log, proxy_start_line, args.iterations * 2)
     java = summary(samples["java"])
     python = summary(samples["python"])
+    for target, application in (("java", java), ("python", python)):
+        elapsed = [float(sample["elapsedMs"]) for sample in application["samples"]]
+        network = provider["targets"][target]["providerNetwork"]["samplesMs"]
+        application["applicationOverhead"] = value_summary(
+            [
+                max(0.0, total - provider_ms)
+                for total, provider_ms in zip(elapsed, network, strict=True)
+            ]
+        )
     response_models = {
         sample["model"] for target_samples in samples.values() for sample in target_samples
     }
-    java_p95 = float(java["p95Ms"])
-    python_p95 = float(python["p95Ms"])
-    java_p99 = float(java["p99Ms"])
-    python_p99 = float(python["p99Ms"])
+    java_p95 = float(java["applicationOverhead"]["p95Ms"])
+    python_p95 = float(python["applicationOverhead"]["p95Ms"])
+    java_p99 = float(java["applicationOverhead"]["p99Ms"])
+    python_p99 = float(python["applicationOverhead"]["p99Ms"])
     report = {
         "scenario": "Provider connectivity REST, concurrency 1",
         "criteria": {
-            "p95AllowedMs": round(min(java_p95 * 1.10, java_p95 + 100), 3),
-            "p99AllowedMs": round(java_p99 * 1.15, 3),
+            "applicationOverheadP95AllowedMs": round(
+                min(java_p95 * 1.10, java_p95 + 100),
+                3,
+            ),
+            "applicationOverheadP99AllowedMs": round(java_p99 * 1.15, 3),
+            "providerNetworkExcludedFromPass": True,
         },
         "java": java,
         "passed": (

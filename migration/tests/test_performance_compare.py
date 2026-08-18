@@ -38,6 +38,12 @@ class PerformanceCompareTest(unittest.TestCase):
         self.assertEqual(50, summary["p95Ms"])
         self.assertEqual(50, summary["p99Ms"])
 
+    def test_value_summary_records_application_overhead_distribution(self) -> None:
+        summary = MODULE.value_summary([20.0, 25.0, 30.0, 35.0, 40.0])
+        self.assertEqual(30, summary["medianMs"])
+        self.assertEqual(40, summary["p95Ms"])
+        self.assertEqual([20.0, 25.0, 30.0, 35.0, 40.0], summary["samplesMs"])
+
     def test_proxy_capture_separates_alternating_targets(self) -> None:
         events = []
         for index in range(4):
