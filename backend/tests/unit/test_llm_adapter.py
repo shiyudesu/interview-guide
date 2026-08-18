@@ -195,6 +195,8 @@ async def test_structured_output_repairs_then_retries_in_java_order() -> None:
 
     assert result.answer == 'candidate said "quoted" text'
     assert "安全边界" in fake.system_prompts[0]
+    assert "\n\n# 安全边界" in fake.system_prompts[0]
+    assert "\n\n\n# 安全边界" not in fake.system_prompts[0]
 
 
 def test_quote_repair_matches_java_heuristic() -> None:

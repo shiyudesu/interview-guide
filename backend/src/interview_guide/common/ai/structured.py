@@ -128,7 +128,7 @@ class StructuredOutputInvoker:
         *,
         tools: Sequence[dict[str, object]] | None = None,
     ) -> T:
-        secured_system_prompt = system_prompt_with_format + ANTI_INJECTION_INSTRUCTION
+        secured_system_prompt = system_prompt_with_format.rstrip("\n") + ANTI_INJECTION_INSTRUCTION
         format_start = system_prompt_with_format.find(JAVA_FORMAT_PREFIX)
         formatted_user_prompt = (
             user_prompt + "\n" + system_prompt_with_format[format_start:]
