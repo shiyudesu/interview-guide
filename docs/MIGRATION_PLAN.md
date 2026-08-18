@@ -1488,6 +1488,10 @@ baseline、peak 和末段稳定中位数，并检查 Python 稳定内存不超�
 - 最终受保护真实模型验收固定使用本地生产配置：
   `qwen3.7-max`、`qwen3.7-text-embedding`（1024 维）、
   `qwen3-asr-flash-realtime` 和 `qwen3-tts-flash-realtime`。
+- 连续两次切换后完整 CI、本地空库/现有库 Compose、Windows Chrome 页面、真实模型、
+  真实性能、语音和题库专项面试均已通过。
+- Java 生产代码和测试、Gradle、Flyway 运行文件及 JVM CI 已删除；固定样本、最终行为报告、
+  `pre-python-switch` tag 和归档镜像继续保留。
 
 正式切换前：
 

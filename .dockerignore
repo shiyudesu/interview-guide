@@ -8,10 +8,8 @@
 .gitignore
 .gitattributes
 
-# Gradle
-.gradle
+# Build artifacts
 **/build/
-!gradle/wrapper/gradle-wrapper.jar
 
 # Node.js (Frontend)
 **/node_modules

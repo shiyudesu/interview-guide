@@ -1,58 +1,73 @@
 {
   "backendEndpoints": [
     {
-      "canonicalPath": "/api/interview-schedule",
+      "canonicalPath": "/actuator/health",
       "consumes": null,
-      "controller": "InterviewScheduleController",
-      "frontendUsages": [
-        {
-          "canonicalPath": "/api/interview-schedule",
-          "httpMethod": "GET",
-          "path": "/api/interview-schedule",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 31
-          }
-        },
-        {
-          "canonicalPath": "/api/interview-schedule",
-          "httpMethod": "POST",
-          "path": "/api/interview-schedule",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 19
-          }
-        }
-      ],
+      "controller": "main",
+      "frontendUsages": [],
+      "handler": "actuator_health",
       "httpMethod": "GET",
-      "javaMethod": "getAll",
-      "parameters": [
-        {
-          "arguments": "(required = false)",
-          "kind": "RequestParam"
-        },
-        {
-          "arguments": "(required = false)",
-          "kind": "RequestParam"
-        },
-        {
-          "arguments": "(required = false)",
-          "kind": "RequestParam"
-        }
-      ],
-      "path": "/api/interview-schedule",
+      "parameters": [],
+      "path": "/actuator/health",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 88
+        "file": "backend/src/interview_guide/main.py",
+        "line": 140
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/actuator/info",
+      "consumes": null,
+      "controller": "main",
+      "frontendUsages": [],
+      "handler": "actuator_info",
+      "httpMethod": "GET",
+      "parameters": [],
+      "path": "/actuator/info",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/main.py",
+        "line": 147
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/actuator/metrics",
+      "consumes": null,
+      "controller": "main",
+      "frontendUsages": [],
+      "handler": "actuator_metrics",
+      "httpMethod": "GET",
+      "parameters": [],
+      "path": "/actuator/metrics",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/main.py",
+        "line": 151
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/actuator/prometheus",
+      "consumes": null,
+      "controller": "main",
+      "frontendUsages": [],
+      "handler": "actuator_prometheus",
+      "httpMethod": "GET",
+      "parameters": [],
+      "path": "/actuator/prometheus",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/main.py",
+        "line": 158
+      },
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview-schedule",
       "consumes": null,
-      "controller": "InterviewScheduleController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule",
@@ -73,27 +88,82 @@
           }
         }
       ],
-      "httpMethod": "POST",
-      "javaMethod": "create",
+      "handler": "list_schedules",
+      "httpMethod": "GET",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "ServiceDependency",
+          "name": "service"
+        },
+        {
+          "annotation": "str | None",
+          "name": "status"
+        },
+        {
+          "annotation": "str | None",
+          "name": "start"
+        },
+        {
+          "annotation": "str | None",
+          "name": "end"
         }
       ],
       "path": "/api/interview-schedule",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 61
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 115
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/interview-schedule",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/interview-schedule",
+          "httpMethod": "GET",
+          "path": "/api/interview-schedule",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 31
+          }
+        },
+        {
+          "canonicalPath": "/api/interview-schedule",
+          "httpMethod": "POST",
+          "path": "/api/interview-schedule",
+          "source": {
+            "file": "frontend/src/api/interviewSchedule.ts",
+            "line": 19
+          }
+        }
+      ],
+      "handler": "create_schedule",
+      "httpMethod": "POST",
+      "parameters": [
+        {
+          "annotation": "CreateInterviewRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
+      "path": "/api/interview-schedule",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 88
+      },
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview-schedule/parse",
       "consumes": null,
-      "controller": "InterviewScheduleController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule/parse",
@@ -105,27 +175,30 @@
           }
         }
       ],
+      "handler": "parse_schedule",
       "httpMethod": "POST",
-      "javaMethod": "parse",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "ParseRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ParseServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/interview-schedule/parse",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 48
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 97
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview-schedule/{}",
       "consumes": null,
-      "controller": "InterviewScheduleController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule/{}",
@@ -155,27 +228,30 @@
           }
         }
       ],
+      "handler": "delete_schedule",
       "httpMethod": "DELETE",
-      "javaMethod": "delete",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "schedule_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview-schedule/{id}",
+      "path": "/api/interview-schedule/{schedule_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 121
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 143
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview-schedule/{}",
       "consumes": null,
-      "controller": "InterviewScheduleController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule/{}",
@@ -205,27 +281,30 @@
           }
         }
       ],
+      "handler": "get_schedule",
       "httpMethod": "GET",
-      "javaMethod": "getById",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "schedule_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview-schedule/{id}",
+      "path": "/api/interview-schedule/{schedule_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 74
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 106
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview-schedule/{}",
       "consumes": null,
-      "controller": "InterviewScheduleController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule/{}",
@@ -255,31 +334,34 @@
           }
         }
       ],
+      "handler": "update_schedule",
       "httpMethod": "PUT",
-      "javaMethod": "update",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "schedule_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "CreateInterviewRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview-schedule/{id}",
+      "path": "/api/interview-schedule/{schedule_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 105
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 130
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview-schedule/{}/status",
       "consumes": null,
-      "controller": "InterviewScheduleController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule/{}/status",
@@ -291,31 +373,34 @@
           }
         }
       ],
+      "handler": "patch_schedule_status",
       "httpMethod": "PATCH",
-      "javaMethod": "updateStatus",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "schedule_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestParam"
+          "annotation": "Annotated[str, Query()]",
+          "name": "status"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview-schedule/{id}/status",
+      "path": "/api/interview-schedule/{schedule_id}/status",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 135
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 164
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview-schedule/{}/status",
       "consumes": null,
-      "controller": "InterviewScheduleController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule/{}/status",
@@ -327,31 +412,34 @@
           }
         }
       ],
+      "handler": "put_schedule_status",
       "httpMethod": "PUT",
-      "javaMethod": "updateStatus",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "schedule_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestParam"
+          "annotation": "Annotated[str, Query()]",
+          "name": "status"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview-schedule/{id}/status",
+      "path": "/api/interview-schedule/{schedule_id}/status",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interviewschedule/InterviewScheduleController.java",
-        "line": 135
+        "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+        "line": 173
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions",
@@ -372,22 +460,26 @@
           }
         }
       ],
+      "handler": "list_sessions",
       "httpMethod": "GET",
-      "javaMethod": "listSessions",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/interview/sessions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 51
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 111
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions",
@@ -408,27 +500,34 @@
           }
         }
       ],
+      "handler": "create_session",
       "httpMethod": "POST",
-      "javaMethod": "createSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "CreateInterviewRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/interview/sessions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 62
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 116
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/unfinished/{}",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/unfinished/{}",
@@ -440,27 +539,30 @@
           }
         }
       ],
+      "handler": "unfinished_session",
       "httpMethod": "GET",
-      "javaMethod": "findUnfinishedSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "resume_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/unfinished/{resumeId}",
+      "path": "/api/interview/sessions/unfinished/{resume_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 118
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 133
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}",
@@ -481,27 +583,30 @@
           }
         }
       ],
+      "handler": "delete_interview",
       "httpMethod": "DELETE",
-      "javaMethod": "deleteInterview",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}",
+      "path": "/api/interview/sessions/{session_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 181
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 244
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}",
@@ -522,27 +627,30 @@
           }
         }
       ],
+      "handler": "get_session",
       "httpMethod": "GET",
-      "javaMethod": "getSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}",
+      "path": "/api/interview/sessions/{session_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 74
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 141
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}/answers",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}/answers",
@@ -563,31 +671,38 @@
           }
         }
       ],
+      "handler": "submit_answer",
       "httpMethod": "POST",
-      "javaMethod": "submitAnswer",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "Request",
+          "name": "request"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "dict[str, Any]",
+          "name": "body"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}/answers",
+      "path": "/api/interview/sessions/{session_id}/answers",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 91
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 157
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}/answers",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}/answers",
@@ -608,31 +723,34 @@
           }
         }
       ],
+      "handler": "save_answer",
       "httpMethod": "PUT",
-      "javaMethod": "saveAnswer",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "dict[str, Any]",
+          "name": "body"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}/answers",
+      "path": "/api/interview/sessions/{session_id}/answers",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 126
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 186
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}/complete",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}/complete",
@@ -644,27 +762,30 @@
           }
         }
       ],
+      "handler": "complete_interview",
       "httpMethod": "POST",
-      "javaMethod": "completeInterview",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}/complete",
+      "path": "/api/interview/sessions/{session_id}/complete",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 141
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 202
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}/details",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}/details",
@@ -676,27 +797,30 @@
           }
         }
       ],
+      "handler": "detail",
       "httpMethod": "GET",
-      "javaMethod": "getInterviewDetail",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}/details",
+      "path": "/api/interview/sessions/{session_id}/details",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 152
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 219
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}/export",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}/export",
@@ -708,27 +832,30 @@
           }
         }
       ],
+      "handler": "export_pdf",
       "httpMethod": "GET",
-      "javaMethod": "exportInterviewPdf",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}/export",
+      "path": "/api/interview/sessions/{session_id}/export",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 161
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 227
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}/question",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}/question",
@@ -740,27 +867,30 @@
           }
         }
       ],
+      "handler": "current_question",
       "httpMethod": "GET",
-      "javaMethod": "getCurrentQuestion",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}/question",
+      "path": "/api/interview/sessions/{session_id}/question",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 83
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 149
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/sessions/{}/report",
       "consumes": null,
-      "controller": "InterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/sessions/{}/report",
@@ -772,27 +902,30 @@
           }
         }
       ],
+      "handler": "report",
       "httpMethod": "GET",
-      "javaMethod": "getReport",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/interview/sessions/{sessionId}/report",
+      "path": "/api/interview/sessions/{session_id}/report",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/InterviewController.java",
-        "line": 107
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 211
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/skills",
       "consumes": null,
-      "controller": "InterviewSkillController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/skills",
@@ -804,22 +937,21 @@
           }
         }
       ],
+      "handler": "list_skills",
       "httpMethod": "GET",
-      "javaMethod": "listSkills",
       "parameters": [],
       "path": "/api/interview/skills",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillController.java",
-        "line": 26
+        "file": "backend/src/interview_guide/modules/interview_skill/api.py",
+        "line": 41
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/skills/parse-jd",
       "consumes": null,
-      "controller": "InterviewSkillController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/skills/parse-jd",
@@ -831,27 +963,30 @@
           }
         }
       ],
+      "handler": "parse_jd",
       "httpMethod": "POST",
-      "javaMethod": "parseJd",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "ParseJdRequest",
+          "name": "payload"
         }
       ],
       "path": "/api/interview/skills/parse-jd",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillController.java",
-        "line": 36
+        "file": "backend/src/interview_guide/modules/interview_skill/api.py",
+        "line": 54
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/interview/skills/{}",
       "consumes": null,
-      "controller": "InterviewSkillController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview/skills/{}",
@@ -863,27 +998,26 @@
           }
         }
       ],
+      "handler": "get_skill",
       "httpMethod": "GET",
-      "javaMethod": "getSkill",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "skill_id"
         }
       ],
-      "path": "/api/interview/skills/{id}",
+      "path": "/api/interview/skills/{skill_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/interview/skill/InterviewSkillController.java",
-        "line": 31
+        "file": "backend/src/interview_guide/modules/interview_skill/api.py",
+        "line": 46
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase-interviews/sessions",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase-interviews/sessions",
@@ -895,27 +1029,34 @@
           }
         }
       ],
+      "handler": "create_knowledge_base_interview",
       "httpMethod": "POST",
-      "javaMethod": "createInterviewSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "CreateKnowledgeBaseInterviewRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "InterviewServiceDependency",
+          "name": "interview"
         }
       ],
       "path": "/api/knowledgebase-interviews/sessions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 98
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 195
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/categories",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/categories",
@@ -927,22 +1068,26 @@
           }
         }
       ],
+      "handler": "categories",
       "httpMethod": "GET",
-      "javaMethod": "getAllCategories",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/knowledgebase/categories",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 117
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 182
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/category/{}",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/category/{}",
@@ -954,27 +1099,30 @@
           }
         }
       ],
+      "handler": "by_category",
       "httpMethod": "GET",
-      "javaMethod": "getByCategory",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "category"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/knowledgebase/category/{category}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 125
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 187
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/list",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/list",
@@ -986,31 +1134,34 @@
           }
         }
       ],
+      "handler": "list_knowledge_bases",
       "httpMethod": "GET",
-      "javaMethod": "getAllKnowledgeBases",
       "parameters": [
         {
-          "arguments": "(value = \"sortBy\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "ServiceDependency",
+          "name": "service"
         },
         {
-          "arguments": "(value = \"vectorStatus\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "str | None",
+          "name": "sortBy"
+        },
+        {
+          "annotation": "str | None",
+          "name": "vectorStatus"
         }
       ],
       "path": "/api/knowledgebase/list",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 54
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 124
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/query",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/query",
@@ -1022,27 +1173,34 @@
           }
         }
       ],
+      "handler": "query_knowledge_base",
       "httpMethod": "POST",
-      "javaMethod": "queryKnowledgeBase",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "QueryRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "QueryServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/knowledgebase/query",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 93
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 136
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/query/stream",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/query/stream",
@@ -1054,27 +1212,34 @@
           }
         }
       ],
+      "handler": "query_knowledge_base_stream",
       "httpMethod": "POST",
-      "javaMethod": "queryKnowledgeBaseStream",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "QueryRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "QueryServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/knowledgebase/query/stream",
-      "produces": "MediaType.TEXT_EVENT_STREAM_VALUE",
+      "produces": "text/event-stream",
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 103
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 147
       },
-      "transport": "sse",
-      "usesValid": true
+      "transport": "sse"
     },
     {
       "canonicalPath": "/api/knowledgebase/questions/{}",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/questions/{}",
@@ -1095,27 +1260,30 @@
           }
         }
       ],
+      "handler": "delete_question",
       "httpMethod": "DELETE",
-      "javaMethod": "deleteQuestion",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "question_id"
+        },
+        {
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/questions/{questionId}",
+      "path": "/api/knowledgebase/questions/{question_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 92
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 186
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/questions/{}",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/questions/{}",
@@ -1136,31 +1304,34 @@
           }
         }
       ],
+      "handler": "update_question",
       "httpMethod": "PUT",
-      "javaMethod": "updateQuestion",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "question_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "UpdateKnowledgeBaseQuestionRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/questions/{questionId}",
+      "path": "/api/knowledgebase/questions/{question_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 78
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 167
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/questions/{}/status",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/questions/{}/status",
@@ -1172,31 +1343,34 @@
           }
         }
       ],
+      "handler": "update_question_status",
       "httpMethod": "PUT",
-      "javaMethod": "updateQuestionStatus",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "question_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "UpdateKnowledgeBaseQuestionStatusRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/questions/{questionId}/status",
+      "path": "/api/knowledgebase/questions/{question_id}/status",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 85
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 176
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/search",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/search",
@@ -1208,27 +1382,30 @@
           }
         }
       ],
+      "handler": "search",
       "httpMethod": "GET",
-      "javaMethod": "search",
       "parameters": [
         {
-          "arguments": "(\"keyword\")",
-          "kind": "RequestParam"
+          "annotation": "str",
+          "name": "keyword"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/knowledgebase/search",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 188
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 200
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/stats",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/stats",
@@ -1240,22 +1417,26 @@
           }
         }
       ],
+      "handler": "statistics",
       "httpMethod": "GET",
-      "javaMethod": "getStatistics",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/knowledgebase/stats",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 198
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 208
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/uncategorized",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/uncategorized",
@@ -1267,22 +1448,26 @@
           }
         }
       ],
+      "handler": "uncategorized",
       "httpMethod": "GET",
-      "javaMethod": "getUncategorized",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/knowledgebase/uncategorized",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 133
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 195
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/upload",
-      "consumes": "MediaType.MULTIPART_FORM_DATA_VALUE",
-      "controller": "KnowledgeBaseController",
+      "consumes": null,
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/upload",
@@ -1294,35 +1479,38 @@
           }
         }
       ],
+      "handler": "upload_knowledge_base",
       "httpMethod": "POST",
-      "javaMethod": "uploadKnowledgeBase",
       "parameters": [
         {
-          "arguments": "(\"file\")",
-          "kind": "RequestParam"
+          "annotation": "ServiceDependency",
+          "name": "service"
         },
         {
-          "arguments": "(value = \"name\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "Annotated[UploadFile, File()]",
+          "name": "file"
         },
         {
-          "arguments": "(value = \"category\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "Annotated[str | None, Form()]",
+          "name": "name"
+        },
+        {
+          "annotation": "Annotated[str | None, Form()]",
+          "name": "category"
         }
       ],
       "path": "/api/knowledgebase/upload",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 152
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 165
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}",
@@ -1343,27 +1531,30 @@
           }
         }
       ],
+      "handler": "delete_knowledge_base",
       "httpMethod": "DELETE",
-      "javaMethod": "deleteKnowledgeBase",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}",
+      "path": "/api/knowledgebase/{knowledge_base_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 84
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 241
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}",
@@ -1384,27 +1575,30 @@
           }
         }
       ],
+      "handler": "get_knowledge_base",
       "httpMethod": "GET",
-      "javaMethod": "getKnowledgeBase",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}",
+      "path": "/api/knowledgebase/{knowledge_base_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 74
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 250
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/category",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/category",
@@ -1416,31 +1610,34 @@
           }
         }
       ],
+      "handler": "update_category",
       "httpMethod": "PUT",
-      "javaMethod": "updateCategory",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "ServiceDependency",
+          "name": "service"
+        },
+        {
+          "annotation": "Annotated[dict[str, str | None], Body()]",
+          "name": "payload"
         }
       ],
-      "path": "/api/knowledgebase/{id}/category",
+      "path": "/api/knowledgebase/{knowledge_base_id}/category",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 141
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 213
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/download",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/download",
@@ -1452,27 +1649,30 @@
           }
         }
       ],
+      "handler": "download_knowledge_base",
       "httpMethod": "GET",
-      "javaMethod": "downloadKnowledgeBase",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}/download",
+      "path": "/api/knowledgebase/{knowledge_base_id}/download",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 165
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 223
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/interview-capacity",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/interview-capacity",
@@ -1484,39 +1684,46 @@
           }
         }
       ],
+      "handler": "knowledge_base_interview_capacity",
       "httpMethod": "GET",
-      "javaMethod": "getInterviewCapacity",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
         },
         {
-          "arguments": "(value = \"category\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "Request",
+          "name": "request"
         },
         {
-          "arguments": "(value = \"difficulty\", defaultValue = \"mid\")",
-          "kind": "RequestParam"
+          "annotation": "InterviewServiceDependency",
+          "name": "interview"
         },
         {
-          "arguments": "(value = \"mainQuestionCount\", defaultValue = \"5\")",
-          "kind": "RequestParam"
+          "annotation": "str | None",
+          "name": "category"
+        },
+        {
+          "annotation": "str",
+          "name": "difficulty"
+        },
+        {
+          "annotation": "Annotated[int, Query(alias='mainQuestionCount')]",
+          "name": "main_question_count"
         }
       ],
-      "path": "/api/knowledgebase/{id}/interview-capacity",
+      "path": "/api/knowledgebase/{knowledge_base_id}/interview-capacity",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 104
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 214
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/questions",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/questions",
@@ -1537,43 +1744,46 @@
           }
         }
       ],
+      "handler": "list_questions",
       "httpMethod": "GET",
-      "javaMethod": "listQuestions",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
         },
         {
-          "arguments": "(value = \"status\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         },
         {
-          "arguments": "(value = \"category\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "KnowledgeBaseQuestionStatus | None",
+          "name": "status"
         },
         {
-          "arguments": "(value = \"difficulty\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "str | None",
+          "name": "category"
         },
         {
-          "arguments": "(value = \"keyword\", required = false)",
-          "kind": "RequestParam"
+          "annotation": "str | None",
+          "name": "difficulty"
+        },
+        {
+          "annotation": "str | None",
+          "name": "keyword"
         }
       ],
-      "path": "/api/knowledgebase/{id}/questions",
+      "path": "/api/knowledgebase/{knowledge_base_id}/questions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 42
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 102
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/questions",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/questions",
@@ -1594,31 +1804,34 @@
           }
         }
       ],
+      "handler": "create_question",
       "httpMethod": "POST",
-      "javaMethod": "createQuestion",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "CreateKnowledgeBaseQuestionRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}/questions",
+      "path": "/api/knowledgebase/{knowledge_base_id}/questions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 71
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 158
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/questions/categories",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/questions/categories",
@@ -1630,27 +1843,30 @@
           }
         }
       ],
+      "handler": "list_question_categories",
       "httpMethod": "GET",
-      "javaMethod": "listCategories",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
+        },
+        {
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}/questions/categories",
+      "path": "/api/knowledgebase/{knowledge_base_id}/questions/categories",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 52
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 124
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/questions/generate",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/questions/generate",
@@ -1662,31 +1878,38 @@
           }
         }
       ],
+      "handler": "generate_questions",
       "httpMethod": "POST",
-      "javaMethod": "generateQuestions",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "GenerateKnowledgeBaseQuestionsRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}/questions/generate",
+      "path": "/api/knowledgebase/{knowledge_base_id}/questions/generate",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 57
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 132
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/questions/generation-status",
       "consumes": null,
-      "controller": "KnowledgeBaseInterviewController",
+      "controller": "interview_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/questions/generation-status",
@@ -1698,27 +1921,30 @@
           }
         }
       ],
+      "handler": "question_generation_status",
       "httpMethod": "GET",
-      "javaMethod": "getQuestionGenerationStatus",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
+        },
+        {
+          "annotation": "QuestionServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}/questions/generation-status",
+      "path": "/api/knowledgebase/{knowledge_base_id}/questions/generation-status",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseInterviewController.java",
-        "line": 66
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 150
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/knowledgebase/{}/revectorize",
       "consumes": null,
-      "controller": "KnowledgeBaseController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/revectorize",
@@ -1730,27 +1956,30 @@
           }
         }
       ],
+      "handler": "revectorize_knowledge_base",
       "httpMethod": "POST",
-      "javaMethod": "revectorize",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "knowledge_base_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/knowledgebase/{id}/revectorize",
+      "path": "/api/knowledgebase/{knowledge_base_id}/revectorize",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/KnowledgeBaseController.java",
-        "line": 209
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 232
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider",
@@ -1762,27 +1991,30 @@
           }
         }
       ],
+      "handler": "create_provider",
       "httpMethod": "POST",
-      "javaMethod": "createProvider",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "CreateProviderRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 49
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 85
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/default-embedding-provider",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/default-embedding-provider",
@@ -1794,27 +2026,30 @@
           }
         }
       ],
+      "handler": "update_default_embedding_provider",
       "httpMethod": "PUT",
-      "javaMethod": "updateDefaultEmbeddingProvider",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "DefaultProviderRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider/default-embedding-provider",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 97
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 108
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/default-provider",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/default-provider",
@@ -1835,63 +2070,70 @@
           }
         }
       ],
+      "handler": "get_default_provider",
       "httpMethod": "GET",
-      "javaMethod": "getDefaultProvider",
-      "parameters": [],
-      "path": "/api/llm-provider/default-provider",
-      "produces": null,
-      "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 84
-      },
-      "transport": "rest",
-      "usesValid": false
-    },
-    {
-      "canonicalPath": "/api/llm-provider/default-provider",
-      "consumes": null,
-      "controller": "LlmProviderController",
-      "frontendUsages": [
-        {
-          "canonicalPath": "/api/llm-provider/default-provider",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/default-provider",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 35
-          }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/default-provider",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/default-provider",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 38
-          }
-        }
-      ],
-      "httpMethod": "PUT",
-      "javaMethod": "updateDefaultProvider",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider/default-provider",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 90
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 94
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/llm-provider/default-provider",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/default-provider",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/default-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 35
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/default-provider",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/default-provider",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 38
+          }
+        }
+      ],
+      "handler": "update_default_provider",
+      "httpMethod": "PUT",
+      "parameters": [
+        {
+          "annotation": "DefaultProviderRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
+      "path": "/api/llm-provider/default-provider",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 99
+      },
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/list",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/list",
@@ -1903,22 +2145,26 @@
           }
         }
       ],
+      "handler": "list_providers",
       "httpMethod": "GET",
-      "javaMethod": "listProviders",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/llm-provider/list",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 37
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 36
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/reload",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/reload",
@@ -1930,22 +2176,26 @@
           }
         }
       ],
+      "handler": "reload_providers",
       "httpMethod": "POST",
-      "javaMethod": "reloadProviders",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/llm-provider/reload",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 77
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 79
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/voice/asr",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/voice/asr",
@@ -1966,63 +2216,70 @@
           }
         }
       ],
+      "handler": "get_asr_config",
       "httpMethod": "GET",
-      "javaMethod": "getAsrConfig",
-      "parameters": [],
-      "path": "/api/llm-provider/voice/asr",
-      "produces": null,
-      "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 106
-      },
-      "transport": "rest",
-      "usesValid": false
-    },
-    {
-      "canonicalPath": "/api/llm-provider/voice/asr",
-      "consumes": null,
-      "controller": "LlmProviderController",
-      "frontendUsages": [
-        {
-          "canonicalPath": "/api/llm-provider/voice/asr",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/voice/asr",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 45
-          }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/voice/asr",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/voice/asr",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 48
-          }
-        }
-      ],
-      "httpMethod": "PUT",
-      "javaMethod": "updateAsrConfig",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "Request",
+          "name": "request"
         }
       ],
       "path": "/api/llm-provider/voice/asr",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 112
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 41
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/asr",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/voice/asr",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/voice/asr",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 45
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/voice/asr",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/voice/asr",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 48
+          }
+        }
+      ],
+      "handler": "update_asr_config",
+      "httpMethod": "PUT",
+      "parameters": [
+        {
+          "annotation": "AsrConfigRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Request",
+          "name": "request"
+        }
+      ],
+      "path": "/api/llm-provider/voice/asr",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 47
+      },
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/voice/asr/test",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/voice/asr/test",
@@ -2034,22 +2291,26 @@
           }
         }
       ],
+      "handler": "test_asr_config",
       "httpMethod": "POST",
-      "javaMethod": "testAsrConfig",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "Request",
+          "name": "request"
+        }
+      ],
       "path": "/api/llm-provider/voice/asr/test",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 132
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 73
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/voice/tts",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/voice/tts",
@@ -2070,63 +2331,70 @@
           }
         }
       ],
+      "handler": "get_tts_config",
       "httpMethod": "GET",
-      "javaMethod": "getTtsConfig",
-      "parameters": [],
-      "path": "/api/llm-provider/voice/tts",
-      "produces": null,
-      "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 119
-      },
-      "transport": "rest",
-      "usesValid": false
-    },
-    {
-      "canonicalPath": "/api/llm-provider/voice/tts",
-      "consumes": null,
-      "controller": "LlmProviderController",
-      "frontendUsages": [
-        {
-          "canonicalPath": "/api/llm-provider/voice/tts",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/voice/tts",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 51
-          }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/voice/tts",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/voice/tts",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 54
-          }
-        }
-      ],
-      "httpMethod": "PUT",
-      "javaMethod": "updateTtsConfig",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "Request",
+          "name": "request"
         }
       ],
       "path": "/api/llm-provider/voice/tts",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 125
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 57
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/llm-provider/voice/tts",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/llm-provider/voice/tts",
+          "httpMethod": "GET",
+          "path": "/api/llm-provider/voice/tts",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 51
+          }
+        },
+        {
+          "canonicalPath": "/api/llm-provider/voice/tts",
+          "httpMethod": "PUT",
+          "path": "/api/llm-provider/voice/tts",
+          "source": {
+            "file": "frontend/src/api/llmProvider.ts",
+            "line": 54
+          }
+        }
+      ],
+      "handler": "update_tts_config",
+      "httpMethod": "PUT",
+      "parameters": [
+        {
+          "annotation": "TtsConfigRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Request",
+          "name": "request"
+        }
+      ],
+      "path": "/api/llm-provider/voice/tts",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 63
+      },
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/{}",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/{}",
@@ -2156,27 +2424,30 @@
           }
         }
       ],
+      "handler": "delete_provider",
       "httpMethod": "DELETE",
-      "javaMethod": "deleteProvider",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "provider_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/llm-provider/{id}",
+      "path": "/api/llm-provider/{provider_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 64
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 143
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/{}",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/{}",
@@ -2206,27 +2477,30 @@
           }
         }
       ],
+      "handler": "get_provider",
       "httpMethod": "GET",
-      "javaMethod": "getProvider",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "provider_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/llm-provider/{id}",
+      "path": "/api/llm-provider/{provider_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 43
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 117
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/{}",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/{}",
@@ -2256,31 +2530,34 @@
           }
         }
       ],
+      "handler": "update_provider",
       "httpMethod": "PUT",
-      "javaMethod": "updateProvider",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "provider_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "UpdateProviderRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/llm-provider/{id}",
+      "path": "/api/llm-provider/{provider_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 56
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 133
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/llm-provider/{}/test",
       "consumes": null,
-      "controller": "LlmProviderController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/{}/test",
@@ -2292,27 +2569,30 @@
           }
         }
       ],
+      "handler": "test_provider",
       "httpMethod": "POST",
-      "javaMethod": "testProvider",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "str",
+          "name": "provider_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/llm-provider/{id}/test",
+      "path": "/api/llm-provider/{provider_id}/test",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/llmprovider/controller/LlmProviderController.java",
-        "line": 71
+        "file": "backend/src/interview_guide/modules/llm_provider/api.py",
+        "line": 125
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions",
@@ -2333,22 +2613,26 @@
           }
         }
       ],
+      "handler": "list_sessions",
       "httpMethod": "GET",
-      "javaMethod": "listSessions",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/rag-chat/sessions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 51
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 90
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions",
@@ -2369,27 +2653,30 @@
           }
         }
       ],
+      "handler": "create_session",
       "httpMethod": "POST",
-      "javaMethod": "createSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "CreateSessionRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/rag-chat/sessions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 43
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 82
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions/{}",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions/{}",
@@ -2410,27 +2697,30 @@
           }
         }
       ],
+      "handler": "delete_session",
       "httpMethod": "DELETE",
-      "javaMethod": "deleteSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/rag-chat/sessions/{sessionId}",
+      "path": "/api/rag-chat/sessions/{session_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 101
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 135
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions/{}",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions/{}",
@@ -2451,27 +2741,30 @@
           }
         }
       ],
+      "handler": "session_detail",
       "httpMethod": "GET",
-      "javaMethod": "getSessionDetail",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/rag-chat/sessions/{sessionId}",
+      "path": "/api/rag-chat/sessions/{session_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 60
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 95
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions/{}/knowledge-bases",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions/{}/knowledge-bases",
@@ -2483,31 +2776,34 @@
           }
         }
       ],
+      "handler": "update_knowledge_bases",
       "httpMethod": "PUT",
-      "javaMethod": "updateSessionKnowledgeBases",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "UpdateKnowledgeBasesRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/rag-chat/sessions/{sessionId}/knowledge-bases",
+      "path": "/api/rag-chat/sessions/{session_id}/knowledge-bases",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 89
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 122
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions/{}/messages/stream",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions/{}/messages/stream",
@@ -2519,31 +2815,34 @@
           }
         }
       ],
+      "handler": "send_message_stream",
       "httpMethod": "POST",
-      "javaMethod": "sendMessageStream",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "SendMessageRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/rag-chat/sessions/{sessionId}/messages/stream",
-      "produces": "MediaType.TEXT_EVENT_STREAM_VALUE",
+      "path": "/api/rag-chat/sessions/{session_id}/messages/stream",
+      "produces": "text/event-stream",
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 114
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 144
       },
-      "transport": "sse",
-      "usesValid": true
+      "transport": "sse"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions/{}/pin",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions/{}/pin",
@@ -2555,27 +2854,30 @@
           }
         }
       ],
+      "handler": "toggle_pin",
       "httpMethod": "PUT",
-      "javaMethod": "togglePin",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/rag-chat/sessions/{sessionId}/pin",
+      "path": "/api/rag-chat/sessions/{session_id}/pin",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 80
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 113
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/rag-chat/sessions/{}/title",
       "consumes": null,
-      "controller": "RagChatController",
+      "controller": "rag_chat_api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions/{}/title",
@@ -2587,31 +2889,34 @@
           }
         }
       ],
+      "handler": "update_title",
       "httpMethod": "PUT",
-      "javaMethod": "updateSessionTitle",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "UpdateTitleRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/rag-chat/sessions/{sessionId}/title",
+      "path": "/api/rag-chat/sessions/{session_id}/title",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/knowledgebase/RagChatController.java",
-        "line": 68
+        "file": "backend/src/interview_guide/modules/knowledge_base/rag_chat_api.py",
+        "line": 103
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/resumes",
       "consumes": null,
-      "controller": "ResumeController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/resumes",
@@ -2623,22 +2928,26 @@
           }
         }
       ],
+      "handler": "list_resumes",
       "httpMethod": "GET",
-      "javaMethod": "getAllResumes",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
       "path": "/api/resumes",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
-        "line": 64
+        "file": "backend/src/interview_guide/modules/resume/api.py",
+        "line": 39
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/resumes/health",
       "consumes": null,
-      "controller": "ResumeController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/resumes/health",
@@ -2650,22 +2959,21 @@
           }
         }
       ],
+      "handler": "resume_health",
       "httpMethod": "GET",
-      "javaMethod": "health",
       "parameters": [],
       "path": "/api/resumes/health",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
-        "line": 128
+        "file": "backend/src/interview_guide/modules/resume/api.py",
+        "line": 58
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/resumes/upload",
-      "consumes": "MediaType.MULTIPART_FORM_DATA_VALUE",
-      "controller": "ResumeController",
+      "consumes": null,
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/resumes/upload",
@@ -2677,27 +2985,30 @@
           }
         }
       ],
+      "handler": "upload_resume",
       "httpMethod": "POST",
-      "javaMethod": "uploadAndAnalyze",
       "parameters": [
         {
-          "arguments": "(\"file\")",
-          "kind": "RequestParam"
+          "annotation": "Annotated[UploadFile, File()]",
+          "name": "file"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/resumes/upload",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
-        "line": 49
+        "file": "backend/src/interview_guide/modules/resume/api.py",
+        "line": 44
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/resumes/{}",
       "consumes": null,
-      "controller": "ResumeController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/resumes/{}",
@@ -2709,27 +3020,30 @@
           }
         }
       ],
+      "handler": "delete_resume",
       "httpMethod": "DELETE",
-      "javaMethod": "deleteResume",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "resume_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/resumes/{id}",
+      "path": "/api/resumes/{resume_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
-        "line": 104
+        "file": "backend/src/interview_guide/modules/resume/api.py",
+        "line": 94
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/resumes/{}/detail",
       "consumes": null,
-      "controller": "ResumeController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/resumes/{}/detail",
@@ -2741,27 +3055,30 @@
           }
         }
       ],
+      "handler": "resume_detail",
       "httpMethod": "GET",
-      "javaMethod": "getResumeDetail",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "resume_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/resumes/{id}/detail",
+      "path": "/api/resumes/{resume_id}/detail",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
-        "line": 73
+        "file": "backend/src/interview_guide/modules/resume/api.py",
+        "line": 70
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/resumes/{}/export",
       "consumes": null,
-      "controller": "ResumeController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/resumes/{}/export",
@@ -2773,27 +3090,30 @@
           }
         }
       ],
+      "handler": "export_resume_pdf",
       "httpMethod": "GET",
-      "javaMethod": "exportAnalysisPdf",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "resume_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/resumes/{id}/export",
+      "path": "/api/resumes/{resume_id}/export",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
-        "line": 82
+        "file": "backend/src/interview_guide/modules/resume/api.py",
+        "line": 78
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/resumes/{}/reanalyze",
       "consumes": null,
-      "controller": "ResumeController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/resumes/{}/reanalyze",
@@ -2805,27 +3125,30 @@
           }
         }
       ],
+      "handler": "reanalyze_resume",
       "httpMethod": "POST",
-      "javaMethod": "reanalyze",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "resume_id"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
         }
       ],
-      "path": "/api/resumes/{id}/reanalyze",
+      "path": "/api/resumes/{resume_id}/reanalyze",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/resume/ResumeController.java",
-        "line": 117
+        "file": "backend/src/interview_guide/modules/resume/api.py",
+        "line": 103
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions",
@@ -2846,31 +3169,34 @@
           }
         }
       ],
+      "handler": "list_sessions",
       "httpMethod": "GET",
-      "javaMethod": "getAllSessions",
       "parameters": [
         {
-          "arguments": "(required = false)",
-          "kind": "RequestParam"
+          "annotation": "Service",
+          "name": "service"
         },
         {
-          "arguments": "(required = false)",
-          "kind": "RequestParam"
+          "annotation": "str | None",
+          "name": "userId"
+        },
+        {
+          "annotation": "str | None",
+          "name": "status"
         }
       ],
       "path": "/api/voice-interview/sessions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 118
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 105
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions",
@@ -2891,27 +3217,30 @@
           }
         }
       ],
+      "handler": "create_session",
       "httpMethod": "POST",
-      "javaMethod": "createSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "CreateVoiceSessionRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
       "path": "/api/voice-interview/sessions",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 58
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 65
       },
-      "transport": "rest",
-      "usesValid": true
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}",
@@ -2932,27 +3261,30 @@
           }
         }
       ],
+      "handler": "delete_session",
       "httpMethod": "DELETE",
-      "javaMethod": "deleteSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}",
+      "path": "/api/voice-interview/sessions/{session_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 131
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 114
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}",
@@ -2973,27 +3305,30 @@
           }
         }
       ],
+      "handler": "get_session",
       "httpMethod": "GET",
-      "javaMethod": "getSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}",
+      "path": "/api/voice-interview/sessions/{session_id}",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 68
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 73
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}/end",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}/end",
@@ -3005,27 +3340,30 @@
           }
         }
       ],
+      "handler": "end_session",
       "httpMethod": "POST",
-      "javaMethod": "endSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}/end",
+      "path": "/api/voice-interview/sessions/{session_id}/end",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 84
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 81
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
@@ -3046,27 +3384,30 @@
           }
         }
       ],
+      "handler": "get_evaluation",
       "httpMethod": "GET",
-      "javaMethod": "getEvaluation",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}/evaluation",
+      "path": "/api/voice-interview/sessions/{session_id}/evaluation",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 157
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 163
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
@@ -3087,27 +3428,30 @@
           }
         }
       ],
+      "handler": "generate_evaluation",
       "httpMethod": "POST",
-      "javaMethod": "generateEvaluation",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}/evaluation",
+      "path": "/api/voice-interview/sessions/{session_id}/evaluation",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 188
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 190
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}/messages",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}/messages",
@@ -3119,27 +3463,30 @@
           }
         }
       ],
+      "handler": "messages",
       "httpMethod": "GET",
-      "javaMethod": "getMessages",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}/messages",
+      "path": "/api/voice-interview/sessions/{session_id}/messages",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 141
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 120
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}/pause",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}/pause",
@@ -3151,31 +3498,34 @@
           }
         }
       ],
+      "handler": "pause_session",
       "httpMethod": "PUT",
-      "javaMethod": "pauseSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
         },
         {
-          "arguments": "",
-          "kind": "RequestBody"
+          "annotation": "Service",
+          "name": "service"
+        },
+        {
+          "annotation": "Annotated[dict[str, str], Body()]",
+          "name": "payload"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}/pause",
+      "path": "/api/voice-interview/sessions/{session_id}/pause",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 94
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 87
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
     },
     {
       "canonicalPath": "/api/voice-interview/sessions/{}/resume",
       "consumes": null,
-      "controller": "VoiceInterviewController",
+      "controller": "api",
       "frontendUsages": [
         {
           "canonicalPath": "/api/voice-interview/sessions/{}/resume",
@@ -3187,27 +3537,67 @@
           }
         }
       ],
+      "handler": "resume_session",
       "httpMethod": "PUT",
-      "javaMethod": "resumeSession",
       "parameters": [
         {
-          "arguments": "",
-          "kind": "PathVariable"
+          "annotation": "int",
+          "name": "session_id"
+        },
+        {
+          "annotation": "Service",
+          "name": "service"
         }
       ],
-      "path": "/api/voice-interview/sessions/{sessionId}/resume",
+      "path": "/api/voice-interview/sessions/{session_id}/resume",
       "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/controller/VoiceInterviewController.java",
-        "line": 108
+        "file": "backend/src/interview_guide/modules/voice_interview/api.py",
+        "line": 100
       },
-      "transport": "rest",
-      "usesValid": false
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/swagger-ui.html",
+      "consumes": null,
+      "controller": "main",
+      "frontendUsages": [],
+      "handler": "swagger_ui",
+      "httpMethod": "GET",
+      "parameters": [],
+      "path": "/swagger-ui.html",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/main.py",
+        "line": 176
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/v3/api-docs",
+      "consumes": null,
+      "controller": "main",
+      "frontendUsages": [],
+      "handler": "openapi_document",
+      "httpMethod": "GET",
+      "parameters": [
+        {
+          "annotation": "Request",
+          "name": "request"
+        }
+      ],
+      "path": "/v3/api-docs",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/main.py",
+        "line": 165
+      },
+      "transport": "rest"
     },
     {
       "canonicalPath": "/ws/voice-interview/{}",
-      "consumes": "text/json",
-      "controller": "VoiceInterviewWebSocketHandler",
+      "consumes": null,
+      "controller": "websocket_api",
       "frontendUsages": [
         {
           "canonicalPath": "/ws/voice-interview/{}",
@@ -3228,17 +3618,25 @@
           }
         }
       ],
+      "handler": "voice_interview_websocket",
       "httpMethod": "WEBSOCKET",
-      "javaMethod": "handleTextMessage",
-      "parameters": [],
+      "parameters": [
+        {
+          "annotation": "WebSocket",
+          "name": "websocket"
+        },
+        {
+          "annotation": "str",
+          "name": "sessionId"
+        }
+      ],
       "path": "/ws/voice-interview/{sessionId}",
-      "produces": "text/json",
+      "produces": null,
       "source": {
-        "file": "app/src/main/java/interview/guide/modules/voiceinterview/config/WebSocketConfig.java",
-        "line": 24
+        "file": "backend/src/interview_guide/modules/voice_interview/websocket_api.py",
+        "line": 10
       },
-      "transport": "websocket",
-      "usesValid": false
+      "transport": "websocket"
     }
   ],
   "frontendCalls": [
@@ -4046,21 +4444,69 @@
   ],
   "schemaVersion": 1,
   "sourceOfTruth": [
-    "Java controller mappings",
-    "Java WebSocket registration",
+    "FastAPI route decorators",
     "frontend/src URL literals"
   ],
   "summary": {
-    "backendEndpointCount": 88,
-    "backendOnlyCount": 0,
-    "controllerCount": 10,
+    "backendEndpointCount": 94,
+    "backendOnlyCount": 6,
+    "controllerCount": 5,
     "frontendCallCount": 89,
     "frontendOnlyCount": 1,
     "sseEndpointCount": 2,
     "webSocketEndpointCount": 1
   },
   "unmatched": {
-    "backendOnly": [],
+    "backendOnly": [
+      {
+        "httpMethod": "GET",
+        "path": "/actuator/health",
+        "source": {
+          "file": "backend/src/interview_guide/main.py",
+          "line": 140
+        }
+      },
+      {
+        "httpMethod": "GET",
+        "path": "/actuator/info",
+        "source": {
+          "file": "backend/src/interview_guide/main.py",
+          "line": 147
+        }
+      },
+      {
+        "httpMethod": "GET",
+        "path": "/actuator/metrics",
+        "source": {
+          "file": "backend/src/interview_guide/main.py",
+          "line": 151
+        }
+      },
+      {
+        "httpMethod": "GET",
+        "path": "/actuator/prometheus",
+        "source": {
+          "file": "backend/src/interview_guide/main.py",
+          "line": 158
+        }
+      },
+      {
+        "httpMethod": "GET",
+        "path": "/swagger-ui.html",
+        "source": {
+          "file": "backend/src/interview_guide/main.py",
+          "line": 176
+        }
+      },
+      {
+        "httpMethod": "GET",
+        "path": "/v3/api-docs",
+        "source": {
+          "file": "backend/src/interview_guide/main.py",
+          "line": 165
+        }
+      }
+    ],
     "frontendOnly": [
       {
         "canonicalPath": "/api/resumes/statistics",

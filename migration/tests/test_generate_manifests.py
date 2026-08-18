@@ -6,7 +6,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR_PATH = REPOSITORY_ROOT / "migration/scripts/generate_manifests.py"
 SPEC = importlib.util.spec_from_file_location("generate_manifests", GENERATOR_PATH)
@@ -23,8 +22,19 @@ class GenerateManifestsTest(unittest.TestCase):
         frontend_only_paths = {
             item["canonicalPath"] for item in manifest["unmatched"]["frontendOnly"]
         }
+        backend_only_paths = {item["path"] for item in manifest["unmatched"]["backendOnly"]}
         self.assertEqual({"/api/resumes/statistics"}, frontend_only_paths)
-        self.assertEqual(0, manifest["summary"]["backendOnlyCount"])
+        self.assertEqual(
+            {
+                "/actuator/health",
+                "/actuator/info",
+                "/actuator/metrics",
+                "/actuator/prometheus",
+                "/swagger-ui.html",
+                "/v3/api-docs",
+            },
+            backend_only_paths,
+        )
         self.assertGreaterEqual(manifest["summary"]["backendEndpointCount"], 80)
         self.assertEqual(manifest["summary"]["webSocketEndpointCount"], 1)
         self.assertGreaterEqual(manifest["summary"]["sseEndpointCount"], 2)
@@ -37,21 +47,15 @@ class GenerateManifestsTest(unittest.TestCase):
             {"hstore", "uuid-ossp", "vector"},
             {item["name"] for item in database["extensions"]},
         )
-        vector_store = next(
-            item for item in database["tables"] if item["name"] == "vector_store"
-        )
-        embedding = next(
-            item for item in vector_store["columns"] if item["name"] == "embedding"
-        )
+        vector_store = next(item for item in database["tables"] if item["name"] == "vector_store")
+        embedding = next(item for item in vector_store["columns"] if item["name"] == "embedding")
         self.assertIn("vector(1024)", embedding["definition"])
         self.assertEqual(redis["summary"]["streamCount"], 5)
 
     def test_resource_inventory_records_prompts_and_disabled_tests(self) -> None:
         resources = GENERATOR.extract_resources(REPOSITORY_ROOT)
 
-        self.assertEqual(
-            17, resources["summary"]["resourceCountsByCategory"]["prompt"]
-        )
+        self.assertEqual(17, resources["summary"]["resourceCountsByCategory"]["prompt"])
         self.assertGreaterEqual(resources["summary"]["disabledTestMarkerCount"], 1)
 
     def test_generation_is_deterministic(self) -> None:

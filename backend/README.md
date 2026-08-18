@@ -1,8 +1,7 @@
 # Python backend
 
-The Python backend is being built under the compatibility requirements in
-`../docs/MIGRATION_PLAN.md`. Java remains the behavior reference until every
-comparison stage passes.
+Production FastAPI backend. Historical migration requirements and fixed compatibility
+evidence are preserved under `../docs/MIGRATION_PLAN.md` and `../migration/`.
 
 ```bash
 uv sync --frozen

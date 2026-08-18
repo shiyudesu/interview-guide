@@ -73,12 +73,7 @@ class RedisClient:
         self._socket.close()
 
     def command(self, *parts: str | bytes | int) -> Any:
-        encoded = [
-            part
-            if isinstance(part, bytes)
-            else str(part).encode("utf-8")
-            for part in parts
-        ]
+        encoded = [part if isinstance(part, bytes) else str(part).encode("utf-8") for part in parts]
         request = [f"*{len(encoded)}\r\n".encode("ascii")]
         for part in encoded:
             request.extend(
@@ -204,9 +199,7 @@ def redis_value(client: RedisClient, key: bytes, value_type: str) -> Any:
             "pending": [
                 {
                     "group": group["name"],
-                    "summary": decode_redis(
-                        client.command("XPENDING", key, group["name"])
-                    ),
+                    "summary": decode_redis(client.command("XPENDING", key, group["name"])),
                 }
                 for group in groups
             ],
@@ -287,13 +280,11 @@ class S3Client:
         canonical_uri = urllib.parse.quote(path, safe="/-_.~")
         query_items = sorted(query or [])
         canonical_query = "&".join(
-            f"{urllib.parse.quote(key, safe='-_.~')}="
-            f"{urllib.parse.quote(value, safe='-_.~')}"
+            f"{urllib.parse.quote(key, safe='-_.~')}={urllib.parse.quote(value, safe='-_.~')}"
             for key, value in query_items
         )
         request_headers = {
-            key.lower(): " ".join(value.strip().split())
-            for key, value in (headers or {}).items()
+            key.lower(): " ".join(value.strip().split()) for key, value in (headers or {}).items()
         }
         request_headers.update(
             {
@@ -327,7 +318,7 @@ class S3Client:
             ]
         )
         date_key = self._sign(
-            f"AWS4{self._secret_key}".encode("utf-8"),
+            f"AWS4{self._secret_key}".encode(),
             date_stamp,
         )
         region_key = self._sign(date_key, self._region)
@@ -403,19 +394,14 @@ class S3Client:
             status, _, body = self.request("GET", f"/{bucket}", query=query)
             if status != 200:
                 raise RuntimeError(
-                    f"S3 list failed with status {status}: "
-                    f"{body.decode('utf-8', errors='replace')}"
+                    f"S3 list failed with status {status}: {body.decode('utf-8', errors='replace')}"
                 )
             root = ET.fromstring(body)
             namespace = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
             keys.extend(
-                element.text or ""
-                for element in root.findall("s3:Contents/s3:Key", namespace)
+                element.text or "" for element in root.findall("s3:Contents/s3:Key", namespace)
             )
-            truncated = (
-                root.findtext("s3:IsTruncated", "false", namespace).lower()
-                == "true"
-            )
+            truncated = root.findtext("s3:IsTruncated", "false", namespace).lower() == "true"
             if not truncated:
                 return sorted(keys)
             continuation = root.findtext("s3:NextContinuationToken", None, namespace)
@@ -472,9 +458,7 @@ def seed_s3(args: argparse.Namespace) -> int:
 
 
 def capture(args: argparse.Namespace) -> int:
-    database_dump = normalize_dump(
-        args.database_data.read_text(encoding="utf-8")
-    )
+    database_dump = normalize_dump(args.database_data.read_text(encoding="utf-8"))
     document = {
         "databaseData": database_dump,
         "redis": capture_redis(args.redis_host, args.redis_port),

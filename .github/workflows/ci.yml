@@ -2,11 +2,9 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -21,22 +19,15 @@ jobs:
     name: Repository policy
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
+      - uses: actions/checkout@v7
       - name: Test commit message hook
         run: bash scripts/test-commit-msg-hook.sh
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13.13"
-
       - name: Check migration manifests
         run: bash migration/scripts/check-manifests.sh
-
       - name: Validate production Compose
         env:
           APP_AI_CONFIG_ENCRYPTION_KEY: ci-compose-encryption-key
@@ -45,145 +36,118 @@ jobs:
   backend:
     name: Backend checks
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     services:
       redis:
         image: redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
-        ports:
-          - 6379:6379
+        ports: ["6379:6379"]
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 2s
           --health-timeout 3s
           --health-retries 30
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Detect backend implementations
-        id: backend
-        shell: bash
-        run: |
-          if [[ -f app/build.gradle ]]; then
-            echo "java=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "java=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          if [[ -f backend/pyproject.toml ]]; then
-            echo "python=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "python=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          if [[ ! -f app/build.gradle && ! -f backend/pyproject.toml ]]; then
-            echo "No supported backend implementation was found." >&2
-            exit 1
-          fi
-
-      - name: Set up Java 25
-        if: steps.backend.outputs.java == 'true'
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "25"
-          cache: gradle
-
-      - name: Run Java baseline tests
-        if: steps.backend.outputs.java == 'true'
-        run: ./gradlew :app:test --no-daemon
-
-      - name: Set up Python 3.13
-        if: steps.backend.outputs.python == 'true'
-        uses: actions/setup-python@v7
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13.13"
-
-      - name: Set up uv
-        if: steps.backend.outputs.python == 'true'
-        uses: astral-sh/setup-uv@v10.0.1
+      - uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
           cache-dependency-glob: backend/uv.lock
           version: "0.11.14"
-
-      - name: Install Python dependencies
-        if: steps.backend.outputs.python == 'true'
+      - name: Install locked dependencies
         working-directory: backend
         run: uv sync --frozen
-
-      - name: Run Python lint and type checks
-        if: steps.backend.outputs.python == 'true'
+      - name: Run lint and type checks
         working-directory: backend
         run: |
           uv run ruff check .
           uv run ruff format --check .
           uv run mypy src
-
-      - name: Run Python tests
-        if: steps.backend.outputs.python == 'true'
+      - name: Run tests
         working-directory: backend
         env:
           TEST_REDIS_URL: redis://127.0.0.1:6379/0
         run: uv run pytest
-
-      - name: Build Python application image
-        if: steps.backend.outputs.python == 'true'
+      - name: Build application image
         run: docker build --file backend/Dockerfile --tag interview-guide-python:ci .
+      - name: Verify image contains no JVM
+        run: >-
+          docker run --rm interview-guide-python:ci
+          sh -c 'test ! -e /usr/bin/java && ! command -v java'
 
-      - name: Verify Python image contains no JVM
-        if: steps.backend.outputs.python == 'true'
-        run: |
-          docker run --rm interview-guide-python:ci \
-            sh -c 'test ! -e /usr/bin/java && ! command -v java'
-
-  migration-comparison:
-    name: Migration comparison
+  production-integration:
+    name: Production Compose integration
     needs: backend
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    timeout-minutes: 45
+    env:
+      AI_BAILIAN_API_KEY: ci-placeholder
+      APP_AI_CONFIG_ENCRYPTION_KEY: ci-compose-encryption-key
+      CORS_ALLOWED_ORIGINS: http://localhost,http://127.0.0.1:4173
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up Java 25
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "25"
-          cache: gradle
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v7
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13.13"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v10.0.1
+      - uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
-          cache-dependency-glob: migration/model-proxy/uv.lock
+          cache-dependency-glob: backend/uv.lock
           version: "0.11.14"
-
-      - name: Start isolated comparison environment
-        run: ./migration/scripts/start-comparison-env.sh
-
-      - name: Run Java baseline and candidate comparison
-        run: ./migration/scripts/run-comparison.sh
-
-      - name: Upload comparison reports
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install dependencies
+        run: |
+          cd backend && uv sync --frozen
+          cd ../frontend && pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps chromium
+      - name: Start production Compose
+        run: docker compose up -d --build --wait
+      - name: Pause background processes for controlled integration tests
+        run: docker compose stop worker scheduler
+      - name: Run infrastructure integration tests
+        working-directory: backend
+        env:
+          PGPASSWORD: password
+          TEST_POSTGRES_URL: postgresql+psycopg://postgres@127.0.0.1:5432/interview_guide
+          TEST_REDIS_URL: redis://127.0.0.1:6379/0
+          TEST_S3_ACCESS_KEY: minioadmin
+          TEST_S3_BUCKET: interview-guide-integration
+          TEST_S3_ENDPOINT: http://127.0.0.1:9000
+          TEST_S3_SECRET_KEY: minioadmin
+        run: uv run pytest -m integration
+      - name: Resume background processes
+        run: docker compose start worker scheduler
+      - name: Run frontend against production backend
+        working-directory: frontend
+        env:
+          REAL_BACKEND_URL: http://127.0.0.1:8080
+          RUN_REAL_BACKEND_E2E: "true"
+        run: pnpm run test:e2e --grep @real-backend
+      - name: Capture Compose logs
+        if: always()
+        run: |
+          mkdir -p migration/reports
+          docker compose ps -a > migration/reports/production-compose-ps.txt
+          docker compose logs --no-color > migration/reports/production-compose.log
+      - name: Upload integration logs
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: migration-comparison-reports
-          path: migration/reports/
+          name: production-compose-integration
+          path: migration/reports/production-compose*
           if-no-files-found: ignore
-
-      - name: Stop isolated comparison environment
+      - name: Stop production Compose
         if: always()
-        run: ./migration/scripts/stop-comparison-env.sh
+        run: docker compose down -v --remove-orphans
 
   model-proxy:
     name: Model proxy checks
@@ -192,153 +156,20 @@ jobs:
     defaults:
       run:
         working-directory: migration/model-proxy
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v7
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13.13"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v10.0.1
+      - uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
           cache-dependency-glob: migration/model-proxy/uv.lock
           version: "0.11.14"
-
       - name: Install locked dependencies
         run: uv sync --frozen
-
       - name: Test HTTP and WebSocket proxy
-        run: |
-          uv run python -m compileall -q src tests
-          uv run python -m unittest discover -s tests -v
-
-  database-schema-comparison:
-    name: Flyway and Alembic schema
-    needs: backend
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up Java 25
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "25"
-          cache: gradle
-
-      - name: Set up Python 3.13.13
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.13.13"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: true
-          cache-dependency-glob: |
-            backend/uv.lock
-            migration/model-proxy/uv.lock
-          version: "0.11.14"
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          package_json_file: frontend/package.json
-
-      - name: Set up Node.js 24
-        uses: actions/setup-node@v7
-        with:
-          node-version: "24"
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Chromium
-        working-directory: frontend
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Start Java and Python schema environment
-        env:
-          COMPARISON_CANDIDATE: python
-        run: ./migration/scripts/start-comparison-env.sh
-
-      - name: Compare Flyway and Alembic schemas
-        run: ./migration/scripts/run-schema-comparison.sh
-
-      - name: Run Python Redis and S3 integration tests
-        working-directory: backend
-        env:
-          TEST_POSTGRES_URL: postgresql+psycopg://postgres:comparison-password@127.0.0.1:25432/interview_guide_python
-          TEST_REDIS_URL: redis://127.0.0.1:26379/0
-          TEST_S3_ENDPOINT: http://127.0.0.1:19000
-        run: uv run pytest -m integration
-
-      - name: Compare interview schedule module
-        run: ./migration/scripts/run-interview-schedule-comparison.sh
-
-      - name: Compare interview Skill module
-        run: ./migration/scripts/run-interview-skill-comparison.sh
-
-      - name: Compare LLM Provider read and defaults
-        run: ./migration/scripts/run-llm-provider-comparison.sh
-
-      - name: Compare resume foundation
-        run: ./migration/scripts/run-resume-foundation-comparison.sh
-
-      - name: Compare resume first upload
-        run: ./migration/scripts/run-resume-upload-comparison.sh
-
-      - name: Compare voice interview REST
-        run: ./migration/scripts/run-voice-rest-comparison.sh
-
-      - name: Compare voice interview WebSocket non-model transcript
-        run: ./migration/scripts/run-voice-websocket-comparison.sh
-
-      - name: Compare voice evaluation Worker database and Redis state
-        run: ./migration/scripts/run-voice-evaluation-comparison.sh
-
-      - name: Compare knowledge base foundation
-        run: ./migration/scripts/run-knowledge-base-comparison.sh
-
-      - name: Compare RAG Chat CRUD and no-model streaming
-        run: ./migration/scripts/run-rag-chat-comparison.sh
-
-      - name: Compare text interview CRUD, idempotency, Redis and PDF
-        run: ./migration/scripts/run-interview-comparison.sh
-
-      - name: Compare knowledge-base question bank and specialized interview
-        run: ./migration/scripts/run-knowledge-base-interview-comparison.sh
-
-      - name: Run frontend against real Python backend
-        working-directory: frontend
-        env:
-          REAL_BACKEND_URL: http://127.0.0.1:28080
-          RUN_REAL_BACKEND_E2E: "true"
-          VITE_API_BASE_URL: http://127.0.0.1:28080
-        run: pnpm run test:e2e --grep @real-backend
-
-      - name: Upload schema comparison reports
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: database-schema-comparison-reports
-          path: migration/reports/
-          if-no-files-found: ignore
-
-      - name: Stop isolated schema environment
-        if: always()
-        run: ./migration/scripts/stop-comparison-env.sh
+        run: uv run python -m unittest discover -s tests -v
 
   frontend:
     name: Frontend tests and build
@@ -347,32 +178,23 @@ jobs:
     defaults:
       run:
         working-directory: frontend
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v6
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           package_json_file: frontend/package.json
-
-      - name: Set up Node.js 24
-        uses: actions/setup-node@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Run frontend tests
         run: |
           pnpm run test:interview-history
           pnpm run test:question-generation
           pnpm run test:interview-capacity
           pnpm run test:interview-entry
-
       - name: Build frontend
         run: pnpm run build

@@ -67,7 +67,7 @@ def main() -> None:
             args.output / "difference" / f"page-{index + 1}.png",
         )
         for index, (java_page, python_page) in enumerate(
-            zip(java_pages, python_pages)
+            zip(java_pages, python_pages, strict=False)
         )
     ]
     report = {

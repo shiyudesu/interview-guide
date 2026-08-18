@@ -3,36 +3,36 @@
     {
       "definition": "ALTER TABLE interview_sessions ADD COLUMN interview_category VARCHAR(64);",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260722__add_interview_category_to_interview_sessions.sql",
-        "line": 13
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 325
       }
     },
     {
       "definition": "ALTER TABLE knowledge_bases ADD COLUMN IF NOT EXISTS question_gen_status VARCHAR(20) NOT NULL DEFAULT 'NONE', ADD COLUMN IF NOT EXISTS question_gen_error VARCHAR(500), ADD COLUMN IF NOT EXISTS question_gen_task_id VARCHAR(36), ADD COLUMN IF NOT EXISTS question_gen_config TEXT, ADD COLUMN IF NOT EXISTS question_gen_message VARCHAR(500), ADD COLUMN IF NOT EXISTS question_gen_saved_count INTEGER NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS question_gen_skipped_count INTEGER NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS question_gen_updated_at TIMESTAMP(6);",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
-        "line": 2
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 369
       }
     },
     {
       "definition": "ALTER TABLE knowledge_bases DROP CONSTRAINT IF EXISTS knowledge_bases_question_gen_status_check;",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
-        "line": 12
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 379
       }
     },
     {
       "definition": "ALTER TABLE knowledge_bases ADD CONSTRAINT knowledge_bases_question_gen_status_check CHECK (question_gen_status IN ('NONE', 'QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED'));",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
-        "line": 15
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 382
       }
     },
     {
       "definition": "ALTER TABLE interview_sessions ADD COLUMN request_id VARCHAR(64);",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260803__add_interview_request_id.sql",
-        "line": 1
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 391
       }
     }
   ],
@@ -40,22 +40,22 @@
     {
       "name": "hstore",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 1
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 4
       }
     },
     {
       "name": "uuid-ossp",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 2
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 5
       }
     },
     {
       "name": "vector",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 3
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 6
       }
     }
   ],
@@ -64,8 +64,8 @@
       "definition": "CREATE INDEX idx_interview_answer_session_question ON interview_answers (session_id, question_index);",
       "name": "idx_interview_answer_session_question",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 283
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 286
       },
       "unique": false
     },
@@ -73,8 +73,8 @@
       "definition": "CREATE INDEX idx_interview_session_resume_created ON interview_sessions (resume_id, created_at);",
       "name": "idx_interview_session_resume_created",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 285
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 288
       },
       "unique": false
     },
@@ -82,8 +82,8 @@
       "definition": "CREATE INDEX idx_interview_session_resume_status_created ON interview_sessions (resume_id, status, created_at);",
       "name": "idx_interview_session_resume_status_created",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 287
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 290
       },
       "unique": false
     },
@@ -91,8 +91,8 @@
       "definition": "CREATE INDEX idx_interview_session_skill_created ON interview_sessions (skill_id, created_at);",
       "name": "idx_interview_session_skill_created",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 289
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 292
       },
       "unique": false
     },
@@ -100,8 +100,8 @@
       "definition": "CREATE INDEX idx_kb_category ON knowledge_bases (category);",
       "name": "idx_kb_category",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 291
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 294
       },
       "unique": false
     },
@@ -109,8 +109,8 @@
       "definition": "CREATE INDEX idx_kb_question_kb_status ON knowledge_base_questions (knowledge_base_id, status);",
       "name": "idx_kb_question_kb_status",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 293
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 296
       },
       "unique": false
     },
@@ -118,8 +118,8 @@
       "definition": "CREATE INDEX idx_kb_question_skill_difficulty ON knowledge_base_questions (skill_id, difficulty);",
       "name": "idx_kb_question_skill_difficulty",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 295
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 298
       },
       "unique": false
     },
@@ -127,8 +127,8 @@
       "definition": "CREATE INDEX idx_rag_message_order ON rag_chat_messages (session_id, message_order);",
       "name": "idx_rag_message_order",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 297
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 300
       },
       "unique": false
     },
@@ -136,8 +136,8 @@
       "definition": "CREATE INDEX idx_rag_message_session ON rag_chat_messages (session_id);",
       "name": "idx_rag_message_session",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 299
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 302
       },
       "unique": false
     },
@@ -145,8 +145,8 @@
       "definition": "CREATE INDEX idx_rag_session_updated ON rag_chat_sessions (updated_at);",
       "name": "idx_rag_session_updated",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 301
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 304
       },
       "unique": false
     },
@@ -154,8 +154,8 @@
       "definition": "CREATE INDEX spring_ai_vector_index ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
       "name": "spring_ai_vector_index",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 303
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 306
       },
       "unique": false
     },
@@ -163,8 +163,8 @@
       "definition": "CREATE INDEX spring_ai_vector_index ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
       "name": "spring_ai_vector_index",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260723__ensure_pgvector_store.sql",
-        "line": 25
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 360
       },
       "unique": false
     },
@@ -172,8 +172,8 @@
       "definition": "CREATE INDEX IF NOT EXISTS idx_kb_question_gen_status_updated ON knowledge_bases(question_gen_status, question_gen_updated_at);",
       "name": "idx_kb_question_gen_status_updated",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
-        "line": 19
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 386
       },
       "unique": false
     },
@@ -181,46 +181,26 @@
       "definition": "CREATE UNIQUE INDEX uk_interview_sessions_request_id ON interview_sessions (request_id);",
       "name": "uk_interview_sessions_request_id",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260803__add_interview_request_id.sql",
-        "line": 4
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 394
       },
       "unique": true
     }
   ],
   "migrations": [
     {
-      "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-      "sha256": "06168d60b3f874e523a9c13dbfe66a84c6abb62e4f0b0c2e383192c677862208",
-      "statementTerminatorCount": 31
-    },
-    {
-      "file": "app/src/main/resources/db/migration/V20260722__add_interview_category_to_interview_sessions.sql",
-      "sha256": "c12fc031df45163111d720b749f174ce3186f9c5474bda256a6bd3748e1ea4cb",
-      "statementTerminatorCount": 5
-    },
-    {
-      "file": "app/src/main/resources/db/migration/V20260723__ensure_pgvector_store.sql",
-      "sha256": "3a7085785f22ec12b0977868b55a5c9215e3d8e42dad8470039ada20dba61f8a",
-      "statementTerminatorCount": 11
-    },
-    {
-      "file": "app/src/main/resources/db/migration/V20260724__add_question_gen_status.sql",
-      "sha256": "803dbc372adf94bad49b50c8acaf0c1d9d965b63122648d70f038bc91f5658ac",
-      "statementTerminatorCount": 4
-    },
-    {
-      "file": "app/src/main/resources/db/migration/V20260803__add_interview_request_id.sql",
-      "sha256": "5eedcef50000a728c8ba740af39087bada4ae29d2c1fe39ecccb6d15200b050b",
-      "statementTerminatorCount": 2
+      "file": "backend/alembic/sql/0001_initial_schema.sql",
+      "sha256": "430f090350e0e39703c99d70c5b560baefb64a7ca51b38411625f92854b050ff",
+      "statementTerminatorCount": 53
     }
   ],
   "schemaVersion": 1,
-  "sourceOfTruth": "Flyway SQL; PostgreSQL catalog comparison is added in Stage 1/3.",
+  "sourceOfTruth": "Alembic accepted production SQL and PostgreSQL catalog tests.",
   "summary": {
     "alterationCount": 5,
     "extensionCount": 3,
     "indexCount": 14,
-    "migrationCount": 5,
+    "migrationCount": 1,
     "tableCount": 17
   },
   "tables": [
@@ -280,8 +260,8 @@
       ],
       "name": "interview_schedule",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 5
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 8
       }
     },
     {
@@ -345,8 +325,8 @@
       ],
       "name": "resumes",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 22
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 25
       }
     },
     {
@@ -405,8 +385,8 @@
       ],
       "name": "resume_analyses",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 41
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 44
       }
     },
     {
@@ -508,8 +488,8 @@
       ],
       "name": "interview_sessions",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 58
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 61
       }
     },
     {
@@ -565,8 +545,8 @@
       ],
       "name": "interview_answers",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 90
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 93
       }
     },
     {
@@ -642,8 +622,8 @@
       ],
       "name": "knowledge_bases",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 107
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 110
       }
     },
     {
@@ -723,8 +703,8 @@
       ],
       "name": "knowledge_base_questions",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 129
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 132
       }
     },
     {
@@ -753,8 +733,8 @@
       "constraints": [],
       "name": "llm_global_setting",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 153
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 156
       }
     },
     {
@@ -815,8 +795,8 @@
       "constraints": [],
       "name": "llm_provider_config",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 161
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 164
       }
     },
     {
@@ -855,8 +835,8 @@
       ],
       "name": "rag_chat_sessions",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 177
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 180
       }
     },
     {
@@ -900,8 +880,8 @@
       ],
       "name": "rag_chat_messages",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 189
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 192
       }
     },
     {
@@ -922,8 +902,8 @@
       ],
       "name": "rag_session_knowledge_bases",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 204
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 207
       }
     },
     {
@@ -948,8 +928,8 @@
       "constraints": [],
       "name": "vector_store",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 214
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 217
       }
     },
     {
@@ -1004,8 +984,8 @@
       ],
       "name": "voice_interview_evaluations",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 221
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 224
       }
     },
     {
@@ -1052,8 +1032,8 @@
       ],
       "name": "voice_interview_messages",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 236
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 239
       }
     },
     {
@@ -1162,8 +1142,8 @@
       ],
       "name": "voice_interview_sessions",
       "source": {
-        "file": "app/src/main/resources/db/migration/V1__init_schema.sql",
-        "line": 250
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 253
       }
     },
     {
@@ -1188,8 +1168,8 @@
       "constraints": [],
       "name": "vector_store",
       "source": {
-        "file": "app/src/main/resources/db/migration/V20260723__ensure_pgvector_store.sql",
-        "line": 16
+        "file": "backend/alembic/sql/0001_initial_schema.sql",
+        "line": 351
       }
     }
   ]

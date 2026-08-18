@@ -132,9 +132,6 @@ services:
     <<: *backend-service
     container_name: interview-migrate
     command: ["interview-guide-migrate"]
-    environment:
-      <<: *backend-environment
-      APP_MIGRATION_BASELINE_FLYWAY: ${APP_MIGRATION_BASELINE_FLYWAY:-true}
     depends_on:
       postgres:
         condition: service_healthy

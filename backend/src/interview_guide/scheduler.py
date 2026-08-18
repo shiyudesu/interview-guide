@@ -129,7 +129,8 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
         )
         await resolved_stop_event.wait()
     finally:
-        scheduler.shutdown(wait=True)
+        if scheduler.running:
+            scheduler.shutdown(wait=True)
         if infrastructure is not None:
             await infrastructure.close()
         logger.info("scheduler stopped")

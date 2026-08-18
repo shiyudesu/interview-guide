@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
@@ -74,9 +75,7 @@ def write_json(output: Path, name: str, value: Any) -> None:
 
 def canonical_path(path: str) -> str:
     normalized = re.sub(r"^(?:https?|wss?)://[^/]+", "", path)
-    normalized = re.sub(
-        r"\$\{(?:query|queryString|searchParams)\b.*$", "", normalized
-    )
+    normalized = re.sub(r"\$\{(?:query|queryString|searchParams)\b.*$", "", normalized)
     normalized = re.sub(r"\$\{[^}]+\}", "{}", normalized.split("?", 1)[0])
     normalized = re.sub(r"\{[^}]+\}", "{}", normalized)
     normalized = re.sub(r"/+", "/", normalized)
@@ -131,9 +130,7 @@ def annotation_http_methods(kind: str, annotation: str) -> list[str]:
     return methods or ["ANY"]
 
 
-def find_method_signature(
-    lines: list[str], annotation_end: int
-) -> tuple[str, str] | None:
+def find_method_signature(lines: list[str], annotation_end: int) -> tuple[str, str] | None:
     candidate = "\n".join(lines[annotation_end + 1 : annotation_end + 35])
     match = re.search(
         r"\b(?:public|protected|private)\s+"
@@ -146,118 +143,109 @@ def find_method_signature(
     return match.group(1), compact(match.group(2))
 
 
-def extract_java_api(root: Path) -> list[dict[str, Any]]:
+def extract_python_api(root: Path) -> list[dict[str, Any]]:
     endpoints: list[dict[str, Any]] = []
-    controller_paths = sorted(
-        (root / "app/src/main/java").glob("**/*Controller.java")
-    )
-    for path in controller_paths:
+    for path in sorted((root / "backend/src/interview_guide").glob("**/*.py")):
         text = path.read_text(encoding="utf-8")
-        lines = text.splitlines()
-        class_match = re.search(r"\bpublic\s+class\s+(\w+)", text)
-        if not class_match:
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
             continue
-        class_name = class_match.group(1)
-        class_line = source_line(text, class_match.start()) - 1
-        blocks = annotation_blocks(lines)
-        class_prefix = ""
-        for start, _, kind, annotation in blocks:
-            if start >= class_line:
-                break
-            if kind == "RequestMapping":
-                class_prefix = annotation_path(annotation)
-
-        for start, end, kind, annotation in blocks:
-            if start < class_line:
+        prefix = ""
+        for node in tree.body:
+            if not isinstance(node, ast.Assign):
                 continue
-            signature = find_method_signature(lines, end)
-            if not signature:
+            if not any(
+                isinstance(target, ast.Name) and target.id == "router" for target in node.targets
+            ):
                 continue
-            method_name, parameters = signature
-            path_value = join_paths(class_prefix, annotation_path(annotation))
-            consumes_match = re.search(r"\bconsumes\s*=\s*([^,)]+)", annotation)
-            produces_match = re.search(r"\bproduces\s*=\s*([^,)]+)", annotation)
-            parameter_annotations = [
-                {
-                    "kind": match.group(1),
-                    "arguments": compact(match.group(2) or ""),
-                }
-                for match in re.finditer(
-                    r"@(RequestParam|PathVariable|RequestBody|RequestPart)"
-                    r"\s*(\([^)]*\))?",
-                    parameters,
-                )
-            ]
-            for http_method in annotation_http_methods(kind, annotation):
+            if not isinstance(node.value, ast.Call):
+                continue
+            for keyword in node.value.keywords:
+                if (
+                    keyword.arg == "prefix"
+                    and isinstance(keyword.value, ast.Constant)
+                    and isinstance(keyword.value.value, str)
+                ):
+                    prefix = keyword.value.value
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            for decorator in node.decorator_list:
+                if not isinstance(decorator, ast.Call) or not isinstance(
+                    decorator.func, ast.Attribute
+                ):
+                    continue
+                owner = decorator.func.value
+                if not isinstance(owner, ast.Name) or owner.id not in {"router", "app"}:
+                    continue
+                method = decorator.func.attr.lower()
+                if method not in {"get", "post", "put", "patch", "delete", "websocket"}:
+                    continue
+                suffix = ""
+                if (
+                    decorator.args
+                    and isinstance(decorator.args[0], ast.Constant)
+                    and isinstance(decorator.args[0].value, str)
+                ):
+                    suffix = decorator.args[0].value
+                path_value = join_paths(prefix if owner.id == "router" else "", suffix)
+                transport = "websocket" if method == "websocket" else "rest"
+                if any(
+                    isinstance(candidate, ast.Call)
+                    and (
+                        (
+                            isinstance(candidate.func, ast.Name)
+                            and candidate.func.id == "StreamingResponse"
+                        )
+                        or (
+                            isinstance(candidate.func, ast.Attribute)
+                            and candidate.func.attr == "StreamingResponse"
+                        )
+                    )
+                    for candidate in ast.walk(node)
+                ):
+                    transport = "sse"
                 endpoints.append(
                     {
                         "canonicalPath": canonical_path(path_value),
-                        "consumes": compact(consumes_match.group(1))
-                        if consumes_match
-                        else None,
-                        "controller": class_name,
+                        "consumes": None,
+                        "controller": path.stem,
                         "frontendUsages": [],
-                        "httpMethod": http_method,
-                        "javaMethod": method_name,
-                        "parameters": parameter_annotations,
+                        "handler": node.name,
+                        "httpMethod": "WEBSOCKET" if method == "websocket" else method.upper(),
+                        "parameters": [
+                            {
+                                "name": argument.arg,
+                                "annotation": ast.unparse(argument.annotation)
+                                if argument.annotation is not None
+                                else None,
+                            }
+                            for argument in node.args.args
+                        ],
                         "path": path_value,
-                        "produces": compact(produces_match.group(1))
-                        if produces_match
-                        else None,
+                        "produces": "text/event-stream" if transport == "sse" else None,
                         "source": {
                             "file": relative(root, path),
-                            "line": start + 1,
+                            "line": decorator.lineno,
                         },
-                        "transport": "sse"
-                        if "TEXT_EVENT_STREAM" in annotation
-                        else "rest",
-                        "usesValid": "@Valid" in parameters,
+                        "transport": transport,
                     }
                 )
-
-    websocket_config = root / (
-        "app/src/main/java/interview/guide/modules/voiceinterview/"
-        "config/WebSocketConfig.java"
-    )
-    if websocket_config.exists():
-        text = websocket_config.read_text(encoding="utf-8")
-        for match in re.finditer(r"\.addHandler\([^,]+,\s*\"([^\"]+)\"\)", text):
-            path_value = match.group(1)
-            endpoints.append(
-                {
-                    "canonicalPath": canonical_path(path_value),
-                    "consumes": "text/json",
-                    "controller": "VoiceInterviewWebSocketHandler",
-                    "frontendUsages": [],
-                    "httpMethod": "WEBSOCKET",
-                    "javaMethod": "handleTextMessage",
-                    "parameters": [],
-                    "path": path_value,
-                    "produces": "text/json",
-                    "source": {
-                        "file": relative(root, websocket_config),
-                        "line": source_line(text, match.start()),
-                    },
-                    "transport": "websocket",
-                    "usesValid": False,
-                }
-            )
     return sorted(
         endpoints,
         key=lambda item: (
             item["path"],
             item["httpMethod"],
             item["controller"],
-            item["javaMethod"],
+            item["handler"],
         ),
     )
 
 
 def infer_frontend_method(text: str, offset: int) -> str:
     context = text[max(0, offset - 500) : offset]
-    request_methods = re.findall(
-        r"request\.(get|post|put|patch|delete|upload|download)\b", context
-    )
+    request_methods = re.findall(r"request\.(get|post|put|patch|delete|upload|download)\b", context)
     if request_methods:
         method = request_methods[-1]
         return {"upload": "POST", "download": "GET"}.get(method, method.upper())
@@ -314,7 +302,7 @@ def extract_frontend_api(root: Path) -> list[dict[str, Any]]:
 
 
 def build_api_manifest(root: Path) -> dict[str, Any]:
-    endpoints = extract_java_api(root)
+    endpoints = extract_python_api(root)
     frontend_calls = extract_frontend_api(root)
     calls_by_path: dict[str, list[dict[str, Any]]] = {}
     for call in frontend_calls:
@@ -322,9 +310,7 @@ def build_api_manifest(root: Path) -> dict[str, Any]:
     backend_paths = {endpoint["canonicalPath"] for endpoint in endpoints}
     for endpoint in endpoints:
         endpoint["frontendUsages"] = calls_by_path.get(endpoint["canonicalPath"], [])
-    frontend_only = [
-        call for call in frontend_calls if call["canonicalPath"] not in backend_paths
-    ]
+    frontend_only = [call for call in frontend_calls if call["canonicalPath"] not in backend_paths]
     backend_only = [
         {
             "httpMethod": endpoint["httpMethod"],
@@ -337,8 +323,7 @@ def build_api_manifest(root: Path) -> dict[str, Any]:
     return {
         "schemaVersion": SCHEMA_VERSION,
         "sourceOfTruth": [
-            "Java controller mappings",
-            "Java WebSocket registration",
+            "FastAPI route decorators",
             "frontend/src URL literals",
         ],
         "summary": {
@@ -347,12 +332,8 @@ def build_api_manifest(root: Path) -> dict[str, Any]:
             "controllerCount": len({item["controller"] for item in endpoints}),
             "frontendCallCount": len(frontend_calls),
             "frontendOnlyCount": len(frontend_only),
-            "sseEndpointCount": sum(
-                item["transport"] == "sse" for item in endpoints
-            ),
-            "webSocketEndpointCount": sum(
-                item["transport"] == "websocket" for item in endpoints
-            ),
+            "sseEndpointCount": sum(item["transport"] == "sse" for item in endpoints),
+            "webSocketEndpointCount": sum(item["transport"] == "websocket" for item in endpoints),
         },
         "backendEndpoints": endpoints,
         "frontendCalls": frontend_calls,
@@ -414,7 +395,7 @@ def extract_database(root: Path) -> dict[str, Any]:
     tables: list[dict[str, Any]] = []
     indexes: list[dict[str, Any]] = []
     alterations: list[dict[str, Any]] = []
-    sql_paths = sorted((root / "app/src/main/resources/db/migration").glob("*.sql"))
+    sql_paths = sorted((root / "backend/alembic/sql").glob("*.sql"))
     for path in sql_paths:
         text = path.read_text(encoding="utf-8")
         source = relative(root, path)
@@ -501,7 +482,7 @@ def extract_database(root: Path) -> dict[str, Any]:
             )
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "sourceOfTruth": "Flyway SQL; PostgreSQL catalog comparison is added in Stage 1/3.",
+        "sourceOfTruth": "Alembic accepted production SQL and PostgreSQL catalog tests.",
         "summary": {
             "alterationCount": len(alterations),
             "extensionCount": len(extensions),
@@ -518,19 +499,19 @@ def extract_database(root: Path) -> dict[str, Any]:
 
 
 def extract_redis(root: Path) -> dict[str, Any]:
-    java_root = root / "app/src/main/java"
+    python_root = root / "backend/src/interview_guide"
     constants: list[dict[str, Any]] = []
     scheduled: list[dict[str, Any]] = []
     rate_limits: list[dict[str, Any]] = []
     key_literals: list[dict[str, Any]] = []
     operation_evidence: list[dict[str, Any]] = []
-    for path in sorted(java_root.glob("**/*.java")):
+    stream_count = 0
+    for path in sorted(python_root.glob("**/*.py")):
         text = path.read_text(encoding="utf-8")
         source = relative(root, path)
         for match in re.finditer(
-            r"\bstatic\s+final\s+[\w<>, ?.\[\]]+\s+(\w+)\s*=\s*(.*?);",
+            r"(?m)^([A-Z][A-Z0-9_]*)\s*(?::[^=]+)?=\s*(.+)$",
             text,
-            flags=re.DOTALL,
         ):
             name = match.group(1)
             if any(marker in name for marker in REDIS_CONSTANT_MARKERS):
@@ -544,39 +525,34 @@ def extract_redis(root: Path) -> dict[str, Any]:
                         "valueExpression": compact(match.group(2)),
                     }
                 )
+        stream_count += len(re.findall(r"(?m)^[A-Z][A-Z0-9_]*\s*=\s*StreamDefinition\(", text))
         for match in re.finditer(
-            r"@Scheduled\s*\((.*?)\)\s*"
-            r"(?:public|protected|private)\s+[\w<>, ?.\[\]]+\s+(\w+)\s*\(",
+            r"scheduler\.add_job\(\s*(\w+).*?trigger=\"([^\"]+)\"",
             text,
-            flags=re.DOTALL,
+            re.DOTALL,
         ):
             scheduled.append(
                 {
-                    "method": match.group(2),
-                    "schedule": compact(match.group(1)),
+                    "method": match.group(1),
+                    "schedule": match.group(2),
                     "source": {
                         "file": source,
                         "line": source_line(text, match.start()),
                     },
                 }
             )
-        for match in re.finditer(r"@RateLimit\s*\((.*?)\)", text, flags=re.DOTALL):
-            following = text[match.end() : match.end() + 1200]
-            method_match = re.search(
-                r"(?:public|protected|private)\s+[\w<>, ?.\[\]]+\s+(\w+)\s*\(",
-                following,
-            )
+        for match in re.finditer(r"\.rate_limiter\.check\((.*?)\n\s*\)", text, flags=re.DOTALL):
             rate_limits.append(
                 {
                     "arguments": compact(match.group(1)),
-                    "method": method_match.group(1) if method_match else None,
+                    "method": None,
                     "source": {
                         "file": source,
                         "line": source_line(text, match.start()),
                     },
                 }
             )
-        if re.search(r"redis|redisson|RStream|RLock|RBucket|RMap", text, re.IGNORECASE):
+        if re.search(r"redis|xreadgroup|xautoclaim|xadd|xack", text, re.IGNORECASE):
             for match in re.finditer(r'"([^"\n]+:[^"\n]+)"', text):
                 value = match.group(1)
                 if "://" in value or " " in value:
@@ -592,9 +568,9 @@ def extract_redis(root: Path) -> dict[str, Any]:
                 )
             for line_number, line in enumerate(text.splitlines(), start=1):
                 if re.search(
-                    r"\b(?:getBucket|getMap|getLock|getStream|stream[A-Z]\w*|"
-                    r"RScript|evalSha|scriptLoad)\b",
+                    r"\b(?:xadd|xack|xreadgroup|xautoclaim|evalsha|script_load)\b",
                     line,
+                    re.IGNORECASE,
                 ):
                     operation_evidence.append(
                         {
@@ -602,14 +578,14 @@ def extract_redis(root: Path) -> dict[str, Any]:
                             "source": {"file": source, "line": line_number},
                         }
                     )
-    lua_paths = sorted((root / "app/src/main/resources/scripts").glob("*.lua"))
+    lua_paths = sorted((root / "backend/resources/scripts").glob("*.lua"))
     return {
         "schemaVersion": SCHEMA_VERSION,
         "summary": {
             "constantCount": len(constants),
             "rateLimitRuleCount": len(rate_limits),
             "scheduledMethodCount": len(scheduled),
-            "streamCount": sum(item["name"].endswith("STREAM_KEY") for item in constants),
+            "streamCount": stream_count,
         },
         "constants": constants,
         "keyLiterals": key_literals,
@@ -650,9 +626,7 @@ def yaml_values(root: Path, path: Path) -> list[dict[str, Any]]:
                         )
                     ),
                 }
-                for env_match in re.finditer(
-                    r"\$\{([A-Za-z0-9_.-]+)(?::([^}]*))?\}", raw_value
-                )
+                for env_match in re.finditer(r"\$\{([A-Za-z0-9_.-]+)(?::([^}]*))?\}", raw_value)
             ]
             values.append(
                 {
@@ -671,19 +645,11 @@ def yaml_values(root: Path, path: Path) -> list[dict[str, Any]]:
 
 
 def extract_configuration(root: Path) -> dict[str, Any]:
-    yaml_paths = sorted((root / "app/src/main/resources").glob("*.yml"))
-    yaml_paths += [root / "docker-compose.dev.yml", root / "docker-compose.yml"]
-    values = [
-        value
-        for path in yaml_paths
-        if path.exists()
-        for value in yaml_values(root, path)
-    ]
+    yaml_paths = [root / "docker-compose.dev.yml", root / "docker-compose.yml"]
+    values = [value for path in yaml_paths if path.exists() for value in yaml_values(root, path)]
     env_example: list[dict[str, Any]] = []
     env_path = root / ".env.example"
-    for line_number, line in enumerate(
-        env_path.read_text(encoding="utf-8").splitlines(), start=1
-    ):
+    for line_number, line in enumerate(env_path.read_text(encoding="utf-8").splitlines(), start=1):
         match = re.match(r"^([A-Z][A-Z0-9_]*)=(.*)$", line)
         if match:
             env_example.append(
@@ -704,27 +670,17 @@ def extract_configuration(root: Path) -> dict[str, Any]:
             )
     property_bindings: list[dict[str, Any]] = []
     value_injections: list[dict[str, Any]] = []
-    for path in sorted((root / "app/src/main/java").glob("**/*.java")):
+    for path in sorted((root / "backend/src/interview_guide").glob("**/*.py")):
         text = path.read_text(encoding="utf-8")
         for match in re.finditer(
-            r"@ConfigurationProperties\s*\(\s*prefix\s*=\s*\"([^\"]+)\"\s*\)",
+            r"(?m)^\s*(\w+):[^=]+?=\s*Field\((.*?)validation_alias=\"([A-Z0-9_]+)\"",
             text,
+            re.DOTALL,
         ):
-            class_match = re.search(r"\b(?:class|record)\s+(\w+)", text[match.end() :])
             property_bindings.append(
                 {
-                    "class": class_match.group(1) if class_match else None,
-                    "prefix": match.group(1),
-                    "source": {
-                        "file": relative(root, path),
-                        "line": source_line(text, match.start()),
-                    },
-                }
-            )
-        for match in re.finditer(r"@Value\s*\(\s*\"\$\{([^}]+)\}\"\s*\)", text):
-            value_injections.append(
-                {
-                    "expression": match.group(1),
+                    "field": match.group(1),
+                    "environment": match.group(3),
                     "source": {
                         "file": relative(root, path),
                         "line": source_line(text, match.start()),
@@ -732,9 +688,7 @@ def extract_configuration(root: Path) -> dict[str, Any]:
                 }
             )
     env_names = {
-        reference["name"]
-        for value in values
-        for reference in value["environmentReferences"]
+        reference["name"] for value in values for reference in value["environmentReferences"]
     }
     example_names = {item["name"] for item in env_example}
     return {
@@ -763,7 +717,7 @@ def resource_entry(root: Path, path: Path, category: str) -> dict[str, Any]:
 
 
 def extract_resources(root: Path) -> dict[str, Any]:
-    resource_root = root / "app/src/main/resources"
+    resource_root = root / "backend/resources"
     patterns = {
         "font": "fonts/**/*",
         "prompt": "prompts/**/*",
@@ -777,7 +731,11 @@ def extract_resources(root: Path) -> dict[str, Any]:
             if path.is_file():
                 resources.append(resource_entry(root, path, category))
     tests: list[dict[str, Any]] = []
-    test_roots = [root / "app/src/test", root / "frontend/e2e", root / "frontend/src"]
+    test_roots = [
+        root / "backend/tests",
+        root / "frontend/e2e",
+        root / "frontend/src",
+    ]
     for test_root in test_roots:
         if not test_root.exists():
             continue
@@ -785,7 +743,7 @@ def extract_resources(root: Path) -> dict[str, Any]:
             if not path.is_file():
                 continue
             if not (
-                path.suffix in {".java", ".ts", ".tsx"}
+                path.suffix in {".py", ".ts", ".tsx"}
                 and ("test" in path.name.lower() or "spec" in path.name.lower())
             ):
                 continue
@@ -801,9 +759,7 @@ def extract_resources(root: Path) -> dict[str, Any]:
     return {
         "schemaVersion": SCHEMA_VERSION,
         "summary": {
-            "disabledTestMarkerCount": sum(
-                item["disabledMarkers"] for item in tests
-            ),
+            "disabledTestMarkerCount": sum(item["disabledMarkers"] for item in tests),
             "resourceCount": len(resources),
             "resourceCountsByCategory": dict(sorted(category_counts.items())),
             "testFileCount": len(tests),
@@ -858,13 +814,10 @@ def main() -> None:
         write_json(output, name, value)
     summary = {
         "schemaVersion": SCHEMA_VERSION,
-        "manifests": {
-            name: value["summary"] for name, value in sorted(manifests.items())
-        },
+        "manifests": {name: value["summary"] for name, value in sorted(manifests.items())},
         "nextRequiredWork": [
-            "Record fixed runtime request/response/error samples.",
-            "Capture PostgreSQL catalog, Redis runtime state, S3 metadata, SSE bytes, and WebSocket transcripts.",
-            "Establish isolated Java/Python comparison environments.",
+            "Keep production Compose, Python tests, manifests, and protected model checks green.",
+            "Preserve fixed migration samples and final acceptance artifacts.",
         ],
     }
     write_json(output, "summary.json", summary)

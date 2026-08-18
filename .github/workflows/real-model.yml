@@ -1,4 +1,4 @@
-name: Real model migration checks
+name: Real model production checks
 
 on:
   workflow_dispatch:
@@ -9,135 +9,39 @@ permissions:
 jobs:
   real-model:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     environment: real-model
     env:
       AI_EMBEDDING_MODEL: qwen3.7-text-embedding
       AI_MODEL: qwen3.7-max
       APP_VOICE_INTERVIEW_QWEN_ASR_MODEL: qwen3-asr-flash-realtime
       APP_VOICE_INTERVIEW_QWEN_TTS_MODEL: qwen3-tts-flash-realtime
-
     steps:
       - uses: actions/checkout@v7
-
-      - name: Require protected real-model secret
+      - name: Require protected secret
         env:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        run: |
-          if [[ -z "$AI_BAILIAN_API_KEY" ]]; then
-            echo "AI_BAILIAN_API_KEY is required; no real-model result will be claimed" >&2
-            exit 1
-          fi
-
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "25"
-          cache: gradle
-
+        run: test -n "$AI_BAILIAN_API_KEY"
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13.13"
-
       - uses: astral-sh/setup-uv@v10.0.1
         with:
           version: "0.11.14"
           enable-cache: true
-          cache-dependency-glob: |
-            backend/uv.lock
-            migration/model-proxy/uv.lock
-
-      - name: Start isolated Java and Python
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-          COMPARISON_CANDIDATE: python
-        run: ./migration/scripts/start-comparison-env.sh
-
-      - name: Call real Provider through recording proxy
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        run: ./migration/scripts/run-real-model-smoke.sh
-
-      - name: Compare real-provider performance
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-          PERFORMANCE_ITERATIONS: "5"
-        run: ./migration/scripts/run-performance-acceptance.sh
-
-      - name: Verify real ASR and TTS protocol adapters
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-          APP_VOICE_INTERVIEW_QWEN_ASR_URL: ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime
-          APP_VOICE_INTERVIEW_QWEN_TTS_URL: ws://127.0.0.1:18090/ws/wss/dashscope.aliyuncs.com/api-ws/v1/realtime
+          cache-dependency-glob: backend/uv.lock
+      - name: Install locked dependencies
         working-directory: backend
-        run: uv run --frozen python ../migration/scripts/real_model_voice.py
-
-      - name: Prepare real voice evaluation data
+        run: uv sync --frozen
+      - name: Run protected production model checks
         env:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
         working-directory: backend
-        run: >-
-          uv run --frozen python
-          ../migration/scripts/real_model_voice_evaluation.py prepare
-
-      - name: Start real-model stream workers
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        run: ./migration/scripts/start-comparison-workers.sh
-
-      - name: Run real voice evaluation
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        working-directory: backend
-        run: >-
-          uv run --frozen python
-          ../migration/scripts/real_model_voice_evaluation.py capture
-
-      - name: Stop voice evaluation workers
-        run: ./migration/scripts/stop-comparison-workers.sh
-
-      - name: Prepare real question generation data
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        working-directory: backend
-        run: >-
-          uv run --frozen python
-          ../migration/scripts/real_model_knowledge_base_interview.py prepare
-
-      - name: Start real question-generation workers
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        run: ./migration/scripts/start-comparison-workers.sh
-
-      - name: Run real question generation and specialized interview
-        env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        working-directory: backend
-        run: >-
-          uv run --frozen python
-          ../migration/scripts/real_model_knowledge_base_interview.py capture
-
-      - name: Upload redacted model records
+        run: uv run --frozen python ../migration/scripts/production_model_acceptance.py
+      - name: Upload redacted records
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: real-model-migration-records
-          path: |
-            migration/reports/model-proxy.jsonl
-            migration/reports/real-model-interview.json
-            migration/reports/real-model-knowledge-base.json
-            migration/reports/real-model-knowledge-base-interview.json
-            migration/reports/real-model-smoke.json
-            migration/reports/performance-provider-connectivity.json
-            migration/reports/real-model-voice.json
-            migration/reports/real-model-voice-evaluation.json
-            migration/reports/runtime/question-workers/
+          name: real-model-production-records
+          path: migration/reports/real-model-production.json
           if-no-files-found: ignore
-
-      - name: Stop comparison workers
-        if: always()
-        run: ./migration/scripts/stop-comparison-workers.sh
-
-      - name: Stop comparison environment
-        if: always()
-        run: ./migration/scripts/stop-comparison-env.sh

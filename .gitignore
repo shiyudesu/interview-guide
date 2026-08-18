@@ -1,8 +1,6 @@
-# Ignore Gradle project-specific cache directory
-.gradle
-
-# Ignore Gradle build output directory
+# Ignore generic build output directory
 build
+/.session-tmp/
 /.claude/*
 !/.claude/rules/
 !/.claude/rules/**

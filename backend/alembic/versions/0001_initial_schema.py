@@ -1,4 +1,4 @@
-"""Create the schema matching the final Flyway state.
+"""Create the accepted production schema.
 
 Revision ID: 0001_initial_schema
 Revises:

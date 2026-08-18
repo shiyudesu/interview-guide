@@ -1,38 +1,38 @@
 {
   "manifests": {
     "api.json": {
-      "backendEndpointCount": 88,
-      "backendOnlyCount": 0,
-      "controllerCount": 10,
+      "backendEndpointCount": 94,
+      "backendOnlyCount": 6,
+      "controllerCount": 5,
       "frontendCallCount": 89,
       "frontendOnlyCount": 1,
       "sseEndpointCount": 2,
       "webSocketEndpointCount": 1
     },
     "configuration.json": {
-      "configurationValueCount": 311,
-      "envExampleCount": 37,
-      "envReferencedButUndocumentedCount": 71,
-      "propertyBindingCount": 11
+      "configurationValueCount": 143,
+      "envExampleCount": 36,
+      "envReferencedButUndocumentedCount": 8,
+      "propertyBindingCount": 100
     },
     "database.json": {
       "alterationCount": 5,
       "extensionCount": 3,
       "indexCount": 14,
-      "migrationCount": 5,
+      "migrationCount": 1,
       "tableCount": 17
     },
     "known-issues.json": {
       "knownIssueCount": 21
     },
     "redis.json": {
-      "constantCount": 49,
-      "rateLimitRuleCount": 33,
+      "constantCount": 39,
+      "rateLimitRuleCount": 4,
       "scheduledMethodCount": 3,
       "streamCount": 5
     },
     "resources.json": {
-      "disabledTestMarkerCount": 8,
+      "disabledTestMarkerCount": 1,
       "resourceCount": 60,
       "resourceCountsByCategory": {
         "font": 1,
@@ -41,13 +41,12 @@
         "skill": 40,
         "voice-config": 1
       },
-      "testFileCount": 49
+      "testFileCount": 51
     }
   },
   "nextRequiredWork": [
-    "Record fixed runtime request/response/error samples.",
-    "Capture PostgreSQL catalog, Redis runtime state, S3 metadata, SSE bytes, and WebSocket transcripts.",
-    "Establish isolated Java/Python comparison environments."
+    "Keep production Compose, Python tests, manifests, and protected model checks green.",
+    "Preserve fixed migration samples and final acceptance artifacts."
   ],
   "schemaVersion": 1
 }

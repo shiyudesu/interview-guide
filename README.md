@@ -1,430 +1,81 @@
-<div align="center">
+# InterviewGuide
 
-**智能 AI 面试官平台** - 基于大语言模型的简历分析、模拟面试和 RAG 知识库系统
-
-[![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18.3-blue?logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-336791?logo=postgresql)](https://www.postgresql.org/)
-
-
-</div>
-
-
----
-
-## 项目介绍
-
-InterviewGuide 是一个集成了简历分析、模拟面试（文字 + 语音）、面试安排、知识库管理、知识库题库面试和多模型配置的智能面试辅助平台。系统利用大语言模型（LLM）、向量数据库、Redis Stream 异步任务和实时语音技术，为求职者、HR 和培训机构提供智能化的简历评估、面试练习、知识库问答和面试日程管理能力。
-
-## Python 后端迁移
-
-生产 Compose 已切换为 Python/FastAPI，使用同一镜像分别启动 Migrate、API、Worker 和
-Scheduler。`app/` 暂时保留为 Java 行为基线和回滚版本；满足切换后连续两次完整 CI 门槛前
-不会删除。前端业务接口保持不变。
-
-```bash
-./migration/scripts/generate-manifests.sh
-./migration/scripts/check-manifests.sh
-./migration/scripts/sync-flyway-schema.py
-./migration/scripts/sync-java-resources.py
-./migration/scripts/start-comparison-env.sh
-./migration/scripts/run-comparison.sh
-./migration/scripts/run-schema-comparison.sh
-./migration/scripts/run-interview-schedule-comparison.sh
-./migration/scripts/run-interview-skill-comparison.sh
-./migration/scripts/run-llm-provider-comparison.sh
-./migration/scripts/run-resume-foundation-comparison.sh
-./migration/scripts/run-resume-upload-comparison.sh
-./migration/scripts/run-voice-rest-comparison.sh
-./migration/scripts/run-voice-websocket-comparison.sh
-./migration/scripts/run-voice-evaluation-comparison.sh
-./migration/scripts/run-knowledge-base-comparison.sh
-./migration/scripts/run-rag-chat-comparison.sh
-./migration/scripts/run-interview-comparison.sh
-./migration/scripts/run-knowledge-base-interview-comparison.sh
-./migration/scripts/run-rest-performance-comparison.sh
-./migration/scripts/run-performance-acceptance.sh
-./migration/scripts/stop-comparison-env.sh
-```
-
-真实模型兼容测试使用 `migration/model-proxy/` 中的本地 HTTP/WebSocket 透传记录代理；
-正常结果不会被代理修改，故障注入默认关闭。
-普通知识库查询在常规比较中只验证无需真实模型的校验、缺失知识库和 SSE 错误分帧；
-RAG Chat 常规比较覆盖 CRUD、关联、无模型 SSE 和消息落库。真实改写、Embedding、同步回答、
-流式回答以及 RAG Chat 正常/故障保存结构由受保护的 `real-model.yml` 记录并验收。
-文字面试常规比较使用明确标记的固定模型 stub，覆盖 CRUD、requestId 幂等、数据库、Redis
-Stream、错误和 PDF 可见文本；真实出题与顺序评估由同一受保护工作流记录请求和费用后验收。
-知识库题库与专项面试常规比较固定任务 ID、Prompt、Embedding、API、数据库和 Redis Stream，
-覆盖生成状态恢复、CRUD、严格容量、ACTIVE 抽题和统一评估复用；受保护工作流另行调用真实
-Embedding 与 LLM，并保存 Provider、模型、耗时和 Token 记录。
-语音 WebSocket 常规比较覆盖固定历史会话的非模型 welcome transcript；语音评估 Worker
-常规比较使用明确标记的固定模型 stub 对比 Java/Python 数据库和 Redis 状态，不作为真实模型
-验收。Python 单元和真实 PostgreSQL/Redis 集成测试中的 fake 只验证编排、重试、ACK、崩溃
-reclaim 和恢复阈值。真实 ASR/TTS 与语音评估 LLM 仅由受保护工作流通过记录代理验收，并保存
-Provider、模型、耗时、Token 和 Provider 是否返回费用信息；缺少受保护 Key 时工作流直接失败，
-不会生成“真实模型已通过”的报告。
-受保护工作流还会交替执行至少五次 Java/Python 真实 Provider 连通性请求，校验请求模型和参数
-一致，并保存应用延迟、Provider 网络延迟、Token 与基于官方版本化单价的估算费用。该单场景
-报告不能替代迁移计划阶段 7 中其余并发、SSE、WebSocket、Worker 和大文件性能验收。
-手动 `performance.yml` 以固定 Skill 详情接口比较 1、10、50 并发下的 p95、p99、吞吐、
-错误率和响应一致性；
-压测期间同时按进程树采样 Java/Python RSS，并检查 Python 稳定内存不超过 Java 的 120%。
-该测试不调用模型，只作为基础 REST 性能基线。
-Python API 关闭 Uvicorn 重复 access log；项目中间件继续生成 requestId 和指标，并在 DEBUG
-记录普通请求、INFO 记录慢请求或 4xx、WARNING 记录 5xx，避免单 worker 被同步日志阻塞。
-OpenTelemetry 仅在同时启用并配置 `OTEL_EXPORTER_OTLP_ENDPOINT` 时挂载请求 instrumentation，
-避免创建最终不会导出的 span。
-SQLAlchemy 连接池显式固定为 10 个常驻连接、0 overflow，与 Java Hikari 默认并发上限一致；
-可通过 `APP_DATABASE_POOL_SIZE` 和 `APP_DATABASE_MAX_OVERFLOW` 覆盖。连接借用不执行隐式
-pre-ping，真实断线由当前操作显式失败并交给业务恢复流程。
-
-Python 镜像固定使用 Python 3.13.13、libmagic 5.44-3 和
-LibreOffice 7.4.7-1+deb12u14，不包含 JVM。
-
-Python 基础工程创建后使用：
-
-```bash
-cd backend
-uv sync --frozen
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src
-uv run pytest
-docker build -f Dockerfile -t interview-guide-python ..
-```
-
-## 系统架构
-
-![系统架构图](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/interview-guide-architecture-diagram.png)
-
-## 配套教程
-
-本项目承诺**完整功能免费开源**，也不会做所谓的 Pro 版或“付费解锁核心功能”之类的设计。
-
-如果你想学习这个项目，或者希望把它作为个人项目经历 / 毕设选题，我也整理了一套相对细致的教程：从基础设施搭建、核心业务实现，到最后如何在面试中讲清楚思路与亮点，尽量把容易卡住的地方讲透。
-
-如果你确实需要更系统的辅导，可以点这里了解详情（**教程为付费内容**，主要是想覆盖一些时间成本，望理解，感谢支持）：[《SpringAI 智能面试平台+RAG 知识库》](https://javaguide.cn/zhuanlan/interview-guide.html)。
+智能 AI 面试平台，包含简历分析、文字/语音模拟面试、面试日程、知识库 RAG、知识库题库面试和多模型配置。
 
 ## 技术栈
 
-### 后端技术
+- Python 3.13.13、FastAPI、Uvicorn、Pydantic v2
+- SQLAlchemy 2.0 AsyncEngine、psycopg 3、Alembic、PostgreSQL 16 + pgvector
+- redis-py asyncio、Redis Stream、APScheduler
+- LangGraph、langchain-openai、统一 LLM Adapter
+- pdfminer.six、python-docx、LibreOffice、ReportLab、boto3
+- React 18、TypeScript、Vite、Tailwind CSS 4
+- uv 0.11.14、Node 24、pnpm 10.26.2
 
-| 技术                  | 版本  | 说明                          |
-| --------------------- | ----- | ----------------------------- |
-| Python                | 3.13.13 | 开发语言                    |
-| FastAPI + Uvicorn     | 0.141 / 0.52 | REST、SSE 和 WebSocket |
-| Pydantic              | 2.x | API Schema 和配置              |
-| SQLAlchemy + psycopg  | 2.0 / 3 | PostgreSQL 异步访问          |
-| Alembic               | 1.19 | 数据库升级                      |
-| LangGraph / LangChain | - | 多步骤 AI 编排和 OpenAI 兼容接入 |
-| redis-py asyncio      | 8.1 | 缓存、限流和 Redis Stream       |
-| pdfminer.six / ReportLab | - | 文档解析和 PDF 导出          |
-| boto3                 | 1.43 | S3 兼容对象存储                 |
-| APScheduler           | 3.11 | 单实例恢复与过期任务             |
-| uv                    | 0.11.14 | 依赖和运行管理                |
+## 快速启动
 
-技术选型常见问题解答：
-
-1. 数据存储为什么选择 PostgreSQL + pgvector？PG 的向量数据存储功能够用了，精简架构，不想引入太多组件。
-2. 为什么引入 Redis？
-   - Redis 替代 `ConcurrentHashMap` 实现面试会话的缓存。
-   - 基于 Redis Stream 实现简历分析、知识库向量化等场景的异步（还能解耦，分析和向量化可以使用其他编程语言来做）。不使用 [Kafka](https://javaguide.cn/high-performance/message-queue/kafka-questions-01.html) 这类成熟的消息队列，也是不想引入太多组件。
-3. 为什么拆分 API、Worker 和 Scheduler？API 保持单 worker 以维护语音连接状态，五类 Redis
-   Stream 由独立 Worker 顺序消费，恢复和过期任务由单实例 Scheduler 处理。
-
-### 前端技术
-
-| 技术              | 版本  | 说明           |
-| ----------------- | ----- | -------------- |
-| React             | 18.3  | UI 框架        |
-| TypeScript        | 5.6   | 开发语言       |
-| Vite              | 5.4   | 构建工具       |
-| Tailwind CSS      | 4.1   | 样式框架       |
-| React Router      | 7.11  | 路由管理       |
-| Framer Motion     | 12.23 | 动画库         |
-| Recharts          | 3.6   | 图表库         |
-| Lucide React      | 0.468 | 图标库         |
-| React Big Calendar| 1.19  | 面试日历组件   |
-| React Virtuoso    | 4.18  | RAG 聊天虚拟列表 |
-| pnpm              | 10.26 | 前端包管理器   |
-
-## 功能特性
-
-### 简历管理模块
-
-- **多格式解析**：支持 PDF、DOCX、DOC、TXT 等多种简历格式。
-- **异步处理流**：基于 Redis Stream 实现异步简历分析，支持实时查看处理进度（待分析/分析中/已完成/失败）。
-- **稳定性保障**：内置分析失败自动重试机制（最多 3 次）与基于内容哈希的重复检测。
-- **分析报告导出**：支持将 AI 分析结果一键导出为结构化的 PDF 简历分析报告。
-
-### 模拟面试模块
-
-- **Skill 驱动出题**：内置 10+ 面试方向（Java 后端、阿里/字节/腾讯专项、前端、Python、算法、系统设计、测开、AI Agent 等），每个方向由 `SKILL.md` 定义考察范围、难度分布和参考知识库。
-- **历史题目去重**：出题时自动排除已有会话中问过的题目，避免重复考察。
-- **面试阶段时长联动**：总时长滑块拖动后，各阶段（自我介绍、技术考察、项目深挖、反问环节）按时比自动分配。
-- **智能追问流**：支持配置多轮智能追问（默认 1 条），模拟多轮问答场景。
-- **统一评估架构**：文字面试和语音面试共用同一套评估引擎（分批评估 + 结构化输出 + 二次汇总 + 降级兜底），评估结果可对比。
-- **报告一键导出**：支持异步生成并导出详细的 PDF 模拟面试评估报告。
-- **面试中心入口**：面试中心页整合文字面试和语音面试入口，支持继续面试和重新面试。
-
-### 面试安排模块
-
-- **邀请解析**：规则 + AI 双引擎，支持飞书/腾讯会议/Zoom 格式，自动提取公司、岗位、时间、会议链接
-- **日历管理**：日/周/月视图 + 拖拽调整 + 列表视图
-- **状态流转**：定时任务自动过期，手动标记待面试/已完成/已取消
-- **面试提醒**：可配置提醒，避免错过面试
-
-### 语音面试模块
-
-实时语音对话面试，WebSocket + 千问3 语音模型（ASR/TTS/LLM 统一 API Key）：
-
-- **实时流式对话**：句子级并发 TTS，边生成边合成边播放，首包延迟 200ms
-- **服务端 VAD**：自动断句，实时字幕（含中间结果）
-- **回声防护 + 手动提交**：避免 AI 语音被误录入
-- **多轮上下文记忆 + 暂停/恢复**：超时自动暂停
-- **Micrometer 埋点**：TTS/ASR 延迟、会话时长等指标
-
-> **已知问题**：端到端延迟偏高（服务端音频中转）、无耳机时回声泄漏、TTS 音色单一、弱网音频断续。后续计划探索 WebRTC、客户端 VAD 降噪、端到端语音模型等方案。
-
-### 知识库管理模块
-
-- **文档智能处理**：支持 PDF、DOCX、Markdown 等多种格式文档的自动上传、分块与异步向量化。
-- **RAG 检索增强**：集成 pgvector，通过查询改写、相似度阈值和 TopK 策略提升 AI 问答的准确性与专业度。
-- **流式响应交互**：基于 SSE（Server-Sent Events）技术实现打字机式流式响应。
-- **智能问答对话**：支持会话管理、置顶、多知识库关联、Markdown 展示和虚拟列表渲染。
-- **知识库运维**：支持分类管理、下载、重新向量化、搜索和统计信息展示。
-
-### 知识库题库与面试模块
-
-- **基于知识库生成题目**：从已向量化文档生成主问题、参考答案、关键点、评分标准和追问，并按方向与难度组织题库。
-- **异步生成与质量提示**：题目生成任务通过 Redis Stream 异步执行；生成不足时保留草稿，并展示实际追问数与目标追问数，避免静默丢失题目。
-- **完整题库维护**：支持题目搜索、筛选、分页、手动新增、编辑、删除，以及草稿、已启用、已归档状态的单题或批量管理。
-- **严格面试容量校验**：开始面试前按方向、难度、主问题数和每题追问数实时计算可用容量；追问数量是硬约束，容量不足的选项会直接禁用，后端同时进行兜底校验。
-- **知识库专项面试**：从已启用题目中抽取主问题和追问，完整记录作答过程，并复用统一评估引擎异步生成总分、逐题评价、优势和改进建议。
-- **评估与记录闭环**：交卷后展示评估进度，完成后自动进入本次面试详情；支持方向、时间、完成状态筛选、表现趋势统计和 PDF 报告导出。
-
-### 多模型与系统设置模块
-
-- **多 Provider 管理**：内置 DashScope、LM Studio、Kimi、DeepSeek、GLM 等 OpenAI 兼容 Provider 配置。
-- **默认模型切换**：支持在设置页切换默认聊天模型和默认向量模型，不需要频繁修改源码配置。
-- **语音服务配置**：ASR/TTS 配置可视化管理，支持语音服务连通性测试。
-- **配置安全落盘**：运行时配置默认写入用户目录 `~/.interview-guide/`，支持 API Key 加密配置。
-
-### TODO
-
-- [x] 问答助手的 Markdown 展示优化
-- [x] 知识库管理页面的知识库下载
-- [x] 异步生成模拟面试评估报告
-- [x] Docker 快速部署
-- [x] 添加 API 限流保护
-- [x] 前端性能优化（RAG 聊天 - 虚拟列表）
-- [x] 模拟面试增加追问功能
-- [x] 语音面试功能（基于 Qwen3 实时语音模型）
-- [x] 面试安排管理（智能解析 + 日历视图）
-- [x] Skill 驱动出题（10+ 面试方向 + 参考知识库）
-- [x] 统一面试评估架构（文字/语音共用评估引擎）
-- [x] 面试历史题目去重
-- [x] 面试中心页（整合文字/语音入口）
-- [x] 语音面试 LLM 流式输出 + 句子级并发 TTS
-- [x] 语音面试暂停/恢复 + 手动提交 + 回声防护
-- [x] 多 LLM Provider 管理与默认模型切换
-- [x] RAG 聊天会话管理 + 虚拟列表优化
-- [x] 可重复注解 API 限流（Global/IP/User 维度）
-- [x] 打通知识库题库与模拟面试（异步出题、严格容量校验、统一评估与记录）
-- [ ] 语音面试接入 WebRTC 降低延迟
-- [ ] 语音面试支持更多 TTS 音色
-
-
-## 效果展示
-
-### 简历与面试
-
-面试中心：
-
-![面试中心](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-interview-hub.png)
-
-Skill 出题 + JD 解析：
-
-![Skill 出题 + JD 解析](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-skill-jd-parse.png)
-
-简历库：
-
-![简历库](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-resume-history.png)
-
-简历上传分析：
-
-![简历上传分析](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-resume-upload-analysis.png)
-
-简历分析详情：
-
-![简历分析详情](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-resume-analysis-detail.png)
-
-面试记录：
-
-![面试记录](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-interview-history.png)
-
-面试详情：
-
-![面试详情](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-interview-detail.png)
-
-模拟面试：
-
-![模拟面试](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-mock-interview.png)
-
-面试安排
-
-![面试安排](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-interview-schedule-list.png)
-
-多模型切换 + 语音服务设置：
-
-![管理聊天模型、向量模型和模块配置](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/llm-settings.png)
-
-
-### 知识库
-
-知识库管理：
-
-![知识库管理](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-knowledge-base-management.png)
-
-问答助手：
-
-![问答助手](https://oss.javaguide.cn/xingqiu/pratical-project/interview-guide/page-qa-assistant.png)
-
-## 项目结构
-
-```
-interview-guide/
-├── backend/                           # 生产 Python/FastAPI 后端
-│   ├── src/interview_guide/
-│   │   ├── common/                    # 响应、配置、DB、Redis、AI、日志
-│   │   ├── infrastructure/            # 文档、PDF、对象存储
-│   │   ├── modules/                   # 业务模块
-│   │   ├── main.py                    # API 入口
-│   │   ├── worker.py                  # 五类 Redis Stream Worker
-│   │   ├── scheduler.py               # 单实例恢复与过期任务
-│   │   └── migrate.py                 # Alembic Migrate 入口
-│   ├── resources/                     # Prompt、Skill、字体和脚本
-│   ├── alembic/                       # 数据库升级
-│   └── pyproject.toml
-├── app/                               # 切换前 Java 行为基线和回滚版本
-│
-├── frontend/                         # 前端应用
-│   ├── src/
-│   │   ├── api/                      # API 接口
-│   │   ├── components/               # 公共组件
-│   │   ├── hooks/                    # 业务 Hooks
-│   │   ├── pages/                    # 页面组件
-│   │   ├── types/                    # 类型定义
-│   │   └── utils/                    # 工具函数
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── docker-compose.yml                # 完整部署：前端 + 后端 + PostgreSQL + Redis + MinIO
-├── docker-compose.dev.yml            # 本地开发依赖：PostgreSQL + Redis + RustFS
-├── docs/                             # 架构设计与改造记录
-├── .env.example                      # 环境变量示例
-└── README.md
-```
-
-## 快速开始
-
-环境要求：
-
-| 依赖          | 版本 | 必需 | 说明                                     |
-| ------------- | ---- | ---- | ---------------------------------------- |
-| Python        | 3.13.13 | 是 | 后端运行                                 |
-| uv            | 0.11.14 | 是 | Python 依赖和命令管理                    |
-| Node.js       | 24   | 是   | 前端构建                                 |
-| pnpm          | 10.26.2 | 是 | 前端包管理器                            |
-| Docker        | -    | 推荐 | 一键启动依赖服务（PostgreSQL/Redis/RustFS）|
-
-> 如果不用 Docker，需要自行安装 PostgreSQL 16（含 pgvector）、Redis 7.4 和 S3 兼容存储。
-
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/shiyudesu/interview-guide.git
-cd interview-guide
-```
-
-### 2. 配置环境变量
-
-推荐复制 `.env.example` 为 `.env`。必须设置稳定的 Provider 加密密钥；使用 DashScope 时再
-填写 `AI_BAILIAN_API_KEY`：
+复制并编辑环境变量：
 
 ```bash
 cp .env.example .env
-
-# 编辑 .env
-# AI_BAILIAN_API_KEY=your_dashscope_api_key
-# APP_AI_CONFIG_ENCRYPTION_KEY=your_random_long_secret
-# AI_MODEL=qwen3.7-max
-# AI_EMBEDDING_MODEL=qwen3.7-text-embedding
 ```
 
-如果你更习惯通过 shell 环境变量注入，也可以这样设置：
+必须长期保持 `APP_AI_CONFIG_ENCRYPTION_KEY` 不变。默认模型：
 
-```bash
-# macOS / Linux（zsh）
-echo 'export AI_BAILIAN_API_KEY=your_api_key' >> ~/.zshrc
-source ~/.zshrc
-
-# Linux（bash）
-echo 'export AI_BAILIAN_API_KEY=your_api_key' >> ~/.bashrc
-source ~/.bashrc
+```env
+AI_MODEL=qwen3.7-max
+AI_EMBEDDING_MODEL=qwen3.7-text-embedding
+APP_AI_CONFIG_ENCRYPTION_KEY=replace_with_a_stable_random_secret
 ```
 
-### 3. 启动依赖服务（可选）
+如使用 DashScope，再配置：
 
-项目提供了 `docker-compose.dev.yml`，可一键启动 PostgreSQL、Redis、RustFS（S3 兼容存储）三个依赖：
+```env
+AI_BAILIAN_API_KEY=your_key
+```
+
+完整部署：
 
 ```bash
-# 启动依赖服务
+docker compose up -d --build --wait
+docker compose ps
+```
+
+访问：
+
+- 前端：<http://localhost>
+- API：<http://localhost:8080>
+- Swagger：<http://localhost:8080/swagger-ui.html>
+- MinIO：<http://localhost:9001>
+
+查看日志：
+
+```bash
+docker compose logs -f app worker scheduler
+docker compose logs migrate
+```
+
+停止服务：
+
+```bash
+docker compose down
+```
+
+仅在明确需要删除所有本地数据时使用：
+
+```bash
+docker compose down -v
+```
+
+## 本地开发
+
+启动依赖：
+
+```bash
 docker compose -f docker-compose.dev.yml up -d
-
-# 停止依赖服务
-docker compose -f docker-compose.dev.yml down
-
-# 停止并清除数据
-docker compose -f docker-compose.dev.yml down -v
 ```
 
-如果你之前已经启动过旧版本容器，拉取新代码后建议确认端口映射是否真的生效：
-
-```bash
-docker ps --format '{{.Names}} {{.Ports}}'
-```
-
-正常情况下应看到：
-
-```text
-interview-postgres 0.0.0.0:5432->5432/tcp
-interview-redis    0.0.0.0:6379->6379/tcp
-```
-
-如果只看到 `interview-postgres 5432/tcp` 或 `interview-redis 6379/tcp`，说明端口没有发布到
-宿主机，Python API 会连接失败。可以重建容器配置（不会删除 Docker volume 中的数据）：
-
-```bash
-docker compose -f docker-compose.dev.yml up -d --force-recreate postgres redis
-```
-
-启动后默认账号：
-
-| 服务         | 地址             | 账号            | 密码            |
-| ------------ | ---------------- | --------------- | --------------- |
-| PostgreSQL   | `localhost:5432` | `postgres`      | `password`      |
-| Redis        | `localhost:6379` | -               | -               |
-| RustFS 控制台 | `localhost:9001` | `minioadmin`    | `minioadmin`    |
-
-> 应用启动时会自动检查并创建 `interview-guide` Bucket。`.env` 中的
-> `APP_STORAGE_ACCESS_KEY` / `APP_STORAGE_SECRET_KEY` 必须与 RustFS 账号一致。
-
-### 4. 启动应用
-
-**后端 Migrate、API、Worker、Scheduler：**
+后端：
 
 ```bash
 cd backend
@@ -433,7 +84,7 @@ uv run --frozen interview-guide-migrate
 uv run --frozen interview-guide-api
 ```
 
-另开两个终端：
+另开终端启动异步进程：
 
 ```bash
 cd backend
@@ -445,200 +96,67 @@ cd backend
 uv run --frozen interview-guide-scheduler
 ```
 
-后端服务启动于 `http://localhost:8080`
-
-**前端：**
+前端：
 
 ```bash
 cd frontend
 corepack enable
-pnpm install
-pnpm dev
+pnpm install --frozen-lockfile
+pnpm run dev
 ```
 
-前端服务启动于 `http://localhost:5173`
-
-
-## Docker 快速部署
-
-本项目提供了完整的 Docker 支持，可以一键启动所有服务（前后端、数据库、中间件）。
-
-Docker Compose 编排 PostgreSQL、Redis、MinIO、Bucket 初始化、Alembic Migrate、Python
-API、Worker、Scheduler 和 React/Nginx。数据通过 Docker 命名卷持久化，
-`docker compose down` 不会丢失数据。
-
-### 1. 前置准备
-
-- 安装 [Docker](https://www.docker.com/products/docker-desktop/) 和 Docker Compose
-- 申请阿里云百炼 API Key（用于 AI 对话功能，申请地址：<https://bailian.console.aliyun.com/>）
-
-### 2. 快速启动
-
-在项目根目录下执行：
-
-`.env.example` 中的 PostgreSQL、Redis、MinIO 已与 `docker-compose.yml` 对齐（数据库用户 `postgres` / 密码 `password`，MinIO `minioadmin` / `minioadmin`）。复制为 `.env` 后主要填写 `AI_BAILIAN_API_KEY`；若你曾在旧版本中使用过不同的库密码或对象存储密钥，请同步修改 `.env`，必要时重建 Postgres 卷以免旧数据与密码不一致。
-
-```bash
-# 1. 复制环境变量配置文件
-cp .env.example .env
-
-# 2. 编辑 .env 文件，填入 AI 配置
-# vim .env
-# 必填：AI_BAILIAN_API_KEY=your_key_here
-# 必填：APP_AI_CONFIG_ENCRYPTION_KEY=your_random_long_secret
-# 可选：AI_MODEL=qwen3.7-max
-# 可选：AI_EMBEDDING_MODEL=qwen3.7-text-embedding
-# 也可以在设置页维护 DashScope、Kimi、DeepSeek、GLM、LM Studio 等 Provider
-#
-# 面试参数配置（可选）：
-# APP_INTERVIEW_FOLLOW_UP_COUNT=1         # 每个主问题生成追问数量（默认 1）
-# APP_INTERVIEW_EVALUATION_BATCH_SIZE=8   # 回答评估分批大小（默认 8）
-
-# 3. 构建并启动所有服务
-docker compose up -d --build
-```
-
-> **仅启动依赖服务**：本地开发可执行
-> `docker compose -f docker-compose.dev.yml up -d`，然后用 `uv run` 分别启动 Python 进程。
-
-### 3. 服务访问
-
-启动完成后，您可以通过以下地址访问各个服务：
-
-| 服务             | 地址                                           | 默认账号     | 默认密码     | 说明                   |
-| ---------------- | ---------------------------------------------- | ------------ | ------------ | ---------------------- |
-| **前端应用**     | [http://localhost](http://localhost)           | -            | -            | 用户访问入口           |
-| **后端 API**     | [http://localhost:8080](http://localhost:8080) | -            | -            | RESTful API            |
-| **接口文档**     | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | - | - | FastAPI Swagger UI |
-| **MinIO 控制台** | [http://localhost:9001](http://localhost:9001) | `minioadmin` | `minioadmin` | 对象存储管理           |
-| **MinIO API**    | `localhost:9000`                               | -            | -            | S3 兼容接口            |
-| **PostgreSQL**   | `localhost:5432`                               | `postgres`   | `password`   | 数据库 (包含 pgvector) |
-| **Redis**        | `localhost:6379`                               | -            | -            | 缓存与消息队列         |
-
-### 4. 常用运维命令
-
-```bash
-# 查看服务状态
-docker compose ps
-
-# 查看后端日志
-docker compose logs -f app worker scheduler
-
-# 拉取新代码后重新构建部署
-docker compose up -d --build
-
-# 停止并移除所有服务（数据保留在 Docker 卷中）
-docker compose down
-
-# 停止服务并清除数据卷（慎用，会删除数据库和文件）
-docker compose down -v
-
-# 清理无用镜像（构建产生的中间层）
-docker image prune -f
-```
-
-## 使用场景
-
-| 用户角色        | 使用场景                               |
-| --------------- | -------------------------------------- |
-| **求职者**      | 上传简历获取分析建议，进行模拟面试练习 |
-| **HR/招聘人员** | 批量分析简历，评估候选人能力           |
-| **培训机构**    | 提供面试培训服务，管理知识库资源       |
-
-## 常见问题
-
-### Q: 数据库表创建失败/数据丢失
-
-先查看一次性 Migrate 容器日志：
-
-```bash
-docker compose logs migrate
-```
-
-空库由 Alembic 创建；已验收的 Java/Flyway 数据库会校验完整 Flyway history 和 16 张业务表后
-写入 Alembic baseline，不会重复建表。任何版本或表结构缺失都会直接失败。
-
-### Q: 知识库向量化失败
-
-确认 Migrate 成功、Worker 正在运行，并检查 Provider 的 Embedding 模型和维度。知识库固定使用
-1024 维向量，修改默认 Embedding Provider 后需要重新向量化已有文档。
-
-### Q: 数据库迁移需要手动执行脚本吗？
-
-正式 Compose 会先运行一次 `interview-guide-migrate`，成功后 API、Worker 和 Scheduler 才启动。
-本地手工运行时先执行：
+## 检查命令
 
 ```bash
 cd backend
-uv run --frozen interview-guide-migrate
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src
+uv run pytest
 ```
-
-### Q: 启动时报 `Connection to localhost:5432 refused` 怎么办？
-
-这通常不是 Alembic 脚本错误，而是后端从宿主机访问不到 PostgreSQL。先确认依赖容器已启动：
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d
-docker ps --format '{{.Names}} {{.Ports}}'
+cd frontend
+pnpm run build
+pnpm run test:e2e
 ```
 
-`interview-postgres` 必须显示 `0.0.0.0:5432->5432/tcp`，`interview-redis` 必须显示 `0.0.0.0:6379->6379/tcp`。如果只显示 `5432/tcp` 或 `6379/tcp`，说明旧容器没有应用端口映射配置，重建容器即可：
+## 运行架构
 
-```bash
-docker compose -f docker-compose.dev.yml up -d --force-recreate postgres redis
-```
+同一 Python 镜像启动四类程序：
 
-如果你的本机 `5432` 或 `6379` 已被其他项目占用，可以修改 `.env` 中的 `POSTGRES_PORT` / `REDIS_PORT`，并同步调整 `docker-compose.dev.yml` 里的端口映射，确保应用配置和容器发布端口一致。
+1. `interview-guide-migrate`：只执行 Alembic 升级。
+2. `interview-guide-api`：提供 REST、SSE 和 WebSocket，保持单 Uvicorn worker。
+3. `interview-guide-worker`：并行运行五类 Redis Stream 的顺序消费者。
+4. `interview-guide-scheduler`：单实例处理过期与恢复任务。
 
-### Q: 简历分析失败
+Compose 会等待 Migrate 成功后再启动 API、Worker 和 Scheduler。
 
-检查一下阿里云 DashScope API KEY 是否配置正确（申请地址：<https://bailian.console.aliyun.com/>）。
+## Provider
 
-### Q: 设置页新增/切换模型后不生效？
+内置 DashScope、Kimi、DeepSeek、GLM 和 LM Studio，也可添加任意 OpenAI 兼容 Provider。
 
-Provider 配置和加密后的 API Key 保存在 PostgreSQL。API、Worker 和 Scheduler 必须使用完全相同
-且长期不变的 `APP_AI_CONFIG_ENCRYPTION_KEY`；修改该值会导致已有 Provider Key 无法解密。
-可以在设置页测试连接，或调用 `/api/llm-provider/reload` 重新加载缓存。
-若 shell 中曾导出旧值，应先执行 `unset APP_AI_CONFIG_ENCRYPTION_KEY`，避免覆盖 `.env`。
+- 默认聊天模型：`qwen3.7-max`
+- 默认向量模型：`qwen3.7-text-embedding`，1024 维
+- 默认 ASR：`qwen3-asr-flash-realtime`
+- 默认 TTS：`qwen3-tts-flash-realtime`
 
-### Q: 语音面试无法识别或没有声音？
+Provider API Key 加密保存在 PostgreSQL。API、Worker 和 Scheduler 必须使用相同的
+`APP_AI_CONFIG_ENCRYPTION_KEY`。
 
-语音面试的 ASR/TTS 默认也使用 `AI_BAILIAN_API_KEY`。请检查浏览器麦克风权限、后端日志中的 DashScope WebSocket 连接状态，以及设置页里的 ASR/TTS 测试结果。无耳机时可能触发回声录入，建议先使用手动提交模式或佩戴耳机测试。
+## 数据和对象存储
 
-### Q: 简历分析一直显示"分析中"？
+- PostgreSQL：`localhost:5432`
+- Redis：`localhost:6379`
+- MinIO API：`localhost:9000`
+- MinIO Console：`localhost:9001`
 
-确认 `worker` 服务正在运行，并检查 Redis Stream：
+上传限制：简历 10MB、知识库 50MB、multipart 50MB。
 
-```bash
-docker compose ps worker
-docker compose logs -f worker
-```
+## 自动化
 
-### Q: PDF 导出失败或中文显示异常？
+- `ci.yml`：Python、真实基础设施集成、生产 Compose、前端和镜像无 JVM 检查。
+- `real-model.yml`：受保护环境中的 LLM、Embedding、ASR 和 TTS 生产冒烟。
+- `migration/`：保留迁移固定样本、最终行为报告和历史对比工具。
 
-项目已内置中文字体并通过 ReportLab 导出。如遇到问题，请检查：
-
-- 字体文件是否存在：`backend/resources/fonts/ZhuqueFangsong-Regular.ttf`
-- `app` 日志中的字体加载信息
-- Python 镜像是否使用仓库中的 `backend/Dockerfile`
-
-### Q: Windows PowerShell 下后端日志中文乱码？
-
-Python 日志按 UTF-8 输出。若 Windows PowerShell 仍显示乱码，先执行：
-
-```powershell
-chcp 65001 | Out-Null
-[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-[Console]::InputEncoding  = [System.Text.UTF8Encoding]::new($false)
-$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-```
-
-然后从 `backend/` 使用 `uv run --frozen interview-guide-api` 启动。
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 许可证
-
-AGPL-3.0 License（只要通过网络提供服务，就必须向用户公开修改后的源码）
+切换前版本保存在 `pre-python-switch` tag；Java 镜像和验收证据已归档在迁移会话产物中。
