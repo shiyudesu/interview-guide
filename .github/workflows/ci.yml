@@ -124,8 +124,8 @@ jobs:
           TEST_S3_ENDPOINT: http://127.0.0.1:9000
           TEST_S3_SECRET_KEY: minioadmin
         run: uv run pytest -m integration
-      - name: Resume background processes
-        run: docker compose start worker scheduler
+      - name: Restore backend after destructive integration fixtures
+        run: docker compose up -d --force-recreate app worker scheduler --wait
       - name: Run frontend against production backend
         working-directory: frontend
         env:
