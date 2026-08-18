@@ -11,6 +11,7 @@ from typing import Any
 import httpx
 import psycopg
 import redis
+from model_record_reader import read_jsonl_records
 from realtime_artifact import sse_record
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,11 +58,7 @@ TARGETS = (
 
 
 def model_records() -> list[dict[str, Any]]:
-    if not MODEL_RECORDS.exists():
-        return []
-    return [
-        json.loads(line) for line in MODEL_RECORDS.read_text(encoding="utf-8").splitlines() if line
-    ]
+    return read_jsonl_records(MODEL_RECORDS)
 
 
 def embed_question(api_key: str) -> list[float]:

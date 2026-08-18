@@ -12,6 +12,7 @@ from typing import Any
 
 import psycopg
 import redis
+from model_record_reader import read_jsonl_records
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "migration/reports"
@@ -51,11 +52,7 @@ TARGETS = (
 
 
 def record_lines() -> list[dict[str, Any]]:
-    if not MODEL_RECORDS.exists():
-        return []
-    return [
-        json.loads(line) for line in MODEL_RECORDS.read_text(encoding="utf-8").splitlines() if line
-    ]
+    return read_jsonl_records(MODEL_RECORDS)
 
 
 def prepare_target(target: Target) -> int:

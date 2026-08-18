@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "migration/scripts/performance_compare.py"
+sys.path.insert(0, str(SCRIPT.parent))
 SPEC = importlib.util.spec_from_file_location("performance_compare", SCRIPT)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"Unable to load {SCRIPT}")

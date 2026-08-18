@@ -11,6 +11,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from model_record_reader import complete_jsonl_lines
+
 QWEN37_MAX_PRICING = {
     "inputPerMillionUsd": 1.65,
     "outputPerMillionUsd": 4.951,
@@ -53,9 +55,7 @@ def summary(samples: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def record_lines(path: Path) -> list[str]:
-    if not path.is_file():
-        return []
-    return path.read_text(encoding="utf-8").splitlines()
+    return complete_jsonl_lines(path)
 
 
 def response_usage(event: dict[str, Any]) -> dict[str, int]:
