@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import gzip
 import hashlib
 import json
+import zlib
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -34,7 +36,7 @@ def redacted(value: str | bytes) -> str:
 
 def sanitize_headers(headers: Any) -> dict[str, list[str]]:
     sanitized: dict[str, list[str]] = {}
-    for key in headers.keys():
+    for key in headers:
         values = headers.getall(key)
         if key.lower() in SECRET_KEYS:
             sanitized[key.lower()] = [redacted(value) for value in values]
@@ -48,16 +50,11 @@ def sanitize_json(value: Any, key: str | None = None) -> Any:
         return redacted(json.dumps(value, ensure_ascii=False, sort_keys=True))
     if isinstance(value, dict):
         return {
-            item_key: sanitize_json(item_value, item_key)
-            for item_key, item_value in value.items()
+            item_key: sanitize_json(item_value, item_key) for item_key, item_value in value.items()
         }
     if isinstance(value, list):
         return [sanitize_json(item) for item in value]
-    if (
-        key in BINARY_KEYS
-        and isinstance(value, str)
-        and len(value) >= 256
-    ):
+    if key in BINARY_KEYS and isinstance(value, str) and len(value) >= 256:
         return {
             "encodedCharacters": len(value),
             "sha256": hashlib.sha256(value.encode("utf-8")).hexdigest(),
@@ -67,14 +64,30 @@ def sanitize_json(value: Any, key: str | None = None) -> Any:
 
 
 def body_record(
-    body: bytes, content_type: str | None, max_record_bytes: int
+    body: bytes,
+    content_type: str | None,
+    max_record_bytes: int,
+    content_encoding: str | None = None,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "bytes": len(body),
         "sha256": hashlib.sha256(body).hexdigest(),
     }
-    sample = body[:max_record_bytes]
-    record["truncated"] = len(sample) != len(body)
+    decoded = body
+    normalized_encoding = (content_encoding or "").lower().strip()
+    try:
+        if normalized_encoding == "gzip":
+            decoded = gzip.decompress(body)
+        elif normalized_encoding == "deflate":
+            decoded = zlib.decompress(body)
+    except (gzip.BadGzipFile, EOFError, zlib.error) as error:
+        record["decodeError"] = type(error).__name__
+        decoded = body
+    if normalized_encoding:
+        record["contentEncoding"] = normalized_encoding
+        record["decodedBytes"] = len(decoded)
+    sample = decoded[:max_record_bytes]
+    record["truncated"] = len(sample) != len(decoded)
     normalized_content_type = (content_type or "").lower()
     if "json" in normalized_content_type:
         try:

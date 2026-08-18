@@ -99,28 +99,19 @@ def target_url(
 
 
 def forwarded_headers(headers: Any) -> dict[str, str]:
-    return {
-        key: value
-        for key, value in headers.items()
-        if key.lower() not in HOP_BY_HOP_HEADERS
-    }
+    return {key: value for key, value in headers.items() if key.lower() not in HOP_BY_HOP_HEADERS}
 
 
 def websocket_headers(headers: Any) -> dict[str, str]:
     return {
         key: value
         for key, value in headers.items()
-        if key.lower() not in HOP_BY_HOP_HEADERS
-        and not key.lower().startswith("sec-websocket-")
+        if key.lower() not in HOP_BY_HOP_HEADERS and not key.lower().startswith("sec-websocket-")
     }
 
 
 def response_headers(headers: Any) -> list[tuple[str, str]]:
-    return [
-        (key, value)
-        for key, value in headers.items()
-        if key.lower() not in HOP_BY_HOP_HEADERS
-    ]
+    return [(key, value) for key, value in headers.items() if key.lower() not in HOP_BY_HOP_HEADERS]
 
 
 def request_id(request: web.Request) -> str:
@@ -166,9 +157,7 @@ async def reset_fault(request: web.Request) -> web.Response:
     return web.json_response({"reset": True})
 
 
-async def apply_fault(
-    request: web.Request, correlation_id: str
-) -> web.StreamResponse | None:
+async def apply_fault(request: web.Request, correlation_id: str) -> web.StreamResponse | None:
     fault = await request.app[FAULTS_KEY].take()
     if fault is None:
         return None
@@ -249,6 +238,7 @@ async def proxy_http(request: web.Request) -> web.StreamResponse:
                         bytes(response_body),
                         upstream.headers.get("Content-Type"),
                         config.max_record_bytes,
+                        upstream.headers.get("Content-Encoding"),
                     ),
                     "correlationId": correlation_id,
                     "durationMs": round((time.monotonic() - started) * 1000, 3),
@@ -267,7 +257,9 @@ async def proxy_http(request: web.Request) -> web.StreamResponse:
                 "kind": "upstream-error",
             }
         )
-        raise web.HTTPBadGateway(text=f"Model proxy upstream failure: {type(error).__name__}")
+        raise web.HTTPBadGateway(
+            text=f"Model proxy upstream failure: {type(error).__name__}"
+        ) from error
 
 
 async def forward_websocket_message(

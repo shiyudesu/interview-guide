@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import json
 import tempfile
 import unittest
@@ -7,13 +8,29 @@ from pathlib import Path
 
 from aiohttp import ClientSession, web
 from aiohttp.test_utils import TestServer
-from multidict import CIMultiDict
-
 from model_proxy.app import ProxyConfig, create_app, target_url
-from model_proxy.recording import sanitize_headers, sanitize_json
+from model_proxy.recording import body_record, sanitize_headers, sanitize_json
+from multidict import CIMultiDict
 
 
 class RecordingTest(unittest.TestCase):
+    def test_gzip_json_is_decoded_only_for_recording(self) -> None:
+        raw = gzip.compress(b'{"usage":{"prompt_tokens":3,"completion_tokens":2}}')
+
+        record = body_record(
+            raw,
+            "application/json",
+            1024,
+            "gzip",
+        )
+
+        self.assertEqual("gzip", record["contentEncoding"])
+        self.assertEqual(
+            {"usage": {"prompt_tokens": 3, "completion_tokens": 2}},
+            record["json"],
+        )
+        self.assertEqual(len(raw), record["bytes"])
+
     def test_secrets_are_redacted_but_model_payload_is_preserved(self) -> None:
         sanitized = sanitize_json(
             {
@@ -93,10 +110,7 @@ class ProxyIntegrationTest(unittest.IsolatedAsyncioTestCase):
 
     def proxy_url(self, prefix: str, tail: str) -> str:
         upstream_port = self.upstream.port
-        return (
-            f"{self.proxy.make_url(prefix)}/http/"
-            f"127.0.0.1:{upstream_port}/{tail}"
-        )
+        return f"{self.proxy.make_url(prefix)}/http/127.0.0.1:{upstream_port}/{tail}"
 
     async def test_http_response_is_forwarded_without_body_changes(self) -> None:
         payload = {
@@ -117,16 +131,11 @@ class ProxyIntegrationTest(unittest.IsolatedAsyncioTestCase):
             json.loads(body),
         )
         records = [
-            json.loads(line)
-            for line in self.record_path.read_text(encoding="utf-8").splitlines()
+            json.loads(line) for line in self.record_path.read_text(encoding="utf-8").splitlines()
         ]
-        request_record = next(
-            item for item in records if item["kind"] == "http-request"
-        )
+        request_record = next(item for item in records if item["kind"] == "http-request")
         self.assertTrue(
-            request_record["headers"]["authorization"][0].startswith(
-                "<redacted:sha256:"
-            )
+            request_record["headers"]["authorization"][0].startswith("<redacted:sha256:")
         )
         self.assertEqual(
             "fixed prompt",
@@ -154,24 +163,16 @@ class ProxyIntegrationTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_websocket_messages_are_forwarded(self) -> None:
         upstream_port = self.upstream.port
-        url = (
-            f"{self.proxy.make_url('/ws')}/ws/"
-            f"127.0.0.1:{upstream_port}/realtime"
-        )
+        url = f"{self.proxy.make_url('/ws')}/ws/127.0.0.1:{upstream_port}/realtime"
         async with self.session.ws_connect(url) as websocket:
             await websocket.send_json({"type": "session.update"})
             message = await websocket.receive_json()
 
         self.assertEqual({"type": "session.update"}, message)
         records = [
-            json.loads(line)
-            for line in self.record_path.read_text(encoding="utf-8").splitlines()
+            json.loads(line) for line in self.record_path.read_text(encoding="utf-8").splitlines()
         ]
-        directions = {
-            item["direction"]
-            for item in records
-            if item["kind"] == "websocket-message"
-        }
+        directions = {item["direction"] for item in records if item["kind"] == "websocket-message"}
         self.assertEqual(
             {"client-to-upstream", "upstream-to-client"},
             directions,
