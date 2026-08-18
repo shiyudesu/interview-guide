@@ -93,6 +93,9 @@ jobs:
           uv run --frozen python
           ../migration/scripts/real_model_voice_evaluation.py capture
 
+      - name: Stop voice evaluation workers
+        run: ./migration/scripts/stop-comparison-workers.sh
+
       - name: Prepare real question generation data
         env:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
@@ -100,6 +103,11 @@ jobs:
         run: >-
           uv run --frozen python
           ../migration/scripts/real_model_knowledge_base_interview.py prepare
+
+      - name: Start real question-generation workers
+        env:
+          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+        run: ./migration/scripts/start-comparison-workers.sh
 
       - name: Run real question generation and specialized interview
         env:
