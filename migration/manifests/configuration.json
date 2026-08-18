@@ -558,22 +558,28 @@
     {
       "environmentReferences": [
         {
-          "default": "qwen3.5-flash",
+          "default": "qwen3.7-max",
           "name": "AI_MODEL",
           "sensitive": false
         }
       ],
       "property": "app.ai.providers.dashscope.model",
-      "rawValue": "${AI_MODEL:qwen3.5-flash}",
+      "rawValue": "${AI_MODEL:qwen3.7-max}",
       "source": {
         "file": "app/src/main/resources/application.yml",
         "line": 116
       }
     },
     {
-      "environmentReferences": [],
+      "environmentReferences": [
+        {
+          "default": "qwen3.7-text-embedding",
+          "name": "AI_EMBEDDING_MODEL",
+          "sensitive": false
+        }
+      ],
       "property": "app.ai.providers.dashscope.embedding-model",
-      "rawValue": "text-embedding-v3",
+      "rawValue": "${AI_EMBEDDING_MODEL:qwen3.7-text-embedding}",
       "source": {
         "file": "app/src/main/resources/application.yml",
         "line": 117
@@ -2631,16 +2637,31 @@
     {
       "environmentReferences": [
         {
-          "default": "-qwen3.5-flash",
+          "default": "-qwen3.7-max",
           "name": "AI_MODEL",
           "sensitive": false
         }
       ],
       "property": "AI_MODEL",
-      "rawValue": "${AI_MODEL:-qwen3.5-flash}",
+      "rawValue": "${AI_MODEL:-qwen3.7-max}",
       "source": {
         "file": "docker-compose.yml",
         "line": 23
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-qwen3.7-text-embedding",
+          "name": "AI_EMBEDDING_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "AI_EMBEDDING_MODEL",
+      "rawValue": "${AI_EMBEDDING_MODEL:-qwen3.7-text-embedding}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 24
       }
     },
     {
@@ -2655,7 +2676,7 @@
       "rawValue": "${PROVIDER_LMSTUDIO_API_KEY:-lm-studio}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 24
+        "line": 25
       }
     },
     {
@@ -2670,7 +2691,7 @@
       "rawValue": "${PROVIDER_KIMI_API_KEY:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 25
+        "line": 26
       }
     },
     {
@@ -2685,7 +2706,7 @@
       "rawValue": "${PROVIDER_KIMI_MODEL:-kimi-k2.6}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 26
+        "line": 27
       }
     },
     {
@@ -2700,7 +2721,7 @@
       "rawValue": "${PROVIDER_DEEPSEEK_API_KEY:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 27
+        "line": 28
       }
     },
     {
@@ -2715,7 +2736,7 @@
       "rawValue": "${PROVIDER_DEEPSEEK_MODEL:-deepseek-v4-flash}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 28
+        "line": 29
       }
     },
     {
@@ -2730,7 +2751,7 @@
       "rawValue": "${PROVIDER_GLM_API_KEY:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 29
+        "line": 30
       }
     },
     {
@@ -2745,7 +2766,7 @@
       "rawValue": "${PROVIDER_GLM_MODEL:-glm-5}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 30
+        "line": 31
       }
     },
     {
@@ -2760,7 +2781,7 @@
       "rawValue": "${APP_AI_RAG_REWRITE_ENABLED:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 31
+        "line": 32
       }
     },
     {
@@ -2775,7 +2796,7 @@
       "rawValue": "${APP_AI_RAG_SHORT_QUERY_LENGTH:-4}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 32
+        "line": 33
       }
     },
     {
@@ -2790,7 +2811,7 @@
       "rawValue": "${APP_AI_RAG_TOPK_SHORT:-20}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 33
+        "line": 34
       }
     },
     {
@@ -2805,7 +2826,7 @@
       "rawValue": "${APP_AI_RAG_TOPK_MEDIUM:-12}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 34
+        "line": 35
       }
     },
     {
@@ -2820,7 +2841,7 @@
       "rawValue": "${APP_AI_RAG_TOPK_LONG:-8}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 35
+        "line": 36
       }
     },
     {
@@ -2835,7 +2856,7 @@
       "rawValue": "${APP_AI_RAG_MIN_SCORE_SHORT:-0.18}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 36
+        "line": 37
       }
     },
     {
@@ -2850,7 +2871,7 @@
       "rawValue": "${APP_AI_RAG_MIN_SCORE_DEFAULT:-0.28}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 37
+        "line": 38
       }
     },
     {
@@ -2865,7 +2886,7 @@
       "rawValue": "${APP_AI_RAG_HISTORY_ENABLED:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 38
+        "line": 39
       }
     },
     {
@@ -2880,7 +2901,7 @@
       "rawValue": "${APP_AI_RAG_HISTORY_MAX_MESSAGES:-10}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 39
+        "line": 40
       }
     },
     {
@@ -2895,7 +2916,7 @@
       "rawValue": "${APP_INTERVIEW_FOLLOW_UP_COUNT:-1}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 40
+        "line": 41
       }
     },
     {
@@ -2910,7 +2931,7 @@
       "rawValue": "${APP_INTERVIEW_EVALUATION_BATCH_SIZE:-8}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 41
+        "line": 42
       }
     },
     {
@@ -2925,7 +2946,7 @@
       "rawValue": "${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:5173}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 42
+        "line": 43
       }
     },
     {
@@ -2940,7 +2961,7 @@
       "rawValue": "${LOG_LEVEL:-INFO}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 43
+        "line": 44
       }
     },
     {
@@ -2955,7 +2976,7 @@
       "rawValue": "${TZ:-Asia/Shanghai}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 44
+        "line": 45
       }
     },
     {
@@ -2964,7 +2985,7 @@
       "rawValue": "&backend-service",
       "source": {
         "file": "docker-compose.yml",
-        "line": 46
+        "line": 47
       }
     },
     {
@@ -2979,7 +3000,7 @@
       "rawValue": "interview-guide-python:${INTERVIEW_GUIDE_IMAGE_TAG:-local}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 47
+        "line": 48
       }
     },
     {
@@ -2988,7 +3009,7 @@
       "rawValue": "*backend-build",
       "source": {
         "file": "docker-compose.yml",
-        "line": 48
+        "line": 49
       }
     },
     {
@@ -2997,7 +3018,7 @@
       "rawValue": "*backend-environment",
       "source": {
         "file": "docker-compose.yml",
-        "line": 49
+        "line": 50
       }
     },
     {
@@ -3006,7 +3027,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 50
+        "line": 51
       }
     },
     {
@@ -3015,7 +3036,7 @@
       "rawValue": "pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782",
       "source": {
         "file": "docker-compose.yml",
-        "line": 54
+        "line": 55
       }
     },
     {
@@ -3024,7 +3045,7 @@
       "rawValue": "linux/amd64",
       "source": {
         "file": "docker-compose.yml",
-        "line": 55
+        "line": 56
       }
     },
     {
@@ -3033,7 +3054,7 @@
       "rawValue": "interview-postgres",
       "source": {
         "file": "docker-compose.yml",
-        "line": 56
+        "line": 57
       }
     },
     {
@@ -3048,7 +3069,7 @@
       "rawValue": "${POSTGRES_DB:-interview_guide}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 58
+        "line": 59
       }
     },
     {
@@ -3063,7 +3084,7 @@
       "rawValue": "${POSTGRES_PASSWORD:-password}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 59
+        "line": 60
       }
     },
     {
@@ -3078,7 +3099,7 @@
       "rawValue": "${POSTGRES_USER:-postgres}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 60
+        "line": 61
       }
     },
     {
@@ -3087,7 +3108,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 70
+        "line": 71
       }
     },
     {
@@ -3096,7 +3117,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 71
+        "line": 72
       }
     },
     {
@@ -3105,7 +3126,7 @@
       "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 72
+        "line": 73
       }
     },
     {
@@ -3114,7 +3135,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 73
+        "line": 74
       }
     },
     {
@@ -3123,7 +3144,7 @@
       "rawValue": "redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635",
       "source": {
         "file": "docker-compose.yml",
-        "line": 76
+        "line": 77
       }
     },
     {
@@ -3132,7 +3153,7 @@
       "rawValue": "linux/amd64",
       "source": {
         "file": "docker-compose.yml",
-        "line": 77
+        "line": 78
       }
     },
     {
@@ -3141,7 +3162,7 @@
       "rawValue": "interview-redis",
       "source": {
         "file": "docker-compose.yml",
-        "line": 78
+        "line": 79
       }
     },
     {
@@ -3150,7 +3171,7 @@
       "rawValue": "[\"redis-server\", \"--appendonly\", \"yes\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 79
+        "line": 80
       }
     },
     {
@@ -3159,7 +3180,7 @@
       "rawValue": "[\"CMD\", \"redis-cli\", \"ping\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 85
+        "line": 86
       }
     },
     {
@@ -3168,7 +3189,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 86
+        "line": 87
       }
     },
     {
@@ -3177,7 +3198,7 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 87
+        "line": 88
       }
     },
     {
@@ -3186,7 +3207,7 @@
       "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 88
+        "line": 89
       }
     },
     {
@@ -3195,7 +3216,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 89
+        "line": 90
       }
     },
     {
@@ -3204,7 +3225,7 @@
       "rawValue": "minio/minio:RELEASE.2024-12-18T13-15-44Z@sha256:34c8e2f52a5984492555427fee07254c80036bdb7079bb91679232abd7a4fa20",
       "source": {
         "file": "docker-compose.yml",
-        "line": 92
+        "line": 93
       }
     },
     {
@@ -3213,7 +3234,7 @@
       "rawValue": "linux/amd64",
       "source": {
         "file": "docker-compose.yml",
-        "line": 93
+        "line": 94
       }
     },
     {
@@ -3222,7 +3243,7 @@
       "rawValue": "interview-minio",
       "source": {
         "file": "docker-compose.yml",
-        "line": 94
+        "line": 95
       }
     },
     {
@@ -3231,7 +3252,7 @@
       "rawValue": "[\"server\", \"/data\", \"--console-address\", \":9001\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 95
+        "line": 96
       }
     },
     {
@@ -3246,7 +3267,7 @@
       "rawValue": "${APP_STORAGE_SECRET_KEY:-minioadmin}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 97
+        "line": 98
       }
     },
     {
@@ -3261,7 +3282,7 @@
       "rawValue": "${APP_STORAGE_ACCESS_KEY:-minioadmin}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 98
+        "line": 99
       }
     },
     {
@@ -3270,7 +3291,7 @@
       "rawValue": "[\"CMD\", \"curl\", \"-f\", \"http://localhost:9000/minio/health/live\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 105
+        "line": 106
       }
     },
     {
@@ -3279,7 +3300,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 106
+        "line": 107
       }
     },
     {
@@ -3288,7 +3309,7 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 107
+        "line": 108
       }
     },
     {
@@ -3297,7 +3318,7 @@
       "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 108
+        "line": 109
       }
     },
     {
@@ -3306,7 +3327,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 109
+        "line": 110
       }
     },
     {
@@ -3315,7 +3336,7 @@
       "rawValue": "minio/mc:RELEASE.2024-11-21T17-21-54Z@sha256:771f5ad7925a6b5e069786d8e847a292de320f1e3e3203647e29f47ec9b3d93b",
       "source": {
         "file": "docker-compose.yml",
-        "line": 112
+        "line": 113
       }
     },
     {
@@ -3324,7 +3345,7 @@
       "rawValue": "linux/amd64",
       "source": {
         "file": "docker-compose.yml",
-        "line": 113
+        "line": 114
       }
     },
     {
@@ -3333,7 +3354,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 116
+        "line": 117
       }
     },
     {
@@ -3348,7 +3369,7 @@
       "rawValue": "${APP_STORAGE_BUCKET:-interview-guide}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 118
+        "line": 119
       }
     },
     {
@@ -3363,7 +3384,7 @@
       "rawValue": "${APP_STORAGE_SECRET_KEY:-minioadmin}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 119
+        "line": 120
       }
     },
     {
@@ -3378,7 +3399,7 @@
       "rawValue": "${APP_STORAGE_ACCESS_KEY:-minioadmin}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 120
+        "line": 121
       }
     },
     {
@@ -3387,7 +3408,7 @@
       "rawValue": "interview-migrate",
       "source": {
         "file": "docker-compose.yml",
-        "line": 132
+        "line": 133
       }
     },
     {
@@ -3396,7 +3417,7 @@
       "rawValue": "[\"interview-guide-migrate\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 133
+        "line": 134
       }
     },
     {
@@ -3411,7 +3432,7 @@
       "rawValue": "${APP_MIGRATION_BASELINE_FLYWAY:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 136
+        "line": 137
       }
     },
     {
@@ -3420,7 +3441,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 139
+        "line": 140
       }
     },
     {
@@ -3429,7 +3450,7 @@
       "rawValue": "\"no\"",
       "source": {
         "file": "docker-compose.yml",
-        "line": 140
+        "line": 141
       }
     },
     {
@@ -3438,7 +3459,7 @@
       "rawValue": "interview-app",
       "source": {
         "file": "docker-compose.yml",
-        "line": 144
+        "line": 145
       }
     },
     {
@@ -3447,7 +3468,7 @@
       "rawValue": "[\"interview-guide-api\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 145
+        "line": 146
       }
     },
     {
@@ -3456,7 +3477,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 148
+        "line": 149
       }
     },
     {
@@ -3465,7 +3486,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 150
+        "line": 151
       }
     },
     {
@@ -3474,7 +3495,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 152
+        "line": 153
       }
     },
     {
@@ -3483,7 +3504,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 166
+        "line": 167
       }
     },
     {
@@ -3492,7 +3513,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 167
+        "line": 168
       }
     },
     {
@@ -3501,7 +3522,7 @@
       "rawValue": "24",
       "source": {
         "file": "docker-compose.yml",
-        "line": 168
+        "line": 169
       }
     },
     {
@@ -3510,7 +3531,7 @@
       "rawValue": "10s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 169
+        "line": 170
       }
     },
     {
@@ -3519,7 +3540,7 @@
       "rawValue": "interview-worker",
       "source": {
         "file": "docker-compose.yml",
-        "line": 173
+        "line": 174
       }
     },
     {
@@ -3528,7 +3549,7 @@
       "rawValue": "[\"interview-guide-worker\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 174
+        "line": 175
       }
     },
     {
@@ -3537,7 +3558,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 177
+        "line": 178
       }
     },
     {
@@ -3546,7 +3567,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 179
+        "line": 180
       }
     },
     {
@@ -3555,7 +3576,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 181
+        "line": 182
       }
     },
     {
@@ -3564,7 +3585,7 @@
       "rawValue": "interview-scheduler",
       "source": {
         "file": "docker-compose.yml",
-        "line": 185
+        "line": 186
       }
     },
     {
@@ -3573,7 +3594,7 @@
       "rawValue": "[\"interview-guide-scheduler\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 186
+        "line": 187
       }
     },
     {
@@ -3582,7 +3603,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 189
+        "line": 190
       }
     },
     {
@@ -3591,7 +3612,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 191
+        "line": 192
       }
     },
     {
@@ -3600,7 +3621,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 193
+        "line": 194
       }
     },
     {
@@ -3609,7 +3630,7 @@
       "rawValue": "./frontend",
       "source": {
         "file": "docker-compose.yml",
-        "line": 197
+        "line": 198
       }
     },
     {
@@ -3618,7 +3639,7 @@
       "rawValue": "Dockerfile",
       "source": {
         "file": "docker-compose.yml",
-        "line": 198
+        "line": 199
       }
     },
     {
@@ -3633,7 +3654,7 @@
       "rawValue": "interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-local}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 199
+        "line": 200
       }
     },
     {
@@ -3642,7 +3663,7 @@
       "rawValue": "interview-frontend",
       "source": {
         "file": "docker-compose.yml",
-        "line": 200
+        "line": 201
       }
     },
     {
@@ -3651,7 +3672,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 203
+        "line": 204
       }
     },
     {
@@ -3660,7 +3681,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 206
+        "line": 207
       }
     }
   ],
@@ -3900,7 +3921,7 @@
       }
     },
     {
-      "default": "qwen3.5-flash",
+      "default": "qwen3.7-max",
       "name": "AI_MODEL",
       "sensitive": false,
       "source": {
@@ -3909,12 +3930,21 @@
       }
     },
     {
+      "default": "qwen3.7-text-embedding",
+      "name": "AI_EMBEDDING_MODEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 68
+      }
+    },
+    {
       "default": "true",
       "name": "APP_AI_RAG_REWRITE_ENABLED",
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 70
+        "line": 71
       }
     },
     {
@@ -3923,7 +3953,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 71
+        "line": 72
       }
     },
     {
@@ -3932,7 +3962,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 72
+        "line": 73
       }
     },
     {
@@ -3941,7 +3971,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 73
+        "line": 74
       }
     },
     {
@@ -3950,7 +3980,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 74
+        "line": 75
       }
     },
     {
@@ -3959,7 +3989,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 75
+        "line": 76
       }
     },
     {
@@ -3968,7 +3998,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 76
+        "line": 77
       }
     },
     {
@@ -3977,7 +4007,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 77
+        "line": 78
       }
     },
     {
@@ -3986,7 +4016,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 78
+        "line": 79
       }
     }
   ],
@@ -4155,8 +4185,8 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "configurationValueCount": 310,
-    "envExampleCount": 36,
+    "configurationValueCount": 311,
+    "envExampleCount": 37,
     "envReferencedButUndocumentedCount": 71,
     "propertyBindingCount": 11
   },

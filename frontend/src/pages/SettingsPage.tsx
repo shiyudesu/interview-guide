@@ -23,6 +23,7 @@ const PROVIDER_PRESETS: Record<string, {
   dashscope: {
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     models: [
+      { value: 'qwen3.7-max', label: 'Qwen3.7 Max — 当前旗舰' },
       { value: 'qwen3.6-flash', label: 'Qwen3.6 Flash — 最新旗舰' },
       { value: 'qwen3.5-plus', label: 'Qwen3.5 Plus — 高性能' },
       { value: 'qwen3.5-flash', label: 'Qwen3.5 Flash — 性价比' },

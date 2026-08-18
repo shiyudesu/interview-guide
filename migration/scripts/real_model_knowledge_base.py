@@ -22,6 +22,7 @@ NO_RESULT_RESPONSE = (
     "抱歉，在选定的知识库中未检索到相关信息。请换一个更具体的关键词或补充上下文后再试。"
 )
 MODEL_PROXY_CONTROL = "http://127.0.0.1:18090/__control"
+EMBEDDING_MODEL = os.getenv("AI_EMBEDDING_MODEL", "qwen3.7-text-embedding")
 
 
 @dataclass(frozen=True)
@@ -68,7 +69,7 @@ def embed_question(api_key: str) -> list[float]:
         ("http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1/embeddings"),
         headers={"Authorization": f"Bearer {api_key}"},
         json={
-            "model": "text-embedding-v3",
+            "model": EMBEDDING_MODEL,
             "input": [QUESTION],
             "dimensions": 1024,
         },
@@ -450,7 +451,7 @@ def main() -> None:
     report = {
         "schemaVersion": 1,
         "provider": "dashscope",
-        "embeddingModel": "text-embedding-v3",
+        "embeddingModel": EMBEDDING_MODEL,
         "embeddingDimensions": len(embedding),
         "question": QUESTION,
         "fakeModel": False,

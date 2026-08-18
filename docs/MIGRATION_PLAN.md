@@ -1482,6 +1482,9 @@ baseline、peak 和末段稳定中位数，并检查 Python 稳定内存不超�
   第二次无 DDL，随后 schema 比较零差异。
 - 生产 Compose 已改为先运行 Migrate，再启动同一 Python 镜像的 API、Worker 和 Scheduler；
   服务名 `app` 和对外端口 `8080` 保持不变。
+- 最终受保护真实模型验收固定使用本地生产配置：
+  `qwen3.7-max`、`qwen3.7-text-embedding`（1024 维）、
+  `qwen3-asr-flash-realtime` 和 `qwen3-tts-flash-realtime`。
 
 正式切换前：
 

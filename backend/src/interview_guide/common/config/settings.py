@@ -145,11 +145,15 @@ class Settings(BaseSettings):
         gt=0,
         validation_alias="APP_AI_EMBEDDING_DIMENSIONS",
     )
+    ai_embedding_model: str = Field(
+        default="qwen3.7-text-embedding",
+        validation_alias="AI_EMBEDDING_MODEL",
+    )
     ai_bailian_api_key: SecretStr = Field(
         default=SecretStr(""),
         validation_alias="AI_BAILIAN_API_KEY",
     )
-    ai_model: str = Field(default="qwen3.5-flash", validation_alias="AI_MODEL")
+    ai_model: str = Field(default="qwen3.7-max", validation_alias="AI_MODEL")
     ai_dashscope_base_url: str = Field(
         default="https://dashscope.aliyuncs.com/compatible-mode/v1",
         validation_alias="APP_AI_PROVIDERS_DASHSCOPE_BASE_URL",

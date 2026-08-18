@@ -11,12 +11,12 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-QWEN35_FLASH_PRICING = {
-    "inputPerMillionUsd": 0.029,
-    "outputPerMillionUsd": 0.287,
-    "source": "https://www.alibabacloud.com/help/en/model-studio/qwen3-5-flash",
-    "tier": "China (Beijing), input <= 128K",
-    "verifiedAt": "2026-04-10",
+QWEN37_MAX_PRICING = {
+    "inputPerMillionUsd": 1.65,
+    "outputPerMillionUsd": 4.951,
+    "source": "https://www.alibabacloud.com/help/en/model-studio/qwen3-7-max",
+    "tier": "China (Beijing)",
+    "verifiedAt": "2026-08-18",
 }
 
 
@@ -71,20 +71,20 @@ def response_usage(event: dict[str, Any]) -> dict[str, int]:
 
 
 def estimated_cost(model: str, usage: dict[str, int]) -> dict[str, Any]:
-    if model != "qwen3.5-flash":
+    if model != "qwen3.7-max":
         return {
             "currency": "USD",
             "estimated": None,
             "reason": f"No versioned price configured for {model}",
         }
     value = (
-        usage["inputTokens"] * QWEN35_FLASH_PRICING["inputPerMillionUsd"]
-        + usage["outputTokens"] * QWEN35_FLASH_PRICING["outputPerMillionUsd"]
+        usage["inputTokens"] * QWEN37_MAX_PRICING["inputPerMillionUsd"]
+        + usage["outputTokens"] * QWEN37_MAX_PRICING["outputPerMillionUsd"]
     ) / 1_000_000
     return {
         "currency": "USD",
         "estimated": round(value, 9),
-        "pricing": QWEN35_FLASH_PRICING,
+        "pricing": QWEN37_MAX_PRICING,
     }
 
 

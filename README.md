@@ -360,7 +360,8 @@ cp .env.example .env
 # 编辑 .env
 # AI_BAILIAN_API_KEY=your_dashscope_api_key
 # APP_AI_CONFIG_ENCRYPTION_KEY=your_random_long_secret
-# AI_MODEL=qwen3.5-flash
+# AI_MODEL=qwen3.7-max
+# AI_EMBEDDING_MODEL=qwen3.7-text-embedding
 ```
 
 如果你更习惯通过 shell 环境变量注入，也可以这样设置：
@@ -485,7 +486,8 @@ cp .env.example .env
 # vim .env
 # 必填：AI_BAILIAN_API_KEY=your_key_here
 # 必填：APP_AI_CONFIG_ENCRYPTION_KEY=your_random_long_secret
-# 可选：AI_MODEL=qwen3.5-flash   # 默认值为 qwen3.5-flash
+# 可选：AI_MODEL=qwen3.7-max
+# 可选：AI_EMBEDDING_MODEL=qwen3.7-text-embedding
 # 也可以在设置页维护 DashScope、Kimi、DeepSeek、GLM、LM Studio 等 Provider
 #
 # 面试参数配置（可选）：

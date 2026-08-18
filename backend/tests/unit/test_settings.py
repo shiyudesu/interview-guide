@@ -28,6 +28,8 @@ def test_existing_environment_names_are_supported() -> None:
     )
 
     assert settings.server_port == 28080
+    assert settings.ai_model == "qwen3.7-max"
+    assert settings.ai_embedding_model == "qwen3.7-text-embedding"
     assert settings.database_pool_size == 12
     assert settings.database_max_overflow == 3
     assert settings.postgres_db == "comparison"

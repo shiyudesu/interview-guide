@@ -47,7 +47,7 @@ def static_provider_seeds(settings: Settings) -> tuple[ProviderSeed, ...]:
             settings.ai_dashscope_base_url,
             settings.ai_bailian_api_key.get_secret_value(),
             settings.ai_model,
-            "text-embedding-v3",
+            settings.ai_embedding_model,
             1024,
             True,
         ),

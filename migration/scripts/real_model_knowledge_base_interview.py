@@ -22,6 +22,7 @@ CONTEXT = (
     "AOF 数据安全性更高但文件更大。外部模型调用不应放在长数据库事务内，"
     "应使用状态机、幂等任务和恢复机制保持结果一致。"
 )
+EMBEDDING_MODEL = os.getenv("AI_EMBEDDING_MODEL", "qwen3.7-text-embedding")
 
 
 @dataclass(frozen=True)
@@ -71,7 +72,7 @@ def embed_context(api_key: str) -> list[float]:
         "http://127.0.0.1:18090/proxy/https/dashscope.aliyuncs.com/compatible-mode/v1/embeddings",
         headers={"Authorization": f"Bearer {api_key}"},
         json={
-            "model": "text-embedding-v3",
+            "model": EMBEDDING_MODEL,
             "input": [CONTEXT],
             "dimensions": 1024,
         },

@@ -9,8 +9,13 @@ permissions:
 jobs:
   real-model:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     environment: real-model
+    env:
+      AI_EMBEDDING_MODEL: qwen3.7-text-embedding
+      AI_MODEL: qwen3.7-max
+      APP_VOICE_INTERVIEW_QWEN_ASR_MODEL: qwen3-asr-flash-realtime
+      APP_VOICE_INTERVIEW_QWEN_TTS_MODEL: qwen3-tts-flash-realtime
 
     steps:
       - uses: actions/checkout@v7

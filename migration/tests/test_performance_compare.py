@@ -16,6 +16,17 @@ SPEC.loader.exec_module(MODULE)
 
 
 class PerformanceCompareTest(unittest.TestCase):
+    def test_qwen37_max_cost_uses_versioned_official_price(self) -> None:
+        cost = MODULE.estimated_cost(
+            "qwen3.7-max",
+            {"inputTokens": 1_000_000, "outputTokens": 1_000_000},
+        )
+        self.assertEqual(6.601, cost["estimated"])
+        self.assertEqual(
+            "https://www.alibabacloud.com/help/en/model-studio/qwen3-7-max",
+            cost["pricing"]["source"],
+        )
+
     def test_summary_uses_median_p95_and_p99(self) -> None:
         samples = [
             {"elapsedMs": value, "model": "fixed", "response": {}} for value in (10, 20, 30, 40, 50)
@@ -36,7 +47,7 @@ class PerformanceCompareTest(unittest.TestCase):
                             "json": {
                                 "max_tokens": 1,
                                 "messages": [{"content": "Reply with OK only.", "role": "user"}],
-                                "model": "qwen3.5-flash",
+                                "model": "qwen3.7-max",
                             }
                         },
                         "correlationId": correlation_id,
