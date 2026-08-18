@@ -24,6 +24,7 @@ NO_RESULT_RESPONSE = (
 )
 MODEL_PROXY_CONTROL = "http://127.0.0.1:18090/__control"
 EMBEDDING_MODEL = os.getenv("AI_EMBEDDING_MODEL", "qwen3.7-text-embedding")
+FAULT_INJECTION_COUNT = 10
 
 
 @dataclass(frozen=True)
@@ -338,7 +339,7 @@ def capture_target(target: Target, knowledge_base_id: int) -> dict[str, Any]:
         rag_normal_text = rag_stream_text(rag_normal)
         normal_records = model_records()[before:]
 
-        configure_fault(3)
+        configure_fault(FAULT_INJECTION_COUNT)
         try:
             rag_error_response = client.post(
                 f"/api/rag-chat/sessions/{rag_session_id}/messages/stream",
@@ -414,6 +415,7 @@ def capture_target(target: Target, knowledge_base_id: int) -> dict[str, Any]:
         "ragMessageCount": rag_message_count,
         "requests": request_summaries(normal_records),
         "ragChat": {
+            "faultInjectionCount": FAULT_INJECTION_COUNT,
             "session": rag_session,
             "normal": rag_normal,
             "normalText": rag_normal_text,
