@@ -123,6 +123,7 @@ jobs:
             migration/reports/performance-provider-connectivity.json
             migration/reports/real-model-voice.json
             migration/reports/real-model-voice-evaluation.json
+            migration/reports/runtime/question-workers/
           if-no-files-found: ignore
 
       - name: Stop comparison workers

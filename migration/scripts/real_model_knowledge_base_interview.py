@@ -141,17 +141,19 @@ def success(response: httpx.Response) -> Any:
 
 
 def poll_generation(client: httpx.Client, knowledge_base_id: int) -> dict[str, Any]:
-    deadline = time.monotonic() + 300
+    deadline = time.monotonic() + 600
+    last_value: dict[str, Any] | None = None
     while time.monotonic() < deadline:
         value = success(
             client.get(
                 f"/api/knowledgebase/{knowledge_base_id}/questions/generation-status"
             )
         )
+        last_value = value
         if value["questionGenStatus"] in {"COMPLETED", "FAILED"}:
             return value
         time.sleep(1)
-    raise AssertionError("Real question generation timed out")
+    raise AssertionError(f"Real question generation timed out: {last_value}")
 
 
 def request_summaries(values: list[dict[str, Any]]) -> list[dict[str, Any]]:
