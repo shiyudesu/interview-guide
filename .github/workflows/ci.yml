@@ -125,7 +125,11 @@ jobs:
           TEST_S3_SECRET_KEY: minioadmin
         run: uv run pytest -m integration
       - name: Restore backend after destructive integration fixtures
-        run: docker compose up -d --force-recreate app worker scheduler --wait
+        run: |
+          docker compose exec -T postgres psql \
+            -U postgres -d interview_guide \
+            -c 'TRUNCATE TABLE llm_global_setting, llm_provider_config'
+          docker compose up -d --force-recreate app worker scheduler --wait
       - name: Run frontend against production backend
         working-directory: frontend
         env:
