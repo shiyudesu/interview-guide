@@ -33,6 +33,16 @@ class ModelRecordReaderTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 MODULE.read_jsonl_records(path)
 
+    def test_preserves_unicode_line_separator_inside_json_string(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "records.jsonl"
+            path.write_text('{"text":"before\u0085after"}\n', encoding="utf-8")
+
+            self.assertEqual(
+                [{"text": "before\u0085after"}],
+                MODULE.read_jsonl_records(path),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

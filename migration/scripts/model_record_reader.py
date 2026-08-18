@@ -9,7 +9,7 @@ def complete_jsonl_lines(path: Path) -> list[str]:
     if not path.is_file():
         return []
     document = path.read_text(encoding="utf-8")
-    lines = document.splitlines()
+    lines = document.split("\n")
     if lines and not document.endswith("\n"):
         try:
             json.loads(lines[-1])
