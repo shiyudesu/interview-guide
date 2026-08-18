@@ -2085,10 +2085,19 @@
     {
       "environmentReferences": [],
       "property": "services.postgres.image",
-      "rawValue": "pgvector/pgvector:pg16",
+      "rawValue": "pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782",
       "source": {
         "file": "docker-compose.dev.yml",
         "line": 8
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.platform",
+      "rawValue": "linux/amd64",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 9
       }
     },
     {
@@ -2097,7 +2106,7 @@
       "rawValue": "interview-postgres",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 9
+        "line": 10
       }
     },
     {
@@ -2112,7 +2121,7 @@
       "rawValue": "${POSTGRES_USER:-postgres}",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 11
+        "line": 12
       }
     },
     {
@@ -2127,7 +2136,7 @@
       "rawValue": "${POSTGRES_PASSWORD:-123456}",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 12
+        "line": 13
       }
     },
     {
@@ -2142,7 +2151,7 @@
       "rawValue": "${POSTGRES_DB:-interview_guide}",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 13
+        "line": 14
       }
     },
     {
@@ -2151,7 +2160,7 @@
       "rawValue": "[\"CMD-SHELL\", \"pg_isready -U postgres\"]",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 20
+        "line": 21
       }
     },
     {
@@ -2160,7 +2169,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 21
+        "line": 22
       }
     },
     {
@@ -2169,7 +2178,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 22
+        "line": 23
       }
     },
     {
@@ -2178,16 +2187,34 @@
       "rawValue": "5",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 23
+        "line": 24
       }
     },
     {
       "environmentReferences": [],
       "property": "services.redis.image",
-      "rawValue": "redis:7",
+      "rawValue": "redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 26
+        "line": 27
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.platform",
+      "rawValue": "linux/amd64",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 28
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.command",
+      "rawValue": "[\"redis-server\", \"--appendonly\", \"yes\"]",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 29
       }
     },
     {
@@ -2196,7 +2223,7 @@
       "rawValue": "interview-redis",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 27
+        "line": 30
       }
     },
     {
@@ -2205,7 +2232,7 @@
       "rawValue": "[\"CMD\", \"redis-cli\", \"ping\"]",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 33
+        "line": 36
       }
     },
     {
@@ -2214,7 +2241,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 34
+        "line": 37
       }
     },
     {
@@ -2223,7 +2250,7 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 35
+        "line": 38
       }
     },
     {
@@ -2232,16 +2259,25 @@
       "rawValue": "5",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 36
+        "line": 39
       }
     },
     {
       "environmentReferences": [],
       "property": "services.rustfs.image",
-      "rawValue": "rustfs/rustfs:latest",
+      "rawValue": "rustfs/rustfs@sha256:41fe89380f4120a337790c02af192c3fe7bb55c3edc2e6e9357b487b47c6ab21",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 39
+        "line": 42
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.rustfs.platform",
+      "rawValue": "linux/amd64",
+      "source": {
+        "file": "docker-compose.dev.yml",
+        "line": 43
       }
     },
     {
@@ -2250,7 +2286,7 @@
       "rawValue": "interview-rustfs",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 40
+        "line": 44
       }
     },
     {
@@ -2259,37 +2295,37 @@
       "rawValue": "[\"/data\"]",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 41
+        "line": 45
       }
     },
     {
       "environmentReferences": [
         {
-          "default": "-rustfsadmin",
-          "name": "RUSTFS_ACCESS_KEY",
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_ACCESS_KEY",
           "sensitive": true
         }
       ],
       "property": "services.rustfs.environment.RUSTFS_ACCESS_KEY",
-      "rawValue": "${RUSTFS_ACCESS_KEY:-rustfsadmin}",
+      "rawValue": "${APP_STORAGE_ACCESS_KEY:-minioadmin}",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 43
+        "line": 47
       }
     },
     {
       "environmentReferences": [
         {
-          "default": "-rustfsadmin",
-          "name": "RUSTFS_SECRET_KEY",
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_SECRET_KEY",
           "sensitive": true
         }
       ],
       "property": "services.rustfs.environment.RUSTFS_SECRET_KEY",
-      "rawValue": "${RUSTFS_SECRET_KEY:-rustfsadmin}",
+      "rawValue": "${APP_STORAGE_SECRET_KEY:-minioadmin}",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 44
+        "line": 48
       }
     },
     {
@@ -2298,7 +2334,7 @@
       "rawValue": "\"true\"",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 45
+        "line": 49
       }
     },
     {
@@ -2307,7 +2343,7 @@
       "rawValue": "[\"CMD\", \"/usr/bin/nc\", \"-z\", \"localhost\", \"9000\"]",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 53
+        "line": 57
       }
     },
     {
@@ -2316,7 +2352,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 54
+        "line": 58
       }
     },
     {
@@ -2325,7 +2361,7 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 55
+        "line": 59
       }
     },
     {
@@ -2334,16 +2370,661 @@
       "rawValue": "5",
       "source": {
         "file": "docker-compose.dev.yml",
-        "line": 56
+        "line": 60
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "x-backend-build",
+      "rawValue": "&backend-build",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 1
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "context",
+      "rawValue": ".",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 2
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "dockerfile",
+      "rawValue": "backend/Dockerfile",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 3
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "x-backend-environment",
+      "rawValue": "&backend-environment",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 5
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "POSTGRES_HOST",
+      "rawValue": "postgres",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 6
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "POSTGRES_PORT",
+      "rawValue": "5432",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 7
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-interview_guide",
+          "name": "POSTGRES_DB",
+          "sensitive": false
+        }
+      ],
+      "property": "POSTGRES_DB",
+      "rawValue": "${POSTGRES_DB:-interview_guide}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 8
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-postgres",
+          "name": "POSTGRES_USER",
+          "sensitive": false
+        }
+      ],
+      "property": "POSTGRES_USER",
+      "rawValue": "${POSTGRES_USER:-postgres}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 9
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-password",
+          "name": "POSTGRES_PASSWORD",
+          "sensitive": true
+        }
+      ],
+      "property": "POSTGRES_PASSWORD",
+      "rawValue": "${POSTGRES_PASSWORD:-password}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 10
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-10",
+          "name": "APP_DATABASE_POOL_SIZE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_DATABASE_POOL_SIZE",
+      "rawValue": "${APP_DATABASE_POOL_SIZE:-10}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 11
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-0",
+          "name": "APP_DATABASE_MAX_OVERFLOW",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_DATABASE_MAX_OVERFLOW",
+      "rawValue": "${APP_DATABASE_MAX_OVERFLOW:-0}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 12
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "REDIS_HOST",
+      "rawValue": "redis",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 13
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "REDIS_PORT",
+      "rawValue": "6379",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 14
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "APP_STORAGE_ENDPOINT",
+      "rawValue": "http://minio:9000",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 15
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_ACCESS_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "APP_STORAGE_ACCESS_KEY",
+      "rawValue": "${APP_STORAGE_ACCESS_KEY:-minioadmin}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 16
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_SECRET_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "APP_STORAGE_SECRET_KEY",
+      "rawValue": "${APP_STORAGE_SECRET_KEY:-minioadmin}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 17
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-interview-guide",
+          "name": "APP_STORAGE_BUCKET",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_STORAGE_BUCKET",
+      "rawValue": "${APP_STORAGE_BUCKET:-interview-guide}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 18
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-us-east-1",
+          "name": "APP_STORAGE_REGION",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_STORAGE_REGION",
+      "rawValue": "${APP_STORAGE_REGION:-us-east-1}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 19
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "APP_STORAGE_AUTO_CREATE_BUCKET",
+      "rawValue": "\"false\"",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 20
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "?APP_AI_CONFIG_ENCRYPTION_KEY is required",
+          "name": "APP_AI_CONFIG_ENCRYPTION_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "APP_AI_CONFIG_ENCRYPTION_KEY",
+      "rawValue": "${APP_AI_CONFIG_ENCRYPTION_KEY:?APP_AI_CONFIG_ENCRYPTION_KEY is required}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 21
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "AI_BAILIAN_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "AI_BAILIAN_API_KEY",
+      "rawValue": "${AI_BAILIAN_API_KEY:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 22
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-qwen3.5-flash",
+          "name": "AI_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "AI_MODEL",
+      "rawValue": "${AI_MODEL:-qwen3.5-flash}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 23
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-lm-studio",
+          "name": "PROVIDER_LMSTUDIO_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "PROVIDER_LMSTUDIO_API_KEY",
+      "rawValue": "${PROVIDER_LMSTUDIO_API_KEY:-lm-studio}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 24
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "PROVIDER_KIMI_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "PROVIDER_KIMI_API_KEY",
+      "rawValue": "${PROVIDER_KIMI_API_KEY:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 25
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-kimi-k2.6",
+          "name": "PROVIDER_KIMI_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "PROVIDER_KIMI_MODEL",
+      "rawValue": "${PROVIDER_KIMI_MODEL:-kimi-k2.6}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 26
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "PROVIDER_DEEPSEEK_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "PROVIDER_DEEPSEEK_API_KEY",
+      "rawValue": "${PROVIDER_DEEPSEEK_API_KEY:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 27
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-deepseek-v4-flash",
+          "name": "PROVIDER_DEEPSEEK_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "PROVIDER_DEEPSEEK_MODEL",
+      "rawValue": "${PROVIDER_DEEPSEEK_MODEL:-deepseek-v4-flash}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 28
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "PROVIDER_GLM_API_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "PROVIDER_GLM_API_KEY",
+      "rawValue": "${PROVIDER_GLM_API_KEY:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 29
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-glm-5",
+          "name": "PROVIDER_GLM_MODEL",
+          "sensitive": false
+        }
+      ],
+      "property": "PROVIDER_GLM_MODEL",
+      "rawValue": "${PROVIDER_GLM_MODEL:-glm-5}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 30
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-true",
+          "name": "APP_AI_RAG_REWRITE_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_REWRITE_ENABLED",
+      "rawValue": "${APP_AI_RAG_REWRITE_ENABLED:-true}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 31
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-4",
+          "name": "APP_AI_RAG_SHORT_QUERY_LENGTH",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_SHORT_QUERY_LENGTH",
+      "rawValue": "${APP_AI_RAG_SHORT_QUERY_LENGTH:-4}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 32
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-20",
+          "name": "APP_AI_RAG_TOPK_SHORT",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_TOPK_SHORT",
+      "rawValue": "${APP_AI_RAG_TOPK_SHORT:-20}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 33
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-12",
+          "name": "APP_AI_RAG_TOPK_MEDIUM",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_TOPK_MEDIUM",
+      "rawValue": "${APP_AI_RAG_TOPK_MEDIUM:-12}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 34
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-8",
+          "name": "APP_AI_RAG_TOPK_LONG",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_TOPK_LONG",
+      "rawValue": "${APP_AI_RAG_TOPK_LONG:-8}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 35
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-0.18",
+          "name": "APP_AI_RAG_MIN_SCORE_SHORT",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_MIN_SCORE_SHORT",
+      "rawValue": "${APP_AI_RAG_MIN_SCORE_SHORT:-0.18}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 36
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-0.28",
+          "name": "APP_AI_RAG_MIN_SCORE_DEFAULT",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_MIN_SCORE_DEFAULT",
+      "rawValue": "${APP_AI_RAG_MIN_SCORE_DEFAULT:-0.28}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 37
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-true",
+          "name": "APP_AI_RAG_HISTORY_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_HISTORY_ENABLED",
+      "rawValue": "${APP_AI_RAG_HISTORY_ENABLED:-true}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 38
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-10",
+          "name": "APP_AI_RAG_HISTORY_MAX_MESSAGES",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_AI_RAG_HISTORY_MAX_MESSAGES",
+      "rawValue": "${APP_AI_RAG_HISTORY_MAX_MESSAGES:-10}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 39
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-1",
+          "name": "APP_INTERVIEW_FOLLOW_UP_COUNT",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_INTERVIEW_FOLLOW_UP_COUNT",
+      "rawValue": "${APP_INTERVIEW_FOLLOW_UP_COUNT:-1}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 40
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-8",
+          "name": "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+      "rawValue": "${APP_INTERVIEW_EVALUATION_BATCH_SIZE:-8}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 41
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-http://localhost,http://localhost:5173",
+          "name": "CORS_ALLOWED_ORIGINS",
+          "sensitive": false
+        }
+      ],
+      "property": "CORS_ALLOWED_ORIGINS",
+      "rawValue": "${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:5173}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 42
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-INFO",
+          "name": "LOG_LEVEL",
+          "sensitive": false
+        }
+      ],
+      "property": "LOG_LEVEL",
+      "rawValue": "${LOG_LEVEL:-INFO}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 43
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-Asia/Shanghai",
+          "name": "TZ",
+          "sensitive": false
+        }
+      ],
+      "property": "TZ",
+      "rawValue": "${TZ:-Asia/Shanghai}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 44
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "x-backend-service",
+      "rawValue": "&backend-service",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 46
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-local",
+          "name": "INTERVIEW_GUIDE_IMAGE_TAG",
+          "sensitive": false
+        }
+      ],
+      "property": "image",
+      "rawValue": "interview-guide-python:${INTERVIEW_GUIDE_IMAGE_TAG:-local}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 47
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "build",
+      "rawValue": "*backend-build",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 48
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "environment",
+      "rawValue": "*backend-environment",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 49
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "restart",
+      "rawValue": "unless-stopped",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 50
       }
     },
     {
       "environmentReferences": [],
       "property": "services.postgres.image",
-      "rawValue": "pgvector/pgvector:pg16",
+      "rawValue": "pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782",
       "source": {
         "file": "docker-compose.yml",
-        "line": 15
+        "line": 54
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.platform",
+      "rawValue": "linux/amd64",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 55
       }
     },
     {
@@ -2352,16 +3033,22 @@
       "rawValue": "interview-postgres",
       "source": {
         "file": "docker-compose.yml",
-        "line": 16
+        "line": 56
       }
     },
     {
-      "environmentReferences": [],
-      "property": "services.postgres.environment.POSTGRES_USER",
-      "rawValue": "postgres",
+      "environmentReferences": [
+        {
+          "default": "-interview_guide",
+          "name": "POSTGRES_DB",
+          "sensitive": false
+        }
+      ],
+      "property": "services.postgres.environment.POSTGRES_DB",
+      "rawValue": "${POSTGRES_DB:-interview_guide}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 18
+        "line": 58
       }
     },
     {
@@ -2376,25 +3063,22 @@
       "rawValue": "${POSTGRES_PASSWORD:-password}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 19
+        "line": 59
       }
     },
     {
-      "environmentReferences": [],
-      "property": "services.postgres.environment.POSTGRES_DB",
-      "rawValue": "interview_guide",
+      "environmentReferences": [
+        {
+          "default": "-postgres",
+          "name": "POSTGRES_USER",
+          "sensitive": false
+        }
+      ],
+      "property": "services.postgres.environment.POSTGRES_USER",
+      "rawValue": "${POSTGRES_USER:-postgres}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 20
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.postgres.healthcheck.test",
-      "rawValue": "[\"CMD-SHELL\", \"pg_isready -U postgres\"]",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 32
+        "line": 60
       }
     },
     {
@@ -2403,7 +3087,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 33
+        "line": 70
       }
     },
     {
@@ -2412,25 +3096,43 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 34
+        "line": 71
       }
     },
     {
       "environmentReferences": [],
       "property": "services.postgres.healthcheck.retries",
-      "rawValue": "5",
+      "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 35
+        "line": 72
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.postgres.restart",
+      "rawValue": "unless-stopped",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 73
       }
     },
     {
       "environmentReferences": [],
       "property": "services.redis.image",
-      "rawValue": "redis:7",
+      "rawValue": "redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635",
       "source": {
         "file": "docker-compose.yml",
-        "line": 48
+        "line": 76
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.platform",
+      "rawValue": "linux/amd64",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 77
       }
     },
     {
@@ -2439,7 +3141,16 @@
       "rawValue": "interview-redis",
       "source": {
         "file": "docker-compose.yml",
-        "line": 49
+        "line": 78
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.command",
+      "rawValue": "[\"redis-server\", \"--appendonly\", \"yes\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 79
       }
     },
     {
@@ -2448,7 +3159,7 @@
       "rawValue": "[\"CMD\", \"redis-cli\", \"ping\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 55
+        "line": 85
       }
     },
     {
@@ -2457,7 +3168,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 56
+        "line": 86
       }
     },
     {
@@ -2466,25 +3177,43 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 57
+        "line": 87
       }
     },
     {
       "environmentReferences": [],
       "property": "services.redis.healthcheck.retries",
-      "rawValue": "5",
+      "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 58
+        "line": 88
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.redis.restart",
+      "rawValue": "unless-stopped",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 89
       }
     },
     {
       "environmentReferences": [],
       "property": "services.minio.image",
-      "rawValue": "minio/minio",
+      "rawValue": "minio/minio:RELEASE.2024-12-18T13-15-44Z@sha256:34c8e2f52a5984492555427fee07254c80036bdb7079bb91679232abd7a4fa20",
       "source": {
         "file": "docker-compose.yml",
-        "line": 73
+        "line": 92
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.platform",
+      "rawValue": "linux/amd64",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 93
       }
     },
     {
@@ -2493,34 +3222,46 @@
       "rawValue": "interview-minio",
       "source": {
         "file": "docker-compose.yml",
-        "line": 74
+        "line": 94
       }
     },
     {
       "environmentReferences": [],
       "property": "services.minio.command",
-      "rawValue": "server /data --console-address \":9001\"",
+      "rawValue": "[\"server\", \"/data\", \"--console-address\", \":9001\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 76
+        "line": 95
       }
     },
     {
-      "environmentReferences": [],
-      "property": "services.minio.environment.MINIO_ROOT_USER",
-      "rawValue": "minioadmin",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 78
-      }
-    },
-    {
-      "environmentReferences": [],
+      "environmentReferences": [
+        {
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_SECRET_KEY",
+          "sensitive": true
+        }
+      ],
       "property": "services.minio.environment.MINIO_ROOT_PASSWORD",
-      "rawValue": "minioadmin",
+      "rawValue": "${APP_STORAGE_SECRET_KEY:-minioadmin}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 79
+        "line": 97
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_ACCESS_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "services.minio.environment.MINIO_ROOT_USER",
+      "rawValue": "${APP_STORAGE_ACCESS_KEY:-minioadmin}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 98
       }
     },
     {
@@ -2529,7 +3270,7 @@
       "rawValue": "[\"CMD\", \"curl\", \"-f\", \"http://localhost:9000/minio/health/live\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 86
+        "line": 105
       }
     },
     {
@@ -2538,7 +3279,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 87
+        "line": 106
       }
     },
     {
@@ -2547,52 +3288,148 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 88
+        "line": 107
       }
     },
     {
       "environmentReferences": [],
       "property": "services.minio.healthcheck.retries",
-      "rawValue": "5",
+      "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 89
+        "line": 108
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.minio.restart",
+      "rawValue": "unless-stopped",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 109
       }
     },
     {
       "environmentReferences": [],
       "property": "services.createbuckets.image",
-      "rawValue": "minio/mc",
+      "rawValue": "minio/mc:RELEASE.2024-11-21T17-21-54Z@sha256:771f5ad7925a6b5e069786d8e847a292de320f1e3e3203647e29f47ec9b3d93b",
       "source": {
         "file": "docker-compose.yml",
-        "line": 103
+        "line": 112
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.createbuckets.platform",
+      "rawValue": "linux/amd64",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 113
       }
     },
     {
       "environmentReferences": [],
       "property": "services.createbuckets.depends_on.minio.condition",
-      "rawValue": "service_healthy # 必须等待 MinIO 服务健康（不仅仅是启动）",
+      "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 106
+        "line": 116
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-interview-guide",
+          "name": "APP_STORAGE_BUCKET",
+          "sensitive": false
+        }
+      ],
+      "property": "services.createbuckets.environment.BUCKET",
+      "rawValue": "${APP_STORAGE_BUCKET:-interview-guide}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 118
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_SECRET_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "services.createbuckets.environment.MINIO_ROOT_PASSWORD",
+      "rawValue": "${APP_STORAGE_SECRET_KEY:-minioadmin}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 119
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-minioadmin",
+          "name": "APP_STORAGE_ACCESS_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "services.createbuckets.environment.MINIO_ROOT_USER",
+      "rawValue": "${APP_STORAGE_ACCESS_KEY:-minioadmin}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 120
       }
     },
     {
       "environmentReferences": [],
-      "property": "services.app.build.context",
-      "rawValue": ".",
+      "property": "services.migrate.container_name",
+      "rawValue": "interview-migrate",
       "source": {
         "file": "docker-compose.yml",
-        "line": 128
+        "line": 132
       }
     },
     {
       "environmentReferences": [],
-      "property": "services.app.build.dockerfile",
-      "rawValue": "app/Dockerfile",
+      "property": "services.migrate.command",
+      "rawValue": "[\"interview-guide-migrate\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 129
+        "line": 133
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-true",
+          "name": "APP_MIGRATION_BASELINE_FLYWAY",
+          "sensitive": false
+        }
+      ],
+      "property": "services.migrate.environment.APP_MIGRATION_BASELINE_FLYWAY",
+      "rawValue": "${APP_MIGRATION_BASELINE_FLYWAY:-true}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 136
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.migrate.depends_on.postgres.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 139
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.migrate.restart",
+      "rawValue": "\"no\"",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 140
       }
     },
     {
@@ -2601,16 +3438,34 @@
       "rawValue": "interview-app",
       "source": {
         "file": "docker-compose.yml",
-        "line": 130
+        "line": 144
       }
     },
     {
       "environmentReferences": [],
-      "property": "services.app.depends_on.postgres.condition",
-      "rawValue": "service_healthy",
+      "property": "services.app.command",
+      "rawValue": "[\"interview-guide-api\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 134
+        "line": 145
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.depends_on.createbuckets.condition",
+      "rawValue": "service_completed_successfully",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 148
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.depends_on.migrate.condition",
+      "rawValue": "service_completed_successfully",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 150
       }
     },
     {
@@ -2619,223 +3474,166 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 136
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.depends_on.minio.condition",
-      "rawValue": "service_healthy",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 138
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.depends_on.createbuckets.condition",
-      "rawValue": "service_completed_successfully # 等待初始化任务完成",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 140
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.POSTGRES_HOST",
-      "rawValue": "postgres",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 144
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.POSTGRES_PORT",
-      "rawValue": "5432",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 145
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.POSTGRES_DB",
-      "rawValue": "interview_guide",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 146
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.POSTGRES_USER",
-      "rawValue": "postgres",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 147
-      }
-    },
-    {
-      "environmentReferences": [
-        {
-          "default": "-password",
-          "name": "POSTGRES_PASSWORD",
-          "sensitive": true
-        }
-      ],
-      "property": "services.app.environment.POSTGRES_PASSWORD",
-      "rawValue": "${POSTGRES_PASSWORD:-password}",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 148
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.REDIS_HOST",
-      "rawValue": "redis",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 151
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.REDIS_PORT",
-      "rawValue": "6379",
-      "source": {
-        "file": "docker-compose.yml",
         "line": 152
       }
     },
     {
       "environmentReferences": [],
-      "property": "services.app.environment.APP_STORAGE_ENDPOINT",
-      "rawValue": "http://minio:9000",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 156
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.APP_STORAGE_ACCESS_KEY",
-      "rawValue": "minioadmin",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 157
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.APP_STORAGE_SECRET_KEY",
-      "rawValue": "minioadmin",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 158
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.APP_STORAGE_BUCKET",
-      "rawValue": "interview-guide",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 159
-      }
-    },
-    {
-      "environmentReferences": [],
-      "property": "services.app.environment.APP_STORAGE_REGION",
-      "rawValue": "us-east-1",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 160
-      }
-    },
-    {
-      "environmentReferences": [
-        {
-          "default": null,
-          "name": "AI_BAILIAN_API_KEY",
-          "sensitive": true
-        }
-      ],
-      "property": "services.app.environment.AI_BAILIAN_API_KEY",
-      "rawValue": "${AI_BAILIAN_API_KEY}",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 164
-      }
-    },
-    {
-      "environmentReferences": [
-        {
-          "default": "-qwen3.5-flash",
-          "name": "AI_MODEL",
-          "sensitive": false
-        }
-      ],
-      "property": "services.app.environment.AI_MODEL",
-      "rawValue": "${AI_MODEL:-qwen3.5-flash}",
-      "source": {
-        "file": "docker-compose.yml",
-        "line": 165
-      }
-    },
-    {
-      "environmentReferences": [
-        {
-          "default": null,
-          "name": "APP_AI_CONFIG_ENCRYPTION_KEY",
-          "sensitive": true
-        }
-      ],
-      "property": "services.app.environment.APP_AI_CONFIG_ENCRYPTION_KEY",
-      "rawValue": "${APP_AI_CONFIG_ENCRYPTION_KEY}",
+      "property": "services.app.healthcheck.interval",
+      "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
         "line": 166
       }
     },
     {
-      "environmentReferences": [
-        {
-          "default": "-1",
-          "name": "APP_INTERVIEW_FOLLOW_UP_COUNT",
-          "sensitive": false
-        }
-      ],
-      "property": "services.app.environment.APP_INTERVIEW_FOLLOW_UP_COUNT",
-      "rawValue": "${APP_INTERVIEW_FOLLOW_UP_COUNT:-1}",
+      "environmentReferences": [],
+      "property": "services.app.healthcheck.timeout",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 167
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.healthcheck.retries",
+      "rawValue": "24",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 168
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.app.healthcheck.start_period",
+      "rawValue": "10s",
       "source": {
         "file": "docker-compose.yml",
         "line": 169
       }
     },
     {
-      "environmentReferences": [
-        {
-          "default": "-8",
-          "name": "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
-          "sensitive": false
-        }
-      ],
-      "property": "services.app.environment.APP_INTERVIEW_EVALUATION_BATCH_SIZE",
-      "rawValue": "${APP_INTERVIEW_EVALUATION_BATCH_SIZE:-8}",
+      "environmentReferences": [],
+      "property": "services.worker.container_name",
+      "rawValue": "interview-worker",
       "source": {
         "file": "docker-compose.yml",
-        "line": 170
+        "line": 173
       }
     },
     {
       "environmentReferences": [],
-      "property": "services.frontend.build",
+      "property": "services.worker.command",
+      "rawValue": "[\"interview-guide-worker\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 174
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.worker.depends_on.createbuckets.condition",
+      "rawValue": "service_completed_successfully",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 177
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.worker.depends_on.migrate.condition",
+      "rawValue": "service_completed_successfully",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 179
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.worker.depends_on.redis.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 181
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.scheduler.container_name",
+      "rawValue": "interview-scheduler",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 185
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.scheduler.command",
+      "rawValue": "[\"interview-guide-scheduler\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 186
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.scheduler.depends_on.createbuckets.condition",
+      "rawValue": "service_completed_successfully",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 189
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.scheduler.depends_on.migrate.condition",
+      "rawValue": "service_completed_successfully",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 191
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.scheduler.depends_on.redis.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 193
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.frontend.build.context",
       "rawValue": "./frontend",
       "source": {
         "file": "docker-compose.yml",
-        "line": 182
+        "line": 197
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.frontend.build.dockerfile",
+      "rawValue": "Dockerfile",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 198
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-local",
+          "name": "INTERVIEW_GUIDE_IMAGE_TAG",
+          "sensitive": false
+        }
+      ],
+      "property": "services.frontend.image",
+      "rawValue": "interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-local}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 199
       }
     },
     {
@@ -2844,7 +3642,25 @@
       "rawValue": "interview-frontend",
       "source": {
         "file": "docker-compose.yml",
-        "line": 183
+        "line": 200
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.frontend.depends_on.app.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 203
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.frontend.restart",
+      "rawValue": "unless-stopped",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 206
       }
     }
   ],
@@ -3012,7 +3828,7 @@
       }
     },
     {
-      "default": "rustfsadmin",
+      "default": "minioadmin",
       "name": "APP_STORAGE_ACCESS_KEY",
       "sensitive": true,
       "source": {
@@ -3021,7 +3837,7 @@
       }
     },
     {
-      "default": "rustfsadmin",
+      "default": "minioadmin",
       "name": "APP_STORAGE_SECRET_KEY",
       "sensitive": true,
       "source": {
@@ -3039,17 +3855,35 @@
       }
     },
     {
-      "default": "qwen3.5-flash",
-      "name": "AI_MODEL",
+      "default": "9000",
+      "name": "APP_STORAGE_PORT",
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 58
+        "line": 56
       }
     },
     {
-      "default": "true",
-      "name": "APP_AI_RAG_REWRITE_ENABLED",
+      "default": "9001",
+      "name": "APP_STORAGE_CONSOLE_PORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 57
+      }
+    },
+    {
+      "default": "8080",
+      "name": "SERVER_PORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 60
+      }
+    },
+    {
+      "default": "80",
+      "name": "FRONTEND_PORT",
       "sensitive": false,
       "source": {
         "file": ".env.example",
@@ -3057,26 +3891,8 @@
       }
     },
     {
-      "default": "4",
-      "name": "APP_AI_RAG_SHORT_QUERY_LENGTH",
-      "sensitive": false,
-      "source": {
-        "file": ".env.example",
-        "line": 62
-      }
-    },
-    {
-      "default": "20",
-      "name": "APP_AI_RAG_TOPK_SHORT",
-      "sensitive": false,
-      "source": {
-        "file": ".env.example",
-        "line": 63
-      }
-    },
-    {
-      "default": "12",
-      "name": "APP_AI_RAG_TOPK_MEDIUM",
+      "default": "true",
+      "name": "APP_MIGRATION_BASELINE_FLYWAY",
       "sensitive": false,
       "source": {
         "file": ".env.example",
@@ -3084,26 +3900,8 @@
       }
     },
     {
-      "default": "8",
-      "name": "APP_AI_RAG_TOPK_LONG",
-      "sensitive": false,
-      "source": {
-        "file": ".env.example",
-        "line": 65
-      }
-    },
-    {
-      "default": "0.18",
-      "name": "APP_AI_RAG_MIN_SCORE_SHORT",
-      "sensitive": false,
-      "source": {
-        "file": ".env.example",
-        "line": 66
-      }
-    },
-    {
-      "default": "0.28",
-      "name": "APP_AI_RAG_MIN_SCORE_DEFAULT",
+      "default": "qwen3.5-flash",
+      "name": "AI_MODEL",
       "sensitive": false,
       "source": {
         "file": ".env.example",
@@ -3112,11 +3910,74 @@
     },
     {
       "default": "true",
+      "name": "APP_AI_RAG_REWRITE_ENABLED",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 70
+      }
+    },
+    {
+      "default": "4",
+      "name": "APP_AI_RAG_SHORT_QUERY_LENGTH",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 71
+      }
+    },
+    {
+      "default": "20",
+      "name": "APP_AI_RAG_TOPK_SHORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 72
+      }
+    },
+    {
+      "default": "12",
+      "name": "APP_AI_RAG_TOPK_MEDIUM",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 73
+      }
+    },
+    {
+      "default": "8",
+      "name": "APP_AI_RAG_TOPK_LONG",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 74
+      }
+    },
+    {
+      "default": "0.18",
+      "name": "APP_AI_RAG_MIN_SCORE_SHORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 75
+      }
+    },
+    {
+      "default": "0.28",
+      "name": "APP_AI_RAG_MIN_SCORE_DEFAULT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 76
+      }
+    },
+    {
+      "default": "true",
       "name": "APP_AI_RAG_HISTORY_ENABLED",
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 68
+        "line": 77
       }
     },
     {
@@ -3125,7 +3986,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 69
+        "line": 78
       }
     }
   ],
@@ -3196,9 +4057,10 @@
     "APP_VOICE_TTS_TIMEOUT_SECONDS",
     "APP_VOICE_USER_UTTERANCE_DEBOUNCE_MS",
     "CORS_ALLOWED_ORIGINS",
+    "INTERVIEW_GUIDE_IMAGE_TAG",
+    "LOG_LEVEL",
     "PROVIDER_LMSTUDIO_API_KEY",
-    "RUSTFS_ACCESS_KEY",
-    "RUSTFS_SECRET_KEY",
+    "TZ",
     "java.io.tmpdir"
   ],
   "propertyBindings": [
@@ -3293,9 +4155,9 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "configurationValueCount": 244,
-    "envExampleCount": 31,
-    "envReferencedButUndocumentedCount": 70,
+    "configurationValueCount": 310,
+    "envExampleCount": 36,
+    "envReferencedButUndocumentedCount": 71,
     "propertyBindingCount": 11
   },
   "valueInjections": []

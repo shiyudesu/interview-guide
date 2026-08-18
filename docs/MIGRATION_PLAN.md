@@ -1473,6 +1473,16 @@ baseline、peak 和末段稳定中位数，并检查 Python 稳定内存不超�
 
 ### 阶段 8：正式切换和 Java 清理
 
+当前实施状态：
+
+- 已创建并推送 `pre-python-switch` tag。
+- 已归档 Java 运行镜像、脱敏配置和新旧对比报告。
+- 已从空 comparison volumes 演练 Java 恢复。
+- 已在真实 Flyway schema 上连续运行两次 Python Migrate：首次只写入 Alembic baseline，
+  第二次无 DDL，随后 schema 比较零差异。
+- 生产 Compose 已改为先运行 Migrate，再启动同一 Python 镜像的 API、Worker 和 Scheduler；
+  服务名 `app` 和对外端口 `8080` 保持不变。
+
 正式切换前：
 
 - 保存 `pre-python-switch` Git tag。

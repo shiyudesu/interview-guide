@@ -12,6 +12,11 @@ from interview_guide.common.db.models import (
     KnowledgeBase,
     VectorStore,
 )
+from interview_guide.migrate import (
+    EXPECTED_BUSINESS_TABLES,
+    EXPECTED_FLYWAY_VERSIONS,
+    should_stamp_flyway_schema,
+)
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
@@ -75,3 +80,42 @@ def test_identity_vector_and_added_columns_match_flyway() -> None:
     knowledge_base_columns = KnowledgeBase.__table__.c
     assert knowledge_base_columns.question_gen_status.server_default is not None
     assert knowledge_base_columns.question_gen_saved_count.nullable is False
+
+
+def test_existing_accepted_flyway_schema_is_stamped_only_when_enabled() -> None:
+    assert should_stamp_flyway_schema(
+        alembic_exists=False,
+        flyway_exists=True,
+        flyway_versions=EXPECTED_FLYWAY_VERSIONS,
+        business_tables=EXPECTED_BUSINESS_TABLES,
+        baseline_enabled=True,
+    )
+
+
+def test_existing_flyway_schema_rejects_missing_acceptance_or_drift() -> None:
+    import pytest
+
+    with pytest.raises(RuntimeError, match="APP_MIGRATION_BASELINE_FLYWAY"):
+        should_stamp_flyway_schema(
+            alembic_exists=False,
+            flyway_exists=True,
+            flyway_versions=EXPECTED_FLYWAY_VERSIONS,
+            business_tables=EXPECTED_BUSINESS_TABLES,
+            baseline_enabled=False,
+        )
+    with pytest.raises(RuntimeError, match="history does not match"):
+        should_stamp_flyway_schema(
+            alembic_exists=False,
+            flyway_exists=True,
+            flyway_versions=frozenset({"1"}),
+            business_tables=EXPECTED_BUSINESS_TABLES,
+            baseline_enabled=True,
+        )
+    with pytest.raises(RuntimeError, match="missing required"):
+        should_stamp_flyway_schema(
+            alembic_exists=False,
+            flyway_exists=True,
+            flyway_versions=EXPECTED_FLYWAY_VERSIONS,
+            business_tables=frozenset(),
+            baseline_enabled=True,
+        )

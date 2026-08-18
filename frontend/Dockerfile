@@ -2,7 +2,7 @@
 # 第一阶段：构建环境 (Builder Stage)
 # 作用：使用 Node.js 环境来安装依赖并编译前端代码
 # ==============================================================================
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 # 1. 优先复制依赖定义文件
@@ -11,22 +11,21 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # 2. 安装依赖
-# npm install -g pnpm: 全局安装 pnpm 包管理器
-# pnpm install: 安装所有依赖（包括 devDependencies，构建需要 TypeScript、Vite 等）
-# 注意：不使用 --prod 标志，因为构建阶段需要完整的开发环境
-RUN npm install -g pnpm && pnpm install
+RUN corepack enable \
+    && corepack prepare pnpm@10.26.2 --activate \
+    && pnpm install --frozen-lockfile
 
 # 3. 复制源代码并构建
 COPY . .
 # 执行构建命令 (vite build)，生成的静态文件会存放在 /app/dist 目录
-RUN pnpm build
+RUN pnpm run build
 
 # ==============================================================================
 # 第二阶段：生产环境 (Production Stage)
 # 作用：使用 Nginx 来托管构建好的静态文件 (HTML/CSS/JS)
 # 区别：后端运行需要 JRE，前端运行只需要一个 Web 服务器（如 Nginx）
 # ==============================================================================
-FROM nginx:alpine
+FROM nginx:1.27.4-alpine
 
 # 从第一阶段 (builder) 复制构建产物 (dist 目录) 到 Nginx 的默认服务目录
 COPY --from=builder /app/dist /usr/share/nginx/html

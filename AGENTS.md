@@ -2,13 +2,14 @@
 
 ## 项目状态
 
-本仓库正在把后端从 Java/Spring 迁移到 Python/FastAPI。
+本仓库已进入 Python/FastAPI 正式切换阶段。
 
 - `docs/MIGRATION_PLAN.md` 是完整迁移要求，开始迁移任务前必须先读相关章节。
-- `app/` 是当前 Java 实现，也是迁移期间的新旧行为对照。
-- `backend/` 是目标 Python 后端。
+- `app/` 是切换前 Java 行为基线和临时回滚版本。
+- `backend/` 是生产 Python 后端。
 - `frontend/` 继续使用现有 React 代码，迁移不能要求前端改变业务接口。
-- Java、Gradle、Flyway 和 JVM 文件只能在迁移计划中的全部检查通过后删除。
+- 生产 `docker-compose.yml` 使用 Python Migrate/API/Worker/Scheduler。
+- Java、Gradle、Flyway 和 JVM 文件只能在切换后连续两次完整 CI 与本地 Compose 全流程通过后删除。
 - 迁移任务只替换技术实现，不能顺手修复、重构或重新设计现有业务行为。
 
 发现 Java 代码、前端调用和文档不一致时，先保存实际运行结果并记录问题，不能自行选择一个
@@ -97,7 +98,7 @@ boto3、ReportLab、libmagic 和文档解析等阻塞操作不能直接运行在
 
 ```text
 app/                    当前 Java 行为参考
-backend/                目标 Python 后端
+backend/                生产 Python 后端
 frontend/               现有 React 前端
 docs/MIGRATION_PLAN.md  完整迁移要求
 migration/              新旧对比脚本、清单、样本和报告
@@ -131,6 +132,14 @@ docker compose -f docker-compose.dev.yml up -d
 ./gradlew :app:compileJava
 ./gradlew :app:test --no-daemon
 ./gradlew :app:bootRun
+```
+
+生产 Compose：
+
+```bash
+docker compose up -d --build
+docker compose ps
+docker compose logs migrate app worker scheduler
 ```
 
 迁移阶段 0 清单：

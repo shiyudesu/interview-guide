@@ -19,6 +19,7 @@ RUN uv sync --frozen --no-dev
 FROM --platform=linux/amd64 python:3.13.13-slim-bookworm@sha256:f576b530293e74140ea91d262232648d5c4f45640a95ec447757701bfcacf034 AS runtime
 
 ENV PATH=/opt/venv/bin:$PATH \
+    PYTHONPATH=/app/src \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 

@@ -2,8 +2,8 @@
 
 **智能 AI 面试官平台** - 基于大语言模型的简历分析、模拟面试和 RAG 知识库系统
 
-[![Java](https://img.shields.io/badge/Java-25-orange?logo=openjdk)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.3-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-336791?logo=postgresql)](https://www.postgresql.org/)
@@ -20,9 +20,9 @@ InterviewGuide 是一个集成了简历分析、模拟面试（文字 + 语音�
 
 ## Python 后端迁移
 
-仓库正在按 [`docs/MIGRATION_PLAN.md`](docs/MIGRATION_PLAN.md) 将 Java/Spring 后端迁移到
-Python/FastAPI。迁移期间 `app/` 继续作为行为基线，前端接口不变。阶段 0 清单通过以下命令
-生成并由 CI 检查是否与源码同步：
+生产 Compose 已切换为 Python/FastAPI，使用同一镜像分别启动 Migrate、API、Worker 和
+Scheduler。`app/` 暂时保留为 Java 行为基线和回滚版本；满足切换后连续两次完整 CI 门槛前
+不会删除。前端业务接口保持不变。
 
 ```bash
 ./migration/scripts/generate-manifests.sh
@@ -113,20 +113,17 @@ docker build -f Dockerfile -t interview-guide-python ..
 
 | 技术                  | 版本  | 说明                          |
 | --------------------- | ----- | ----------------------------- |
-| Spring Boot           | 4.1.0 | 应用框架                      |
-| Java                  | 25    | 开发语言（虚拟线程）          |
-| Spring AI             | 2.0.0 | AI 集成框架、OpenAI 兼容模型接入 |
-| Spring AI Agent Utils | 0.10.0 | Skill 资源加载、Advisor 能力扩展 |
-| PostgreSQL + pgvector | 14+   | 关系数据库 + 向量存储（Compose 默认 PG16） |
-| Redis + Redisson      | 6+ / 4.0.0 | 缓存 + 消息队列（Stream） |
-| Apache Tika           | 2.9.2 | 文档解析                      |
-| iText 8               | 8.0.5 | PDF 导出                      |
-| MapStruct             | 1.6.3 | 对象映射                      |
-| SpringDoc OpenAPI     | 3.0.2 | API 接口文档                  |
-| DashScope SDK         | 2.22.7 | 语音识别/合成（Qwen3 ASR/TTS）|
-| AWS S3 SDK            | 2.29.51 | S3 兼容对象存储（MinIO/RustFS）|
-| WebSocket             | -     | 语音面试实时双向通信          |
-| Gradle                | 9.6.1 | 构建工具                      |
+| Python                | 3.13.13 | 开发语言                    |
+| FastAPI + Uvicorn     | 0.141 / 0.52 | REST、SSE 和 WebSocket |
+| Pydantic              | 2.x | API Schema 和配置              |
+| SQLAlchemy + psycopg  | 2.0 / 3 | PostgreSQL 异步访问          |
+| Alembic               | 1.19 | 数据库升级                      |
+| LangGraph / LangChain | - | 多步骤 AI 编排和 OpenAI 兼容接入 |
+| redis-py asyncio      | 8.1 | 缓存、限流和 Redis Stream       |
+| pdfminer.six / ReportLab | - | 文档解析和 PDF 导出          |
+| boto3                 | 1.43 | S3 兼容对象存储                 |
+| APScheduler           | 3.11 | 单实例恢复与过期任务             |
+| uv                    | 0.11.14 | 依赖和运行管理                |
 
 技术选型常见问题解答：
 
@@ -134,7 +131,8 @@ docker build -f Dockerfile -t interview-guide-python ..
 2. 为什么引入 Redis？
    - Redis 替代 `ConcurrentHashMap` 实现面试会话的缓存。
    - 基于 Redis Stream 实现简历分析、知识库向量化等场景的异步（还能解耦，分析和向量化可以使用其他编程语言来做）。不使用 [Kafka](https://javaguide.cn/high-performance/message-queue/kafka-questions-01.html) 这类成熟的消息队列，也是不想引入太多组件。
-3. 构建工具为什么选择 Gradle？个人更喜欢用 Gradle，也写过相关的文章：[Gradle核心概念总结](https://javaguide.cn/tools/gradle/gradle-core-concepts.html)。
+3. 为什么拆分 API、Worker 和 Scheduler？API 保持单 worker 以维护语音连接状态，五类 Redis
+   Stream 由独立 Worker 顺序消费，恢复和过期任务由单实例 Scheduler 处理。
 
 ### 前端技术
 
@@ -298,36 +296,19 @@ Skill 出题 + JD 解析：
 
 ```
 interview-guide/
-├── app/                              # 后端应用
-│   ├── src/main/java/interview/guide/
-│   │   ├── App.java                  # 主启动类
-│   │   ├── common/                   # 通用基础能力
-│   │   │   ├── ai/                   # LLM Provider、结构化输出、Prompt 安全
-│   │   │   ├── annotation/           # @RateLimit 可重复限流注解
-│   │   │   ├── aspect/               # RateLimitAspect + Redis Lua 限流
-│   │   │   ├── async/                # Redis Stream 生产者/消费者模板
-│   │   │   ├── config/               # CORS、S3、OpenAPI、Jackson 等配置
-│   │   │   ├── evaluation/           # 文字/语音共用的统一评估引擎
-│   │   │   ├── exception/            # 业务异常与全局异常处理
-│   │   │   └── result/               # 统一响应 Result<T>
-│   │   ├── infrastructure/           # 基础设施
-│   │   │   ├── export/               # PDF 导出
-│   │   │   ├── file/                 # 文件解析、校验、清洗、S3 存储
-│   │   │   ├── mapper/               # MapStruct 映射器
-│   │   │   └── redis/                # RedisService、面试会话缓存
-│   │   └── modules/                  # 业务模块
-│   │       ├── interview/            # 模拟面试模块
-│   │       ├── interviewschedule/    # 面试安排模块
-│   │       ├── knowledgebase/        # 知识库模块
-│   │       ├── llmprovider/          # 多模型 Provider 与语音配置
-│   │       ├── resume/               # 简历模块
-│   │       └── voiceinterview/       # 语音面试模块
-│   └── src/main/resources/
-│       ├── application.yml           # 应用配置
-│       ├── prompts/                  # AI 提示词模板（StringTemplate）
-│       ├── scripts/                  # Redis Lua 脚本
-│       ├── skills/                   # 面试 Skill 定义和参考题库
-│       └── voice-interview-opening.yml # 语音面试开场白配置
+├── backend/                           # 生产 Python/FastAPI 后端
+│   ├── src/interview_guide/
+│   │   ├── common/                    # 响应、配置、DB、Redis、AI、日志
+│   │   ├── infrastructure/            # 文档、PDF、对象存储
+│   │   ├── modules/                   # 业务模块
+│   │   ├── main.py                    # API 入口
+│   │   ├── worker.py                  # 五类 Redis Stream Worker
+│   │   ├── scheduler.py               # 单实例恢复与过期任务
+│   │   └── migrate.py                 # Alembic Migrate 入口
+│   ├── resources/                     # Prompt、Skill、字体和脚本
+│   ├── alembic/                       # 数据库升级
+│   └── pyproject.toml
+├── app/                               # 切换前 Java 行为基线和回滚版本
 │
 ├── frontend/                         # 前端应用
 │   ├── src/
@@ -353,29 +334,32 @@ interview-guide/
 
 | 依赖          | 版本 | 必需 | 说明                                     |
 | ------------- | ---- | ---- | ---------------------------------------- |
-| JDK           | 25   | 是   | 开发语言                                 |
-| Node.js       | 18+  | 是   | 前端构建                                 |
-| pnpm          | 10+  | 推荐 | 前端包管理器（项目 packageManager 指定 10.26）|
+| Python        | 3.13.13 | 是 | 后端运行                                 |
+| uv            | 0.11.14 | 是 | Python 依赖和命令管理                    |
+| Node.js       | 24   | 是   | 前端构建                                 |
+| pnpm          | 10.26.2 | 是 | 前端包管理器                            |
 | Docker        | -    | 推荐 | 一键启动依赖服务（PostgreSQL/Redis/RustFS）|
 
-> 如果不用 Docker，需要自行安装 PostgreSQL 14+（含 pgvector 扩展）、Redis 6+ 和 S3 兼容存储。
+> 如果不用 Docker，需要自行安装 PostgreSQL 16（含 pgvector）、Redis 7.4 和 S3 兼容存储。
 
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/Snailclimb/interview-guide.git
+git clone https://github.com/shiyudesu/interview-guide.git
 cd interview-guide
 ```
 
 ### 2. 配置环境变量
 
-推荐复制 `.env.example` 为 `.env`，后端 `bootRun` 会自动读取根目录 `.env`。最少需要填写 `AI_BAILIAN_API_KEY`，用于 DashScope 文本模型、ASR 和 TTS：
+推荐复制 `.env.example` 为 `.env`。必须设置稳定的 Provider 加密密钥；使用 DashScope 时再
+填写 `AI_BAILIAN_API_KEY`：
 
 ```bash
 cp .env.example .env
 
 # 编辑 .env
 # AI_BAILIAN_API_KEY=your_dashscope_api_key
+# APP_AI_CONFIG_ENCRYPTION_KEY=your_random_long_secret
 # AI_MODEL=qwen3.5-flash
 ```
 
@@ -419,7 +403,8 @@ interview-postgres 0.0.0.0:5432->5432/tcp
 interview-redis    0.0.0.0:6379->6379/tcp
 ```
 
-如果只看到 `interview-postgres 5432/tcp` 或 `interview-redis 6379/tcp`，说明容器内部服务是启动的，但端口没有发布到宿主机。此时通过 `./gradlew :app:bootRun` 从宿主机启动后端，会出现类似 `Connection to localhost:5432 refused` 的报错。可以重建容器配置（不会删除 Docker volume 中的数据）：
+如果只看到 `interview-postgres 5432/tcp` 或 `interview-redis 6379/tcp`，说明端口没有发布到
+宿主机，Python API 会连接失败。可以重建容器配置（不会删除 Docker volume 中的数据）：
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d --force-recreate postgres redis
@@ -429,20 +414,34 @@ docker compose -f docker-compose.dev.yml up -d --force-recreate postgres redis
 
 | 服务         | 地址             | 账号            | 密码            |
 | ------------ | ---------------- | --------------- | --------------- |
-| PostgreSQL   | `localhost:5432` | `postgres`      | `123456`        |
+| PostgreSQL   | `localhost:5432` | `postgres`      | `password`      |
 | Redis        | `localhost:6379` | -               | -               |
-| RustFS 控制台 | `localhost:9001` | `rustfsadmin`   | `rustfsadmin`   |
+| RustFS 控制台 | `localhost:9001` | `minioadmin`    | `minioadmin`    |
 
-> **注意**：应用启动时会自动检查并创建 `interview-guide` Bucket。使用 `docker-compose.dev.yml` + `:app:bootRun` 时，请确保 `.env` 中的 `APP_STORAGE_ACCESS_KEY` / `APP_STORAGE_SECRET_KEY` 与 RustFS 账号一致，例如都设为 `rustfsadmin`。如果本地已有 MinIO 或其他 S3 兼容存储，也可以直接使用，在 `.env` 中修改 `APP_STORAGE_*` 配置即可。
-
-> **IDEA Docker Debug 提示**：如果在 macOS 上使用 IntelliJ IDEA 的 Docker 调试方式启动后端，遇到 `mounts denied: The path /Applications/IntelliJ IDEA.app/Contents/lib is not shared from the host`，请在 Docker Desktop 的 `Settings -> Resources -> File Sharing` 中加入 `/Applications/IntelliJ IDEA.app/Contents/lib`（或整个 `/Applications/IntelliJ IDEA.app`）以及当前项目目录，然后重启 Docker/IDEA 后再运行。普通 `./gradlew :app:bootRun` 和 `docker compose` 启动不需要这个额外共享路径。
+> 应用启动时会自动检查并创建 `interview-guide` Bucket。`.env` 中的
+> `APP_STORAGE_ACCESS_KEY` / `APP_STORAGE_SECRET_KEY` 必须与 RustFS 账号一致。
 
 ### 4. 启动应用
 
-**后端：**
+**后端 Migrate、API、Worker、Scheduler：**
 
 ```bash
-./gradlew :app:bootRun
+cd backend
+uv sync --frozen
+uv run --frozen interview-guide-migrate
+uv run --frozen interview-guide-api
+```
+
+另开两个终端：
+
+```bash
+cd backend
+uv run --frozen interview-guide-worker
+```
+
+```bash
+cd backend
+uv run --frozen interview-guide-scheduler
 ```
 
 后端服务启动于 `http://localhost:8080`
@@ -463,7 +462,9 @@ pnpm dev
 
 本项目提供了完整的 Docker 支持，可以一键启动所有服务（前后端、数据库、中间件）。
 
-Docker Compose 编排了 6 个服务：PostgreSQL（pgvector）、Redis、MinIO（S3 兼容存储）、MinIO Bucket 初始化、Spring Boot 后端、React 前端（Nginx）。数据通过 Docker 命名卷持久化，`docker-compose down` 不会丢失数据。
+Docker Compose 编排 PostgreSQL、Redis、MinIO、Bucket 初始化、Alembic Migrate、Python
+API、Worker、Scheduler 和 React/Nginx。数据通过 Docker 命名卷持久化，
+`docker compose down` 不会丢失数据。
 
 ### 1. 前置准备
 
@@ -492,10 +493,11 @@ cp .env.example .env
 # APP_INTERVIEW_EVALUATION_BATCH_SIZE=8   # 回答评估分批大小（默认 8）
 
 # 3. 构建并启动所有服务
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
-> **仅启动依赖服务**：如果只想本地开发调试（用 `./gradlew :app:bootRun` 启动后端），可以只启动基础设施：`docker compose up -d postgres redis minio createbuckets`。将 `.env.example` 复制为 `.env` 并填写 `AI_BAILIAN_API_KEY` 即可，默认账号与 `docker-compose.yml` 一致；Bucket 会由初始化任务或应用启动检查自动创建。
+> **仅启动依赖服务**：本地开发可执行
+> `docker compose -f docker-compose.dev.yml up -d`，然后用 `uv run` 分别启动 Python 进程。
 
 ### 3. 服务访问
 
@@ -505,7 +507,7 @@ docker-compose up -d --build
 | ---------------- | ---------------------------------------------- | ------------ | ------------ | ---------------------- |
 | **前端应用**     | [http://localhost](http://localhost)           | -            | -            | 用户访问入口           |
 | **后端 API**     | [http://localhost:8080](http://localhost:8080) | -            | -            | RESTful API            |
-| **接口文档**     | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | - | - | SpringDoc/Swagger UI |
+| **接口文档**     | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | - | - | FastAPI Swagger UI |
 | **MinIO 控制台** | [http://localhost:9001](http://localhost:9001) | `minioadmin` | `minioadmin` | 对象存储管理           |
 | **MinIO API**    | `localhost:9000`                               | -            | -            | S3 兼容接口            |
 | **PostgreSQL**   | `localhost:5432`                               | `postgres`   | `password`   | 数据库 (包含 pgvector) |
@@ -515,19 +517,19 @@ docker-compose up -d --build
 
 ```bash
 # 查看服务状态
-docker-compose ps
+docker compose ps
 
 # 查看后端日志
-docker-compose logs -f app
+docker compose logs -f app worker scheduler
 
 # 拉取新代码后重新构建部署
-docker-compose up -d --build
+docker compose up -d --build
 
 # 停止并移除所有服务（数据保留在 Docker 卷中）
-docker-compose down
+docker compose down
 
 # 停止服务并清除数据卷（慎用，会删除数据库和文件）
-docker-compose down -v
+docker compose down -v
 
 # 清理无用镜像（构建产生的中间层）
 docker image prune -f
@@ -545,49 +547,33 @@ docker image prune -f
 
 ### Q: 数据库表创建失败/数据丢失
 
-本地开发首先检查 JPA 的 `ddl-auto` 配置。`ddl-auto` 模式对比：
+先查看一次性 Migrate 容器日志：
 
-| 模式     | 行为                            | 适用场景      | 数据保留 |
-| -------- | ------------------------------- | ------------- | -------- |
-| update   | 表不存在自动创建，存在则尝试增量更新 | 早期开发或临时实验，当前项目不推荐 | ✅ 保留 |
-| create   | 无条件删除并重建所有表          | 仅首次建表时使用 | ❌ 删除 |
-| **validate** | 只验证，不修改                  | **当前项目默认推荐，建表和变更交给 Flyway** | ✅ 保留 |
-| none     | 什么都不做                      | 生产环境      | ✅ 保留 |
-
-**推荐配置（已默认）**：
-
-```yaml
-jpa:
-  hibernate:
-    ddl-auto: validate  # 只校验 schema，建表和变更交给 Flyway
+```bash
+docker compose logs migrate
 ```
 
-⚠️ **注意**：避免使用 `create` 模式，否则每次重启都会删除所有数据！
+空库由 Alembic 创建；已验收的 Java/Flyway 数据库会校验完整 Flyway history 和 16 张业务表后
+写入 Alembic baseline，不会重复建表。任何版本或表结构缺失都会直接失败。
 
 ### Q: 知识库向量化失败
 
-`vector_store` 表已由 Flyway 创建，Spring AI 不再自动建表。
-
-```java
-spring:
-  ai:
-    vectorstore:
-      pgvector:
-        initialize-schema: false
-
-```
-
-建议保持为 false，避免应用启动时绕过 Flyway 修改数据库 schema。
+确认 Migrate 成功、Worker 正在运行，并检查 Provider 的 Embedding 模型和维度。知识库固定使用
+1024 维向量，修改默认 Embedding Provider 后需要重新向量化已有文档。
 
 ### Q: 数据库迁移需要手动执行脚本吗？
 
-不需要。数据库 schema 已接入 Flyway，后端应用启动时会自动执行 `app/src/main/resources/db/migration/` 下的迁移，并记录到 `flyway_schema_history`。
+正式 Compose 会先运行一次 `interview-guide-migrate`，成功后 API、Worker 和 Scheduler 才启动。
+本地手工运行时先执行：
 
-当前项目通过 `V1__init_schema.sql` 支持空库初始化，后续版本通过增量迁移演进；Hibernate `ddl-auto` 只做 `validate` 校验。测试环境使用 H2，默认关闭 Flyway。
+```bash
+cd backend
+uv run --frozen interview-guide-migrate
+```
 
 ### Q: 启动时报 `Connection to localhost:5432 refused` 怎么办？
 
-这通常不是 Flyway 脚本错误，而是后端从宿主机访问不到 PostgreSQL。先确认依赖容器已启动：
+这通常不是 Alembic 脚本错误，而是后端从宿主机访问不到 PostgreSQL。先确认依赖容器已启动：
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d
@@ -608,7 +594,10 @@ docker compose -f docker-compose.dev.yml up -d --force-recreate postgres redis
 
 ### Q: 设置页新增/切换模型后不生效？
 
-运行时 Provider 配置默认写到 `~/.interview-guide/llm-providers.yml` 和 `~/.interview-guide/llm-providers.env`。可以在设置页点击测试连接，或调用 `/api/llm-provider/reload` 重新加载配置。Docker 部署时如果希望配置持久化，建议为该目录挂载卷。
+Provider 配置和加密后的 API Key 保存在 PostgreSQL。API、Worker 和 Scheduler 必须使用完全相同
+且长期不变的 `APP_AI_CONFIG_ENCRYPTION_KEY`；修改该值会导致已有 Provider Key 无法解密。
+可以在设置页测试连接，或调用 `/api/llm-provider/reload` 重新加载缓存。
+若 shell 中曾导出旧值，应先执行 `unset APP_AI_CONFIG_ENCRYPTION_KEY`，避免覆盖 `.env`。
 
 ### Q: 语音面试无法识别或没有声音？
 
@@ -616,22 +605,24 @@ docker compose -f docker-compose.dev.yml up -d --force-recreate postgres redis
 
 ### Q: 简历分析一直显示"分析中"？
 
-检查 Redis 连接和 Stream Consumer 是否正常运行。查看后端日志确认是否有错误。
+确认 `worker` 服务正在运行，并检查 Redis Stream：
+
+```bash
+docker compose ps worker
+docker compose logs -f worker
+```
 
 ### Q: PDF 导出失败或中文显示异常？
 
-项目已内置中文字体（珠圆玉润仿宋），支持跨平台导出。如遇到问题，请检查：
-- 字体文件是否存在：`app/src/main/resources/fonts/ZhuqueFangsong-Regular.ttf`
-- 检查日志中的字体加载信息
-- 确认 iText 依赖是否正确
+项目已内置中文字体并通过 ReportLab 导出。如遇到问题，请检查：
+
+- 字体文件是否存在：`backend/resources/fonts/ZhuqueFangsong-Regular.ttf`
+- `app` 日志中的字体加载信息
+- Python 镜像是否使用仓库中的 `backend/Dockerfile`
 
 ### Q: Windows PowerShell 下后端日志中文乱码？
 
-**原因简述**：后端与 Logback 按 **UTF-8** 输出日志；中文 Windows 下控制台默认多为 **GBK（代码页 936）**，且 PowerShell 的 `$OutputEncoding`、控制台编码若未统一为 UTF-8，显示时就会把同一串字节解释错，出现乱码。
-
-**本项目已做的配置**（一般无需再改）：根目录 `gradle.properties`（Gradle 进程 UTF-8）、`app/src/main/resources/logback-spring.xml`（控制台日志 UTF-8）、`app/build.gradle` 中 `bootRun` 的 JVM 参数（含 `file.encoding` / `stdout.encoding` / `stderr.encoding`）。
-
-**仍乱码时（PowerShell 侧）**：在启动 `.\gradlew.bat :app:bootRun` 的同一终端先执行下面一段；或写入 **PowerShell 配置文件**（`$PROFILE`）以便每次自动生效：
+Python 日志按 UTF-8 输出。若 Windows PowerShell 仍显示乱码，先执行：
 
 ```powershell
 chcp 65001 | Out-Null
@@ -640,9 +631,7 @@ chcp 65001 | Out-Null
 $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 ```
 
-新建或编辑配置文件：`if (!(Test-Path $PROFILE)) { New-Item -Path $PROFILE -ItemType File -Force }`，再 `notepad $PROFILE` 将上述内容粘贴保存；新开终端后生效，或执行 `. $PROFILE` 立即加载。若提示脚本无法执行，可执行一次：`Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`。
-
-在 PowerShell 中建议使用 `.\gradlew.bat :app:bootRun`（或仓库根目录的 `.\gradlew.bat`），避免与执行策略、路径解析相关的问题。
+然后从 `backend/` 使用 `uv run --frozen interview-guide-api` 启动。
 
 ## 贡献
 

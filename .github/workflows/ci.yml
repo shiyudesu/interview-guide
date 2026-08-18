@@ -37,6 +37,11 @@ jobs:
       - name: Check migration manifests
         run: bash migration/scripts/check-manifests.sh
 
+      - name: Validate production Compose
+        env:
+          APP_AI_CONFIG_ENCRYPTION_KEY: ci-compose-encryption-key
+        run: docker compose config --quiet
+
   backend:
     name: Backend checks
     runs-on: ubuntu-latest

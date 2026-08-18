@@ -5,7 +5,8 @@
 
 services:
   postgres:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782
+    platform: linux/amd64
     container_name: interview-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -23,7 +24,9 @@ services:
       retries: 5
 
   redis:
-    image: redis:7
+    image: redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
+    platform: linux/amd64
+    command: ["redis-server", "--appendonly", "yes"]
     container_name: interview-redis
     ports:
       - "6379:6379"
@@ -36,12 +39,13 @@ services:
       retries: 5
 
   rustfs:
-    image: rustfs/rustfs:latest
+    image: rustfs/rustfs@sha256:41fe89380f4120a337790c02af192c3fe7bb55c3edc2e6e9357b487b47c6ab21
+    platform: linux/amd64
     container_name: interview-rustfs
     command: ["/data"]
     environment:
-      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
-      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
+      RUSTFS_ACCESS_KEY: ${APP_STORAGE_ACCESS_KEY:-minioadmin}
+      RUSTFS_SECRET_KEY: ${APP_STORAGE_SECRET_KEY:-minioadmin}
       RUSTFS_CONSOLE_ENABLE: "true"
     ports:
       - "9000:9000"
@@ -56,7 +60,8 @@ services:
       retries: 5
 
 # 首次启动后，浏览器访问 http://localhost:9001
-# 使用 ${RUSTFS_ACCESS_KEY} / ${RUSTFS_SECRET_KEY} 登录，手动创建名为 interview-guide 的 bucket
+# 使用 APP_STORAGE_ACCESS_KEY / APP_STORAGE_SECRET_KEY 登录。
+# Python 应用默认自动创建名为 interview-guide 的 bucket。
 
 volumes:
   postgres_data:
