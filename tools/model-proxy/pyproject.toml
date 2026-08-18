@@ -1,7 +1,7 @@
 [project]
 name = "interview-guide-model-proxy"
 version = "0.1.0"
-description = "Transparent HTTP and WebSocket recorder for migration model comparisons"
+description = "Transparent HTTP and WebSocket recorder for provider diagnostics"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "aiohttp==3.14.3",

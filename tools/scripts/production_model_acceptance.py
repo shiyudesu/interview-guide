@@ -18,7 +18,8 @@ from interview_guide.modules.voice_interview.dashscope import (
     DashScopeTtsSynthesizer,
 )
 
-REPORT = Path("../migration/reports/real-model-production.json")
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+REPORT = REPOSITORY_ROOT / ".artifacts/real-model-production.json"
 TEXT = "这是生产模型验收。"
 
 

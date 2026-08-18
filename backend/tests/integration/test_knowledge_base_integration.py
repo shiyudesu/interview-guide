@@ -49,7 +49,7 @@ S3_ACCESS_KEY = os.getenv("TEST_S3_ACCESS_KEY", "minioadmin")
 S3_SECRET_KEY = os.getenv("TEST_S3_SECRET_KEY", "minioadmin")
 S3_BUCKET = os.getenv("TEST_S3_BUCKET", "interview-guide-integration")
 FIXED_NOW = datetime(2026, 8, 16, 8, 0)
-SAMPLES = Path(__file__).resolve().parents[3] / "migration" / "samples" / "knowledge-base"
+SAMPLES = Path(__file__).resolve().parents[1] / "fixtures" / "knowledge-base"
 RESOURCES = Path(__file__).resolve().parents[2] / "resources"
 pytestmark = [
     pytest.mark.integration,

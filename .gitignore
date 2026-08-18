@@ -23,7 +23,7 @@ GEMINI.md
 .playwright-mcp/
 frontend/test-results/
 frontend/playwright-report/
-migration/reports/
+/.artifacts/
 __pycache__/
 .pytest_cache/
 .venv/

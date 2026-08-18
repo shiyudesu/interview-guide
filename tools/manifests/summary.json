@@ -1,4 +1,7 @@
 {
+  "maintenance": [
+    "Keep production Compose, Python tests, repository manifests, and protected model checks green."
+  ],
   "manifests": {
     "api.json": {
       "backendEndpointCount": 94,
@@ -22,9 +25,6 @@
       "migrationCount": 1,
       "tableCount": 17
     },
-    "known-issues.json": {
-      "knownIssueCount": 21
-    },
     "redis.json": {
       "constantCount": 39,
       "rateLimitRuleCount": 4,
@@ -44,9 +44,5 @@
       "testFileCount": 51
     }
   },
-  "nextRequiredWork": [
-    "Keep production Compose, Python tests, manifests, and protected model checks green.",
-    "Preserve fixed migration samples and final acceptance artifacts."
-  ],
   "schemaVersion": 1
 }

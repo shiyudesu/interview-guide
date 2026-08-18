@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-GENERATOR_PATH = REPOSITORY_ROOT / "migration/scripts/generate_manifests.py"
+GENERATOR_PATH = REPOSITORY_ROOT / "tools/scripts/generate_manifests.py"
 SPEC = importlib.util.spec_from_file_location("generate_manifests", GENERATOR_PATH)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"Unable to load {GENERATOR_PATH}")
@@ -67,7 +67,6 @@ class GenerateManifestsTest(unittest.TestCase):
                 "api.json": GENERATOR.build_api_manifest(REPOSITORY_ROOT),
                 "configuration.json": GENERATOR.extract_configuration(REPOSITORY_ROOT),
                 "database.json": GENERATOR.extract_database(REPOSITORY_ROOT),
-                "known-issues.json": GENERATOR.extract_known_issues(REPOSITORY_ROOT),
                 "redis.json": GENERATOR.extract_redis(REPOSITORY_ROOT),
                 "resources.json": GENERATOR.extract_resources(REPOSITORY_ROOT),
             }

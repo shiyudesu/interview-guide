@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate deterministic Stage 0 migration inventories from repository sources."""
+"""Generate deterministic repository inventories from source files."""
 
 from __future__ import annotations
 
@@ -14,13 +14,6 @@ from typing import Any
 from urllib.parse import urlsplit
 
 SCHEMA_VERSION = 1
-MAPPING_METHODS = {
-    "GetMapping": ["GET"],
-    "PostMapping": ["POST"],
-    "PutMapping": ["PUT"],
-    "PatchMapping": ["PATCH"],
-    "DeleteMapping": ["DELETE"],
-}
 REDIS_CONSTANT_MARKERS = (
     "STREAM",
     "GROUP",
@@ -88,59 +81,6 @@ def join_paths(prefix: str, suffix: str) -> str:
     if not suffix:
         return prefix
     return f"{prefix.rstrip('/')}/{suffix.lstrip('/')}"
-
-
-def annotation_blocks(lines: list[str]) -> list[tuple[int, int, str, str]]:
-    blocks: list[tuple[int, int, str, str]] = []
-    mapping_pattern = re.compile(
-        r"^\s*@(GetMapping|PostMapping|PutMapping|PatchMapping|"
-        r"DeleteMapping|RequestMapping)\b"
-    )
-    index = 0
-    while index < len(lines):
-        match = mapping_pattern.match(lines[index])
-        if not match:
-            index += 1
-            continue
-        start = index
-        text = lines[index].strip()
-        balance = text.count("(") - text.count(")")
-        while balance > 0 and index + 1 < len(lines):
-            index += 1
-            next_line = lines[index].strip()
-            text += " " + next_line
-            balance += next_line.count("(") - next_line.count(")")
-        blocks.append((start, index, match.group(1), compact(text)))
-        index += 1
-    return blocks
-
-
-def annotation_path(annotation: str) -> str:
-    named = re.search(r"\b(?:value|path)\s*=\s*\"([^\"]*)\"", annotation)
-    if named:
-        return named.group(1)
-    positional = re.search(r"@\w+Mapping\s*\(\s*\"([^\"]*)\"", annotation)
-    return positional.group(1) if positional else ""
-
-
-def annotation_http_methods(kind: str, annotation: str) -> list[str]:
-    if kind in MAPPING_METHODS:
-        return MAPPING_METHODS[kind]
-    methods = re.findall(r"RequestMethod\.([A-Z]+)", annotation)
-    return methods or ["ANY"]
-
-
-def find_method_signature(lines: list[str], annotation_end: int) -> tuple[str, str] | None:
-    candidate = "\n".join(lines[annotation_end + 1 : annotation_end + 35])
-    match = re.search(
-        r"\b(?:public|protected|private)\s+"
-        r"[\w<>, ?.\[\]]+\s+(\w+)\s*\((.*?)\)\s*\{",
-        candidate,
-        flags=re.DOTALL,
-    )
-    if not match:
-        return None
-    return match.group(1), compact(match.group(2))
 
 
 def extract_python_api(root: Path) -> list[dict[str, Any]]:
@@ -769,44 +709,14 @@ def extract_resources(root: Path) -> dict[str, Any]:
     }
 
 
-def extract_known_issues(root: Path) -> dict[str, Any]:
-    plan = root / "docs/MIGRATION_PLAN.md"
-    lines = plan.read_text(encoding="utf-8").splitlines()
-    start = lines.index("### 3.2 已确认的现有问题")
-    issues: list[dict[str, Any]] = []
-    for index in range(start + 1, len(lines)):
-        line = lines[index]
-        if line.startswith("## "):
-            break
-        if line.startswith("- "):
-            issues.append(
-                {
-                    "id": f"KNOWN-{len(issues) + 1:03d}",
-                    "requiredAction": "Add a fixed sample that preserves the current behavior.",
-                    "source": {
-                        "file": relative(root, plan),
-                        "line": index + 1,
-                    },
-                    "status": "sample-required",
-                    "summary": line[2:].strip(),
-                }
-            )
-    return {
-        "schemaVersion": SCHEMA_VERSION,
-        "summary": {"knownIssueCount": len(issues)},
-        "issues": issues,
-    }
-
-
 def main() -> None:
     args = parse_args()
     root = args.root.resolve()
-    output = (args.output or root / "migration/manifests").resolve()
+    output = (args.output or root / "tools/manifests").resolve()
     manifests = {
         "api.json": build_api_manifest(root),
         "configuration.json": extract_configuration(root),
         "database.json": extract_database(root),
-        "known-issues.json": extract_known_issues(root),
         "redis.json": extract_redis(root),
         "resources.json": extract_resources(root),
     }
@@ -815,9 +725,8 @@ def main() -> None:
     summary = {
         "schemaVersion": SCHEMA_VERSION,
         "manifests": {name: value["summary"] for name, value in sorted(manifests.items())},
-        "nextRequiredWork": [
-            "Keep production Compose, Python tests, manifests, and protected model checks green.",
-            "Preserve fixed migration samples and final acceptance artifacts.",
+        "maintenance": [
+            "Keep production Compose, Python tests, repository manifests, and protected model checks green.",
         ],
     }
     write_json(output, "summary.json", summary)

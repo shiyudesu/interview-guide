@@ -37,11 +37,11 @@ jobs:
         env:
           AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
         working-directory: backend
-        run: uv run --frozen python ../migration/scripts/production_model_acceptance.py
+        run: uv run --frozen python ../tools/scripts/production_model_acceptance.py
       - name: Upload redacted records
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: real-model-production-records
-          path: migration/reports/real-model-production.json
+          path: .artifacts/real-model-production.json
           if-no-files-found: ignore

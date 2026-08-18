@@ -1,8 +1,11 @@
 # Java/Spring AI 到 Python/FastAPI/LangGraph 迁移实施计划
 
+> 状态：已完成。本文保留当时的兼容要求和实施决策；当前运行、测试和 CI 命令以
+> `README.md`、`AGENTS.md` 和 `tools/README.md` 为准。
+
 ## 1. 迁移目标
 
-当前后端使用 Java 25、Spring Boot 4.1、Spring AI 2.0、Spring Data JPA、
+迁移前后端使用 Java 25、Spring Boot 4.1、Spring AI 2.0、Spring Data JPA、
 Redisson、Apache Tika、iText 和 DashScope Java SDK。
 
 本次迁移只更换后端技术实现：
@@ -259,12 +262,11 @@ backend/
     ├── contract/
     └── performance/
 
-migration/
-├── manifests/       接口、数据库、Redis、配置和资源清单
-├── samples/         固定请求、响应、文件、SSE 和 WebSocket 样本
-├── model-proxy/     转发真实模型请求、记录请求响应并支持故障测试
-├── scripts/         启动、比较、故障测试和清理脚本
-└── reports/         本地生成的差异报告，不提交大文件
+tools/
+├── manifests/       当前接口、数据库、Redis、配置和资源清单
+├── model-proxy/     Provider 请求诊断和显式故障测试
+├── scripts/         清单生成和受保护生产模型验收
+└── tests/           仓库工具测试
 ```
 
 全部检查通过后才能删除 Java `app/`。Docker Compose 中对外服务名继续使用 `app`，端口继续
@@ -490,19 +492,10 @@ Java 和 Python 同时运行时：
 业务 ID、时间、UUID、对象 key、nonce 和消息顺序应优先通过测试注入固定下来，不应直接
 忽略。
 
-### 7.4 执行命令
+### 7.4 执行工具
 
-迁移过程中需要实现以下命令：
-
-```bash
-./migration/scripts/start-comparison-env.sh
-./migration/scripts/seed-comparison-data.sh
-./migration/scripts/run-comparison.sh
-./migration/scripts/run-failure-cases.sh
-./migration/scripts/stop-comparison-env.sh
-```
-
-`run-comparison.sh` 必须使用非零退出码表示存在不允许的差异，并生成 JSON 和 HTML 报告。
+迁移期间的新旧隔离环境、固定数据、差异报告和故障测试工具已经完成使命，并在最终收尾时
+删除。当前仓库只保留持续质量检查、Provider 诊断和生产模型冒烟工具。
 
 ## 8. Python 基础运行规则
 
@@ -1439,18 +1432,11 @@ FastAPI 必须设置与 Java 一致的：
 - 报告真实调用次数、Token、音频时长和费用。
 - 单独运行不调用模型的基础接口测试，但不能用它替代 AI 接口性能结果。
 
-受保护的 `real-model.yml` 先通过
-`./migration/scripts/run-performance-acceptance.sh` 交替运行至少五次 Java/Python
-Provider 连通性请求，保存请求一致性、应用延迟、Provider 网络延迟、Token 和版本化价格估算。
-这个报告只覆盖单并发 REST 真实模型场景，不能替代下列其余性能场景。
-真实 Provider 延迟会在相邻 Java/Python 请求间波动，因此该场景以
-`端到端耗时 - 同请求 Provider 网络耗时` 得到的应用开销执行阈值判断；端到端与 Provider
-p95/p99 仍完整保存，但不将模型网络波动误判为应用回归。
-手动 `performance.yml` 通过 `./migration/scripts/run-rest-performance-comparison.sh`
-对固定、无模型的 Skill 详情接口执行 1、10、50 并发，检查 REST p95、p99、吞吐、错误率和
-响应一致性；该结果只用于
-区分应用基础开销，不能替代真实 Provider 场景。脚本在压测期间按完整进程树采样 RSS，保存
-baseline、peak 和末段稳定中位数，并检查 Python 稳定内存不超过 Java 的 120%。
+迁移验收时已交替运行至少五次 Java/Python Provider 连通性请求，并保存请求一致性、应用
+延迟、Provider 网络延迟、Token 和版本化价格估算。真实 Provider 延迟通过
+`端到端耗时 - 同请求 Provider 网络耗时` 隔离，不将模型网络波动误判为应用回归。迁移完成后，
+对比性能脚本和 Java 基线已经删除；当前 `real-model.yml` 使用
+`tools/scripts/production_model_acceptance.py` 持续检查生产 LLM、Embedding、ASR 和 TTS。
 
 测试场景：
 
@@ -1478,8 +1464,6 @@ baseline、peak 和末段稳定中位数，并检查 Python 稳定内存不超�
 
 当前实施状态：
 
-- 已创建并推送 `pre-python-switch` tag。
-- 已归档 Java 运行镜像、脱敏配置和新旧对比报告。
 - 已从空 comparison volumes 演练 Java 恢复。
 - 已在真实 Flyway schema 上连续运行两次 Python Migrate：首次只写入 Alembic baseline，
   第二次无 DDL，随后 schema 比较零差异。
@@ -1490,13 +1474,13 @@ baseline、peak 和末段稳定中位数，并检查 Python 稳定内存不超�
   `qwen3-asr-flash-realtime` 和 `qwen3-tts-flash-realtime`。
 - 连续两次切换后完整 CI、本地空库/现有库 Compose、Windows Chrome 页面、真实模型、
   真实性能、语音和题库专项面试均已通过。
-- Java 生产代码和测试、Gradle、Flyway 运行文件及 JVM CI 已删除；固定样本、最终行为报告、
-  `pre-python-switch` tag 和归档镜像继续保留。
+- Java 生产代码和测试、Gradle、Flyway 运行文件及 JVM CI 已删除。
+- 回滚标签、Java 镜像、旧差异报告和迁移专用目录已按最终收尾要求删除。
+- 持续质量工具已迁移到 `tools/`，业务测试夹具已迁移到对应测试目录。
 
-正式切换前：
+正式切换时已执行：
 
-- 保存 `pre-python-switch` Git tag。
-- 保存 Java 镜像、配置备份和新旧对比报告。
+- 临时保存切换前 Git tag、Java 镜像、配置备份和新旧对比报告。
 - 实际演练一次恢复 Java 版本。
 - 确认 Python 数据库升级程序只运行一次。
 - 确认 API、Worker 和 Scheduler 健康。
@@ -1527,59 +1511,22 @@ docker compose config
 docker history <python-image>
 ```
 
-保留：
-
-- 固定测试样本。
-- Java 最终行为报告。
-- 数据库结构报告。
-- 新旧差异报告。
-- 恢复演练记录。
+最终仅保留当前实现所需的兼容测试、仓库清单和受保护生产模型检查，不再保留 Java 可执行
+产物、回滚标签或历史差异报告。
 
 ## 19. 测试命令
 
-当前 Java 基线：
+仓库清单：
 
 ```bash
-./gradlew :app:compileJava
-./gradlew :app:test --no-daemon
+./tools/scripts/generate-manifests.sh
+./tools/scripts/check-manifests.sh
 ```
 
-阶段 0 清单：
+模型诊断代理：
 
 ```bash
-./migration/scripts/generate-manifests.sh
-./migration/scripts/check-manifests.sh
-./migration/scripts/sync-flyway-schema.py
-./migration/scripts/sync-java-resources.py
-./migration/scripts/start-comparison-env.sh
-./migration/scripts/start-model-proxy.sh
-./migration/scripts/record-java-baseline.sh
-./migration/scripts/capture-runtime-state.sh
-./migration/scripts/run-comparison.sh
-./migration/scripts/run-schema-comparison.sh
-./migration/scripts/run-interview-schedule-comparison.sh
-./migration/scripts/run-interview-skill-comparison.sh
-./migration/scripts/run-llm-provider-comparison.sh
-./migration/scripts/run-resume-foundation-comparison.sh
-./migration/scripts/run-resume-upload-comparison.sh
-./migration/scripts/run-voice-rest-comparison.sh
-./migration/scripts/run-voice-websocket-comparison.sh
-./migration/scripts/run-voice-evaluation-comparison.sh
-./migration/scripts/run-knowledge-base-comparison.sh
-./migration/scripts/run-rag-chat-comparison.sh
-./migration/scripts/run-interview-comparison.sh
-./migration/scripts/run-knowledge-base-interview-comparison.sh
-./migration/scripts/run-rest-performance-comparison.sh
-./migration/scripts/run-performance-acceptance.sh
-./migration/scripts/run-failure-cases.sh
-./migration/scripts/stop-model-proxy.sh
-./migration/scripts/stop-comparison-env.sh
-```
-
-模型记录代理：
-
-```bash
-cd migration/model-proxy
+cd tools/model-proxy
 uv sync --frozen
 uv run python -m unittest discover -s tests -v
 uv run interview-guide-model-proxy
@@ -1617,13 +1564,6 @@ docker compose -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.dev.yml down
 ```
 
-新旧比较：
-
-```bash
-./migration/scripts/run-comparison.sh
-./migration/scripts/run-failure-cases.sh
-```
-
 ## 20. 完成标准
 
 迁移完成必须同时满足：
@@ -1641,7 +1581,7 @@ docker compose -f docker-compose.dev.yml down
 11. 性能达到“阶段 7：性能测试”的标准。
 12. Python Compose 可以从空环境完成数据库升级并启动。
 13. 正式应用镜像、Compose、CI 和运行环境不存在 JVM。
-14. Java 恢复演练和 Python 正式切换记录已经保存。
+14. Java 恢复演练和 Python 正式切换曾完成验收，最终历史产物已按收尾要求删除。
 15. 所有行为变化都已被拒绝或通过独立需求批准，迁移任务本身没有夹带功能改造。
 
 ## 21. 执行清单

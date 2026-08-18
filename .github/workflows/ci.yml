@@ -26,8 +26,8 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13.13"
-      - name: Check migration manifests
-        run: bash migration/scripts/check-manifests.sh
+      - name: Check repository manifests
+        run: bash tools/scripts/check-manifests.sh
       - name: Validate production Compose
         env:
           APP_AI_CONFIG_ENCRYPTION_KEY: ci-compose-encryption-key
@@ -139,15 +139,15 @@ jobs:
       - name: Capture Compose logs
         if: always()
         run: |
-          mkdir -p migration/reports
-          docker compose ps -a > migration/reports/production-compose-ps.txt
-          docker compose logs --no-color > migration/reports/production-compose.log
+          mkdir -p .artifacts
+          docker compose ps -a > .artifacts/production-compose-ps.txt
+          docker compose logs --no-color > .artifacts/production-compose.log
       - name: Upload integration logs
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: production-compose-integration
-          path: migration/reports/production-compose*
+          path: .artifacts/production-compose*
           if-no-files-found: ignore
       - name: Stop production Compose
         if: always()
@@ -159,7 +159,7 @@ jobs:
     timeout-minutes: 10
     defaults:
       run:
-        working-directory: migration/model-proxy
+        working-directory: tools/model-proxy
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -168,7 +168,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
-          cache-dependency-glob: migration/model-proxy/uv.lock
+          cache-dependency-glob: tools/model-proxy/uv.lock
           version: "0.11.14"
       - name: Install locked dependencies
         run: uv sync --frozen

@@ -393,7 +393,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_knowledge_base_integration.py",
-      "sha256": "f5db7ab222c6d0c84addb696ed6461cfa4019a064e3c1fd93b8d64de5ab80d3f"
+      "sha256": "12e165d0909f68534bc62b0a4e7d43e6229511ecd450f544ade4b533315bffe9"
     },
     {
       "disabledMarkers": 0,
@@ -443,7 +443,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_api_foundation.py",
-      "sha256": "5abc1a5d973d573c63cd728092a3c44b921bb3f3a1a89fa359d772fec13a8b3d"
+      "sha256": "6decadd1b656a5c0d24ad78ac6165ec59f011bbd26004c49a0841cd707f2a925"
     },
     {
       "disabledMarkers": 0,

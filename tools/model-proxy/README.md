@@ -5,14 +5,14 @@ successful upstream responses. It records request/response timing, headers, JSON
 stream bytes, and WebSocket messages as JSON Lines. API keys, authorization headers,
 cookies, and large audio fields are replaced with hashes.
 
-Use only synthetic migration samples; recorded prompts and ordinary JSON fields are
-intentionally preserved for exact Java/Python request comparison.
+Use only synthetic diagnostic samples; recorded prompts and ordinary JSON fields are
+intentionally preserved for exact provider request inspection.
 
 ```bash
-cd migration/model-proxy
+cd tools/model-proxy
 uv sync --frozen
 MODEL_PROXY_ENABLE_FAULTS=true \
-MODEL_PROXY_RECORD_PATH=../reports/model-proxy.jsonl \
+MODEL_PROXY_RECORD_PATH=../../.artifacts/model-proxy.jsonl \
 uv run interview-guide-model-proxy
 ```
 

@@ -60,7 +60,7 @@ Thumbs.db
 **/coverage
 **/.nyc_output
 **/test-results
-migration/reports/
+.artifacts/
 
 # Documentation (not needed in production image)
 docs/

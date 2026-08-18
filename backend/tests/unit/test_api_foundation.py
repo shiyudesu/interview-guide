@@ -188,7 +188,7 @@ def test_openapi_metadata_and_dynamic_server_url() -> None:
         response = client.get("/v3/api-docs")
 
     baseline_path = (
-        Path(__file__).resolve().parents[2] / "resources/contracts/java-http-baseline.json"
+        Path(__file__).resolve().parents[2] / "resources/contracts/http-compatibility-baseline.json"
     )
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
     openapi_case = next(case for case in baseline["cases"] if case["id"] == "openapi")

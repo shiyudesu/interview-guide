@@ -1,7 +1,7 @@
 # Python backend
 
-Production FastAPI backend. Historical migration requirements and fixed compatibility
-evidence are preserved under `../docs/MIGRATION_PLAN.md` and `../migration/`.
+Production FastAPI backend. Compatibility behavior is enforced by backend tests,
+repository manifests, and protected real-model checks.
 
 ```bash
 uv sync --frozen

@@ -157,6 +157,6 @@ Provider API Key 加密保存在 PostgreSQL。API、Worker 和 Scheduler 必须�
 
 - `ci.yml`：Python、真实基础设施集成、生产 Compose、前端和镜像无 JVM 检查。
 - `real-model.yml`：受保护环境中的 LLM、Embedding、ASR 和 TTS 生产冒烟。
-- `migration/`：保留迁移固定样本、最终行为报告和历史对比工具。
+- `tools/`：仓库清单检查、模型诊断代理和生产模型验收工具。
 
-切换前版本保存在 `pre-python-switch` tag；Java 镜像和验收证据已归档在迁移会话产物中。
+Java 回滚标签、镜像和迁移期间的对比证据已在最终收尾时删除。

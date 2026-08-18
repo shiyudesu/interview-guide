@@ -6,13 +6,13 @@ temporary_output="$(mktemp -d)"
 trap 'rm -r "$temporary_output"' EXIT
 
 python3 -m unittest discover \
-  -s "$repo_root/migration/tests" \
+  -s "$repo_root/tools/tests" \
   -p 'test_*.py'
 
-python3 "$repo_root/migration/scripts/generate_manifests.py" \
+python3 "$repo_root/tools/scripts/generate_manifests.py" \
   --root "$repo_root" \
   --output "$temporary_output"
 
 diff --recursive --unified \
-  "$repo_root/migration/manifests" \
+  "$repo_root/tools/manifests" \
   "$temporary_output"

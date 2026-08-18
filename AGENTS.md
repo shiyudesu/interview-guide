@@ -2,15 +2,15 @@
 
 ## 项目状态
 
-生产后端为 Python/FastAPI。切换前实现和最终行为证据保存在 `pre-python-switch` tag 与
-`migration/` 固定样本/报告中。
+生产后端为 Python/FastAPI。Java/Spring 迁移已经完成，旧实现、回滚镜像和迁移对比证据
+已经删除。兼容行为由后端测试、仓库清单和受保护真实模型工作流持续验证。
 
 目录：
 
 ```text
 backend/                Python 后端
 frontend/               React 前端
-migration/              固定样本、历史对比工具和验收记录
+tools/                  仓库清单、模型诊断和生产验收工具
 docs/MIGRATION_PLAN.md  已完成的迁移计划
 docker-compose.yml      生产 Compose
 docker-compose.dev.yml  本地基础设施
