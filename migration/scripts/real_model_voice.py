@@ -18,6 +18,7 @@ from interview_guide.modules.voice_interview.dashscope import (
 
 REPORT = Path("../migration/reports/real-model-voice.json")
 FIXED_TEXT = "这是语音迁移真实模型连通性测试。"
+ASR_TRAILING_SILENCE_SECONDS = 3
 
 
 def resample_pcm_24k_to_16k(pcm: bytes) -> bytes:
@@ -87,6 +88,10 @@ async def run() -> dict[str, object]:
         for offset in range(0, len(pcm_16k), 3200):
             await asr.append_audio(pcm_16k[offset : offset + 3200])
             await asyncio.sleep(0.1)
+        silence = b"\x00\x00" * (settings.voice_asr_sample_rate * ASR_TRAILING_SILENCE_SECONDS)
+        for offset in range(0, len(silence), 3200):
+            await asr.append_audio(silence[offset : offset + 3200])
+            await asyncio.sleep(0.1)
         await asyncio.wait_for(final.wait(), timeout=20)
     finally:
         await asr.close()
@@ -98,6 +103,7 @@ async def run() -> dict[str, object]:
             "audioFormat": settings.voice_asr_format,
             "inputSampleRate": settings.voice_asr_sample_rate,
             "model": settings.voice_asr_model,
+            "trailingSilenceSeconds": ASR_TRAILING_SILENCE_SECONDS,
             "transcriptLength": len(transcripts[-1]),
         },
         "calledAt": datetime.now(UTC).isoformat(),
