@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.tool.ToolCallingManager;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -169,6 +170,19 @@ class LlmProviderRegistryTest {
         assertNotNull(client1);
         assertNotNull(client2);
         assertNotSame(client1, client2, "After reload, new client should be created");
+    }
+
+    @Test
+    @DisplayName("Qwen Embedding 模型不应被 Registry 误判为聊天模型")
+    void qwenEmbeddingModelIsNotTreatedAsChat() throws Exception {
+        Method method = LlmProviderRegistry.class.getDeclaredMethod(
+            "looksLikeChatModel",
+            String.class
+        );
+        method.setAccessible(true);
+
+        assertFalse((boolean) method.invoke(registry, "qwen3.7-text-embedding"));
+        assertTrue((boolean) method.invoke(registry, "qwen3.7-max"));
     }
 
     @Nested
