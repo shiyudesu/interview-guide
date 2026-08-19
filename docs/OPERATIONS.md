@@ -201,4 +201,4 @@ docker compose down -v
 | Compose、Docker、锁文件或工作流 | 全量 CI |
 
 工作流文件和变更分类脚本本身的修改始终强制全量运行。需要手动完整验收时，在 GitHub
-Actions 中运行 `CI` 的 `workflow_dispatch`。
+Actions 中运行 `CI` 的 `workflow_dispatch`。仓库还会每天定时执行一次全量 CI。
