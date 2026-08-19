@@ -148,7 +148,7 @@ class ExplicitFakeUnifiedEvaluation:
 
 
 @pytest.mark.asyncio
-async def test_explicit_fake_empty_voice_dialogue_saves_java_empty_evaluation() -> None:
+async def test_explicit_fake_empty_voice_dialogue_saves_compatibility_empty_evaluation() -> None:
     repository = ExplicitFakeEvaluationRepository(voice_session(), [])
     unified = ExplicitFakeUnifiedEvaluation()
     registry = ExplicitFakeRegistry()
@@ -174,7 +174,7 @@ async def test_explicit_fake_empty_voice_dialogue_saves_java_empty_evaluation() 
 
 
 @pytest.mark.asyncio
-async def test_explicit_fake_voice_evaluation_builds_java_qa_order_and_references() -> None:
+async def test_fake_voice_evaluation_builds_contract_order_and_references() -> None:
     repository = ExplicitFakeEvaluationRepository(
         voice_session(),
         [
@@ -462,7 +462,7 @@ class ExplicitFakeProducer:
 
 
 @pytest.mark.asyncio
-async def test_voice_recovery_uses_java_thresholds_statuses_and_cache_invalidation() -> None:
+async def test_voice_recovery_uses_contract_thresholds_and_cache_invalidation() -> None:
     repository = ExplicitFakeRecoveryRepository()
     redis = ExplicitFakeRedis()
     producer = ExplicitFakeProducer()

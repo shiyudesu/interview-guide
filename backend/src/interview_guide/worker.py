@@ -92,13 +92,7 @@ async def run_worker(
                 StructuredOutputInvoker(infrastructure.llm_adapter),
                 PromptRepository(resources),
             )
-            if settings.migration_fixed_time:
-                fixed_now = datetime.fromisoformat(settings.migration_fixed_time)
-
-                def now_factory() -> datetime:
-                    return fixed_now
-            else:
-                now_factory = datetime.now
+            now_factory = datetime.now
             resume_consumer = SequentialStreamConsumer(
                 streams,
                 RESUME_ANALYZE,

@@ -51,7 +51,7 @@ class ExplicitFakeChunks:
             self.closed = True
 
 
-def test_rag_chat_requests_use_java_validation_messages() -> None:
+def test_rag_chat_requests_use_compatibility_validation_messages() -> None:
     with pytest.raises(ValidationError, match="至少选择一个知识库"):
         CreateSessionRequest.model_validate({"knowledgeBaseIds": []})
     with pytest.raises(ValidationError, match="至少选择一个知识库"):
@@ -65,7 +65,7 @@ def test_rag_chat_requests_use_java_validation_messages() -> None:
     assert request.title == "\u00a0"
 
 
-def test_rag_chat_sse_escapes_newlines_like_java_controller() -> None:
+def test_rag_chat_sse_escapes_newlines_like_compatibility_controller() -> None:
     assert rag_chat_sse_data("第一行\r\n第二行") == (
         b"data:\xe7\xac\xac\xe4\xb8\x80\xe8\xa1\x8c\\r\\n\xe7\xac\xac\xe4\xba\x8c\xe8\xa1\x8c\n\n"
     )

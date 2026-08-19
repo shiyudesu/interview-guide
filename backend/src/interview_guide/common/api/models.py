@@ -22,13 +22,13 @@ class CamelModel(BaseModel):
     )
 
 
-def format_java_datetime(value: datetime, *, seconds_only: bool = False) -> str:
+def format_api_datetime(value: datetime, *, seconds_only: bool = False) -> str:
     if seconds_only or value.microsecond == 0:
         return value.isoformat(timespec="seconds")
     return value.isoformat(timespec="microseconds")
 
 
-def java_utf16_length(value: str) -> int:
+def utf16_code_unit_length(value: str) -> int:
     return len(value.encode("utf-16-le")) // 2
 
 

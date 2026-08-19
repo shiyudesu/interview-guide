@@ -4,7 +4,7 @@ from interview_guide.common.ai.providers import static_provider_seeds
 from interview_guide.common.config.settings import Settings
 
 
-def test_static_provider_seed_order_and_defaults_match_java() -> None:
+def test_static_provider_seed_order_and_defaults_match_compatibility() -> None:
     settings = Settings(
         _env_file=None,
         APP_AI_CONFIG_ENCRYPTION_KEY="test-key",

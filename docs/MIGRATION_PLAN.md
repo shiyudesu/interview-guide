@@ -1,29 +1,27 @@
-# Python/FastAPI 迁移完成记录
+# Python/FastAPI 切换完成记录
 
 ## 状态
 
-Java/Spring 后端到 Python/FastAPI 的迁移已经完成。生产 Compose、CI、数据库升级、Worker、
+旧后端到 Python/FastAPI 的切换已经完成。生产 Compose、CI、数据库升级、Worker、
 Scheduler 和真实模型验收均使用 Python 实现。
 
-迁移期间使用的 Java 代码、Gradle、Flyway、JVM 镜像、回滚标签、对比脚本和历史差异报告
-已经按最终收尾要求删除。当前仓库不提供 Java 回滚路径。
+切换期间使用的旧代码、构建工具、回滚镜像、标签、对比脚本和历史差异报告已经删除。
+当前仓库不提供旧后端回滚路径。
 
 ## 最终架构
 
-| 原实现 | 当前实现 |
+| 部分 | 当前实现 |
 | --- | --- |
-| Java 25、Spring Boot | Python 3.13.13、FastAPI、Uvicorn |
-| Spring Data JPA | SQLAlchemy 2、psycopg 3 |
-| Flyway | Alembic |
-| Redisson | redis-py asyncio |
-| Spring AI | LangGraph、langchain-openai、统一 LLM Adapter |
-| Java 文件与 PDF 组件 | pdfminer.six、python-docx、LibreOffice、ReportLab |
-
-生产镜像中没有 JDK、JRE 或 `java` 命令。
+| API | Python 3.13.13、FastAPI、Uvicorn |
+| 数据访问 | SQLAlchemy 2、psycopg 3 |
+| 数据库升级 | Alembic |
+| Redis | redis-py asyncio |
+| AI | LangGraph、langchain-openai、统一 LLM Adapter |
+| 文件与 PDF | pdfminer.six、python-docx、LibreOffice、ReportLab |
 
 ## 保持不变的外部行为
 
-迁移的约束是替换实现，不修改产品协议。当前测试继续保护以下行为：
+切换的约束是替换实现，不修改产品协议。当前测试继续保护以下行为：
 
 - REST 路径、HTTP 方法、参数、multipart 字段和响应头
 - 响应字段、默认值、null、数组顺序、时间格式、错误码和错误文案
@@ -44,7 +42,7 @@ cd backend
 uv run --frozen interview-guide-migrate
 ```
 
-迁移验收时已在既有 PostgreSQL schema 上完成 baseline 和重复执行检查，并验证第二次执行
+切换验收时已在既有 PostgreSQL schema 上完成 baseline 和重复执行检查，并验证第二次执行
 不产生额外 DDL。新环境直接升级到 Alembic head。
 
 ## 运行进程
@@ -73,13 +71,13 @@ TTS        qwen3-tts-flash-realtime
 
 ## 当前维护方式
 
-迁移完成后，不再运行 Java/Python 对比。兼容性由以下检查持续维护：
+切换完成后，不再运行新旧后端对比。兼容性由以下检查持续维护：
 
 - 后端单元、契约和真实基础设施集成测试
 - 前端状态测试、Playwright 和生产构建
 - `tools/manifests/` 仓库清单
 - 生产 Compose 集成测试
-- Python 镜像无 JVM 检查
+- Python-only 镜像检查
 - 受保护 LLM、Embedding、ASR 和 TTS 冒烟
 
 当前命令见根目录 [README](../README.md)，配置见

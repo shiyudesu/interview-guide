@@ -450,7 +450,7 @@ async def test_real_redis_voice_pending_is_reclaimed_after_consumer_crash() -> N
 
 
 @pytest.mark.asyncio
-async def test_real_postgres_redis_voice_recovery_matches_java_thresholds() -> None:
+async def test_real_postgres_redis_voice_recovery_matches_compatibility_thresholds() -> None:
     assert REDIS_URL is not None
     database = Database(integration_settings())
     redis = Redis.from_url(REDIS_URL, decode_responses=True)

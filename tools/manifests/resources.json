@@ -413,7 +413,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_redis_integration.py",
-      "sha256": "aa9c81c8a4f0025193ff89b0148cda9fa6e0ecc94e6e17529d295a34dc820f84"
+      "sha256": "853f56c9fda0991fedb177dcaab6f963bc30016aa9842387f7d6f4c2cba78da6"
     },
     {
       "disabledMarkers": 0,
@@ -428,22 +428,22 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_voice_evaluation_worker_integration.py",
-      "sha256": "7d211ee9b4df7ba94bd46c99a6bef65a8b1233b2ff69f51a8736d060634c360e"
+      "sha256": "b0906564cd482016764c9e1210e7e8d332b67629abe67fcc62582f48aeecaff1"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_voice_websocket_integration.py",
-      "sha256": "b3609375c2a87c0633b4fc42ddc094e3e01ab65c28e47bd0d519e9dd76ed04c4"
+      "sha256": "5e9e136436a57a30382ba67edcfde3612cf878a45396aabb41c4c0da9ec51b5f"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_ai_resources.py",
-      "sha256": "29279cdef4473c01f552cd7ebe2905e7eb5fe052e7ee75dadcf8cb3d02842795"
+      "sha256": "8bd195e8f2701f5923842ec7296cc8568d98adb3ad6125f93599d46402467328"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_api_foundation.py",
-      "sha256": "6decadd1b656a5c0d24ad78ac6165ec59f011bbd26004c49a0841cd707f2a925"
+      "sha256": "2fab9c3303735f90ed6056e3e5d75b5b323ec437eb097572aa001e83e7648699"
     },
     {
       "disabledMarkers": 0,
@@ -458,77 +458,77 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_file_infrastructure.py",
-      "sha256": "778fcbcdb958f4eccf1894d8ba57819df773f86427e59642e3127a7b217653ae"
+      "sha256": "d50292b2688e8cf9197ba18bed4d23694131b6de44c30b25c93a4733fb010a3c"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_module.py",
-      "sha256": "be05f86aea2430a037c4e9813854a0393acb8266d3a327fbbdbb9671723391b0"
+      "sha256": "4b15671c348273c98ac487492bce71e28b205a05102d0e4d633adf1b63fea8a1"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_schedule.py",
-      "sha256": "efe706e312b97fb39d8896c2015251a70dd6cc0f1326d1c32812c879f53a415b"
+      "sha256": "8d69157ed2941e480c8242cbf9cf38b76f6ca765634a08881411b6be6d44523d"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_schedule_parser.py",
-      "sha256": "bec65d6c4073d0b58b2b4bbcf11630ea7f01b7ffe496eb9512ed3c10d06b5d7d"
+      "sha256": "452d901e4f5f8b2e9074b012df81a079cb87010e8bd8f63ee6a18fc14b324579"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_skill.py",
-      "sha256": "f8bade643e50017b2c53e9cbf6ff26019be2b4e87a96cb0842aeef819dbf63b3"
+      "sha256": "8534046e4beee75236b2149cc56d737a7aea4338f80f46453c1e224612aab283"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_knowledge_base_interview.py",
-      "sha256": "a703a9050566f86b5d5a313d26e092ee0e87b07cab797f9872c284c1fa233767"
+      "sha256": "156703ca94b2ca5732abddc667085170eeb77d0350505a19f0748b071d1f01a6"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_knowledge_base_query_service.py",
-      "sha256": "9e60a1b6b0e285c6cf9eeea1b8275f9a0c199afd657dff3f4fa566b8a53d4b43"
+      "sha256": "57dc9f9fadf8408170bd45bb02155925b233b9e856d73dd82f341c5ee8999cc6"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_knowledge_base_service.py",
-      "sha256": "72f13739808e8da8279759dae72167e9b1ffc721b1c5d8af2abfe8435f5265f8"
+      "sha256": "aee84cfd7cdad5a86023d318f1238af598da30b6b6de050e9a25c08ed4ba77b1"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_llm_adapter.py",
-      "sha256": "eaa7e5b836ada00e1e05294fe837db2646d5d61adb6341162765acbf4f299bff"
+      "sha256": "a194d0162d1e99da70e4aec0c84ed9f2f493d36e0efc00d665d61dd0a433b3c7"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_llm_provider_service.py",
-      "sha256": "b0ee666c9369b9151243a8fb78a1cd6415ce8214b24faea674f6d247980af955"
+      "sha256": "608c1412d4f0e13a8832512689435a059a010a983c24586f5b7ed87b73049c7e"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_models.py",
-      "sha256": "07e4576ae6e1ec0d5fd2ec486fbef53754091fc8d5cf52c20931d74d83b57f93"
+      "sha256": "008299d436defa03ab4866b9fd709847df290b8f18b1190fbf5b80c674d3b7bd"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_pdf_export.py",
-      "sha256": "61dd3a345036528712c2f99a96c2ecf65edf0bd44d16c79db4622a8111c1d641"
+      "sha256": "e92566a12be19beaf15530b5d79304979d997c92b21b5913016748ff713e96f2"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_provider_seeds.py",
-      "sha256": "e63cf841008f299cf6238fa26f2bf5221634eb2f219587a4f5a4a6b75ac48e97"
+      "sha256": "678392d008a1485df2ec7ce57fed5c78b2d3c1d2769d0bc3440a75f7033b369e"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_rag_chat_service.py",
-      "sha256": "c80251dd9008df42ef1f8ac9c9f12d7e14fb09a29965ef54090dfbc693209c94"
+      "sha256": "36922f820b745de404280981aef08a4caf2449b35bb6a0d5f6c91fda1b3d8d9b"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_rate_limit.py",
-      "sha256": "42f5f3949a8751f0991b09fc7b7584a04560c116c281bf5fcdbc78fa5c647301"
+      "sha256": "6601080cae47c77e2fa1afa3fc92d585b5d24a4ce87ecc3ca18106f0f7d4bf09"
     },
     {
       "disabledMarkers": 0,
@@ -538,7 +538,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_resume_analysis.py",
-      "sha256": "0013d90c76707a218d3e6523e9a9dfb9321c8850301467fa8dde3bd188c7e4a6"
+      "sha256": "4c6ebcb3b2dcc04deb827d7ab920129ed8cfe2e076b86928716d9ac71c4a0f3f"
     },
     {
       "disabledMarkers": 0,
@@ -563,7 +563,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_vectorization.py",
-      "sha256": "06bf086d36d5ff959c163aa692ed7c7941422d27d49afc55cfe7cbd6c42f04a1"
+      "sha256": "96c01d4f26a0f43d5ebc68927ef96f4a82da9cf4457a5be1aefad6f7645fb402"
     },
     {
       "disabledMarkers": 0,
@@ -578,7 +578,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_evaluation.py",
-      "sha256": "dab54db4a8fe01f3038bb9a85cb424e9459439040fc01547ec75c763cafc5c6c"
+      "sha256": "86d80e057752ef5a9ad75337b77d438cc74618434a507fa8fbddddc8b0a715cb"
     },
     {
       "disabledMarkers": 0,
@@ -588,7 +588,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_websocket_core.py",
-      "sha256": "d42b3ddfa4234967812ce68e9a8f9cf5667e1b2ed84abd10229d00b1c765f069"
+      "sha256": "ce94ad30686b9f3b7addc6ce45c25499b8639f7b398646e4fcdef9590b78d2c8"
     },
     {
       "disabledMarkers": 1,

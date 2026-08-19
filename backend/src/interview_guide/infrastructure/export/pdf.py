@@ -47,12 +47,12 @@ def score_color(score: int) -> colors.Color:
     return ERROR_COLOR
 
 
-def java_urlencode(value: str) -> str:
+def form_urlencode(value: str) -> str:
     return quote_plus(value, safe="")
 
 
 def pdf_download_headers(filename: str) -> dict[str, str]:
-    encoded = java_urlencode(filename)
+    encoded = form_urlencode(filename)
     return {
         "Content-Disposition": f"attachment; filename*=UTF-8''{encoded}",
         "Content-Type": "application/pdf",
@@ -63,7 +63,7 @@ def original_file_download_headers(
     filename: str,
     content_type: str | None,
 ) -> dict[str, str]:
-    encoded = java_urlencode(filename).replace("+", "%20")
+    encoded = form_urlencode(filename).replace("+", "%20")
     return {
         "Content-Disposition": (f"attachment; filename=\"{encoded}\"; filename*=UTF-8''{encoded}"),
         "Content-Type": content_type or "application/octet-stream",

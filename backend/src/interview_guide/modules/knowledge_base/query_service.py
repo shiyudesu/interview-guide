@@ -12,8 +12,11 @@ from interview_guide.common.ai.prompts import ANTI_INJECTION_INSTRUCTION, Prompt
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.knowledge_base.models import QueryRequest, QueryResponse
-from interview_guide.modules.knowledge_base.repository import VectorSearchHit, java_trim
-from interview_guide.modules.knowledge_base.service import java_string_length
+from interview_guide.modules.knowledge_base.repository import (
+    VectorSearchHit,
+    trim_codepoints_leq_space,
+)
+from interview_guide.modules.knowledge_base.service import utf16_code_unit_length
 from interview_guide.modules.knowledge_base.vectorization import EMBEDDING_DIMENSIONS
 
 logger = logging.getLogger(__name__)
@@ -283,7 +286,7 @@ class KnowledgeBaseQueryService:
                 [{"role": "user", "content": prompt}],
                 tools=self._tools or None,
             )
-            rewritten = java_trim(result.content or "")
+            rewritten = trim_codepoints_leq_space(result.content or "")
             return rewritten or question
         except Exception:
             logger.warning(
@@ -382,7 +385,7 @@ class KnowledgeBaseQueryService:
             if role == "user":
                 lines.append(f"用户: {content}")
             elif role == "assistant":
-                if java_string_length(content) > MAX_REWRITE_HISTORY_CHARS:
+                if utf16_code_unit_length(content) > MAX_REWRITE_HISTORY_CHARS:
                     content = (
                         content.encode("utf-16-le", errors="surrogatepass")[
                             : MAX_REWRITE_HISTORY_CHARS * 2
@@ -390,10 +393,10 @@ class KnowledgeBaseQueryService:
                         + "..."
                     )
                 lines.append(f"助手: {content}")
-        return java_trim("\n".join(lines))
+        return trim_codepoints_leq_space("\n".join(lines))
 
     def _resolve_search_parameters(self, question: str) -> SearchParameters:
-        compact_length = java_string_length(WHITESPACE.sub("", question))
+        compact_length = utf16_code_unit_length(WHITESPACE.sub("", question))
         if compact_length <= self._configuration.short_query_length:
             return SearchParameters(
                 max(self._configuration.topk_short, 1),
@@ -411,7 +414,7 @@ class KnowledgeBaseQueryService:
 
     @staticmethod
     def _normalize_question(question: str | None) -> str:
-        return java_trim(question) if question is not None else ""
+        return trim_codepoints_leq_space(question) if question is not None else ""
 
     @staticmethod
     def _validated_ids(
@@ -480,7 +483,7 @@ class KnowledgeBaseQueryService:
                 if any(marker in probe_buffer for marker in NO_RESULT_MARKERS):
                     yield NO_RESULT_RESPONSE
                     return
-                if java_string_length(probe_buffer) >= STREAM_PROBE_CHARS:
+                if utf16_code_unit_length(probe_buffer) >= STREAM_PROBE_CHARS:
                     passthrough = True
                     yield probe_buffer
                     probe_buffer = ""

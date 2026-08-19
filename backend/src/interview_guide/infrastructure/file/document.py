@@ -15,7 +15,7 @@ from pdfminer.high_level import extract_text
 from pdfminer.layout import LAParams
 from pypdf import PdfReader
 
-from interview_guide.common.api.models import java_utf16_length
+from interview_guide.common.api.models import utf16_code_unit_length
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.runtime import BlockingExecutor
@@ -120,7 +120,7 @@ class DocumentParser:
             return ""
         try:
             raw_text = self._extract(data, filename, content_type)
-            if java_utf16_length(raw_text) > DOCUMENT_MAX_UTF16_UNITS:
+            if utf16_code_unit_length(raw_text) > DOCUMENT_MAX_UTF16_UNITS:
                 raise RuntimeError("文档内容超过最大字符限制")
             return clean_text(raw_text)
         except BusinessException:

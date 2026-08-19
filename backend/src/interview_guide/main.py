@@ -52,7 +52,7 @@ from interview_guide.modules.voice_interview.websocket_api import (
     router as voice_interview_websocket_router,
 )
 
-ACTUATOR_MEDIA_TYPE = "application/vnd.spring-boot.actuator.v3+json"
+MANAGEMENT_MEDIA_TYPE = "application/vnd.spring-boot.actuator.v3+json"
 
 
 def load_openapi_compatibility_contract() -> dict[str, Any]:
@@ -141,18 +141,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def actuator_health() -> JSONResponse:
         return JSONResponse(
             content={"groups": ["liveness", "readiness"], "status": "UP"},
-            media_type=ACTUATOR_MEDIA_TYPE,
+            media_type=MANAGEMENT_MEDIA_TYPE,
         )
 
     @app.get("/actuator/info", include_in_schema=False)
     async def actuator_info() -> JSONResponse:
-        return JSONResponse(content={}, media_type=ACTUATOR_MEDIA_TYPE)
+        return JSONResponse(content={}, media_type=MANAGEMENT_MEDIA_TYPE)
 
     @app.get("/actuator/metrics", include_in_schema=False)
     async def actuator_metrics() -> JSONResponse:
         return JSONResponse(
             content={"names": metrics.metric_names},
-            media_type=ACTUATOR_MEDIA_TYPE,
+            media_type=MANAGEMENT_MEDIA_TYPE,
         )
 
     @app.get("/actuator/prometheus", include_in_schema=False)

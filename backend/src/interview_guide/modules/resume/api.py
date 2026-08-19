@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile
@@ -18,18 +17,11 @@ router = APIRouter(prefix="/api/resumes")
 async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     async with infrastructure.database.sessions() as session:
-        settings = request.app.state.settings
-        now = (
-            datetime.fromisoformat(settings.migration_fixed_time)
-            if settings.migration_fixed_time
-            else None
-        )
         yield ResumeService(
             session,
             infrastructure.storage,
             infrastructure.streams,
             infrastructure.document_parser,
-            now,
         )
 
 

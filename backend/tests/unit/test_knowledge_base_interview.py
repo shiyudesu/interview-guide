@@ -17,7 +17,6 @@ from interview_guide.modules.knowledge_base.question_models import (
     KnowledgeBaseQuestionFollowUp,
 )
 from interview_guide.modules.knowledge_base.question_service import (
-    ConfiguredRandomSelection,
     KnowledgeBaseInterviewService,
     KnowledgeBaseQuestionGenerationService,
     QuestionGenerationRecoveryService,
@@ -28,7 +27,7 @@ from interview_guide.modules.knowledge_base.question_service import (
 FIXED_NOW = datetime(2026, 8, 17, 8, 0)
 
 
-def test_requests_keep_java_defaults_and_validation_messages() -> None:
+def test_requests_keep_compatibility_defaults_and_validation_messages() -> None:
     generation = GenerateKnowledgeBaseQuestionsRequest(
         questionCount=2,
         categoryLimit=3,
@@ -207,14 +206,6 @@ def test_followup_selection_is_injected_and_strict() -> None:
         "追问一",
         "追问二",
     ]
-
-
-def test_configured_random_selection_matches_java_fisher_yates() -> None:
-    selection = ConfiguredRandomSelection([0, 1], [2])
-    values = ["一", "二", "三"]
-    selection.shuffle(values)
-    assert values == ["三", "二", "一"]
-    assert selection.randrange(0, 3) == 2
 
 
 class RecoveryState:

@@ -21,7 +21,7 @@ from interview_guide.common.ai.prompts import (
 )
 from interview_guide.common.ai.providers import LlmProviderRegistry
 from interview_guide.common.ai.skills import Skill, SkillRepository
-from interview_guide.common.ai.structured import StructuredOutputInvoker, java_bean_output_format
+from interview_guide.common.ai.structured import StructuredOutputInvoker, structured_output_format
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.interview.models import (
     CategoryRequest,
@@ -130,7 +130,7 @@ class QuestionGenerationState(TypedDict, total=False):
     questions: list[InterviewQuestion]
 
 
-QUESTION_OUTPUT_FORMAT = java_bean_output_format(
+QUESTION_OUTPUT_FORMAT = structured_output_format(
     {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -164,7 +164,7 @@ QUESTION_OUTPUT_FORMAT = java_bean_output_format(
         "additionalProperties": False,
     }
 )
-JD_OUTPUT_FORMAT = java_bean_output_format(
+JD_OUTPUT_FORMAT = structured_output_format(
     {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -191,7 +191,7 @@ JD_OUTPUT_FORMAT = java_bean_output_format(
 )
 
 
-def java_string_hash(value: str) -> int:
+def utf16_polynomial_hash(value: str) -> int:
     result = 0
     for character in value:
         codepoint = ord(character)
@@ -208,7 +208,7 @@ def java_string_hash(value: str) -> int:
     return result
 
 
-def java_hashmap_key_order(values: list[str | None]) -> list[str | None]:
+def stable_bucket_key_order(values: list[str | None]) -> list[str | None]:
     unique: list[str | None] = []
     for value in values:
         if value not in unique:
@@ -217,7 +217,7 @@ def java_hashmap_key_order(values: list[str | None]) -> list[str | None]:
     def bucket(value: str | None) -> int:
         if value is None:
             return 0
-        hash_value = java_string_hash(value)
+        hash_value = utf16_polynomial_hash(value)
         spread = hash_value ^ (hash_value >> 16)
         return spread & 15
 
@@ -903,7 +903,7 @@ class InterviewQuestionService:
                 summary = f"{item.question[:30]}…" if len(item.question) > 30 else item.question
             grouped.setdefault(question_type, []).append(summary)
         lines = ["已考过的知识点（避免重复出题）："]
-        for key in java_hashmap_key_order(list(grouped)):
+        for key in stable_bucket_key_order(list(grouped)):
             assert key is not None
             lines.append(f"- {key}: {', '.join(grouped[key])}")
         return "\n".join(lines) + "\n"

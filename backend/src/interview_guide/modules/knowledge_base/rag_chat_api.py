@@ -29,14 +29,9 @@ router = APIRouter(prefix="/api/rag-chat")
 def rag_chat_service(request: Request) -> RagChatService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     settings = request.app.state.settings
-    now = (
-        datetime.fromisoformat(settings.migration_fixed_time)
-        if settings.migration_fixed_time
-        else None
-    )
     repository = RagChatRepository(
         infrastructure.database.sessions,
-        now=(lambda: now) if now is not None else datetime.now,
+        now=datetime.now,
     )
     return RagChatService(
         repository,

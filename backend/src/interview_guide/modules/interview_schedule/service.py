@@ -5,7 +5,6 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.models import InterviewSchedule
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.interview_schedule.models import (
@@ -144,9 +143,5 @@ class InterviewScheduleService:
         )
 
 
-def schedule_now(settings: Settings) -> datetime:
-    return (
-        datetime.fromisoformat(settings.migration_fixed_time)
-        if settings.migration_fixed_time
-        else datetime.now()
-    )
+def schedule_now() -> datetime:
+    return datetime.now()

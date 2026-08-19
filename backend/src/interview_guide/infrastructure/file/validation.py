@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 
-from interview_guide.common.api.models import java_utf16_length
+from interview_guide.common.api.models import utf16_code_unit_length
 from interview_guide.common.errors import BusinessException, ErrorCode
 
 RESUME_MAX_BYTES = 10 * 1024 * 1024
@@ -88,7 +88,7 @@ def is_knowledge_base_mime_type(content_type: str | None) -> bool:
 
 
 def validate_document_character_limit(text: str) -> None:
-    if java_utf16_length(text) > DOCUMENT_MAX_UTF16_UNITS:
+    if utf16_code_unit_length(text) > DOCUMENT_MAX_UTF16_UNITS:
         raise BusinessException(
             ErrorCode.BAD_REQUEST,
             "文档内容超过最大字符限制",

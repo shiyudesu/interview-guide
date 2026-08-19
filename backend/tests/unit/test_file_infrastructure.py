@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from interview_guide.common.api.models import java_utf16_length
+from interview_guide.common.api.models import utf16_code_unit_length
 from interview_guide.common.errors import BusinessException
 from interview_guide.infrastructure.file.content_type import ContentTypeDetector
 from interview_guide.infrastructure.file.hash import sha256_bytes, sha256_chunks
@@ -52,7 +52,7 @@ def test_file_size_and_utf16_limits_fail_whole_input() -> None:
         validate_file(b"12345", 4, "简历")
 
     oversized = "😀" * ((5 * 1024 * 1024) // 2 + 1)
-    assert java_utf16_length(oversized) > 5 * 1024 * 1024
+    assert utf16_code_unit_length(oversized) > 5 * 1024 * 1024
     with pytest.raises(BusinessException, match="文档内容超过最大字符限制"):
         validate_document_character_limit(oversized)
 
@@ -74,7 +74,7 @@ def test_content_type_detection_falls_back_only_on_io_error() -> None:
     )
 
 
-def test_text_cleaning_matches_java_rules() -> None:
+def test_text_cleaning_matches_compatibility_rules() -> None:
     source = (
         "个人简历\r\n============\nimage001.png\n"
         "https://example.com/photo.jpg\nfile:///tmp/temp.html\n\n\n技能：Java   "

@@ -72,7 +72,7 @@ jobs:
         run: uv run pytest
       - name: Build application image
         run: docker build --file backend/Dockerfile --tag interview-guide-python:ci .
-      - name: Verify image contains no JVM
+      - name: Verify Python-only image
         run: >-
           docker run --rm interview-guide-python:ci
           sh -c 'test ! -e /usr/bin/java && ! command -v java'

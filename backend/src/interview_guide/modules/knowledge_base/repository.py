@@ -17,7 +17,7 @@ from interview_guide.common.db.models import (
 from interview_guide.common.errors import BusinessException, ErrorCode
 
 
-def java_trim(value: str) -> str:
+def trim_codepoints_leq_space(value: str) -> str:
     start = 0
     end = len(value)
     while start < end and ord(value[start]) <= 0x20:
@@ -84,7 +84,7 @@ class KnowledgeBaseRepository:
         return list(result)
 
     async def search(self, keyword: str) -> list[KnowledgeBase]:
-        value = f"%{java_trim(keyword).lower()}%"
+        value = f"%{trim_codepoints_leq_space(keyword).lower()}%"
         result = await self._session.scalars(
             select(KnowledgeBase)
             .where(

@@ -16,7 +16,7 @@ from interview_guide.common.api.responses import result_response, serialized_res
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.result import Result
-from interview_guide.main import ACTUATOR_MEDIA_TYPE, create_app
+from interview_guide.main import MANAGEMENT_MEDIA_TYPE, create_app
 
 
 def settings(**overrides: object) -> Settings:
@@ -29,14 +29,14 @@ def settings(**overrides: object) -> Settings:
     )
 
 
-def test_health_response_matches_java_contract() -> None:
+def test_health_response_matches_compatibility_contract() -> None:
     app = create_app(settings())
 
     with TestClient(app) as client:
         response = client.get("/actuator/health")
 
     assert response.status_code == 200
-    assert response.headers["content-type"] == ACTUATOR_MEDIA_TYPE
+    assert response.headers["content-type"] == MANAGEMENT_MEDIA_TYPE
     assert response.content == b'{"groups":["liveness","readiness"],"status":"UP"}'
 
 
@@ -47,7 +47,7 @@ def test_request_logging_keeps_normal_traffic_nonblocking_at_info_level() -> Non
     assert request_log_level(500, 0.1) == logging.WARNING
 
 
-def test_cors_preflight_matches_java_headers() -> None:
+def test_cors_preflight_matches_compatibility_headers() -> None:
     app = create_app(settings())
 
     with TestClient(app) as client:
@@ -118,7 +118,7 @@ class ResponsePayload(BaseModel):
     optional: str | None
 
 
-def test_result_response_preserves_compact_java_compatible_json() -> None:
+def test_result_response_preserves_compact_compatibility_json() -> None:
     result = Result.ok(
         ResponsePayload(
             company_name="示例公司",
@@ -141,7 +141,7 @@ def test_result_response_preserves_compact_java_compatible_json() -> None:
     assert response.body == expected
 
 
-def test_malformed_json_matches_java_internal_error() -> None:
+def test_malformed_json_matches_compatibility_internal_error() -> None:
     app = create_app(settings())
 
     @app.post("/api/test/json")

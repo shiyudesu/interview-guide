@@ -13,11 +13,6 @@ from interview_guide.modules.voice_interview.dashscope import (
     DashScopeAsrProvider,
     DashScopeTtsSynthesizer,
 )
-from interview_guide.modules.voice_interview.fakes import (
-    ExplicitFakeAsrProvider,
-    ExplicitFakeLlmStreamer,
-    ExplicitFakeTtsSynthesizer,
-)
 from interview_guide.modules.voice_interview.llm import UnifiedVoiceLlmStreamer
 from interview_guide.modules.voice_interview.protocols import (
     VoiceAsrProvider,
@@ -39,40 +34,31 @@ def create_voice_websocket_runtime(
     settings: Settings,
 ) -> VoiceWebSocketRuntime:
     resources = Path(__file__).resolve().parents[4] / "resources"
-    service = build_service(infrastructure, settings)
+    service = build_service(infrastructure)
     repository = VoiceInterviewRepository(
         infrastructure.database.sessions,
-        lambda: (
-            datetime.fromisoformat(settings.migration_fixed_time)
-            if settings.migration_fixed_time
-            else datetime.now()
-        ),
+        datetime.now,
     )
-    asr: VoiceAsrProvider
-    llm: VoiceLlmStreamer
-    tts: VoiceTtsSynthesizer
-    if settings.migration_voice_fake_enabled:
-        asr = ExplicitFakeAsrProvider()
-        llm = ExplicitFakeLlmStreamer(("固定迁移回复。",))
-        tts = ExplicitFakeTtsSynthesizer()
-    else:
-        asr = DashScopeAsrProvider(infrastructure.voice_config)
-        tts = DashScopeTtsSynthesizer(infrastructure.voice_config, settings)
-        prompts = PromptRepository(resources)
-        compressor = VoiceContextCompressor(
-            infrastructure.provider_registry,
-            infrastructure.llm_adapter,
-            prompts,
-            settings,
-        )
-        llm = UnifiedVoiceLlmStreamer(
-            repository,
-            infrastructure.provider_registry,
-            infrastructure.llm_adapter,
-            infrastructure.prompt_sanitizer,
-            SkillRepository(resources),
-            compressor,
-        )
+    asr: VoiceAsrProvider = DashScopeAsrProvider(infrastructure.voice_config)
+    tts: VoiceTtsSynthesizer = DashScopeTtsSynthesizer(
+        infrastructure.voice_config,
+        settings,
+    )
+    prompts = PromptRepository(resources)
+    compressor = VoiceContextCompressor(
+        infrastructure.provider_registry,
+        infrastructure.llm_adapter,
+        prompts,
+        settings,
+    )
+    llm: VoiceLlmStreamer = UnifiedVoiceLlmStreamer(
+        repository,
+        infrastructure.provider_registry,
+        infrastructure.llm_adapter,
+        infrastructure.prompt_sanitizer,
+        SkillRepository(resources),
+        compressor,
+    )
     return VoiceWebSocketRuntime(
         service,
         asr,

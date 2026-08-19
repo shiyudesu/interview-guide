@@ -85,7 +85,7 @@ async def test_feishu_rule_parse_has_priority_over_ai() -> None:
 
 
 @pytest.mark.asyncio
-async def test_chinese_round_preserves_java_partial_parse_bug() -> None:
+async def test_chinese_round_preserves_compatibility_partial_parse_bug() -> None:
     parser, _, _ = service()
     raw = "公司：字节跳动 岗位：Java工程师 时间：2026-08-20 10:30 第二轮"
 

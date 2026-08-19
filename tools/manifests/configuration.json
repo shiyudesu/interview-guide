@@ -2736,78 +2736,6 @@
         "file": "backend/src/interview_guide/common/config/settings.py",
         "line": 369
       }
-    },
-    {
-      "environment": "MIGRATION_FIXED_TIME",
-      "field": "migration_fixed_time",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 373
-      }
-    },
-    {
-      "environment": "MIGRATION_PROVIDER_NONCE_HEX",
-      "field": "migration_provider_nonce_hex",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 378
-      }
-    },
-    {
-      "environment": "MIGRATION_FILE_UUID",
-      "field": "migration_file_uuid",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 382
-      }
-    },
-    {
-      "environment": "MIGRATION_INTERVIEW_SESSION_UUID",
-      "field": "migration_interview_session_uuid",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 386
-      }
-    },
-    {
-      "environment": "MIGRATION_QUESTION_GENERATION_TASK_UUID",
-      "field": "migration_question_generation_task_uuid",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 390
-      }
-    },
-    {
-      "environment": "MIGRATION_KNOWLEDGEBASE_MAIN_SELECTION_INTS",
-      "field": "migration_knowledgebase_main_selection_ints",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 394
-      }
-    },
-    {
-      "environment": "MIGRATION_KNOWLEDGEBASE_FOLLOW_UP_SELECTION_INTS",
-      "field": "migration_knowledgebase_follow_up_selection_ints",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 398
-      }
-    },
-    {
-      "environment": "MIGRATION_PROMPT_BOUNDARY_UUID",
-      "field": "migration_prompt_boundary_uuid",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 402
-      }
-    },
-    {
-      "environment": "MIGRATION_VOICE_FAKE_ENABLED",
-      "field": "migration_voice_fake_enabled",
-      "source": {
-        "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 406
-      }
     }
   ],
   "schemaVersion": 1,
@@ -2815,7 +2743,7 @@
     "configurationValueCount": 143,
     "envExampleCount": 47,
     "envReferencedButUndocumentedCount": 0,
-    "propertyBindingCount": 100
+    "propertyBindingCount": 91
   },
   "valueInjections": []
 }

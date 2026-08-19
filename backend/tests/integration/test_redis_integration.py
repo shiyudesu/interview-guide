@@ -76,7 +76,7 @@ async def test_stream_read_pending_reclaim_and_ack(redis_client: Redis) -> None:
 
 
 @pytest.mark.asyncio
-async def test_rate_limit_lua_is_atomic_and_sets_java_ttl(redis_client: Redis) -> None:
+async def test_rate_limit_lua_is_atomic_and_sets_compatibility_ttl(redis_client: Redis) -> None:
     script = Path(__file__).resolve().parents[2] / "resources/scripts/rate_limit_single.lua"
     limiter = RateLimiter(redis_client, script)
     await limiter.start()

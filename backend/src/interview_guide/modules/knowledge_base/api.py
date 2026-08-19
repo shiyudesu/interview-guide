@@ -37,12 +37,6 @@ async def knowledge_base_service(
     request: Request,
 ) -> AsyncIterator[KnowledgeBaseService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    settings = request.app.state.settings
-    fixed_now = (
-        datetime.fromisoformat(settings.migration_fixed_time)
-        if settings.migration_fixed_time
-        else None
-    )
     async with infrastructure.database.sessions() as session:
         yield KnowledgeBaseService(
             session,
@@ -50,7 +44,7 @@ async def knowledge_base_service(
             infrastructure.storage,
             infrastructure.streams,
             infrastructure.document_parser,
-            now=(lambda: fixed_now) if fixed_now is not None else datetime.now,
+            now=datetime.now,
         )
 
 

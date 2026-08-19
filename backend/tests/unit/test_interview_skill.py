@@ -8,7 +8,7 @@ from interview_guide.modules.interview_skill.service import InterviewSkillServic
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_skill_response_order_and_content_matches_java_contract() -> None:
+def test_skill_response_order_and_content_matches_compatibility_contract() -> None:
     service = InterviewSkillService(SkillRepository(BACKEND_ROOT / "resources"))
 
     skills = service.all()

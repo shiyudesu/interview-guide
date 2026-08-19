@@ -34,13 +34,11 @@ SessionDependency = Annotated[AsyncSession, Depends(database_session)]
 
 
 async def schedule_service(
-    request: Request,
     session: SessionDependency,
 ) -> InterviewScheduleService:
-    settings = request.app.state.settings
     return InterviewScheduleService(
         session,
-        now=lambda: schedule_now(settings),
+        now=schedule_now,
     )
 
 
@@ -52,12 +50,11 @@ ServiceDependency = Annotated[
 
 async def parse_service(request: Request) -> InterviewParseService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    settings = request.app.state.settings
     return InterviewParseService(
         infrastructure.provider_registry,
         infrastructure.llm_adapter,
         infrastructure.prompt_sanitizer,
-        schedule_now(settings),
+        schedule_now(),
     )
 
 

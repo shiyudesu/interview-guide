@@ -38,7 +38,7 @@ assert_accepts "english-subject" "feat: add interview question import"
 assert_accepts "chinese-subject" "docs(migration): 更新迁移检查清单"
 assert_accepts "scope-and-body" $'fix(api): preserve legacy response fields\n\nExplain the compatibility impact.\n\nRefs: #12'
 assert_accepts "breaking-change" $'refactor(backend)!: replace the backend runtime\n\nBREAKING CHANGE: implementation runtime changed without changing the API.'
-assert_accepts "git-trailer" $'test: add contract coverage\n\nAdd Java and Python golden-master cases.\n\nSigned-off-by: Example <example@example.com>'
+assert_accepts "git-trailer" $'test: add contract coverage\n\nAdd API and worker golden-master cases.\n\nSigned-off-by: Example <example@example.com>'
 assert_accepts "generated-merge" "Merge branch 'main'"
 assert_accepts "generated-revert" 'Revert "feat: add interview question import"'
 assert_accepts "generated-fixup" "fixup! feat: add interview question import"

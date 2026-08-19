@@ -18,7 +18,7 @@ from interview_guide.common.ai.prompts import (
     PromptSanitizer,
 )
 from interview_guide.common.ai.providers import LlmProviderRegistry
-from interview_guide.common.ai.structured import StructuredOutputInvoker, java_bean_output_format
+from interview_guide.common.ai.structured import StructuredOutputInvoker, structured_output_format
 from interview_guide.common.api.models import compact_json_text
 from interview_guide.common.db.models import KnowledgeBaseQuestion
 from interview_guide.common.errors import BusinessException, ErrorCode
@@ -55,7 +55,10 @@ from interview_guide.modules.knowledge_base.question_repository import (
     QuestionRow,
 )
 from interview_guide.modules.knowledge_base.repository import KnowledgeBaseQueryRepository
-from interview_guide.modules.knowledge_base.vectorization import java_substring, java_utf16_length
+from interview_guide.modules.knowledge_base.vectorization import (
+    utf16_code_unit_length,
+    utf16_prefix,
+)
 
 logger = logging.getLogger(__name__)
 DEFAULT_SKILL_ID = "knowledge-base"
@@ -74,7 +77,7 @@ GENERATION_QUERIES = (
     "典型案例 常见问题 应用场景 最佳实践",
 )
 
-QUESTION_OUTPUT_FORMAT = java_bean_output_format(
+QUESTION_OUTPUT_FORMAT = structured_output_format(
     {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -831,9 +834,9 @@ class KnowledgeBaseQuestionGenerationService:
                 "知识库未检索到可用于生成题目的内容",
             )
         context = "\n\n---\n\n".join(texts)
-        if java_utf16_length(context) <= MAX_CONTEXT_CHARS:
+        if utf16_code_unit_length(context) <= MAX_CONTEXT_CHARS:
             return context
-        return java_substring(context, MAX_CONTEXT_CHARS) + "\n...(知识库片段过长，已截断)"
+        return utf16_prefix(context, MAX_CONTEXT_CHARS) + "\n...(知识库片段过长，已截断)"
 
     async def _call_llm(
         self,
@@ -1054,51 +1057,6 @@ class SystemRandomSelection:
 
     def randrange(self, start: int, stop: int) -> int:
         return random.randrange(start, stop)
-
-
-class ConfiguredRandomSelection:
-    def __init__(
-        self,
-        main_values: Sequence[int] | None,
-        follow_up_values: Sequence[int] | None,
-    ) -> None:
-        self._main_values = list(main_values) if main_values is not None else None
-        self._follow_up_values = list(follow_up_values) if follow_up_values is not None else None
-        self._main_index = 0
-        self._follow_up_index = 0
-
-    def shuffle(self, values: list[Any]) -> None:
-        if self._main_values is None:
-            random.shuffle(values)
-            return
-        for index in range(len(values), 1, -1):
-            selected = self._next_main(0, index)
-            values[index - 1], values[selected] = values[selected], values[index - 1]
-
-    def randrange(self, start: int, stop: int) -> int:
-        if self._follow_up_values is None:
-            return random.randrange(start, stop)
-        if self._follow_up_index >= len(self._follow_up_values):
-            raise RuntimeError("Configured follow-up selection sequence exhausted")
-        selected = self._follow_up_values[self._follow_up_index]
-        self._follow_up_index += 1
-        if selected < start or selected >= stop:
-            raise RuntimeError(
-                f"Configured follow-up selection {selected} is outside [{start}, {stop})"
-            )
-        return selected
-
-    def _next_main(self, start: int, stop: int) -> int:
-        assert self._main_values is not None
-        if self._main_index >= len(self._main_values):
-            raise RuntimeError("Configured main-question selection sequence exhausted")
-        selected = self._main_values[self._main_index]
-        self._main_index += 1
-        if selected < start or selected >= stop:
-            raise RuntimeError(
-                f"Configured main-question selection {selected} is outside [{start}, {stop})"
-            )
-        return selected
 
 
 class KnowledgeBaseInterviewService:

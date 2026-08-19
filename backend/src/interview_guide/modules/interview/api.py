@@ -46,19 +46,9 @@ logger = logging.getLogger(__name__)
 async def interview_service(request: Request) -> AsyncIterator[InterviewService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     settings = request.app.state.settings
-    fixed_now = (
-        datetime.fromisoformat(settings.migration_fixed_time)
-        if settings.migration_fixed_time
-        else None
-    )
-    fixed_uuid = (
-        uuid.UUID(settings.migration_interview_session_uuid)
-        if settings.migration_interview_session_uuid
-        else None
-    )
     repository = InterviewRepository(
         infrastructure.database.sessions,
-        now=(lambda: fixed_now) if fixed_now is not None else datetime.now,
+        now=datetime.now,
     )
     structured = StructuredOutputInvoker(infrastructure.llm_adapter)
     questions = InterviewQuestionService(
@@ -86,7 +76,7 @@ async def interview_service(request: Request) -> AsyncIterator[InterviewService]
         evaluation,
         infrastructure.provider_registry,
         infrastructure.blocking_executor,
-        uuid_factory=(lambda: fixed_uuid) if fixed_uuid is not None else uuid.uuid4,
+        uuid_factory=uuid.uuid4,
     )
 
 

@@ -90,11 +90,11 @@ def cl100k_encoding() -> tiktoken.Encoding:
     return tiktoken.get_encoding("cl100k_base")
 
 
-def java_utf16_length(value: str) -> int:
+def utf16_code_unit_length(value: str) -> int:
     return len(value.encode("utf-16-le", errors="surrogatepass")) // 2
 
 
-def java_substring(value: str, end_utf16: int) -> str:
+def utf16_prefix(value: str, end_utf16: int) -> str:
     encoded = value.encode("utf-16-le", errors="surrogatepass")
     return encoded[: end_utf16 * 2].decode("utf-16-le", errors="surrogatepass")
 
@@ -104,7 +104,7 @@ def last_punctuation_index(value: str) -> int:
     for punctuation in PUNCTUATION_MARKS:
         index = value.rfind(punctuation)
         if index >= 0:
-            result = max(result, java_utf16_length(value[:index]))
+            result = max(result, utf16_code_unit_length(value[:index]))
     return result
 
 
@@ -132,9 +132,9 @@ def split_text(
         if len(tokens) > chunk_size:
             punctuation_index = last_punctuation_index(chunk_text)
             if punctuation_index != -1 and punctuation_index > min_chunk_size_characters:
-                chunk_text = java_substring(chunk_text, punctuation_index + 1)
+                chunk_text = utf16_prefix(chunk_text, punctuation_index + 1)
         value = chunk_text.strip()
-        if java_utf16_length(value) > min_chunk_length_to_embed:
+        if utf16_code_unit_length(value) > min_chunk_length_to_embed:
             chunks.append(value)
         consumed = len(encoding.encode(chunk_text, disallowed_special=()))
         if consumed < 1:
@@ -143,7 +143,7 @@ def split_text(
         chunk_count += 1
     if tokens:
         remaining = encoding.decode(tokens).replace(os.linesep, " ").strip()
-        if java_utf16_length(remaining) > min_chunk_length_to_embed:
+        if utf16_code_unit_length(remaining) > min_chunk_length_to_embed:
             chunks.append(remaining)
     return chunks
 

@@ -10,7 +10,7 @@ from interview_guide.common.ai.adapter import ProviderConfig
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.structured import (
     StructuredOutputInvoker,
-    java_bean_output_format,
+    structured_output_format,
 )
 from interview_guide.common.errors import ErrorCode
 from interview_guide.modules.interview.models import (
@@ -22,12 +22,12 @@ from interview_guide.modules.interview.models import (
 )
 from interview_guide.modules.interview.question import (
     InterviewSkillLibrary,
-    java_hashmap_key_order,
+    stable_bucket_key_order,
 )
 
 MAX_REFERENCE_CONTEXT_CHARS = 6_000
 logger = logging.getLogger(__name__)
-BATCH_OUTPUT_FORMAT = java_bean_output_format(
+BATCH_OUTPUT_FORMAT = structured_output_format(
     {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -80,7 +80,7 @@ BATCH_OUTPUT_FORMAT = java_bean_output_format(
         "additionalProperties": False,
     }
 )
-SUMMARY_OUTPUT_FORMAT = java_bean_output_format(
+SUMMARY_OUTPUT_FORMAT = structured_output_format(
     {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -211,7 +211,7 @@ class UnifiedEvaluationService:
         )
         qa_records = "".join(
             f"问题{item.question_index + 1} "
-            f"[{self._java_string(item.category)}]: {item.question}\n"
+            f"[{self._nullable_string(item.category)}]: {item.question}\n"
             f"回答: {item.user_answer if item.user_answer is not None else '(未回答)'}\n\n"
             for item in records
         )
@@ -406,7 +406,7 @@ class UnifiedEvaluationService:
                 score=int(sum(category_scores[category]) / len(category_scores[category])),
                 question_count=len(category_scores[category]),
             )
-            for category in java_hashmap_key_order(list(category_scores))
+            for category in stable_bucket_key_order(list(category_scores))
         ]
         overall_score = (
             0 if answered_count == 0 else int(sum(item.score for item in details) / len(details))
@@ -441,7 +441,7 @@ class UnifiedEvaluationService:
             category_scores.setdefault(record.category, []).append(score)
         return "\n".join(
             sorted(
-                f"- {UnifiedEvaluationService._java_string(category)}: "
+                f"- {UnifiedEvaluationService._nullable_string(category)}: "
                 f"平均分 {int(sum(scores) / len(scores))}, 题数 {len(scores)}"
                 for category, scores in category_scores.items()
             )
@@ -486,7 +486,7 @@ class UnifiedEvaluationService:
         return result
 
     @staticmethod
-    def _java_string(value: object | None) -> str:
+    def _nullable_string(value: object | None) -> str:
         return "null" if value is None else str(value)
 
 

@@ -151,8 +151,8 @@
       "unique": false
     },
     {
-      "definition": "CREATE INDEX spring_ai_vector_index ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
-      "name": "spring_ai_vector_index",
+      "definition": "CREATE INDEX vector_store_embedding_hnsw_idx ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
+      "name": "vector_store_embedding_hnsw_idx",
       "source": {
         "file": "backend/alembic/sql/0001_initial_schema.sql",
         "line": 306
@@ -160,8 +160,8 @@
       "unique": false
     },
     {
-      "definition": "CREATE INDEX spring_ai_vector_index ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
-      "name": "spring_ai_vector_index",
+      "definition": "CREATE INDEX vector_store_embedding_hnsw_idx ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
+      "name": "vector_store_embedding_hnsw_idx",
       "source": {
         "file": "backend/alembic/sql/0001_initial_schema.sql",
         "line": 360
@@ -190,7 +190,7 @@
   "migrations": [
     {
       "file": "backend/alembic/sql/0001_initial_schema.sql",
-      "sha256": "430f090350e0e39703c99d70c5b560baefb64a7ca51b38411625f92854b050ff",
+      "sha256": "639877f22379732b99ece43e7f410ec9c6c169b337c92acae2f962a9ef2249e7",
       "statementTerminatorCount": 53
     }
   ],

@@ -27,7 +27,7 @@ from interview_guide.infrastructure.file.validation import (
 )
 from interview_guide.modules.knowledge_base.repository import (
     KnowledgeBaseRepository,
-    java_trim,
+    trim_codepoints_leq_space,
 )
 
 logger = logging.getLogger(__name__)
@@ -69,11 +69,11 @@ class KnowledgeBaseStreams(Protocol):
     ) -> str: ...
 
 
-def java_string_length(value: str) -> int:
+def utf16_code_unit_length(value: str) -> int:
     return len(value.encode("utf-16-le", errors="surrogatepass")) // 2
 
 
-def java_is_blank(value: str | None) -> bool:
+def is_blank_text(value: str | None) -> bool:
     return value is None or not value or value.isspace()
 
 
@@ -138,7 +138,7 @@ class KnowledgeBaseService:
         return await self._repository.categories()
 
     async def list_by_category(self, category: str | None) -> list[dict[str, Any]]:
-        blank = java_is_blank(category)
+        blank = is_blank_text(category)
         entities = await self._repository.list_entities(
             category=category if not blank else None,
             uncategorized=blank,
@@ -148,7 +148,7 @@ class KnowledgeBaseService:
     async def search(self, keyword: str) -> list[dict[str, Any]]:
         entities = (
             await self._repository.list_entities()
-            if java_is_blank(keyword)
+            if is_blank_text(keyword)
             else await self._repository.search(keyword)
         )
         return [item(entity) for entity in entities]
@@ -174,7 +174,7 @@ class KnowledgeBaseService:
                 ErrorCode.KNOWLEDGE_BASE_NOT_FOUND,
                 "知识库不存在",
             )
-        entity.category = category if not java_is_blank(category) else None
+        entity.category = category if not is_blank_text(category) else None
         await self._session.commit()
 
     async def upload(
@@ -235,7 +235,7 @@ class KnowledgeBaseService:
         resolved_filename = filename or ""
         knowledge_name = (
             name
-            if name is not None and java_trim(name)
+            if name is not None and trim_codepoints_leq_space(name)
             else resolved_filename.rsplit(".", 1)[0]
             if "." in resolved_filename
             else resolved_filename or "未命名知识库"
@@ -244,8 +244,8 @@ class KnowledgeBaseService:
             entity = await self._repository.add(
                 KnowledgeBase(
                     access_count=1,
-                    category=java_trim(category)
-                    if category is not None and java_trim(category)
+                    category=trim_codepoints_leq_space(category)
+                    if category is not None and trim_codepoints_leq_space(category)
                     else None,
                     chunk_count=0,
                     content_type=upload_content_type,
@@ -269,7 +269,7 @@ class KnowledgeBaseService:
                 "name": entity.name,
                 "category": entity.category or "",
                 "fileSize": entity.file_size,
-                "contentLength": java_string_length(content),
+                "contentLength": utf16_code_unit_length(content),
                 "vectorStatus": "PENDING",
             },
             "storage": {"fileKey": file_key, "fileUrl": file_url},

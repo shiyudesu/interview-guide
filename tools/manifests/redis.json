@@ -12,7 +12,7 @@
       "name": "PROVIDER_VERSION_KEY",
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 26
+        "line": 25
       },
       "valueExpression": "\"llm:provider:config:version\""
     },
@@ -20,7 +20,7 @@
       "name": "PROVIDER_BOOTSTRAP_LOCK",
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 28
+        "line": 27
       },
       "valueExpression": "0x49475F50524F5644"
     },
@@ -254,7 +254,7 @@
         "file": "backend/src/interview_guide/modules/interview/evaluation.py",
         "line": 30
       },
-      "valueExpression": "java_bean_output_format("
+      "valueExpression": "structured_output_format("
     },
     {
       "name": "CODE_BLOCK",
@@ -268,7 +268,7 @@
       "name": "STREAM_ERROR_RESPONSE",
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/query_service.py",
-        "line": 23
+        "line": 26
       },
       "valueExpression": "\"【错误】知识库查询失败：AI服务暂时不可用，请稍后重试。\""
     },
@@ -276,7 +276,7 @@
       "name": "STREAM_PROBE_CHARS",
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/query_service.py",
-        "line": 24
+        "line": 27
       },
       "valueExpression": "120"
     },
@@ -317,21 +317,21 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 26
+        "line": 25
       },
       "value": "llm:provider:config:version"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 27
+        "line": 26
       },
       "value": "llm:provider:config:changed"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 444
+        "line": 407
       },
       "value": "{self.postgres_host}:{self.postgres_port}/{database}"
     },
@@ -429,7 +429,7 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 116
+        "line": 110
       },
       "value": "data:{line}\\n"
     },
@@ -450,35 +450,35 @@
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 105
+        "line": 99
       },
       "value": "{RESUME_ANALYZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 117
+        "line": 111
       },
       "value": "{KB_VECTORIZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 139
+        "line": 133
       },
       "value": "{KB_QUESTION_GEN.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 165
+        "line": 159
       },
       "value": "{INTERVIEW_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 197
+        "line": 191
       },
       "value": "{VOICE_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     }
@@ -546,7 +546,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 102
+        "line": 92
       }
     },
     {
@@ -562,7 +562,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 102
+        "line": 96
       }
     },
     {
@@ -570,7 +570,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
-        "line": 90
+        "line": 65
       }
     }
   ],
@@ -580,7 +580,7 @@
       "schedule": "cron",
       "source": {
         "file": "backend/src/interview_guide/scheduler.py",
-        "line": 100
+        "line": 94
       }
     },
     {
@@ -588,7 +588,7 @@
       "schedule": "interval",
       "source": {
         "file": "backend/src/interview_guide/scheduler.py",
-        "line": 109
+        "line": 103
       }
     },
     {
@@ -596,7 +596,7 @@
       "schedule": "interval",
       "source": {
         "file": "backend/src/interview_guide/scheduler.py",
-        "line": 117
+        "line": 111
       }
     }
   ],

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import time
-import uuid
 from collections.abc import AsyncIterator
-from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -27,7 +25,6 @@ from interview_guide.modules.knowledge_base.question_models import (
     UpdateKnowledgeBaseQuestionStatusRequest,
 )
 from interview_guide.modules.knowledge_base.question_service import (
-    ConfiguredRandomSelection,
     KnowledgeBaseInterviewService,
     KnowledgeBaseQuestionService,
     QuestionGenerationStateService,
@@ -37,31 +34,11 @@ from interview_guide.modules.knowledge_base.question_service import (
 router = APIRouter()
 
 
-def configured_ints(value: str | None) -> list[int] | None:
-    if value is None or not value.strip():
-        return None
-    return [int(item.strip()) for item in value.split(",")]
-
-
-def fixed_now(request: Request) -> datetime | None:
-    value = request.app.state.settings.migration_fixed_time
-    return datetime.fromisoformat(value) if value else None
-
-
 def generation_state(
     request: Request,
 ) -> QuestionGenerationStateService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    value = request.app.state.settings.migration_question_generation_task_uuid
-    fixed_task_id = str(uuid.UUID(value)) if value else None
-    now = fixed_now(request)
-    return QuestionGenerationStateService(
-        infrastructure.database.sessions,
-        now=(lambda: now) if now is not None else datetime.now,
-        task_id_factory=(lambda: fixed_task_id)
-        if fixed_task_id is not None
-        else lambda: str(uuid.uuid4()),
-    )
+    return QuestionGenerationStateService(infrastructure.database.sessions)
 
 
 async def question_service(
@@ -69,13 +46,11 @@ async def question_service(
 ) -> AsyncIterator[KnowledgeBaseQuestionService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     state = generation_state(request)
-    now = fixed_now(request)
     async with infrastructure.database.sessions() as session:
         yield KnowledgeBaseQuestionService(
             session,
             state,
             QuestionGenStreamProducer(infrastructure.streams, state),
-            now=(lambda: now) if now is not None else datetime.now,
         )
 
 
@@ -199,14 +174,9 @@ async def create_knowledge_base_interview(
     interview: InterviewServiceDependency,
 ) -> Response:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    settings = request.app.state.settings
     service = KnowledgeBaseInterviewService(
         infrastructure.database.sessions,
         interview,
-        random_selection=ConfiguredRandomSelection(
-            configured_ints(settings.migration_knowledgebase_main_selection_ints),
-            configured_ints(settings.migration_knowledgebase_follow_up_selection_ints),
-        ),
     )
     return result_response(Result.ok(await service.create_session(payload)))
 
@@ -229,14 +199,9 @@ async def knowledge_base_interview_capacity(
             "系统繁忙，请稍后重试",
         )
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    settings = request.app.state.settings
     service = KnowledgeBaseInterviewService(
         infrastructure.database.sessions,
         interview,
-        random_selection=ConfiguredRandomSelection(
-            configured_ints(settings.migration_knowledgebase_main_selection_ints),
-            configured_ints(settings.migration_knowledgebase_follow_up_selection_ints),
-        ),
     )
     return result_response(
         Result.ok(

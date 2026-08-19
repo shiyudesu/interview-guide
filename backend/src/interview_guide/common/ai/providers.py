@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import secrets
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -485,30 +484,5 @@ class LlmProviderRegistry:
                 await asyncio.sleep(1)
 
 
-def provider_now(settings: Settings) -> datetime:
-    return (
-        datetime.fromisoformat(settings.migration_fixed_time)
-        if settings.migration_fixed_time
-        else datetime.now()
-    )
-
-
-def provider_nonce_factory(settings: Settings) -> Callable[[int], bytes]:
-    if not settings.migration_provider_nonce_hex:
-        return secrets.token_bytes
-    configured = iter(
-        value.strip() for value in settings.migration_provider_nonce_hex.split(",") if value.strip()
-    )
-
-    def next_nonce(size: int) -> bytes:
-        try:
-            value = bytes.fromhex(next(configured))
-        except StopIteration as error:
-            raise RuntimeError("MIGRATION_PROVIDER_NONCE_HEX sequence exhausted") from error
-        if len(value) != size:
-            raise RuntimeError(
-                f"Configured provider nonce has length {len(value)}, expected {size}"
-            )
-        return value
-
-    return next_nonce
+def provider_now() -> datetime:
+    return datetime.now()

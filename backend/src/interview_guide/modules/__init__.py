@@ -1,1 +1,1 @@
-"""Business modules migrated from Java."""
+"""InterviewGuide business modules."""

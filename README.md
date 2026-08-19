@@ -3,8 +3,7 @@
 InterviewGuide 是一个自托管 AI 面试平台，覆盖简历分析、文字和语音模拟面试、面试日程、
 知识库 RAG、知识库出题及多模型 Provider 管理。
 
-后端已经完全切换到 Python/FastAPI。生产环境不包含 Java、Gradle、Flyway 或其他 JVM
-运行时。
+后端为 Python/FastAPI，生产环境只运行 Python 服务和基础设施组件。
 
 ## 功能
 
@@ -212,4 +211,4 @@ docker-compose.dev.yml  本地基础设施
   集成、真实 PostgreSQL/Redis/S3 测试及前端真实后端 E2E。
 - `Real model production checks`：在受保护环境中调用真实 LLM、Embedding、ASR 和 TTS。
 
-CI 还会检查生产 Python 镜像中不存在 Java 命令。
+CI 还会检查生产镜像保持 Python-only。

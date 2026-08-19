@@ -190,7 +190,7 @@ def question_service(
     )
 
 
-def test_create_request_keeps_java_controller_defaults_without_extra_validation() -> None:
+def test_create_request_keeps_compatibility_controller_defaults_without_extra_validation() -> None:
     request = CreateInterviewRequest.model_validate({})
     assert request.question_count == 0
     assert request.skill_id is None
@@ -262,7 +262,7 @@ async def test_explicit_fake_direction_failure_returns_generated_resume_question
 
 
 @pytest.mark.asyncio
-async def test_explicit_fake_jd_parse_uses_unified_adapter_and_java_length_rule() -> None:
+async def test_explicit_fake_jd_parse_uses_unified_adapter_and_compatibility_length_rule() -> None:
     skills = InterviewSkillLibrary(SkillRepository(RESOURCES), RESOURCES)
     service = JdParseService(
         cast(Any, ExplicitFakeRegistry()),

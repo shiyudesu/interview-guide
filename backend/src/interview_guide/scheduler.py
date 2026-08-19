@@ -40,20 +40,14 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
         if settings.infrastructure_startup_enabled:
             infrastructure = RuntimeInfrastructure(settings)
             await infrastructure.start()
-            if settings.migration_fixed_time:
-                fixed_now = datetime.fromisoformat(settings.migration_fixed_time)
-
-                def now_factory() -> datetime:
-                    return fixed_now
-            else:
-                now_factory = datetime.now
+            now_factory = datetime.now
 
             async def expire_interview_schedules() -> None:
                 assert infrastructure is not None
                 async with infrastructure.database.sessions() as session:
                     updated = await InterviewScheduleService(
                         session,
-                        now=lambda: schedule_now(settings),
+                        now=schedule_now,
                     ).expire_pending()
                     if updated:
                         logger.info(

@@ -4,23 +4,23 @@ from dataclasses import dataclass
 
 import pytest
 
-from interview_guide.modules.knowledge_base.repository import java_trim
+from interview_guide.modules.knowledge_base.repository import trim_codepoints_leq_space
 from interview_guide.modules.knowledge_base.service import (
     KnowledgeBaseService,
-    java_is_blank,
-    java_string_length,
+    is_blank_text,
+    utf16_code_unit_length,
 )
 
 
-def test_java_string_length_counts_utf16_code_units() -> None:
-    assert java_string_length("知识库😀") == 5
+def test_compatibility_string_length_counts_utf16_code_units() -> None:
+    assert utf16_code_unit_length("知识库😀") == 5
 
 
-def test_java_blank_and_trim_compatibility() -> None:
-    assert java_trim("\t fixed \n") == "fixed"
-    assert java_is_blank("") is True
-    assert java_is_blank(" \t\n") is True
-    assert java_is_blank(" value ") is False
+def test_compatibility_blank_and_trim_compatibility() -> None:
+    assert trim_codepoints_leq_space("\t fixed \n") == "fixed"
+    assert is_blank_text("") is True
+    assert is_blank_text(" \t\n") is True
+    assert is_blank_text(" value ") is False
 
 
 @dataclass

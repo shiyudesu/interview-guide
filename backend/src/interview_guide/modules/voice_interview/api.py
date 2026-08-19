@@ -25,21 +25,12 @@ from interview_guide.modules.voice_interview.service import (
 router = APIRouter(prefix="/api/voice-interview")
 
 
-def runtime_now(settings: Any) -> datetime:
-    return (
-        datetime.fromisoformat(settings.migration_fixed_time)
-        if settings.migration_fixed_time
-        else datetime.now()
-    )
-
-
 def build_service(
     infrastructure: RuntimeInfrastructure,
-    settings: Any,
 ) -> VoiceInterviewService:
     repository = VoiceInterviewRepository(
         infrastructure.database.sessions,
-        lambda: runtime_now(settings),
+        datetime.now,
     )
     producer = VoiceEvaluationProducer(
         infrastructure.streams,
@@ -50,13 +41,13 @@ def build_service(
         repository,
         infrastructure.redis.client,
         producer,
-        lambda: runtime_now(settings),
+        datetime.now,
     )
 
 
 async def service_dependency(request: Request) -> VoiceInterviewService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    return build_service(infrastructure, request.app.state.settings)
+    return build_service(infrastructure)
 
 
 Service = Annotated[VoiceInterviewService, Depends(service_dependency)]

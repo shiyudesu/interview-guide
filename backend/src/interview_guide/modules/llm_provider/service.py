@@ -84,7 +84,7 @@ class LlmProviderService:
         )
         await self._repository.update_default_chat(
             provider_id,
-            provider_now(self._settings),
+            provider_now(),
         )
         await self._registry.publish_change()
 
@@ -98,7 +98,7 @@ class LlmProviderService:
         )
         await self._repository.update_default_embedding(
             provider_id,
-            provider_now(self._settings),
+            provider_now(),
         )
         await self._registry.publish_change()
 
@@ -124,7 +124,7 @@ class LlmProviderService:
             dimensions,
         )
         encrypted = self._encryption.encrypt(api_key)
-        timestamp = provider_now(self._settings)
+        timestamp = provider_now()
         await self._repository.create_provider(
             LlmProviderConfig(
                 id=provider_id,
@@ -186,7 +186,7 @@ class LlmProviderService:
             encrypted = self._encryption.encrypt(trimmed_api_key)
             values["api_key_nonce"] = encrypted.nonce
             values["api_key_ciphertext"] = encrypted.ciphertext
-        values["updated_at"] = provider_now(self._settings)
+        values["updated_at"] = provider_now()
         await self._repository.update_provider(provider_id, values)
         await self._registry.publish_change()
 

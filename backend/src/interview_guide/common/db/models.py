@@ -456,7 +456,7 @@ class VectorStore(Base):
     __tablename__ = "vector_store"
     __table_args__ = (
         Index(
-            "spring_ai_vector_index",
+            "vector_store_embedding_hnsw_idx",
             "embedding",
             postgresql_using="hnsw",
             postgresql_ops={"embedding": "vector_cosine_ops"},

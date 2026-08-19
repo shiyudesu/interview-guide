@@ -6,7 +6,7 @@ from interview_guide.common.redis.rate_limit import (
 )
 
 
-def test_rate_limit_keys_keep_java_class_and_method_names() -> None:
+def test_rate_limit_keys_keep_compatibility_class_and_method_names() -> None:
     assert (
         RateLimiter._key(
             "KnowledgeBaseController",

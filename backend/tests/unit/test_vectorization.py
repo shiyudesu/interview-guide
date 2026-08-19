@@ -37,11 +37,11 @@ def test_split_text_preserves_order() -> None:
     ]
 
 
-def test_split_text_matches_java_minimum_chunk_length() -> None:
+def test_split_text_matches_compatibility_minimum_chunk_length() -> None:
     assert split_text("short") == []
 
 
-def test_split_text_matches_java_cl100k_chunks() -> None:
+def test_split_text_matches_compatibility_cl100k_chunks() -> None:
     assert split_text(
         "one two three four five six seven eight nine ten eleven",
         chunk_size=3,

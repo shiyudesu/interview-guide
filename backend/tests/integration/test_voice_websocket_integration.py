@@ -230,7 +230,7 @@ def test_websocket_validates_session_before_accepting() -> None:
     assert finished.value.code == 1008
 
 
-def test_second_connection_overwrites_without_rejection_like_java() -> None:
+def test_second_connection_overwrites_without_rejection_like_compatibility() -> None:
     active = session(3)
     service = InMemoryVoiceService([active])
     runtime, _, _, _ = build_runtime(service)

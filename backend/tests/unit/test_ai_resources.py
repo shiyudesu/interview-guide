@@ -23,7 +23,7 @@ BACKEND_ROOT = Path(__file__).resolve().parents[2]
 RESOURCES = BACKEND_ROOT / "resources"
 
 
-def test_aes_gcm_matches_fixed_java_fixture() -> None:
+def test_aes_gcm_matches_fixed_compatibility_fixture() -> None:
     encryption = ApiKeyEncryption(
         "fixed-test-key",
         nonce_factory=lambda size: bytes(range(size)),
@@ -72,7 +72,7 @@ def test_prompt_renderer_preserves_template_and_requires_variables() -> None:
         )
 
 
-def test_prompt_sanitizer_matches_java_boundaries() -> None:
+def test_prompt_sanitizer_matches_compatibility_boundaries() -> None:
     sanitizer = PromptSanitizer(
         uuid_factory=lambda: uuid.UUID("12345678-0000-0000-0000-000000000000")
     )
@@ -89,13 +89,13 @@ def test_skill_repository_loads_sorted_presets_and_references() -> None:
     loaded = skills.all()
     assert len(loaded) == 10
     assert [skill.skill_id for skill in loaded] == sorted(skill.skill_id for skill in loaded)
-    java_skill = skills.get("java-backend")
-    assert java_skill.display_name == "Java 后端开发"
-    assert java_skill.categories[0].key == "JAVA"
+    backend_skill = skills.get("java-backend")
+    assert backend_skill.display_name == "Java 后端开发"
+    assert backend_skill.categories[0].key == "JAVA"
     assert "Java" in (skills.reference("java-backend", "JAVA") or "")
 
 
-def test_skill_tool_definition_matches_java_agent_utils() -> None:
+def test_skill_tool_definition_matches_compatibility_agent_utils() -> None:
     tool = SkillRepository(RESOURCES).tool_definition()
     function = tool["function"]
     description = function["description"]

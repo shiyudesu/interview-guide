@@ -8,14 +8,14 @@ from interview_guide.modules.llm_provider.service import (
 )
 
 
-def test_api_key_mask_matches_java() -> None:
+def test_api_key_mask_matches_compatibility() -> None:
     assert mask_api_key(None) == "***"
     assert mask_api_key("") == "***"
     assert mask_api_key("123456") == "***"
     assert mask_api_key("1234567") == "123***567"
 
 
-def test_provider_connectivity_urls_match_java_order() -> None:
+def test_provider_connectivity_urls_match_compatibility_order() -> None:
     assert connectivity_test_urls("https://example.test/v1/") == [
         "https://example.test/v1/chat/completions"
     ]

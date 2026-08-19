@@ -214,7 +214,7 @@ def query_service(
     )
 
 
-def test_query_request_uses_java_validation_messages() -> None:
+def test_query_request_uses_compatibility_validation_messages() -> None:
     with pytest.raises(ValidationError, match="至少选择一个知识库"):
         QueryRequest.model_validate({"knowledgeBaseIds": [], "question": "问题"})
     with pytest.raises(ValidationError, match="问题不能为空"):
@@ -342,7 +342,7 @@ async def test_explicit_fake_no_hit_and_no_result_answer_are_normalized() -> Non
 
 
 @pytest.mark.asyncio
-async def test_null_knowledge_base_id_reaches_java_compatible_business_error() -> None:
+async def test_null_knowledge_base_id_reaches_compatibility_business_error() -> None:
     repository = ExplicitFakeQueryRepository(search_results=[])
     adapter = ExplicitFakeLlmAdapter(chat_contents=[])
     service = query_service(repository, adapter, rewrite_enabled=False)
@@ -451,7 +451,7 @@ async def test_explicit_fake_rag_history_is_used_for_rewrite_and_answer() -> Non
     assert adapter.chat_messages[1][1:3] == history
 
 
-def test_rag_history_truncates_by_java_utf16_units() -> None:
+def test_rag_history_truncates_by_compatibility_utf16_units() -> None:
     formatted = KnowledgeBaseQueryService._format_history_for_rewrite(
         [{"role": "assistant", "content": "😀" * 101}]
     )
@@ -459,7 +459,7 @@ def test_rag_history_truncates_by_java_utf16_units() -> None:
     assert formatted == f"助手: {'😀' * 100}..."
 
 
-def test_sse_data_matches_spring_string_event_framing() -> None:
+def test_sse_data_matches_contract_event_framing() -> None:
     assert sse_data("第一行\r\n第二行\n") == (
         b"data:\xe7\xac\xac\xe4\xb8\x80\xe8\xa1\x8c\n"
         b"data:\xe7\xac\xac\xe4\xba\x8c\xe8\xa1\x8c\n"

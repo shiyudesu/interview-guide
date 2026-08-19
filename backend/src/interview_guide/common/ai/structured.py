@@ -11,7 +11,7 @@ from interview_guide.common.ai.prompts import ANTI_INJECTION_INSTRUCTION
 from interview_guide.common.errors import BusinessException, ErrorCode
 
 T = TypeVar("T", bound=BaseModel)
-JAVA_FORMAT_PREFIX = "Your response should be in JSON format."
+OUTPUT_FORMAT_PREFIX = "Your response should be in JSON format."
 
 STRICT_JSON_INSTRUCTION = """请仅返回可被 JSON 解析器直接解析的 JSON 对象，并严格满足字段结构要求：
 1) 不要输出 Markdown 代码块（如 ```json）。
@@ -20,7 +20,7 @@ STRICT_JSON_INSTRUCTION = """请仅返回可被 JSON 解析器直接解析的 JS
 """
 
 
-def java_schema_json(value: object, indent: int = 0) -> str:
+def render_schema_instance(value: object, indent: int = 0) -> str:
     prefix = " " * indent
     if isinstance(value, dict):
         if not value:
@@ -28,7 +28,7 @@ def java_schema_json(value: object, indent: int = 0) -> str:
         items = list(value.items())
         lines = ["{"]
         for index, (key, item) in enumerate(items):
-            rendered = java_schema_json(item, indent + 2)
+            rendered = render_schema_instance(item, indent + 2)
             lines.append(
                 f"{' ' * (indent + 2)}{json.dumps(str(key), ensure_ascii=False)} : "
                 f"{rendered}{',' if index + 1 < len(items) else ''}"
@@ -37,26 +37,26 @@ def java_schema_json(value: object, indent: int = 0) -> str:
         return "\n".join(lines)
     if isinstance(value, list):
         if all(not isinstance(item, (dict, list)) for item in value):
-            return "[ " + ", ".join(java_schema_json(item) for item in value) + " ]"
+            return "[ " + ", ".join(render_schema_instance(item) for item in value) + " ]"
         return (
             "[\n"
             + ",\n".join(
-                f"{' ' * (indent + 2)}{java_schema_json(item, indent + 2)}" for item in value
+                f"{' ' * (indent + 2)}{render_schema_instance(item, indent + 2)}" for item in value
             )
             + f"\n{prefix}]"
         )
     return json.dumps(value, ensure_ascii=False)
 
 
-def java_bean_output_format(schema: dict[str, object]) -> str:
+def structured_output_format(schema: dict[str, object]) -> str:
     return (
-        f"{JAVA_FORMAT_PREFIX}\n"
+        f"{OUTPUT_FORMAT_PREFIX}\n"
         "Do not include any explanations, only provide a RFC8259 compliant JSON "
         "response following this format without deviation.\n"
         "Do not include markdown code blocks in your response.\n"
         "Remove the ```json markdown from the output.\n"
         "Here is the JSON Schema instance your output must adhere to:\n"
-        f"```{java_schema_json(schema)}```\n"
+        f"```{render_schema_instance(schema)}```\n"
     )
 
 
@@ -129,7 +129,7 @@ class StructuredOutputInvoker:
         tools: Sequence[dict[str, object]] | None = None,
     ) -> T:
         secured_system_prompt = system_prompt_with_format.rstrip("\n") + ANTI_INJECTION_INSTRUCTION
-        format_start = system_prompt_with_format.find(JAVA_FORMAT_PREFIX)
+        format_start = system_prompt_with_format.find(OUTPUT_FORMAT_PREFIX)
         formatted_user_prompt = (
             user_prompt + "\n" + system_prompt_with_format[format_start:]
             if format_start >= 0

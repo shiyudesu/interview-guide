@@ -2,8 +2,8 @@
 
 ## 项目状态
 
-生产后端为 Python/FastAPI。Java/Spring 迁移已经完成，旧实现、回滚镜像和迁移对比证据
-已经删除。兼容行为由后端测试、仓库清单、生产 Compose 集成和受保护真实模型工作流验证。
+生产后端为 Python/FastAPI。旧后端迁移已经完成，旧实现、回滚镜像和对比证据已经删除。
+兼容行为由后端测试、仓库清单、生产 Compose 集成和受保护真实模型工作流验证。
 
 目录：
 
@@ -86,7 +86,7 @@ docker compose logs migrate app worker scheduler
 - 默认分支 `main`。
 - Commit subject 使用 Conventional Commits。
 - 不提交 API Key、Token、数据库密码或用户文件。
-- `ci.yml` 必须验证生产 Compose 和 Python 镜像不包含 JVM。
+- `ci.yml` 必须验证生产 Compose 和 Python-only 镜像。
 - `real-model.yml` 只在受保护环境中运行。
 - 修改运行命令、Compose、CI 或技术方案时同步更新 README、AGENTS 和相关文档。
 - 环境变量和 Provider 行为以 `docs/CONFIGURATION.md` 为准，部署排障以

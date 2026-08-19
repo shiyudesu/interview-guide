@@ -32,7 +32,7 @@ class FailingStructuredOutput:
 
 
 @pytest.mark.asyncio
-async def test_ai_failure_returns_java_zero_score_result() -> None:
+async def test_ai_failure_returns_compatibility_zero_score_result() -> None:
     service = ResumeGradingService(
         FakeRegistry(),  # type: ignore[arg-type]
         FailingStructuredOutput(),  # type: ignore[arg-type]

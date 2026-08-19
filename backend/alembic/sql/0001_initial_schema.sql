@@ -303,7 +303,7 @@ CREATE INDEX idx_rag_message_session
   ON rag_chat_messages (session_id);
 CREATE INDEX idx_rag_session_updated
   ON rag_chat_sessions (updated_at);
-CREATE INDEX spring_ai_vector_index
+CREATE INDEX vector_store_embedding_hnsw_idx
   ON vector_store USING hnsw (embedding public.vector_cosine_ops);
 
 COMMENT ON COLUMN interview_sessions.interview_category IS '知识库面试方向（来自题库 category，普通面试为 NULL）';
@@ -356,8 +356,8 @@ BEGIN
     );
   END IF;
 
-  IF to_regclass('public.spring_ai_vector_index') IS NULL THEN
-    CREATE INDEX spring_ai_vector_index
+  IF to_regclass('public.vector_store_embedding_hnsw_idx') IS NULL THEN
+    CREATE INDEX vector_store_embedding_hnsw_idx
       ON vector_store USING hnsw (embedding public.vector_cosine_ops);
   END IF;
 END

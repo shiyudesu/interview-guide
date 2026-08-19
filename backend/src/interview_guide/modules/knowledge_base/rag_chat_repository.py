@@ -57,7 +57,7 @@ class RagChatRepository:
                 raise BusinessException(ErrorCode.NOT_FOUND, "部分知识库不存在")
             resolved_title = (
                 title
-                if title is not None and not self._java_is_blank(title)
+                if title is not None and not self._is_blank_excluding_nbsp(title)
                 else self._generate_title(knowledge_bases)
             )
             now = self._now()
@@ -310,7 +310,7 @@ class RagChatRepository:
         return f"{len(knowledge_bases)} 个知识库对话"
 
     @staticmethod
-    def _java_is_blank(value: str) -> bool:
+    def _is_blank_excluding_nbsp(value: str) -> bool:
         if not value:
             return True
         return all(character.isspace() and character != "\u00a0" for character in value)

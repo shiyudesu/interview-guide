@@ -31,7 +31,7 @@ def clean_text(text: str | None) -> str:
     return cleaned.strip()
 
 
-def java_utf16_truncate(text: str, max_units: int) -> str:
+def truncate_utf16_code_units(text: str, max_units: int) -> str:
     encoded = text.encode("utf-16-le", errors="surrogatepass")
     if len(encoded) <= max_units * 2:
         return text
@@ -42,7 +42,7 @@ def java_utf16_truncate(text: str, max_units: int) -> str:
 
 
 def clean_text_with_limit(text: str | None, max_length: int) -> str:
-    return java_utf16_truncate(clean_text(text), max_length)
+    return truncate_utf16_code_units(clean_text(text), max_length)
 
 
 def clean_to_single_line(text: str | None) -> str:
