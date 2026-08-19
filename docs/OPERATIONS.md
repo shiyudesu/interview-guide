@@ -186,3 +186,19 @@ docker compose down -v
 ```
 
 第二条命令不可恢复本地 PostgreSQL、Redis 和对象存储内容。
+
+## CI 变更选择
+
+`CI` 会先运行 `tools/scripts/detect_ci_changes.py`，再按路径选择检查：
+
+| 改动 | 运行内容 |
+| --- | --- |
+| 仅 Markdown 文档 | 文档、提交规范、工具测试、`CI gate` |
+| 后端单元测试 | 后端检查、仓库清单、`CI gate` |
+| 后端运行代码或集成测试 | 后端检查、生产 Compose 集成、`CI gate` |
+| 前端运行代码 | 前端测试和构建、生产 Compose 集成、`CI gate` |
+| 模型诊断代理 | Model Proxy 测试、`CI gate` |
+| Compose、Docker、锁文件或工作流 | 全量 CI |
+
+工作流文件和变更分类脚本本身的修改始终强制全量运行。需要手动完整验收时，在 GitHub
+Actions 中运行 `CI` 的 `workflow_dispatch`。
