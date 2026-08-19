@@ -12,7 +12,7 @@
         "body": "{\"groups\":[\"liveness\",\"readiness\"],\"status\":\"UP\"}",
         "headers": {
           "content-type": [
-            "application/vnd.spring-boot.actuator.v3+json"
+            "application/json"
           ]
         },
         "status": 200

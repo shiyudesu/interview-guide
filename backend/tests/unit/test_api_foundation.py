@@ -16,7 +16,7 @@ from interview_guide.common.api.responses import result_response, serialized_res
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.result import Result
-from interview_guide.main import MANAGEMENT_MEDIA_TYPE, create_app
+from interview_guide.main import create_app
 
 
 def settings(**overrides: object) -> Settings:
@@ -36,7 +36,7 @@ def test_health_response_matches_compatibility_contract() -> None:
         response = client.get("/actuator/health")
 
     assert response.status_code == 200
-    assert response.headers["content-type"] == MANAGEMENT_MEDIA_TYPE
+    assert response.headers["content-type"] == "application/json"
     assert response.content == b'{"groups":["liveness","readiness"],"status":"UP"}'
 
 

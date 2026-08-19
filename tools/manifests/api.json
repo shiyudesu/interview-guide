@@ -12,7 +12,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 140
+        "line": 138
       },
       "transport": "rest"
     },
@@ -28,7 +28,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 147
+        "line": 144
       },
       "transport": "rest"
     },
@@ -44,7 +44,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 151
+        "line": 148
       },
       "transport": "rest"
     },
@@ -60,7 +60,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 158
+        "line": 154
       },
       "transport": "rest"
     },
@@ -112,7 +112,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 112
+        "line": 109
       },
       "transport": "rest"
     },
@@ -156,7 +156,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 85
+        "line": 82
       },
       "transport": "rest"
     },
@@ -191,7 +191,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 94
+        "line": 91
       },
       "transport": "rest"
     },
@@ -244,7 +244,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 140
+        "line": 137
       },
       "transport": "rest"
     },
@@ -297,7 +297,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 103
+        "line": 100
       },
       "transport": "rest"
     },
@@ -354,7 +354,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 127
+        "line": 124
       },
       "transport": "rest"
     },
@@ -393,7 +393,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 161
+        "line": 158
       },
       "transport": "rest"
     },
@@ -432,7 +432,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 170
+        "line": 167
       },
       "transport": "rest"
     },
@@ -3569,7 +3569,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 176
+        "line": 172
       },
       "transport": "rest"
     },
@@ -3590,7 +3590,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 165
+        "line": 161
       },
       "transport": "rest"
     },
@@ -4463,7 +4463,7 @@
         "path": "/actuator/health",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 140
+          "line": 138
         }
       },
       {
@@ -4471,7 +4471,7 @@
         "path": "/actuator/info",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 147
+          "line": 144
         }
       },
       {
@@ -4479,7 +4479,7 @@
         "path": "/actuator/metrics",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 151
+          "line": 148
         }
       },
       {
@@ -4487,7 +4487,7 @@
         "path": "/actuator/prometheus",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 158
+          "line": 154
         }
       },
       {
@@ -4495,7 +4495,7 @@
         "path": "/swagger-ui.html",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 176
+          "line": 172
         }
       },
       {
@@ -4503,7 +4503,7 @@
         "path": "/v3/api-docs",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 165
+          "line": 161
         }
       }
     ],

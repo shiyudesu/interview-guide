@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
+from interview_guide.modules.interview_schedule.api import parse_query_datetime
 from interview_guide.modules.interview_schedule.models import (
     CreateInterviewRequest,
 )
@@ -41,3 +42,21 @@ def test_interview_time_rejects_timezone_and_extra_precision() -> None:
                     "interviewTime": value,
                 }
             )
+
+
+@pytest.mark.parametrize(
+    ("value", "parameter"),
+    [
+        ("not-a-time", "start"),
+        ("2026-08-20T10:30:00+08:00", "end"),
+    ],
+)
+def test_schedule_query_time_uses_project_validation_message(
+    value: str,
+    parameter: str,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match=rf"{parameter} 时间格式错误，请使用不带时区的 ISO-8601 本地时间",
+    ):
+        parse_query_datetime(value, parameter)

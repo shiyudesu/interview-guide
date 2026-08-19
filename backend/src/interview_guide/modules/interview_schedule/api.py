@@ -64,21 +64,18 @@ ParseServiceDependency = Annotated[
 ]
 
 
-def parse_query_datetime(value: str | None) -> datetime | None:
+def parse_query_datetime(
+    value: str | None,
+    parameter: str,
+) -> datetime | None:
     if value is None:
         return None
     try:
         parsed = datetime.fromisoformat(value)
     except ValueError as error:
-        raise ValueError(
-            f"Failed to convert value of type 'java.lang.String' "
-            f"to required type 'java.time.LocalDateTime'; {value}"
-        ) from error
+        raise ValueError(f"{parameter} 时间格式错误，请使用不带时区的 ISO-8601 本地时间") from error
     if parsed.tzinfo is not None:
-        raise ValueError(
-            f"Failed to convert value of type 'java.lang.String' "
-            f"to required type 'java.time.LocalDateTime'; {value}"
-        )
+        raise ValueError(f"{parameter} 时间格式错误，请使用不带时区的 ISO-8601 本地时间")
     return parsed
 
 
@@ -118,8 +115,8 @@ async def list_schedules(
 ) -> Response:
     schedules = await service.list(
         status,
-        parse_query_datetime(start),
-        parse_query_datetime(end),
+        parse_query_datetime(start, "start"),
+        parse_query_datetime(end, "end"),
     )
     return result_response(Result.ok(schedules))
 
