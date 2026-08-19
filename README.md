@@ -208,8 +208,11 @@ docker-compose.dev.yml  本地基础设施
 
 ## CI
 
-- `CI`：仓库策略、后端 lint/mypy/pytest、前端测试和构建、模型代理、生产 Compose
-  集成、真实 PostgreSQL/Redis/S3 测试及前端真实后端 E2E。
+- `CI` 先按变更路径分类。文档提交只运行轻量策略和链接检查；后端、前端、模型代理与生产
+  Compose 集成仅在对应代码或部署文件变化时运行。
+- 完整运行包含后端 lint/mypy/pytest、前端测试和构建、模型代理、隔离的
+  PostgreSQL/Redis/S3 集成测试、生产 Compose 及前端真实后端 E2E。
+- `CI gate` 汇总必需 Job，允许未命中的检查安全跳过。
 - `Real model production checks`：在受保护环境中调用真实 LLM、Embedding、ASR 和 TTS。
 
 CI 还会检查生产镜像保持 Python-only。

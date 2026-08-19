@@ -9,6 +9,11 @@ scripts/        清单生成与真实模型验收脚本
 tests/          工具测试
 ```
 
+CI 辅助脚本：
+
+- `scripts/detect_ci_changes.py`：按改动路径选择后端、前端、模型代理和生产集成 Job。
+- `scripts/check_docs.py`：检查 Markdown 链接、行尾空格和文档环境变量。
+
 ## 仓库清单
 
 重新生成：
@@ -21,9 +26,12 @@ tests/          工具测试
 
 ```bash
 ./tools/scripts/check-manifests.sh
+python3 tools/scripts/check-docs.py --root .
+python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
 ```
 
-检查脚本会运行工具单元测试、在临时目录重新生成清单，并逐文件比较。修改路由、配置、
+检查脚本会在临时目录重新生成清单并逐文件比较。工具单元测试通过
+`python3 -m unittest discover -s tools/tests -p 'test_*.py' -v` 单独运行。修改路由、配置、
 Alembic、Redis 常量、资源或测试后需要更新清单。
 
 ## 模型诊断代理

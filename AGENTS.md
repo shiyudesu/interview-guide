@@ -87,6 +87,8 @@ docker compose logs migrate app worker scheduler
 - Commit subject 使用 Conventional Commits。
 - 不提交 API Key、Token、数据库密码或用户文件。
 - `ci.yml` 必须验证生产 Compose 和 Python-only 镜像。
+- CI 使用 `tools/scripts/detect_ci_changes.py` 选择必要 Job；工作流或分类脚本变化必须全量运行。
+- 文档提交只运行轻量文档检查和统一 `CI gate`，不能启动完整 Compose。
 - `real-model.yml` 只在受保护环境中运行。
 - 修改运行命令、Compose、CI 或技术方案时同步更新 README、AGENTS 和相关文档。
 - 环境变量和 Provider 行为以 `docs/CONFIGURATION.md` 为准，部署排障以
