@@ -200,6 +200,7 @@ docker-compose.dev.yml  本地基础设施
 
 - [配置说明](docs/CONFIGURATION.md)
 - [运行与排障](docs/OPERATIONS.md)
+- [自适应面试轮次实施计划](docs/ADAPTIVE_INTERVIEW_PLAN.md)
 - [后端开发](backend/README.md)
 - [前端开发](frontend/README.md)
 - [仓库工具](tools/README.md)
