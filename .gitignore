@@ -13,8 +13,6 @@ test-output.txt
 qodana.yaml
 
 app/src/main/resources/application-dev.yml
-SETUP_API_KEYS.md
-
 # AI Assistant documentation
 CLAUDE.local.md
 GEMINI.md

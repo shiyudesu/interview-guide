@@ -1602,6 +1602,15 @@
       }
     },
     {
+      "default": "lm-studio",
+      "name": "PROVIDER_LMSTUDIO_API_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.example",
+        "line": 16
+      }
+    },
+    {
       "default": "",
       "name": "PROVIDER_KIMI_API_KEY",
       "sensitive": true,
@@ -1661,7 +1670,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 39
+        "line": 38
       }
     },
     {
@@ -1670,7 +1679,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 40
+        "line": 39
       }
     },
     {
@@ -1679,7 +1688,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 41
+        "line": 40
       }
     },
     {
@@ -1688,7 +1697,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 42
+        "line": 41
       }
     },
     {
@@ -1697,7 +1706,7 @@
       "sensitive": true,
       "source": {
         "file": ".env.example",
-        "line": 43
+        "line": 42
       }
     },
     {
@@ -1706,7 +1715,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 44
+        "line": 43
       }
     },
     {
@@ -1715,7 +1724,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 45
+        "line": 44
       }
     },
     {
@@ -1724,7 +1733,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 48
+        "line": 47
       }
     },
     {
@@ -1733,7 +1742,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 49
+        "line": 48
       }
     },
     {
@@ -1742,7 +1751,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 52
+        "line": 51
       }
     },
     {
@@ -1751,7 +1760,7 @@
       "sensitive": true,
       "source": {
         "file": ".env.example",
-        "line": 53
+        "line": 52
       }
     },
     {
@@ -1760,12 +1769,21 @@
       "sensitive": true,
       "source": {
         "file": ".env.example",
-        "line": 54
+        "line": 53
       }
     },
     {
       "default": "interview-guide",
       "name": "APP_STORAGE_BUCKET",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 54
+      }
+    },
+    {
+      "default": "us-east-1",
+      "name": "APP_STORAGE_REGION",
       "sensitive": false,
       "source": {
         "file": ".env.example",
@@ -1791,12 +1809,21 @@
       }
     },
     {
+      "default": "local",
+      "name": "INTERVIEW_GUIDE_IMAGE_TAG",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 60
+      }
+    },
+    {
       "default": "8080",
       "name": "SERVER_PORT",
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 60
+        "line": 61
       }
     },
     {
@@ -1805,7 +1832,34 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 61
+        "line": 62
+      }
+    },
+    {
+      "default": "http://localhost,http://localhost:5173",
+      "name": "CORS_ALLOWED_ORIGINS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 63
+      }
+    },
+    {
+      "default": "INFO",
+      "name": "LOG_LEVEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 64
+      }
+    },
+    {
+      "default": "Asia/Shanghai",
+      "name": "TZ",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 65
       }
     },
     {
@@ -1814,7 +1868,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 64
+        "line": 68
       }
     },
     {
@@ -1823,7 +1877,16 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 65
+        "line": 69
+      }
+    },
+    {
+      "default": "1024",
+      "name": "APP_AI_EMBEDDING_DIMENSIONS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 70
       }
     },
     {
@@ -1832,7 +1895,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 68
+        "line": 73
       }
     },
     {
@@ -1841,7 +1904,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 69
+        "line": 74
       }
     },
     {
@@ -1850,7 +1913,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 70
+        "line": 75
       }
     },
     {
@@ -1859,7 +1922,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 71
+        "line": 76
       }
     },
     {
@@ -1868,7 +1931,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 72
+        "line": 77
       }
     },
     {
@@ -1877,7 +1940,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 73
+        "line": 78
       }
     },
     {
@@ -1886,7 +1949,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 74
+        "line": 79
       }
     },
     {
@@ -1895,7 +1958,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 75
+        "line": 80
       }
     },
     {
@@ -1904,20 +1967,47 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 76
+        "line": 81
+      }
+    },
+    {
+      "default": "1",
+      "name": "APP_INTERVIEW_FOLLOW_UP_COUNT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 82
+      }
+    },
+    {
+      "default": "8",
+      "name": "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 83
+      }
+    },
+    {
+      "default": "qwen3-asr-flash-realtime",
+      "name": "APP_VOICE_INTERVIEW_QWEN_ASR_MODEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 86
+      }
+    },
+    {
+      "default": "qwen3-tts-flash-realtime",
+      "name": "APP_VOICE_INTERVIEW_QWEN_TTS_MODEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 87
       }
     }
   ],
-  "envReferencedButUndocumented": [
-    "APP_INTERVIEW_EVALUATION_BATCH_SIZE",
-    "APP_INTERVIEW_FOLLOW_UP_COUNT",
-    "APP_STORAGE_REGION",
-    "CORS_ALLOWED_ORIGINS",
-    "INTERVIEW_GUIDE_IMAGE_TAG",
-    "LOG_LEVEL",
-    "PROVIDER_LMSTUDIO_API_KEY",
-    "TZ"
-  ],
+  "envReferencedButUndocumented": [],
   "propertyBindings": [
     {
       "environment": "APP_ENV",
@@ -2723,8 +2813,8 @@
   "schemaVersion": 1,
   "summary": {
     "configurationValueCount": 143,
-    "envExampleCount": 36,
-    "envReferencedButUndocumentedCount": 8,
+    "envExampleCount": 47,
+    "envReferencedButUndocumentedCount": 0,
     "propertyBindingCount": 100
   },
   "valueInjections": []

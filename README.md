@@ -1,52 +1,69 @@
 # InterviewGuide
 
-智能 AI 面试平台，包含简历分析、文字/语音模拟面试、面试日程、知识库 RAG、知识库题库面试和多模型配置。
+InterviewGuide 是一个自托管 AI 面试平台，覆盖简历分析、文字和语音模拟面试、面试日程、
+知识库 RAG、知识库出题及多模型 Provider 管理。
+
+后端已经完全切换到 Python/FastAPI。生产环境不包含 Java、Gradle、Flyway 或其他 JVM
+运行时。
+
+## 功能
+
+- 上传 PDF、DOC、DOCX 简历，生成结构化分析和 PDF 报告
+- 按岗位 Skill 或 JD 生成文字面试，异步评估并保存报告
+- 实时 ASR/TTS 语音面试，支持暂停、恢复和会后评估
+- 管理面试日程，支持自然语言解析和状态流转
+- 上传知识库文件，完成清洗、切片、向量化和 RAG 对话
+- 从知识库生成题目并发起专项面试
+- 在设置页管理聊天、Embedding、ASR 和 TTS 配置
 
 ## 技术栈
 
-- Python 3.13.13、FastAPI、Uvicorn、Pydantic v2
-- SQLAlchemy 2.0 AsyncEngine、psycopg 3、Alembic、PostgreSQL 16 + pgvector
-- redis-py asyncio、Redis Stream、APScheduler
-- LangGraph、langchain-openai、统一 LLM Adapter
-- pdfminer.six、python-docx、LibreOffice、ReportLab、boto3
-- React 18、TypeScript、Vite、Tailwind CSS 4
-- uv 0.11.14、Node 24、pnpm 10.26.2
+| 部分 | 实现 |
+| --- | --- |
+| 后端 | Python 3.13.13、FastAPI、Uvicorn、Pydantic v2 |
+| 数据库 | PostgreSQL 16、pgvector、SQLAlchemy 2、psycopg 3、Alembic |
+| 异步任务 | Redis 7、Redis Stream、APScheduler |
+| AI | LangGraph、langchain-openai、统一 LLM Adapter |
+| 文件 | S3 兼容存储、pdfminer.six、python-docx、LibreOffice、ReportLab |
+| 前端 | React 18、TypeScript、Vite 5、Tailwind CSS 4 |
+| 工具链 | uv 0.11.14、Node.js 24、pnpm 10.26.2 |
 
 ## 快速启动
 
-复制并编辑环境变量：
+准备配置：
 
 ```bash
 cp .env.example .env
 ```
 
-必须长期保持 `APP_AI_CONFIG_ENCRYPTION_KEY` 不变。默认模型：
+使用默认四个模型时，至少修改下面两项：
 
 ```env
-AI_MODEL=qwen3.7-max
-AI_EMBEDDING_MODEL=qwen3.7-text-embedding
+AI_BAILIAN_API_KEY=your_dashscope_api_key
 APP_AI_CONFIG_ENCRYPTION_KEY=replace_with_a_stable_random_secret
 ```
 
-如使用 DashScope，再配置：
+`APP_AI_CONFIG_ENCRYPTION_KEY` 用于加密数据库中的 Provider API Key。首次部署后不要更换，
+否则已有密钥无法解密。
 
-```env
-AI_BAILIAN_API_KEY=your_key
-```
+对外部署前还要修改 PostgreSQL 和对象存储的默认密码。
 
-完整部署：
+启动完整环境：
 
 ```bash
 docker compose up -d --build --wait
 docker compose ps
 ```
 
-访问：
+默认地址：
 
-- 前端：<http://localhost>
-- API：<http://localhost:8080>
-- Swagger：<http://localhost:8080/swagger-ui.html>
-- MinIO：<http://localhost:9001>
+| 服务 | 地址 |
+| --- | --- |
+| 前端 | <http://localhost> |
+| API | <http://localhost:8080> |
+| Swagger UI | <http://localhost:8080/swagger-ui.html> |
+| OpenAPI | <http://localhost:8080/v3/api-docs> |
+| MinIO Console | <http://localhost:9001> |
 
 查看日志：
 
@@ -61,21 +78,31 @@ docker compose logs migrate
 docker compose down
 ```
 
-仅在明确需要删除所有本地数据时使用：
+`docker compose down -v` 会删除 PostgreSQL、Redis 和对象存储数据，只能在确认不再需要本地
+数据时使用。
 
-```bash
-docker compose down -v
-```
+## 运行架构
+
+生产 Compose 使用同一个 Python 镜像启动四类进程：
+
+1. `interview-guide-migrate` 执行 `alembic upgrade head`。
+2. `interview-guide-api` 提供 REST、SSE 和 WebSocket，固定为单 Uvicorn worker。
+3. `interview-guide-worker` 消费五组 Redis Stream：简历分析、知识库向量化、知识库出题、
+   文字面试评估和语音面试评估。
+4. `interview-guide-scheduler` 处理日程过期、题目生成恢复和语音会话恢复。
+
+API、Worker 和 Scheduler 会等 Migrate 成功后再启动。前端由 Nginx 提供静态文件，并把
+`/api/` 和 `/ws/` 转发到 API。
 
 ## 本地开发
 
-启动依赖：
+先启动 PostgreSQL、Redis 和 RustFS：
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d --wait
 ```
 
-后端：
+启动后端：
 
 ```bash
 cd backend
@@ -84,7 +111,7 @@ uv run --frozen interview-guide-migrate
 uv run --frozen interview-guide-api
 ```
 
-另开终端启动异步进程：
+Worker 和 Scheduler 需要分别在新终端中运行：
 
 ```bash
 cd backend
@@ -96,7 +123,7 @@ cd backend
 uv run --frozen interview-guide-scheduler
 ```
 
-前端：
+启动前端：
 
 ```bash
 cd frontend
@@ -105,7 +132,30 @@ pnpm install --frozen-lockfile
 pnpm run dev
 ```
 
+Vite 默认监听 <http://localhost:5173>，并把 `/api` 转发到
+`VITE_API_PROXY_TARGET`，默认值为 `http://localhost:8080`。
+
+## Provider 和模型
+
+内置种子包括 DashScope、Kimi、DeepSeek、GLM 和 LM Studio，也可以添加任意 OpenAI
+兼容 Provider。种子只在 Provider 表为空时写入；系统启动后，数据库和设置页中的配置是实际
+数据源。
+
+当前默认模型：
+
+```text
+聊天       qwen3.7-max
+Embedding  qwen3.7-text-embedding（1024 维）
+ASR        qwen3-asr-flash-realtime
+TTS        qwen3-tts-flash-realtime
+```
+
+系统不会自动从厂商拉取模型列表。聊天模型、Embedding 模型和向量维度需要按厂商文档填写。
+详细配置见 [配置说明](docs/CONFIGURATION.md)。
+
 ## 检查命令
+
+后端：
 
 ```bash
 cd backend
@@ -115,48 +165,51 @@ uv run mypy src
 uv run pytest
 ```
 
+前端：
+
 ```bash
 cd frontend
-pnpm run build
+pnpm run test:interview-history
+pnpm run test:question-generation
+pnpm run test:interview-capacity
+pnpm run test:interview-entry
 pnpm run test:e2e
+pnpm run build
 ```
 
-## 运行架构
+仓库清单和模型代理：
 
-同一 Python 镜像启动四类程序：
+```bash
+./tools/scripts/check-manifests.sh
+cd tools/model-proxy
+uv sync --frozen
+uv run python -m unittest discover -s tests -v
+```
 
-1. `interview-guide-migrate`：只执行 Alembic 升级。
-2. `interview-guide-api`：提供 REST、SSE 和 WebSocket，保持单 Uvicorn worker。
-3. `interview-guide-worker`：并行运行五类 Redis Stream 的顺序消费者。
-4. `interview-guide-scheduler`：单实例处理过期与恢复任务。
+## 目录
 
-Compose 会等待 Migrate 成功后再启动 API、Worker 和 Scheduler。
+```text
+backend/                FastAPI 后端、Alembic、资源和测试
+frontend/               React 前端、Playwright 和 Nginx 配置
+tools/                  仓库清单、模型诊断代理、生产模型验收
+docs/                   配置、运维和已完成迁移记录
+docker-compose.yml      完整生产拓扑
+docker-compose.dev.yml  本地基础设施
+```
 
-## Provider
+## 文档
 
-内置 DashScope、Kimi、DeepSeek、GLM 和 LM Studio，也可添加任意 OpenAI 兼容 Provider。
+- [配置说明](docs/CONFIGURATION.md)
+- [运行与排障](docs/OPERATIONS.md)
+- [后端开发](backend/README.md)
+- [前端开发](frontend/README.md)
+- [仓库工具](tools/README.md)
+- [迁移完成记录](docs/MIGRATION_PLAN.md)
 
-- 默认聊天模型：`qwen3.7-max`
-- 默认向量模型：`qwen3.7-text-embedding`，1024 维
-- 默认 ASR：`qwen3-asr-flash-realtime`
-- 默认 TTS：`qwen3-tts-flash-realtime`
+## CI
 
-Provider API Key 加密保存在 PostgreSQL。API、Worker 和 Scheduler 必须使用相同的
-`APP_AI_CONFIG_ENCRYPTION_KEY`。
+- `CI`：仓库策略、后端 lint/mypy/pytest、前端测试和构建、模型代理、生产 Compose
+  集成、真实 PostgreSQL/Redis/S3 测试及前端真实后端 E2E。
+- `Real model production checks`：在受保护环境中调用真实 LLM、Embedding、ASR 和 TTS。
 
-## 数据和对象存储
-
-- PostgreSQL：`localhost:5432`
-- Redis：`localhost:6379`
-- MinIO API：`localhost:9000`
-- MinIO Console：`localhost:9001`
-
-上传限制：简历 10MB、知识库 50MB、multipart 50MB。
-
-## 自动化
-
-- `ci.yml`：Python、真实基础设施集成、生产 Compose、前端和镜像无 JVM 检查。
-- `real-model.yml`：受保护环境中的 LLM、Embedding、ASR 和 TTS 生产冒烟。
-- `tools/`：仓库清单检查、模型诊断代理和生产模型验收工具。
-
-Java 回滚标签、镜像和迁移期间的对比证据已在最终收尾时删除。
+CI 还会检查生产 Python 镜像中不存在 Java 命令。

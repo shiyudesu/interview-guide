@@ -23,7 +23,7 @@ RUN pnpm run build
 # ==============================================================================
 # 第二阶段：生产环境 (Production Stage)
 # 作用：使用 Nginx 来托管构建好的静态文件 (HTML/CSS/JS)
-# 区别：后端运行需要 JRE，前端运行只需要一个 Web 服务器（如 Nginx）
+# 后端由独立 Python 容器运行，前端镜像只包含 Nginx 和静态文件
 # ==============================================================================
 FROM nginx:1.27.4-alpine
 
@@ -31,7 +31,7 @@ FROM nginx:1.27.4-alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # 复制自定义的 Nginx 配置文件
-# 用于处理路由转发（解决 React/Vue 单页应用刷新 404 问题）和 API 反向代理
+# 用于处理路由转发（解决 React 单页应用刷新 404 问题）和 API 反向代理
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # 暴露 80 端口

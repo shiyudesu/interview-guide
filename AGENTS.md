@@ -3,7 +3,7 @@
 ## 项目状态
 
 生产后端为 Python/FastAPI。Java/Spring 迁移已经完成，旧实现、回滚镜像和迁移对比证据
-已经删除。兼容行为由后端测试、仓库清单和受保护真实模型工作流持续验证。
+已经删除。兼容行为由后端测试、仓库清单、生产 Compose 集成和受保护真实模型工作流验证。
 
 目录：
 
@@ -11,7 +11,7 @@
 backend/                Python 后端
 frontend/               React 前端
 tools/                  仓库清单、模型诊断和生产验收工具
-docs/MIGRATION_PLAN.md  已完成的迁移计划
+docs/                   配置、运维和迁移完成记录
 docker-compose.yml      生产 Compose
 docker-compose.dev.yml  本地基础设施
 ```
@@ -50,7 +50,7 @@ docker-compose.dev.yml  本地基础设施
 - 所有模型客户端由 `LlmProviderRegistry` 和统一 LLM Adapter 提供。
 - 关闭 SDK、LangChain 和 LangGraph 隐式重试。
 - Provider 配置以数据库为准，修改后通过 Redis 版本通知清理进程缓存。
-- 最终模型默认值：
+- 当前模型默认值：
   - `qwen3.7-max`
   - `qwen3.7-text-embedding`，1024 维
   - `qwen3-asr-flash-realtime`
@@ -76,6 +76,7 @@ docker compose logs migrate app worker scheduler
 - 单元测试可以使用明确命名的 fake/stub。
 - 真实模型验收必须使用受保护 Key，不能用 fake 冒充。
 - 集成测试使用真实 PostgreSQL/pgvector、Redis 和 S3 兼容存储。
+- 集成测试不能指向保存业务数据的数据库或 bucket。
 - 前端改动运行相关测试、Playwright 和 `pnpm run build`。
 - 浏览器验证使用 Windows Chrome：
   `/mnt/c/Program Files/Google/Chrome/Application/chrome.exe`。
@@ -88,3 +89,5 @@ docker compose logs migrate app worker scheduler
 - `ci.yml` 必须验证生产 Compose 和 Python 镜像不包含 JVM。
 - `real-model.yml` 只在受保护环境中运行。
 - 修改运行命令、Compose、CI 或技术方案时同步更新 README、AGENTS 和相关文档。
+- 环境变量和 Provider 行为以 `docs/CONFIGURATION.md` 为准，部署排障以
+  `docs/OPERATIONS.md` 为准。

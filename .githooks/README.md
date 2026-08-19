@@ -1,27 +1,29 @@
 # Git Hooks
 
-Enable the repository hooks after cloning:
+克隆仓库后启用提交钩子：
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
-Commit subjects follow Conventional Commits:
+Commit subject 使用 Conventional Commits：
 
 ```text
-feat: add resume parsing baseline
-fix(api): preserve the legacy error response
-docs(migration): 更新迁移检查清单
+feat(resume): add reanalysis endpoint
+fix(worker): reclaim pending evaluation
+docs: refresh deployment guide
 ```
 
-Allowed types are `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`,
-`build`, `ci`, and `revert`. A scope and breaking-change marker are optional.
-The summary may use any language.
+允许的类型：
 
-The body is optional. When present, leave one blank line after the subject.
-Bullets, paragraphs, issue references, and Git trailers are all accepted.
+```text
+feat fix refactor perf test docs chore build ci revert
+```
 
-Run the hook tests with:
+scope 和 `!` 可选，subject 可以使用中文或英文。需要 body 时，subject 后留一个空行。
+Issue 引用和 Git trailer 可以放在 body 末尾。
+
+运行钩子测试：
 
 ```bash
 bash scripts/test-commit-msg-hook.sh
