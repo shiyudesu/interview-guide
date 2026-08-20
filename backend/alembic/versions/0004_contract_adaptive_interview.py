@@ -32,9 +32,7 @@ RESET_TABLES = (
 
 def upgrade() -> None:
     if os.environ.get(RESET_ENV) != "1":
-        raise RuntimeError(
-            f"Destructive adaptive interview migration requires {RESET_ENV}=1"
-        )
+        raise RuntimeError(f"Destructive adaptive interview migration requires {RESET_ENV}=1")
 
     connection = op.get_bind()
     for table in RESET_TABLES:

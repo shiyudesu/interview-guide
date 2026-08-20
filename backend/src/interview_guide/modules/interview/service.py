@@ -370,13 +370,9 @@ class InterviewService:
                         if question.id in turn_by_question
                         else None
                     ),
-                    score=(
-                        evaluations[question.id].score if question.id in evaluations else 0
-                    ),
+                    score=(evaluations[question.id].score if question.id in evaluations else 0),
                     feedback=(
-                        evaluations[question.id].feedback
-                        if question.id in evaluations
-                        else None
+                        evaluations[question.id].feedback if question.id in evaluations else None
                     ),
                     reference_answer=(
                         evaluations[question.id].reference_answer
@@ -384,9 +380,7 @@ class InterviewService:
                         else question.reference_answer
                     ),
                     key_points=(
-                        evaluations[question.id].key_points
-                        if question.id in evaluations
-                        else []
+                        evaluations[question.id].key_points if question.id in evaluations else []
                     ),
                     answered_at=(
                         turn_by_question[question.id].answered_at
@@ -676,11 +670,7 @@ class InterviewService:
     ) -> SubmitTurnResponse:
         action = TurnAction(str(turn.action))
         next_question = next(
-            (
-                question
-                for question in aggregate.questions
-                if question.id == turn.next_question_id
-            ),
+            (question for question in aggregate.questions if question.id == turn.next_question_id),
             None,
         )
         return SubmitTurnResponse(

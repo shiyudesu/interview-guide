@@ -507,14 +507,10 @@ class VoiceWebSocketRuntime:
                 user_text,
             )
             next_text = (
-                response.next_question.question
-                if response.next_question is not None
-                else ""
+                response.next_question.question if response.next_question is not None else ""
             )
             normalized = " ".join(
-                value.strip()
-                for value in (response.acknowledgement, next_text)
-                if value.strip()
+                value.strip() for value in (response.acknowledgement, next_text) if value.strip()
             )
             sentence_end = self._start_complete_sentences(
                 state,

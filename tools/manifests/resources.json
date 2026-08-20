@@ -445,7 +445,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_module.py",
-      "sha256": "9a41717f50796127785a87bbcc68da8406a6e7e91b16a70289d458ff06ed2db4"
+      "sha256": "aa16c9bb25edb9212887c6370783e73f5afddbd38f455223a05b511822bbe94f"
     },
     {
       "disabledMarkers": 0,
@@ -560,7 +560,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_evaluation.py",
-      "sha256": "82961a10d8323e8aede5128ae3ee8fe02a0d9df794f56819ff674e9e80651679"
+      "sha256": "32af7aa7af55149c18e2018af6564dc7046455bf7c8455f389078ea6bab910c1"
     },
     {
       "disabledMarkers": 0,

@@ -42,9 +42,7 @@ class InterviewSessionCache:
         )
 
     async def get_turn_result(self, session_id: str, request_id: str) -> str | None:
-        value = await self._redis.get(
-            f"{TURN_RESULT_PREFIX}{session_id}:{request_id}"
-        )
+        value = await self._redis.get(f"{TURN_RESULT_PREFIX}{session_id}:{request_id}")
         return str(value) if value is not None else None
 
     async def set_turn_result(

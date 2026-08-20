@@ -95,9 +95,7 @@ class InterviewRepository:
     async def find_by_request_id(self, request_id: str) -> SessionAggregate | None:
         async with self._sessions() as session:
             public_id = await session.scalar(
-                select(InterviewSession.session_id).where(
-                    InterviewSession.request_id == request_id
-                )
+                select(InterviewSession.session_id).where(InterviewSession.request_id == request_id)
             )
             return await self._aggregate(session, public_id) if public_id is not None else None
 

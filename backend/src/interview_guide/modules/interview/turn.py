@@ -98,8 +98,7 @@ class InterviewTurnDecisionService:
         started = time.monotonic()
         current = self._current_question(aggregate)
         has_next_main = any(
-            question.kind == QuestionKind.MAIN.value
-            and question.main_order > current.main_order
+            question.kind == QuestionKind.MAIN.value and question.main_order > current.main_order
             for question in aggregate.questions
         )
         follow_ups = self._follow_ups(aggregate, current)
@@ -122,9 +121,7 @@ class InterviewTurnDecisionService:
                 "interview-turn-decision-user.st",
                 self._context(aggregate, current, answer, follow_ups),
             )
-            async with asyncio.timeout(
-                self._settings.interview_turn_decision_timeout_seconds
-            ):
+            async with asyncio.timeout(self._settings.interview_turn_decision_timeout_seconds):
                 invocation = await self._structured.invoke_with_metadata(
                     provider,
                     system,
@@ -206,18 +203,13 @@ class InterviewTurnDecisionService:
     ) -> TurnDecisionResult:
         current = self._current_question(aggregate)
         has_next = any(
-            question.kind == QuestionKind.MAIN.value
-            and question.main_order > current.main_order
+            question.kind == QuestionKind.MAIN.value and question.main_order > current.main_order
             for question in aggregate.questions
         )
         action = TurnAction.NEXT_MAIN if has_next else TurnAction.COMPLETE
         return TurnDecisionResult(
             action=action,
-            acknowledgement=(
-                "好的，我们继续下一题。"
-                if has_next
-                else "好的，本次面试到这里。"
-            ),
+            acknowledgement=("好的，我们继续下一题。" if has_next else "好的，本次面试到这里。"),
             follow_up_question=None,
             reason_code=reason_code,
             reason="决策模型不可用，使用确定性回退",
@@ -310,9 +302,7 @@ class InterviewTurnDecisionService:
         for turn in recent_turns:
             recent_question = question_by_id.get(turn.question_id)
             if recent_question is not None:
-                recent.append(
-                    f"问：{recent_question.question}\n答：{turn.answer or '(未回答)'}"
-                )
+                recent.append(f"问：{recent_question.question}\n答：{turn.answer or '(未回答)'}")
         context_parts = [f"渠道：{aggregate.session.channel}"]
         if aggregate.resume_text:
             context_parts.append(f"简历：{aggregate.resume_text}")

@@ -56,9 +56,7 @@ async def test_legacy_voice_stream_forwards_to_unified_evaluation() -> None:
         streams,  # type: ignore[arg-type]
         status,
     )
-    payload = await handler.parse(
-        StreamMessage("1-0", {FIELD_VOICE_SESSION_ID: "42"})
-    )
+    payload = await handler.parse(StreamMessage("1-0", {FIELD_VOICE_SESSION_ID: "42"}))
     assert payload is not None
     assert await handler.try_mark_processing(payload)
     await handler.process(payload)

@@ -69,9 +69,7 @@ class VoiceInterviewRepository:
                 )
             )
             if interview_session_id is None:
-                raise LookupError(
-                    f"核心面试会话不存在: {interview_session_public_id}"
-                )
+                raise LookupError(f"核心面试会话不存在: {interview_session_public_id}")
             entity = VoiceInterviewSession(
                 actual_duration=None,
                 created_at=timestamp,

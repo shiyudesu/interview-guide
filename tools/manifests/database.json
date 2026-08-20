@@ -95,21 +95,21 @@
       "definition": "ALTER TABLE interview_sessions DROP COLUMN current_question_index, DROP COLUMN questions_json, DROP COLUMN source_type, DROP COLUMN total_questions;",
       "source": {
         "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
-        "line": 26
+        "line": 24
       }
     },
     {
       "definition": "ALTER TABLE interview_sessions ALTER COLUMN channel SET NOT NULL, ALTER COLUMN planned_main_question_count SET NOT NULL, ALTER COLUMN max_follow_ups_per_main SET NOT NULL;",
       "source": {
         "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
-        "line": 32
+        "line": 30
       }
     },
     {
       "definition": "ALTER TABLE voice_interview_sessions ALTER COLUMN interview_session_id SET NOT NULL;",
       "source": {
         "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
-        "line": 37
+        "line": 35
       }
     }
   ],
@@ -332,7 +332,7 @@
     },
     {
       "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
-      "sha256": "05dd0a4bfc066015dbde7602f9e1e23dcd20a0fd5a872ca4b62ba38e7b1ec699",
+      "sha256": "4c46bb5d6e8584fae9df088c10d51030dfc8885fb518471f7fec200383d179dc",
       "statementTerminatorCount": 13
     }
   ],

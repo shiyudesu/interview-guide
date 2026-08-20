@@ -162,9 +162,7 @@ class UnifiedEvaluationService:
         result: list[QuestionGroup] = []
         for main_order in sorted(grouped):
             questions = sorted(grouped[main_order], key=lambda item: item.follow_up_order)
-            main = next(
-                item for item in questions if item.kind == QuestionKind.MAIN.value
-            )
+            main = next(item for item in questions if item.kind == QuestionKind.MAIN.value)
             if not any(question.id in turns for question in questions):
                 continue
             result.append(QuestionGroup(main, questions, turns))
@@ -206,9 +204,7 @@ class UnifiedEvaluationService:
         for group in groups:
             evaluated = output_by_order.get(group.main.main_order)
             turn_outputs = (
-                {item.questionId: item for item in evaluated.turns}
-                if evaluated is not None
-                else {}
+                {item.questionId: item for item in evaluated.turns} if evaluated is not None else {}
             )
             children: list[TurnEvaluationDTO] = []
             main_detail: TurnEvaluationDTO | None = None
@@ -220,9 +216,7 @@ class UnifiedEvaluationService:
                     question=question.question,
                     answer=turn.answer if turn is not None else None,
                     score=item.score if item is not None else 0,
-                    feedback=(
-                        item.feedback if item is not None else "该轮未生成有效评估结果。"
-                    ),
+                    feedback=(item.feedback if item is not None else "该轮未生成有效评估结果。"),
                     reference_answer=(
                         item.referenceAnswer
                         if item is not None and item.referenceAnswer

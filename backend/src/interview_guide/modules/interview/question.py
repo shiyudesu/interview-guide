@@ -527,9 +527,7 @@ class InterviewQuestionService:
                 question_count,
             )
             seen = {item.question for item in questions}
-            questions.extend(
-                item for item in fallback if item.question not in seen
-            )
+            questions.extend(item for item in fallback if item.question not in seen)
         return questions[:question_count]
 
     async def _resolve_skill_node(
@@ -868,6 +866,7 @@ class InterviewQuestionService:
                 skill.persona,
             )
         )
+
 
 class JdParseService:
     def __init__(
