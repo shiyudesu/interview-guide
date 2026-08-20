@@ -62,8 +62,10 @@ POST /api/interview/sessions/{sessionId}/turns
 
 模型只能输出 `FOLLOW_UP` 或 `NEXT_MAIN`；`COMPLETE` 只能由服务端状态机产生。
 
-上下文只包含当前主问题链、最近六轮、受限简历/JD/Skill 和知识库参考资料，所有外部内容
-通过 PromptSanitizer 和数据边界包装。轮次主链路不再同步调用模型生成语音上下文摘要。
+上下文只包含当前主问题链、最近六轮、受限简历/JD/Skill 和题目参考资料，所有外部内容
+通过 PromptSanitizer 和数据边界包装。普通面试在创建会话时按主问题分类保存 Skill reference
+快照，知识库面试保存参考答案、关键点、rubric、来源片段和候选追问素材；后续追问与评估均读取
+题目快照，不实时访问外部题库。轮次主链路不再同步调用模型生成语音上下文摘要。
 
 ## 渠道行为
 

@@ -1,0 +1,45 @@
+displayName: DevOps / SRE
+display:
+  icon: SRE
+  gradient: from-slate-500 to-blue-600
+  iconBg: bg-slate-100 dark:bg-slate-800
+  iconColor: text-slate-700 dark:text-slate-300
+categories:
+  - key: LINUX
+    label: Linux 与网络
+    priority: CORE
+    ref: network-os.md
+    shared: true
+  - key: CONTAINER_K8S
+    label: 容器与 Kubernetes
+    priority: CORE
+    ref: kubernetes.md
+    shared: true
+  - key: RELIABILITY
+    label: 可靠性工程
+    priority: CORE
+    ref: high-availability.md
+    shared: true
+  - key: CI_CD
+    label: CI/CD 与发布
+    priority: NORMAL
+    ref: cicd.md
+    shared: true
+  - key: OBSERVABILITY
+    label: 可观测性与事故响应
+    priority: NORMAL
+    ref: observability-sre.md
+    shared: true
+  - key: CLOUD_IAC
+    label: 云平台与 IaC
+    priority: NORMAL
+    ref: cloud-iac.md
+    shared: true
+  - key: SECURITY
+    label: 平台安全
+    priority: NORMAL
+    ref: security.md
+    shared: true
+  - key: PROJECT
+    label: 项目经历
+    priority: ALWAYS_ONE

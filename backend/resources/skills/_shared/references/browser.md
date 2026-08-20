@@ -25,10 +25,11 @@
 - CSP（Content-Security-Policy）：白名单限制资源加载，`nonce`/`hash` 策略。
 
 ## 性能监控与优化
-- Core Web Vitals：LCP（最大内容绘制 ≤2.5s）、FID/INP（交互延迟 ≤100ms）、CLS（布局偏移 ≤0.1）。
-- 性能 API：`PerformanceObserver`、`performance.timing`（导航计时）、`PerformanceResourceTiming`。
-- 优化手段：代码分割、图片懒加载、预加载（`<link rel="preload">`）、骨架屏。
-- 内存泄漏排查：Chrome DevTools Memory 面板，堆快照对比、分配时间线。
+- Core Web Vitals 关注 LCP、INP、CLS；FID 已被 INP 替代，指标应看真实用户分位数而不是单次跑分。
+- 性能 API：`PerformanceObserver`、Navigation Timing、Resource Timing、Long Tasks 和 User Timing。
+- 优化手段：代码分割、响应式图片、关键资源优先级、非关键资源延迟加载和稳定尺寸占位。
+- 内存泄漏排查：Chrome DevTools 堆快照、分配时间线、脱离 DOM 和事件监听器引用链。
+- 第三方脚本需单独统计体积、长任务和失败影响，并配置超时、延迟加载或隔离策略。
 
 ## 面试追问模板
 - 从输入 URL 到页面渲染完成，中间经历了哪些步骤？

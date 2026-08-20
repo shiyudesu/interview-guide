@@ -5,6 +5,7 @@
 ```text
 manifests/      API、配置、数据库、Redis、资源和测试清单
 model-proxy/    Provider HTTP/WebSocket 诊断代理
+reference_sources/ 普通面试参考资料来源、分类词表和来源追踪
 scripts/        清单生成与真实模型验收脚本
 tests/          工具测试
 ```
@@ -58,3 +59,25 @@ uv run interview-guide-model-proxy
 - TTS 返回 PCM
 
 结果写入被忽略的 `.artifacts/real-model-production.json`，不会记录 API Key。
+
+## 普通面试参考资料
+
+外部题库只通过离线工具用于发现问题方向，不进入生产请求链路。工具支持面试鸭搜索、
+GitHub Markdown 和结构化 JSON 题库。校验来源目录：
+
+```bash
+python3 tools/scripts/reference_sources.py --root . validate
+```
+
+采集少量面试鸭候选题进行检查：
+
+```bash
+python3 tools/scripts/reference_sources.py --root . collect \
+  --source mianshiya \
+  --skill java-backend \
+  --query-limit 2 \
+  --output .artifacts/reference-sample.jsonl
+```
+
+完整的来源许可、采集和整理规则见
+[普通面试参考资料来源](../docs/REFERENCE_SOURCES.md)。

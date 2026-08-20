@@ -33,6 +33,15 @@ categories:
   - key: MQ
     label: 消息队列
     priority: NORMAL
+    ref: mq.md
+    shared: true
   - key: DB_DESIGN
     label: 数据库设计
     priority: NORMAL
+    ref: db-design.md
+    shared: true
+  - key: SECURITY
+    label: 架构安全
+    priority: NORMAL
+    ref: security.md
+    shared: true

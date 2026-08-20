@@ -1,0 +1,45 @@
+displayName: 数据工程
+display:
+  icon: 数
+  gradient: from-indigo-500 to-violet-600
+  iconBg: bg-indigo-100 dark:bg-indigo-900/30
+  iconColor: text-indigo-700 dark:text-indigo-300
+categories:
+  - key: SQL_MODELING
+    label: SQL 与数据建模
+    priority: CORE
+    ref: data-modeling.md
+    shared: true
+  - key: BATCH_PROCESSING
+    label: 批处理
+    priority: CORE
+    ref: batch-processing.md
+    shared: true
+  - key: STREAM_PROCESSING
+    label: 流处理
+    priority: CORE
+    ref: stream-processing.md
+    shared: true
+  - key: DATA_WAREHOUSE
+    label: 数据仓库
+    priority: NORMAL
+    ref: data-warehouse.md
+    shared: true
+  - key: DATA_QUALITY
+    label: 数据质量与治理
+    priority: NORMAL
+    ref: data-quality.md
+    shared: true
+  - key: ORCHESTRATION
+    label: 调度与编排
+    priority: NORMAL
+    ref: data-orchestration.md
+    shared: true
+  - key: PLATFORM
+    label: 数据平台运维
+    priority: NORMAL
+    ref: deployment-observability.md
+    shared: true
+  - key: PROJECT
+    label: 项目经历
+    priority: ALWAYS_ONE

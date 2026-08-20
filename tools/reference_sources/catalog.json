@@ -1,0 +1,597 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "mianshiya",
+      "displayName": "面试鸭 MCP",
+      "kind": "mianshiya-search",
+      "homepage": "https://www.mianshiya.com/",
+      "endpoint": "https://api.mianshiya.com/api/question/mcp/search",
+      "resultUrlTemplate": "https://www.mianshiya.com/question/{id}",
+      "license": "external-terms",
+      "licenseUrl": "https://www.mianshiya.com/",
+      "usage": "link-only",
+      "enabled": true,
+      "skills": [
+        "data-engineering",
+        "devops-sre",
+        "frontend",
+        "go-backend",
+        "java-backend",
+        "python-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "java-guide",
+      "displayName": "JavaGuide",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/Snailclimb/JavaGuide",
+      "repository": "Snailclimb/JavaGuide",
+      "revision": "34fcbf735a03678b1ac3f4aebb9fbb27e7ee4f6b",
+      "trackedBranch": "main",
+      "includePrefixes": [
+        "docs/database",
+        "docs/distributed-system",
+        "docs/high-availability",
+        "docs/high-performance",
+        "docs/java",
+        "docs/system-design"
+      ],
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/Snailclimb/JavaGuide/blob/main/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "java-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "advanced-java",
+      "displayName": "advanced-java",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/doocs/advanced-java",
+      "repository": "doocs/advanced-java",
+      "revision": "1659850d7de4739ac9394dddd6c68466a8c38761",
+      "trackedBranch": "main",
+      "includePrefixes": [
+        "docs"
+      ],
+      "license": "CC-BY-SA-4.0",
+      "licenseUrl": "https://github.com/doocs/advanced-java/blob/main/LICENSE",
+      "usage": "discovery-only",
+      "enabled": true,
+      "skills": [
+        "java-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "front-end-interview-handbook",
+      "displayName": "Front End Interview Handbook",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/yangshun/front-end-interview-handbook",
+      "repository": "yangshun/front-end-interview-handbook",
+      "revision": "8e867581255f40aa0f16977287e5472c3b906874",
+      "trackedBranch": "main",
+      "files": [
+        "questions/css-questions.md",
+        "questions/html-questions.md",
+        "questions/javascript-questions.md"
+      ],
+      "includePrefixes": [
+        "questions"
+      ],
+      "license": "MIT",
+      "licenseUrl": "https://github.com/yangshun/front-end-interview-handbook/blob/main/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "frontend"
+      ]
+    },
+    {
+      "id": "frontend-interview-questions",
+      "displayName": "Front-end Developer Interview Questions",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/h5bp/Front-end-Developer-Interview-Questions",
+      "repository": "h5bp/Front-end-Developer-Interview-Questions",
+      "revision": "33f5498b653e7ae061ee5a65a0b44e9ab860502c",
+      "trackedBranch": "main",
+      "files": [
+        "src/questions/coding-questions.md",
+        "src/questions/css-questions.md",
+        "src/questions/general-questions.md",
+        "src/questions/html-questions.md",
+        "src/questions/javascript-questions.md",
+        "src/questions/network-questions.md",
+        "src/questions/performance-questions.md",
+        "src/questions/testing-questions.md"
+      ],
+      "includePrefixes": [
+        "src/questions"
+      ],
+      "license": "MIT",
+      "licenseUrl": "https://github.com/h5bp/Front-end-Developer-Interview-Questions/blob/main/LICENSE.md",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "frontend"
+      ]
+    },
+    {
+      "id": "react-interview-questions",
+      "displayName": "React Interview Questions & Answers",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/sudheerj/reactjs-interview-questions",
+      "repository": "sudheerj/reactjs-interview-questions",
+      "revision": "4c355593498bb1878953b6b7f23c20c02848909e",
+      "trackedBranch": "master",
+      "files": [
+        "README.md"
+      ],
+      "includePrefixes": [
+        "README.md"
+      ],
+      "license": "MIT",
+      "licenseUrl": "https://github.com/sudheerj/reactjs-interview-questions/blob/master/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "frontend"
+      ]
+    },
+    {
+      "id": "system-design-primer",
+      "displayName": "System Design Primer",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/donnemartin/system-design-primer",
+      "repository": "donnemartin/system-design-primer",
+      "revision": "ae9bbd7b02d90b9866215de185217d33f39ab733",
+      "trackedBranch": "master",
+      "includePrefixes": [
+        "README.md",
+        "solutions"
+      ],
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/donnemartin/system-design-primer/blob/master/LICENSE.txt",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "data-engineering",
+        "devops-sre",
+        "go-backend",
+        "java-backend",
+        "python-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "sre-interview-questions",
+      "displayName": "SRE Interview Questions",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/DevOps-resources/sre-interview-questions",
+      "repository": "DevOps-resources/sre-interview-questions",
+      "revision": "fd7d256839dc8208d58c1adefd6648496859b4cb",
+      "trackedBranch": "master",
+      "files": [
+        "incident-response.md",
+        "linux-by-subsystem/basics.md",
+        "linux-by-subsystem/fs.md",
+        "linux-by-subsystem/ipc.md",
+        "linux-by-subsystem/net.md",
+        "linux-by-subsystem/security.md",
+        "networking.md",
+        "observability.md",
+        "security.md",
+        "system-design.md"
+      ],
+      "includePrefixes": [],
+      "license": "MIT",
+      "licenseUrl": "https://github.com/DevOps-resources/sre-interview-questions/blob/master/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "devops-sre",
+        "java-backend",
+        "python-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "python-interview-questions",
+      "displayName": "Python Interview Questions",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/rcallaby/python-interview-questions",
+      "repository": "rcallaby/python-interview-questions",
+      "revision": "fe29cad16a6b039a10450c459851aa8b6726c897",
+      "trackedBranch": "main",
+      "includePrefixes": [],
+      "license": "MIT",
+      "licenseUrl": "https://github.com/rcallaby/python-interview-questions/blob/main/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "python-backend"
+      ]
+    },
+    {
+      "id": "go-interview-questions",
+      "displayName": "Go Interview Questions",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/rcallaby/go-interview-questions",
+      "repository": "rcallaby/go-interview-questions",
+      "revision": "0f97386f89161da1769338a6d184ae97412a204c",
+      "trackedBranch": "main",
+      "includePrefixes": [],
+      "license": "MIT",
+      "licenseUrl": "https://github.com/rcallaby/go-interview-questions/blob/main/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "go-backend"
+      ]
+    },
+    {
+      "id": "machine-learning-interview-questions",
+      "displayName": "Machine Learning Interview Questions",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/amitshekhariitbhu/machine-learning-interview-questions",
+      "repository": "amitshekhariitbhu/machine-learning-interview-questions",
+      "revision": "f25db25059b0d126f50ad319528ce9d1435bb7ed",
+      "trackedBranch": "main",
+      "includePrefixes": [],
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/amitshekhariitbhu/machine-learning-interview-questions/blob/main/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": false,
+      "skills": []
+    },
+    {
+      "id": "devops-interview-questions",
+      "displayName": "DevOps Interview Questions",
+      "kind": "github-markdown",
+      "homepage": "https://github.com/Chaws465/devops-interview-questions",
+      "repository": "Chaws465/devops-interview-questions",
+      "revision": "680f5425a7812454718eb11c72bdf93785bcccc6",
+      "trackedBranch": "master",
+      "files": [
+        "README.md",
+        "scenarios/ansible_minikube_docker.md",
+        "scenarios/cloud_slack_bot.md",
+        "scenarios/elk_kibana_aws.md",
+        "scenarios/jenkins_pipelines.md"
+      ],
+      "includePrefixes": [],
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/Chaws465/devops-interview-questions/blob/master/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "devops-sre"
+      ]
+    },
+    {
+      "id": "data-engineering-interview-questions",
+      "displayName": "Data Engineering Interview Questions",
+      "kind": "github-json",
+      "homepage": "https://github.com/dataskew-io/data-engineering-interview-questions",
+      "repository": "dataskew-io/data-engineering-interview-questions",
+      "revision": "715f5fad79373c70bc9b7e9cd3dc1cb126f69428",
+      "trackedBranch": "main",
+      "files": [
+        "questions.json"
+      ],
+      "includePrefixes": [],
+      "questionField": "question",
+      "difficultyField": "difficulty",
+      "externalIdField": "id",
+      "tagFields": [
+        "company",
+        "interviewStage",
+        "topic"
+      ],
+      "license": "MIT",
+      "licenseUrl": "https://github.com/dataskew-io/data-engineering-interview-questions/blob/main/LICENSE",
+      "usage": "adapt-with-attribution",
+      "enabled": true,
+      "skills": [
+        "data-engineering"
+      ]
+    },
+    {
+      "id": "oracle-java-docs",
+      "displayName": "Oracle Java Documentation",
+      "kind": "documentation",
+      "homepage": "https://docs.oracle.com/en/java/",
+      "license": "official-documentation",
+      "licenseUrl": "https://www.oracle.com/legal/copyright.html",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "java-backend"
+      ]
+    },
+    {
+      "id": "go-docs",
+      "displayName": "Go Documentation",
+      "kind": "documentation",
+      "homepage": "https://go.dev/doc/",
+      "license": "BSD-3-Clause",
+      "licenseUrl": "https://go.dev/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "go-backend"
+      ]
+    },
+    {
+      "id": "spring-docs",
+      "displayName": "Spring Documentation",
+      "kind": "documentation",
+      "homepage": "https://docs.spring.io/spring-framework/reference/",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/spring-projects/spring-framework/blob/main/LICENSE.txt",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "java-backend"
+      ]
+    },
+    {
+      "id": "mysql-docs",
+      "displayName": "MySQL Reference Manual",
+      "kind": "documentation",
+      "homepage": "https://dev.mysql.com/doc/",
+      "license": "official-documentation",
+      "licenseUrl": "https://www.oracle.com/legal/copyright.html",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "data-engineering",
+        "java-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "mdn-web-docs",
+      "displayName": "MDN Web Docs",
+      "kind": "documentation",
+      "homepage": "https://developer.mozilla.org/docs/Web",
+      "license": "CC-BY-SA-2.5",
+      "licenseUrl": "https://developer.mozilla.org/docs/MDN/Writing_guidelines/Attrib_copyright_license",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "frontend"
+      ]
+    },
+    {
+      "id": "react-docs",
+      "displayName": "React Documentation",
+      "kind": "documentation",
+      "homepage": "https://react.dev/",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/reactjs/react.dev/blob/main/LICENSE-DOCS.md",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "frontend"
+      ]
+    },
+    {
+      "id": "vue-docs",
+      "displayName": "Vue Documentation",
+      "kind": "documentation",
+      "homepage": "https://vuejs.org/guide/",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/vuejs/docs/blob/main/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "frontend"
+      ]
+    },
+    {
+      "id": "python-docs",
+      "displayName": "Python 3.13 Documentation",
+      "kind": "documentation",
+      "homepage": "https://docs.python.org/3.13/",
+      "license": "PSF-2.0",
+      "licenseUrl": "https://docs.python.org/3.13/license.html",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "python-backend"
+      ]
+    },
+    {
+      "id": "django-docs",
+      "displayName": "Django Documentation",
+      "kind": "documentation",
+      "homepage": "https://docs.djangoproject.com/",
+      "license": "BSD-3-Clause",
+      "licenseUrl": "https://github.com/django/django/blob/main/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "python-backend"
+      ]
+    },
+    {
+      "id": "fastapi-docs",
+      "displayName": "FastAPI Documentation",
+      "kind": "documentation",
+      "homepage": "https://fastapi.tiangolo.com/",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/fastapi/fastapi/blob/master/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "python-backend"
+      ]
+    },
+    {
+      "id": "postgresql-docs",
+      "displayName": "PostgreSQL Documentation",
+      "kind": "documentation",
+      "homepage": "https://www.postgresql.org/docs/current/",
+      "license": "PostgreSQL",
+      "licenseUrl": "https://www.postgresql.org/about/licence/",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "data-engineering",
+        "java-backend",
+        "python-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "redis-docs",
+      "displayName": "Redis Documentation",
+      "kind": "documentation",
+      "homepage": "https://redis.io/docs/latest/",
+      "license": "official-documentation",
+      "licenseUrl": "https://redis.io/legal/",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "devops-sre",
+        "go-backend",
+        "java-backend",
+        "python-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "kubernetes-docs",
+      "displayName": "Kubernetes Documentation",
+      "kind": "documentation",
+      "homepage": "https://kubernetes.io/docs/",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/kubernetes/website/blob/main/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "devops-sre",
+        "java-backend",
+        "python-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "owasp-cheat-sheets",
+      "displayName": "OWASP Cheat Sheet Series",
+      "kind": "documentation",
+      "homepage": "https://cheatsheetseries.owasp.org/",
+      "license": "CC-BY-SA-4.0",
+      "licenseUrl": "https://github.com/OWASP/CheatSheetSeries/blob/master/LICENSE.md",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "data-engineering",
+        "devops-sre",
+        "go-backend",
+        "frontend",
+        "java-backend",
+        "python-backend",
+        "system-design"
+      ]
+    },
+    {
+      "id": "docker-docs",
+      "displayName": "Docker Documentation",
+      "kind": "documentation",
+      "homepage": "https://docs.docker.com/",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/docker/docs/blob/main/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "devops-sre",
+        "go-backend"
+      ]
+    },
+    {
+      "id": "prometheus-docs",
+      "displayName": "Prometheus Documentation",
+      "kind": "documentation",
+      "homepage": "https://prometheus.io/docs/",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/prometheus/docs/blob/main/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "devops-sre"
+      ]
+    },
+    {
+      "id": "opentelemetry-docs",
+      "displayName": "OpenTelemetry Documentation",
+      "kind": "documentation",
+      "homepage": "https://opentelemetry.io/docs/",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/open-telemetry/opentelemetry.io/blob/main/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "devops-sre",
+        "go-backend"
+      ]
+    },
+    {
+      "id": "terraform-docs",
+      "displayName": "Terraform Documentation",
+      "kind": "documentation",
+      "homepage": "https://developer.hashicorp.com/terraform/docs",
+      "license": "official-documentation",
+      "licenseUrl": "https://www.hashicorp.com/terms-of-service",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "devops-sre"
+      ]
+    },
+    {
+      "id": "kafka-docs",
+      "displayName": "Apache Kafka Documentation",
+      "kind": "documentation",
+      "homepage": "https://kafka.apache.org/documentation/",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/apache/kafka/blob/trunk/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "data-engineering"
+      ]
+    },
+    {
+      "id": "flink-docs",
+      "displayName": "Apache Flink Documentation",
+      "kind": "documentation",
+      "homepage": "https://nightlies.apache.org/flink/flink-docs-stable/",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/apache/flink/blob/master/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "data-engineering"
+      ]
+    },
+    {
+      "id": "spark-docs",
+      "displayName": "Apache Spark Documentation",
+      "kind": "documentation",
+      "homepage": "https://spark.apache.org/docs/latest/",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/apache/spark/blob/master/LICENSE",
+      "usage": "verify-only",
+      "enabled": true,
+      "skills": [
+        "data-engineering"
+      ]
+    }
+  ]
+}

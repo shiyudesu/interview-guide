@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "references": [
+    {
+      "file": "_shared/references/browser.md",
+      "discoverySources": [
+        "front-end-interview-handbook",
+        "frontend-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "mdn-web-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/css.md",
+      "discoverySources": [
+        "front-end-interview-handbook",
+        "frontend-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "mdn-web-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/deployment-observability.md",
+      "discoverySources": [
+        "sre-interview-questions",
+        "system-design-primer"
+      ],
+      "verificationSources": [
+        "kubernetes-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/django-flask.md",
+      "discoverySources": [
+        "mianshiya",
+        "python-interview-questions"
+      ],
+      "verificationSources": [
+        "django-docs",
+        "fastapi-docs",
+        "python-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/distributed.md",
+      "discoverySources": [
+        "advanced-java",
+        "java-guide",
+        "mianshiya",
+        "system-design-primer"
+      ],
+      "verificationSources": [
+        "kubernetes-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/frontend-engineering.md",
+      "discoverySources": [
+        "front-end-interview-handbook",
+        "frontend-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "mdn-web-docs",
+        "react-docs",
+        "vue-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/frontend-performance.md",
+      "discoverySources": [
+        "front-end-interview-handbook",
+        "frontend-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "mdn-web-docs",
+        "react-docs",
+        "vue-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/high-availability.md",
+      "discoverySources": [
+        "sre-interview-questions",
+        "system-design-primer"
+      ],
+      "verificationSources": [
+        "kubernetes-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/java.md",
+      "discoverySources": [
+        "advanced-java",
+        "java-guide",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "oracle-java-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/mq.md",
+      "discoverySources": [
+        "advanced-java",
+        "java-guide",
+        "mianshiya",
+        "system-design-primer"
+      ],
+      "verificationSources": []
+    },
+    {
+      "file": "_shared/references/mysql.md",
+      "discoverySources": [
+        "advanced-java",
+        "java-guide",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "mysql-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/network-os.md",
+      "discoverySources": [
+        "java-guide",
+        "mianshiya",
+        "sre-interview-questions"
+      ],
+      "verificationSources": [
+        "kubernetes-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/postgresql.md",
+      "discoverySources": [
+        "mianshiya",
+        "system-design-primer"
+      ],
+      "verificationSources": [
+        "postgresql-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/python-basic.md",
+      "discoverySources": [
+        "mianshiya",
+        "python-interview-questions"
+      ],
+      "verificationSources": [
+        "python-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/react-vue.md",
+      "discoverySources": [
+        "front-end-interview-handbook",
+        "mianshiya",
+        "react-interview-questions"
+      ],
+      "verificationSources": [
+        "react-docs",
+        "vue-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/redis.md",
+      "discoverySources": [
+        "advanced-java",
+        "java-guide",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "redis-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/security.md",
+      "discoverySources": [
+        "frontend-interview-questions",
+        "mianshiya",
+        "sre-interview-questions"
+      ],
+      "verificationSources": [
+        "owasp-cheat-sheets"
+      ]
+    },
+    {
+      "file": "_shared/references/spring.md",
+      "discoverySources": [
+        "java-guide",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "oracle-java-docs",
+        "spring-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/system-design-scenarios.md",
+      "discoverySources": [
+        "advanced-java",
+        "mianshiya",
+        "sre-interview-questions",
+        "system-design-primer"
+      ],
+      "verificationSources": [
+        "kubernetes-docs",
+        "owasp-cheat-sheets",
+        "postgresql-docs",
+        "redis-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/go-language.md",
+      "discoverySources": [
+        "go-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "go-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/go-concurrency.md",
+      "discoverySources": [
+        "go-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "go-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/go-runtime.md",
+      "discoverySources": [
+        "go-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "go-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/go-service-engineering.md",
+      "discoverySources": [
+        "go-interview-questions",
+        "mianshiya",
+        "system-design-primer"
+      ],
+      "verificationSources": [
+        "docker-docs",
+        "go-docs",
+        "opentelemetry-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/kubernetes.md",
+      "discoverySources": [
+        "devops-interview-questions",
+        "mianshiya",
+        "sre-interview-questions"
+      ],
+      "verificationSources": [
+        "docker-docs",
+        "kubernetes-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/cicd.md",
+      "discoverySources": [
+        "devops-interview-questions",
+        "mianshiya",
+        "sre-interview-questions"
+      ],
+      "verificationSources": [
+        "docker-docs",
+        "kubernetes-docs",
+        "owasp-cheat-sheets"
+      ]
+    },
+    {
+      "file": "_shared/references/observability-sre.md",
+      "discoverySources": [
+        "devops-interview-questions",
+        "mianshiya",
+        "sre-interview-questions"
+      ],
+      "verificationSources": [
+        "opentelemetry-docs",
+        "prometheus-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/cloud-iac.md",
+      "discoverySources": [
+        "devops-interview-questions",
+        "mianshiya",
+        "system-design-primer"
+      ],
+      "verificationSources": [
+        "kubernetes-docs",
+        "terraform-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/data-modeling.md",
+      "discoverySources": [
+        "data-engineering-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "postgresql-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/batch-processing.md",
+      "discoverySources": [
+        "data-engineering-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "spark-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/stream-processing.md",
+      "discoverySources": [
+        "data-engineering-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "flink-docs",
+        "kafka-docs",
+        "spark-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/data-warehouse.md",
+      "discoverySources": [
+        "data-engineering-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "spark-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/data-quality.md",
+      "discoverySources": [
+        "data-engineering-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "owasp-cheat-sheets",
+        "postgresql-docs"
+      ]
+    },
+    {
+      "file": "_shared/references/data-orchestration.md",
+      "discoverySources": [
+        "data-engineering-interview-questions",
+        "mianshiya"
+      ],
+      "verificationSources": [
+        "kubernetes-docs"
+      ]
+    }
+  ]
+}

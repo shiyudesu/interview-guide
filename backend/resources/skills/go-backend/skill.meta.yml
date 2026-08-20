@@ -1,0 +1,50 @@
+displayName: Go 后端开发
+display:
+  icon: Go
+  gradient: from-cyan-500 to-blue-600
+  iconBg: bg-cyan-100 dark:bg-cyan-900/30
+  iconColor: text-cyan-700 dark:text-cyan-300
+categories:
+  - key: GO_LANGUAGE
+    label: Go 语言
+    priority: CORE
+    ref: go-language.md
+    shared: true
+  - key: GO_CONCURRENCY
+    label: Go 并发
+    priority: CORE
+    ref: go-concurrency.md
+    shared: true
+  - key: GO_RUNTIME
+    label: Go 运行时
+    priority: CORE
+    ref: go-runtime.md
+    shared: true
+  - key: SERVICE_ENGINEERING
+    label: 服务工程
+    priority: NORMAL
+    ref: go-service-engineering.md
+    shared: true
+  - key: DATA_STORAGE
+    label: 数据存储
+    priority: NORMAL
+    ref: database.md
+    shared: true
+  - key: DISTRIBUTED
+    label: 分布式系统
+    priority: NORMAL
+    ref: distributed.md
+    shared: true
+  - key: DEPLOY
+    label: 部署与可观测性
+    priority: NORMAL
+    ref: deployment-observability.md
+    shared: true
+  - key: SECURITY
+    label: API 安全
+    priority: NORMAL
+    ref: security.md
+    shared: true
+  - key: PROJECT
+    label: 项目经历
+    priority: ALWAYS_ONE

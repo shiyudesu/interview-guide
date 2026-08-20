@@ -4,6 +4,7 @@
 - 五种基础类型：String/Hash/List/Set/ZSet，各类型底层编码与适用场景。
 - 特殊类型：Bitmap（活跃统计）、HyperLogLog（UV 去重）、Stream（消息队列）。
 - ZSet 底层为什么用跳表而不是红黑树/B+树（范围查询、实现简单、内存灵活）。
+- Stream 关注 Consumer Group、Pending、消息认领、重复消费和 ACK 时机，不把它等同于完整 MQ 产品。
 
 ## 持久化与线程模型
 - RDB（fork + COW）vs AOF（写后日志、fsync 策略），混合持久化。
@@ -23,12 +24,16 @@
 - BigKey 检测与拆分（redis-rdb-tools、UNLINK 异步删除）。
 - HotKey 发现与本地缓存 + 热点分散。
 - 内存淘汰策略：allkeys-lru vs volatile-lru，内存碎片清理。
+- TTL 集中过期可能造成延迟尖峰；过期删除、淘汰和业务缓存失效要分别分析。
+- 客户端侧关注连接池、超时、重试放大、Pipeline 批次大小和 Cluster 重定向处理。
 
 ## 集群
 - 主从复制（全量 + 增量）、哨兵模式（故障转移、主观/客观下线）。
 - Cluster 模式：16384 槽位、Gossip 协议、重定向（MOVED/ASK）。
+- 故障切换期间可能出现短暂不可用或数据丢失窗口，业务需明确一致性和降级边界。
 
 ## 面试追问模板
 - 如果 Redis 宕机，业务怎么降级？
 - 百万级 QPS 场景下，缓存架构怎么设计？
 - 大 Key 线上清理导致阻塞怎么办？
+- Consumer Pending 持续增长时，如何安全 reclaim、重试并避免重复副作用？

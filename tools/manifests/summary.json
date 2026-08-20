@@ -33,12 +33,12 @@
     },
     "resources.json": {
       "disabledTestMarkerCount": 1,
-      "resourceCount": 58,
+      "resourceCount": 84,
       "resourceCountsByCategory": {
         "font": 1,
         "prompt": 16,
         "redis-script": 1,
-        "skill": 40
+        "skill": 66
       },
       "testFileCount": 47
     }

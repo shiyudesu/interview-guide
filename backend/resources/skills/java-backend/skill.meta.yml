@@ -30,6 +30,31 @@ categories:
     priority: NORMAL
     ref: system-design-scenarios.md
     shared: true
+  - key: MQ
+    label: 消息队列
+    priority: NORMAL
+    ref: mq.md
+    shared: true
+  - key: DISTRIBUTED
+    label: 分布式与微服务
+    priority: NORMAL
+    ref: distributed.md
+    shared: true
+  - key: NET_OS
+    label: 计算机网络与 Linux
+    priority: NORMAL
+    ref: network-os.md
+    shared: true
+  - key: SECURITY
+    label: 应用安全
+    priority: NORMAL
+    ref: security.md
+    shared: true
+  - key: BACKEND_ENGINEERING
+    label: 工程化与可观测性
+    priority: NORMAL
+    ref: deployment-observability.md
+    shared: true
   - key: PROJECT
     label: 项目经历
     priority: ALWAYS_ONE

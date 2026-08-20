@@ -55,6 +55,10 @@ docker-compose.dev.yml  本地基础设施
 - 文字和语音面试统一写入 `interview:evaluate:stream`。
 - 限流 key 使用业务 scope，不使用 Controller 或方法类名。
 - 所有模型客户端由 `LlmProviderRegistry` 和统一 LLM Adapter 提供。
+- 普通面试外部题库只允许通过 `tools/scripts/reference_sources.py` 离线采集，生产请求链路不得
+  调用外部题库；运行时只读取已审核并提交的 Skill reference。
+- 外部来源必须登记在 `tools/reference_sources/catalog.json`，新增或修改 reference 时同步更新
+  `provenance.json`；无明确许可的内容只能用于方向发现，不能复制题解。
 - 关闭 SDK、LangChain 和 LangGraph 隐式重试。
 - Provider 配置以数据库为准，修改后通过 Redis 版本通知清理进程缓存。
 - 内置 Provider 只有百炼，初始不带 API Key；其他 Provider 必须从设置页添加。

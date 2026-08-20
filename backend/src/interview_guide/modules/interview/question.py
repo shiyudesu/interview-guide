@@ -5,7 +5,7 @@ import logging
 import math
 import re
 from collections import OrderedDict
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TypedDict, cast
@@ -299,6 +299,13 @@ class InterviewSkillLibrary:
             )
             return ""
 
+    def attach_question_references(
+        self,
+        skill: ResolvedSkill,
+        questions: Sequence[PlannedInterviewQuestion],
+    ) -> list[PlannedInterviewQuestion]:
+        return [self._attach_question_reference(skill, question) for question in questions]
+
     def reference_file_list(self) -> str:
         rows: OrderedDict[str, str] = OrderedDict()
         for skill in self._repository.all():
@@ -326,7 +333,7 @@ class InterviewSkillLibrary:
         include: Callable[[ResolvedCategory], bool],
         max_chars: int,
     ) -> str:
-        sections: list[str] = []
+        references: list[tuple[str, str]] = []
         for category in skill.categories:
             if not include(category):
                 continue
@@ -335,11 +342,62 @@ class InterviewSkillLibrary:
             content = self._load_reference(skill, category)
             if not content:
                 continue
-            sections.append(f"### {category.label} ({category.key})\n{content}")
-            joined = "\n\n".join(sections)
-            if len(joined) >= max_chars:
-                return joined[:max_chars] + "\n...（references 已截断）"
-        return "\n\n".join(sections) if sections else "未配置 references。"
+            references.append((f"### {category.label} ({category.key})\n", content))
+        if not references:
+            return "未配置 references。"
+        joined = "\n\n".join(header + content for header, content in references)
+        if len(joined) <= max_chars:
+            return joined
+
+        separator_chars = 2 * (len(references) - 1)
+        content_budget = max_chars - separator_chars - sum(len(header) for header, _ in references)
+        if content_budget <= 0:
+            return joined[:max_chars]
+        base_budget, remainder = divmod(content_budget, len(references))
+        sections = []
+        for index, (header, content) in enumerate(references):
+            category_budget = base_budget + (1 if index < remainder else 0)
+            sections.append(header + self._truncate_reference(content, category_budget))
+        return "\n\n".join(sections)
+
+    def _attach_question_reference(
+        self,
+        skill: ResolvedSkill,
+        question: PlannedInterviewQuestion,
+    ) -> PlannedInterviewQuestion:
+        if question.source_context:
+            return question
+        question_type = question.type.strip().upper()
+        category_label = (question.category or "").strip().casefold()
+        category = next(
+            (
+                candidate
+                for candidate in skill.categories
+                if candidate.key.upper() == question_type
+                or candidate.label.casefold() == category_label
+            ),
+            None,
+        )
+        if category is None or category.ref is None:
+            return question
+        reference = self._load_reference(skill, category)
+        if not reference:
+            return question
+        header = f"当前题目分类参考资料（{category.label}/{category.key}）：\n"
+        source_context = self._truncate_reference(
+            header + reference,
+            MAX_SINGLE_REFERENCE_CHARS,
+        )
+        return question.model_copy(update={"source_context": source_context})
+
+    @staticmethod
+    def _truncate_reference(content: str, max_chars: int) -> str:
+        if len(content) <= max_chars:
+            return content
+        marker = "\n...（该分类参考内容已截断）"
+        if max_chars <= len(marker):
+            return content[:max_chars]
+        return content[: max_chars - len(marker)].rstrip() + marker
 
     def _load_reference(
         self,
@@ -499,7 +557,10 @@ class InterviewQuestionService:
             )
             seen = {item.question for item in questions}
             questions.extend(item for item in fallback if item.question not in seen)
-        return questions[:question_count]
+        return self._skills.attach_question_references(
+            cast(ResolvedSkill, result["skill"]),
+            questions[:question_count],
+        )
 
     async def _resolve_skill_node(
         self,

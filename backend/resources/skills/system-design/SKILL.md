@@ -17,4 +17,6 @@ description: 用于系统设计面试出题；聚焦容量估算、可用性与�
 - DISTRIBUTED -> distributed.md
 - CACHE/REDIS -> redis.md
 - DESIGN_PATTERN -> design-pattern.md
-- MQ/DB_DESIGN -> 结合分布式场景进行追问
+- MQ -> mq.md
+- DB_DESIGN -> db-design.md
+- SECURITY -> security.md

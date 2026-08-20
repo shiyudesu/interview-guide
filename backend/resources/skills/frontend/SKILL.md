@@ -17,4 +17,8 @@ description: 用于前端工程面试出题；覆盖 JavaScript、React/Vue、�
 - JAVASCRIPT -> javascript.md
 - REACT_VUE -> react-vue.md
 - BROWSER -> browser.md
-- CSS/ENGINEERING/PERFORMANCE/PROJECT -> 结合简历与工程实践深挖
+- CSS -> css.md
+- ENGINEERING -> frontend-engineering.md
+- PERFORMANCE -> frontend-performance.md
+- SECURITY -> security.md
+- PROJECT -> 结合简历与工程实践深挖

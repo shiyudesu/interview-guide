@@ -20,15 +20,26 @@ categories:
     priority: CORE
     ref: browser.md
     shared: true
-  - key: CSS
-    label: CSS
-    priority: NORMAL
   - key: ENGINEERING
     label: 工程化
     priority: NORMAL
+    ref: frontend-engineering.md
+    shared: true
   - key: PERFORMANCE
     label: 性能优化
     priority: NORMAL
+    ref: frontend-performance.md
+    shared: true
+  - key: CSS
+    label: CSS
+    priority: NORMAL
+    ref: css.md
+    shared: true
+  - key: SECURITY
+    label: 前端安全
+    priority: NORMAL
+    ref: security.md
+    shared: true
   - key: PROJECT
     label: 项目经历
     priority: ALWAYS_ONE

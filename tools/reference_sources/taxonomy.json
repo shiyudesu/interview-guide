@@ -1,0 +1,1165 @@
+{
+  "schemaVersion": 1,
+  "skills": {
+    "data-engineering": {
+      "categories": [
+        {
+          "key": "SQL_MODELING",
+          "queries": [
+            "数据工程 SQL 窗口函数",
+            "数据建模事实表维度表",
+            "数据仓库慢变维",
+            "SQL Join 数据倾斜",
+            "增量数据模型"
+          ],
+          "keywords": [
+            "sql",
+            "data model",
+            "modeling",
+            "fact table",
+            "dimension",
+            "scd",
+            "window function",
+            "数据建模",
+            "事实表",
+            "维度表"
+          ]
+        },
+        {
+          "key": "BATCH_PROCESSING",
+          "queries": [
+            "Spark 批处理 Shuffle",
+            "大数据任务数据倾斜",
+            "Spark SQL 性能优化",
+            "批处理任务幂等重跑",
+            "大规模数据回填"
+          ],
+          "keywords": [
+            "batch",
+            "spark",
+            "shuffle",
+            "executor",
+            "partition",
+            "backfill",
+            "批处理",
+            "数据倾斜",
+            "回填"
+          ]
+        },
+        {
+          "key": "STREAM_PROCESSING",
+          "queries": [
+            "Flink 状态 Checkpoint",
+            "Kafka 消费 Offset",
+            "流处理 Watermark 迟到数据",
+            "Exactly Once 流处理",
+            "流式 Join 状态管理"
+          ],
+          "keywords": [
+            "stream",
+            "streaming",
+            "flink",
+            "kafka",
+            "watermark",
+            "checkpoint",
+            "offset",
+            "流处理",
+            "迟到数据"
+          ]
+        },
+        {
+          "key": "DATA_WAREHOUSE",
+          "queries": [
+            "数据仓库分层设计",
+            "湖仓一体表格式",
+            "数据仓库分区小文件",
+            "OLAP 查询优化",
+            "指标口径治理"
+          ],
+          "keywords": [
+            "data warehouse",
+            "data lake",
+            "lakehouse",
+            "olap",
+            "small files",
+            "数据仓库",
+            "数仓",
+            "湖仓"
+          ]
+        },
+        {
+          "key": "DATA_QUALITY",
+          "queries": [
+            "数据质量监控",
+            "数据血缘元数据",
+            "数据契约 Schema 演进",
+            "数据权限脱敏",
+            "指标一致性治理"
+          ],
+          "keywords": [
+            "data quality",
+            "lineage",
+            "metadata",
+            "data contract",
+            "schema evolution",
+            "数据质量",
+            "血缘",
+            "元数据"
+          ]
+        },
+        {
+          "key": "ORCHESTRATION",
+          "queries": [
+            "Airflow DAG 调度",
+            "数据任务幂等重试",
+            "数据任务补数回填",
+            "调度系统高可用",
+            "数据任务 SLA"
+          ],
+          "keywords": [
+            "airflow",
+            "dag",
+            "orchestration",
+            "scheduler",
+            "retry",
+            "backfill",
+            "调度",
+            "编排",
+            "补数"
+          ]
+        },
+        {
+          "key": "PLATFORM",
+          "queries": [
+            "数据平台 Kubernetes 部署",
+            "数据平台可观测性",
+            "数据任务资源隔离",
+            "数据平台成本治理",
+            "数据平台故障恢复"
+          ],
+          "keywords": [
+            "platform",
+            "kubernetes",
+            "observability",
+            "resource isolation",
+            "cost",
+            "数据平台",
+            "资源隔离",
+            "成本治理"
+          ]
+        }
+      ]
+    },
+    "devops-sre": {
+      "categories": [
+        {
+          "key": "LINUX",
+          "queries": [
+            "Linux CPU 内存排查",
+            "Linux 网络故障排查",
+            "Linux IO 文件系统",
+            "Linux 进程线程",
+            "Linux 权限安全"
+          ],
+          "keywords": [
+            "linux",
+            "filesystem",
+            "process",
+            "syscall",
+            "tcp",
+            "network",
+            "操作系统",
+            "文件系统"
+          ]
+        },
+        {
+          "key": "CONTAINER_K8S",
+          "queries": [
+            "Docker 容器原理",
+            "Kubernetes Pod 调度",
+            "Kubernetes 网络存储",
+            "Kubernetes 故障排查",
+            "Kubernetes 滚动升级"
+          ],
+          "keywords": [
+            "docker",
+            "container",
+            "kubernetes",
+            "pod",
+            "kubernetes deployment",
+            "statefulset",
+            "容器"
+          ]
+        },
+        {
+          "key": "RELIABILITY",
+          "queries": [
+            "SRE SLO 错误预算",
+            "高可用容灾设计",
+            "限流熔断降级",
+            "容量规划压测",
+            "故障演练恢复"
+          ],
+          "keywords": [
+            "sre",
+            "reliability",
+            "availability",
+            "slo",
+            "error budget",
+            "disaster recovery",
+            "高可用",
+            "可靠性"
+          ]
+        },
+        {
+          "key": "CI_CD",
+          "queries": [
+            "CI CD 流水线设计",
+            "蓝绿金丝雀发布",
+            "GitOps 发布",
+            "软件供应链安全",
+            "数据库兼容发布"
+          ],
+          "keywords": [
+            "ci/cd",
+            "pipeline",
+            "deployment",
+            "canary",
+            "blue green",
+            "gitops",
+            "release",
+            "发布",
+            "流水线"
+          ]
+        },
+        {
+          "key": "OBSERVABILITY",
+          "queries": [
+            "Prometheus 指标告警",
+            "OpenTelemetry Trace",
+            "日志指标链路追踪",
+            "线上事故响应复盘",
+            "高基数指标"
+          ],
+          "keywords": [
+            "prometheus",
+            "opentelemetry",
+            "observability",
+            "monitoring",
+            "tracing",
+            "incident",
+            "可观测性",
+            "监控",
+            "事故"
+          ]
+        },
+        {
+          "key": "CLOUD_IAC",
+          "queries": [
+            "Terraform State",
+            "基础设施即代码 IaC",
+            "云上多可用区架构",
+            "云资源成本治理",
+            "IAM 最小权限"
+          ],
+          "keywords": [
+            "terraform",
+            "infrastructure as code",
+            "iac",
+            "cloud",
+            "iam",
+            "state",
+            "云平台",
+            "基础设施即代码"
+          ]
+        },
+        {
+          "key": "SECURITY",
+          "queries": [
+            "Kubernetes 安全 RBAC",
+            "容器镜像供应链安全",
+            "Secret 密钥轮换",
+            "零信任网络",
+            "云平台权限治理"
+          ],
+          "keywords": [
+            "security",
+            "rbac",
+            "secret",
+            "zero trust",
+            "supply chain",
+            "安全",
+            "密钥",
+            "权限"
+          ]
+        }
+      ]
+    },
+    "frontend": {
+      "categories": [
+        {
+          "key": "JAVASCRIPT",
+          "queries": [
+            "JavaScript 类型与原型链",
+            "JavaScript 闭包与作用域",
+            "JavaScript Promise 事件循环",
+            "TypeScript 类型系统",
+            "JavaScript 内存泄漏"
+          ],
+          "keywords": [
+            "javascript",
+            "typescript",
+            "closure",
+            "prototype",
+            "promise",
+            "event loop",
+            "闭包",
+            "原型",
+            "事件循环"
+          ]
+        },
+        {
+          "key": "REACT_VUE",
+          "queries": [
+            "React Hooks Fiber",
+            "React 状态管理性能优化",
+            "React Server Components",
+            "Vue 3 响应式原理",
+            "Vue Composition API"
+          ],
+          "keywords": [
+            "react",
+            "vue",
+            "hook",
+            "fiber",
+            "reconciliation",
+            "composition api",
+            "响应式",
+            "虚拟 dom"
+          ]
+        },
+        {
+          "key": "BROWSER",
+          "queries": [
+            "浏览器渲染流程",
+            "HTTP2 HTTP3 TLS",
+            "浏览器缓存",
+            "浏览器安全 XSS CSRF",
+            "浏览器事件循环"
+          ],
+          "keywords": [
+            "browser",
+            "rendering",
+            "http",
+            "tls",
+            "cache",
+            "cors",
+            "xss",
+            "csrf",
+            "浏览器",
+            "渲染"
+          ]
+        },
+        {
+          "key": "CSS",
+          "queries": [
+            "CSS 布局 Flex Grid",
+            "CSS 选择器优先级",
+            "CSS BFC",
+            "CSS 响应式设计",
+            "CSS 动画性能"
+          ],
+          "keywords": [
+            "css",
+            "flex",
+            "grid",
+            "selector",
+            "specificity",
+            "bfc",
+            "layout",
+            "布局",
+            "选择器"
+          ]
+        },
+        {
+          "key": "ENGINEERING",
+          "queries": [
+            "前端工程化 Vite Webpack",
+            "前端模块化 ESM CommonJS",
+            "前端测试 Vitest Playwright",
+            "微前端 Module Federation",
+            "前端 CI CD"
+          ],
+          "keywords": [
+            "webpack",
+            "vite",
+            "bundler",
+            "module",
+            "testing",
+            "playwright",
+            "micro frontend",
+            "工程化",
+            "构建"
+          ]
+        },
+        {
+          "key": "PERFORMANCE",
+          "queries": [
+            "前端性能优化 Core Web Vitals",
+            "前端首屏性能",
+            "前端内存泄漏排查",
+            "前端资源加载优化",
+            "前端性能监控"
+          ],
+          "keywords": [
+            "performance",
+            "web vitals",
+            "lcp",
+            "inp",
+            "cls",
+            "lazy load",
+            "memory leak",
+            "性能",
+            "首屏"
+          ]
+        },
+        {
+          "key": "SECURITY",
+          "queries": [
+            "前端 XSS CSRF 防护",
+            "前端供应链安全",
+            "浏览器 CSP Trusted Types",
+            "Token Cookie 安全存储",
+            "前端敏感信息泄漏"
+          ],
+          "keywords": [
+            "security",
+            "xss",
+            "csrf",
+            "csp",
+            "trusted types",
+            "supply chain",
+            "安全",
+            "敏感信息"
+          ]
+        }
+      ]
+    },
+    "go-backend": {
+      "categories": [
+        {
+          "key": "GO_LANGUAGE",
+          "queries": [
+            "Go slice map interface",
+            "Go defer panic recover",
+            "Go error wrapping",
+            "Go 泛型类型约束",
+            "Go Modules 依赖管理"
+          ],
+          "keywords": [
+            "golang",
+            "go language",
+            "slice",
+            "map",
+            "interface",
+            "defer",
+            "panic",
+            "generic",
+            "module",
+            "Go 语言"
+          ]
+        },
+        {
+          "key": "GO_CONCURRENCY",
+          "queries": [
+            "Go goroutine channel",
+            "Go context 取消超时",
+            "Go 并发数据竞争",
+            "Go worker pool",
+            "Go goroutine 泄漏"
+          ],
+          "keywords": [
+            "goroutine",
+            "channel",
+            "context",
+            "race",
+            "mutex",
+            "waitgroup",
+            "并发"
+          ]
+        },
+        {
+          "key": "GO_RUNTIME",
+          "queries": [
+            "Go GMP 调度模型",
+            "Go GC 垃圾回收",
+            "Go 逃逸分析内存分配",
+            "Go pprof 性能排查",
+            "Go runtime netpoll"
+          ],
+          "keywords": [
+            "runtime",
+            "scheduler",
+            "gmp",
+            "garbage collection",
+            "escape analysis",
+            "pprof",
+            "netpoll",
+            "调度",
+            "逃逸分析"
+          ]
+        },
+        {
+          "key": "SERVICE_ENGINEERING",
+          "queries": [
+            "Go net/http 服务设计",
+            "Go gRPC 超时重试",
+            "Go database/sql 连接池",
+            "Go 服务优雅停止",
+            "Go 服务测试工程化"
+          ],
+          "keywords": [
+            "net/http",
+            "grpc",
+            "database/sql",
+            "http server",
+            "middleware",
+            "graceful shutdown",
+            "服务",
+            "连接池"
+          ]
+        },
+        {
+          "key": "DATA_STORAGE",
+          "queries": [
+            "Go 数据库事务",
+            "Go ORM N+1",
+            "Go Redis 缓存",
+            "数据库索引查询优化",
+            "数据库连接池治理"
+          ],
+          "keywords": [
+            "database",
+            "sql",
+            "transaction",
+            "redis",
+            "cache",
+            "orm",
+            "数据库",
+            "缓存"
+          ]
+        },
+        {
+          "key": "DISTRIBUTED",
+          "queries": [
+            "Go 微服务治理",
+            "Go 分布式事务",
+            "Go 消息队列幂等",
+            "Go 服务发现负载均衡",
+            "Go 分布式锁"
+          ],
+          "keywords": [
+            "distributed",
+            "microservice",
+            "message queue",
+            "service discovery",
+            "load balance",
+            "分布式",
+            "微服务"
+          ]
+        },
+        {
+          "key": "DEPLOY",
+          "queries": [
+            "Go Docker Kubernetes 部署",
+            "Go 服务可观测性",
+            "Go 线上故障排查",
+            "Go 服务容量规划",
+            "Go CI CD"
+          ],
+          "keywords": [
+            "docker",
+            "kubernetes",
+            "deployment",
+            "observability",
+            "incident",
+            "部署",
+            "可观测性"
+          ]
+        },
+        {
+          "key": "SECURITY",
+          "queries": [
+            "Go API 认证鉴权",
+            "Go Web 安全",
+            "Go JWT OAuth2",
+            "Go 依赖供应链安全",
+            "Go 服务密钥管理"
+          ],
+          "keywords": [
+            "security",
+            "authentication",
+            "authorization",
+            "jwt",
+            "oauth",
+            "安全",
+            "鉴权"
+          ]
+        }
+      ]
+    },
+    "java-backend": {
+      "categories": [
+        {
+          "key": "JAVA",
+          "queries": [
+            "Java 集合 HashMap ConcurrentHashMap",
+            "Java 并发 JMM volatile synchronized",
+            "Java 线程池 CompletableFuture",
+            "JVM GC G1 ZGC",
+            "JVM 内存泄漏故障排查",
+            "Java 21 虚拟线程"
+          ],
+          "keywords": [
+            "java",
+            "jvm",
+            "gc",
+            "hashmap",
+            "concurrenthashmap",
+            "thread",
+            "volatile",
+            "synchronized",
+            "线程池",
+            "并发",
+            "虚拟线程"
+          ]
+        },
+        {
+          "key": "MYSQL",
+          "queries": [
+            "MySQL 索引 B+树",
+            "MySQL 事务 MVCC 锁",
+            "MySQL 慢查询优化",
+            "MySQL 主从复制",
+            "MySQL 分库分表"
+          ],
+          "keywords": [
+            "mysql",
+            "sql",
+            "index",
+            "transaction",
+            "mvcc",
+            "replication",
+            "索引",
+            "事务",
+            "慢查询"
+          ]
+        },
+        {
+          "key": "REDIS",
+          "queries": [
+            "Redis 数据结构底层实现",
+            "Redis 持久化 RDB AOF",
+            "Redis 缓存一致性",
+            "Redis 集群哨兵",
+            "Redis 大Key 热Key",
+            "Redis 分布式锁"
+          ],
+          "keywords": [
+            "redis",
+            "cache",
+            "缓存",
+            "rdb",
+            "aof",
+            "sentinel",
+            "cluster",
+            "bigkey",
+            "hotkey"
+          ]
+        },
+        {
+          "key": "SPRING",
+          "queries": [
+            "Spring IoC Bean 生命周期",
+            "Spring AOP 事务失效",
+            "Spring MVC 请求流程",
+            "Spring Boot 自动配置",
+            "Spring Security 认证授权",
+            "Spring Boot 可观测性"
+          ],
+          "keywords": [
+            "spring",
+            "bean",
+            "aop",
+            "transactional",
+            "spring boot",
+            "spring security",
+            "ioc",
+            "事务失效"
+          ]
+        },
+        {
+          "key": "SYSTEM_DESIGN_SCENARIO",
+          "queries": [
+            "系统设计 秒杀系统",
+            "系统设计 消息队列可靠性",
+            "分布式事务一致性",
+            "微服务限流熔断降级",
+            "线上故障排查 可观测性",
+            "高并发系统容量设计"
+          ],
+          "keywords": [
+            "system design",
+            "distributed",
+            "availability",
+            "scalability",
+            "microservice",
+            "message queue",
+            "系统设计",
+            "分布式",
+            "高可用",
+            "高并发"
+          ]
+        },
+        {
+          "key": "MQ",
+          "queries": [
+            "Kafka 消息可靠性",
+            "RocketMQ 事务消息",
+            "消息重复消费幂等",
+            "消息顺序与积压",
+            "消息队列选型"
+          ],
+          "keywords": [
+            "kafka",
+            "rocketmq",
+            "rabbitmq",
+            "message queue",
+            "消息队列",
+            "重复消费",
+            "消息积压"
+          ]
+        },
+        {
+          "key": "DISTRIBUTED",
+          "queries": [
+            "分布式一致性 CAP",
+            "分布式事务 Saga TCC",
+            "服务注册发现负载均衡",
+            "微服务超时重试熔断",
+            "分布式 ID"
+          ],
+          "keywords": [
+            "distributed",
+            "microservice",
+            "consistency",
+            "saga",
+            "tcc",
+            "service discovery",
+            "分布式",
+            "微服务"
+          ]
+        },
+        {
+          "key": "NET_OS",
+          "queries": [
+            "TCP 拥塞控制 TIME_WAIT",
+            "HTTP2 HTTP3 TLS",
+            "Linux IO 多路复用",
+            "Linux 进程线程内存",
+            "Linux 线上问题排查"
+          ],
+          "keywords": [
+            "tcp",
+            "http",
+            "tls",
+            "linux",
+            "epoll",
+            "network",
+            "operating system",
+            "网络",
+            "操作系统"
+          ]
+        },
+        {
+          "key": "SECURITY",
+          "queries": [
+            "Spring Security 认证授权",
+            "JWT OAuth2 OIDC",
+            "Web API 安全",
+            "越权重放签名校验",
+            "敏感数据加密脱敏"
+          ],
+          "keywords": [
+            "security",
+            "oauth",
+            "oidc",
+            "jwt",
+            "authentication",
+            "authorization",
+            "安全",
+            "认证",
+            "鉴权"
+          ]
+        },
+        {
+          "key": "BACKEND_ENGINEERING",
+          "queries": [
+            "Java 服务 Docker Kubernetes 部署",
+            "Java 服务可观测性 OpenTelemetry",
+            "Java 线上故障排查",
+            "Java CI CD 灰度发布",
+            "线程池连接池监控"
+          ],
+          "keywords": [
+            "docker",
+            "kubernetes",
+            "observability",
+            "opentelemetry",
+            "deployment",
+            "incident",
+            "可观测性",
+            "部署",
+            "故障排查"
+          ]
+        }
+      ]
+    },
+    "python-backend": {
+      "categories": [
+        {
+          "key": "PYTHON_BASIC",
+          "queries": [
+            "Python 数据模型 魔法方法",
+            "Python GIL 多线程多进程",
+            "Python asyncio 协程",
+            "Python 生成器装饰器",
+            "Python 内存管理垃圾回收",
+            "Python 类型系统"
+          ],
+          "keywords": [
+            "python",
+            "gil",
+            "asyncio",
+            "coroutine",
+            "generator",
+            "decorator",
+            "协程",
+            "生成器",
+            "装饰器"
+          ]
+        },
+        {
+          "key": "DATABASE",
+          "queries": [
+            "Python SQLAlchemy ORM",
+            "数据库事务隔离 MVCC",
+            "PostgreSQL 索引查询优化",
+            "数据库连接池",
+            "ORM N+1 问题"
+          ],
+          "keywords": [
+            "sqlalchemy",
+            "database",
+            "postgresql",
+            "transaction",
+            "connection pool",
+            "orm",
+            "数据库",
+            "连接池"
+          ]
+        },
+        {
+          "key": "DJANGO_FLASK",
+          "queries": [
+            "FastAPI 依赖注入异步",
+            "Django 请求生命周期 ORM",
+            "Flask 上下文中间件",
+            "ASGI WSGI 区别",
+            "Python Web API 性能"
+          ],
+          "keywords": [
+            "fastapi",
+            "django",
+            "flask",
+            "asgi",
+            "wsgi",
+            "middleware",
+            "dependency injection",
+            "中间件"
+          ]
+        },
+        {
+          "key": "CACHE",
+          "queries": [
+            "Python Redis 缓存一致性",
+            "Redis 分布式锁",
+            "缓存穿透击穿雪崩",
+            "Redis Stream 消费者组"
+          ],
+          "keywords": [
+            "redis",
+            "cache",
+            "缓存",
+            "stream",
+            "distributed lock",
+            "分布式锁"
+          ]
+        },
+        {
+          "key": "SYSTEM_DESIGN_SCENARIO",
+          "queries": [
+            "Python 高并发服务设计",
+            "Python Celery 任务可靠性",
+            "Python API 限流幂等",
+            "微服务故障恢复",
+            "WebSocket 服务设计"
+          ],
+          "keywords": [
+            "system design",
+            "celery",
+            "task queue",
+            "websocket",
+            "idempotency",
+            "rate limit",
+            "系统设计",
+            "任务队列",
+            "幂等"
+          ]
+        },
+        {
+          "key": "DEPLOY",
+          "queries": [
+            "Python Docker Kubernetes 部署",
+            "Gunicorn Uvicorn Worker",
+            "Python 服务可观测性",
+            "Python 线上故障排查",
+            "Python CI CD"
+          ],
+          "keywords": [
+            "docker",
+            "kubernetes",
+            "gunicorn",
+            "uvicorn",
+            "deployment",
+            "observability",
+            "部署",
+            "可观测性",
+            "故障排查"
+          ]
+        },
+        {
+          "key": "POSTGRESQL",
+          "queries": [
+            "PostgreSQL MVCC Vacuum",
+            "PostgreSQL 索引执行计划",
+            "PostgreSQL JSONB GIN",
+            "PostgreSQL 锁与事务",
+            "PostgreSQL 复制高可用"
+          ],
+          "keywords": [
+            "postgresql",
+            "postgres",
+            "vacuum",
+            "jsonb",
+            "gin",
+            "explain analyze",
+            "mvcc"
+          ]
+        },
+        {
+          "key": "SECURITY",
+          "queries": [
+            "FastAPI OAuth2 JWT 安全",
+            "Python API 认证鉴权",
+            "Web API 越权重放攻击",
+            "Python 依赖供应链安全",
+            "敏感数据加密脱敏"
+          ],
+          "keywords": [
+            "security",
+            "oauth",
+            "jwt",
+            "authentication",
+            "authorization",
+            "supply chain",
+            "安全",
+            "鉴权",
+            "越权"
+          ]
+        }
+      ]
+    },
+    "system-design": {
+      "categories": [
+        {
+          "key": "HIGH_AVAILABILITY",
+          "queries": [
+            "高可用系统设计",
+            "限流熔断降级",
+            "容灾 RTO RPO",
+            "SLO 错误预算",
+            "线上事故应急响应"
+          ],
+          "keywords": [
+            "availability",
+            "reliability",
+            "failover",
+            "disaster recovery",
+            "slo",
+            "incident",
+            "monitoring",
+            "observability",
+            "tracing",
+            "高可用",
+            "容灾",
+            "熔断"
+          ]
+        },
+        {
+          "key": "DISTRIBUTED",
+          "queries": [
+            "分布式一致性 CAP",
+            "Raft 共识算法",
+            "分布式事务 Saga TCC",
+            "分布式锁 fencing token",
+            "服务发现负载均衡"
+          ],
+          "keywords": [
+            "distributed",
+            "consensus",
+            "raft",
+            "cap",
+            "saga",
+            "distributed lock",
+            "分布式",
+            "一致性",
+            "共识"
+          ]
+        },
+        {
+          "key": "SYSTEM_DESIGN_SCENARIO",
+          "queries": [
+            "设计短链系统",
+            "设计秒杀系统",
+            "设计 Feed 流",
+            "设计即时通讯系统",
+            "设计搜索系统",
+            "设计支付系统"
+          ],
+          "keywords": [
+            "system design",
+            "design a",
+            "short url",
+            "feed",
+            "chat system",
+            "payment",
+            "设计",
+            "系统"
+          ]
+        },
+        {
+          "key": "CACHE",
+          "queries": [
+            "缓存架构设计",
+            "缓存一致性",
+            "多级缓存",
+            "热点 Key 治理",
+            "缓存容量淘汰"
+          ],
+          "keywords": [
+            "cache",
+            "redis",
+            "hot key",
+            "eviction",
+            "缓存",
+            "热点"
+          ]
+        },
+        {
+          "key": "DESIGN_PATTERN",
+          "queries": [
+            "架构设计模式",
+            "领域驱动设计 DDD",
+            "事件驱动架构",
+            "CQRS Event Sourcing",
+            "微服务边界设计"
+          ],
+          "keywords": [
+            "design pattern",
+            "ddd",
+            "event driven",
+            "cqrs",
+            "event sourcing",
+            "设计模式",
+            "领域驱动",
+            "事件驱动"
+          ]
+        },
+        {
+          "key": "MQ",
+          "queries": [
+            "消息队列可靠性",
+            "消息重复消费幂等",
+            "消息顺序与积压",
+            "Kafka 分区副本",
+            "RocketMQ 延迟消息事务消息"
+          ],
+          "keywords": [
+            "message queue",
+            "kafka",
+            "rocketmq",
+            "rabbitmq",
+            "consumer",
+            "消息队列",
+            "重复消费",
+            "消息积压"
+          ]
+        },
+        {
+          "key": "DB_DESIGN",
+          "queries": [
+            "数据库表结构设计",
+            "数据库分库分表",
+            "数据库读写分离",
+            "数据库冷热分层",
+            "关系型和 NoSQL 选型"
+          ],
+          "keywords": [
+            "database design",
+            "sharding",
+            "replication",
+            "nosql",
+            "schema",
+            "数据库设计",
+            "分库分表",
+            "读写分离"
+          ]
+        },
+        {
+          "key": "SECURITY",
+          "queries": [
+            "系统架构安全设计",
+            "零信任架构",
+            "OAuth2 OIDC 架构",
+            "API 网关认证鉴权",
+            "数据加密密钥轮换"
+          ],
+          "keywords": [
+            "security",
+            "zero trust",
+            "oauth",
+            "oidc",
+            "authentication",
+            "authorization",
+            "linux capabilities",
+            "security module",
+            "安全",
+            "零信任",
+            "鉴权"
+          ]
+        }
+      ]
+    }
+  }
+}

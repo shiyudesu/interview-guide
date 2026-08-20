@@ -16,7 +16,7 @@ categories:
     ref: database.md
     shared: true
   - key: DJANGO_FLASK
-    label: Django/Flask
+    label: Django/Flask/FastAPI
     priority: NORMAL
     ref: django-flask.md
     shared: true
@@ -31,8 +31,20 @@ categories:
     ref: system-design-scenarios.md
     shared: true
   - key: DEPLOY
-    label: 部署
+    label: 部署与可观测性
     priority: NORMAL
+    ref: deployment-observability.md
+    shared: true
+  - key: POSTGRESQL
+    label: PostgreSQL
+    priority: NORMAL
+    ref: postgresql.md
+    shared: true
+  - key: SECURITY
+    label: API 安全
+    priority: NORMAL
+    ref: security.md
+    shared: true
   - key: PROJECT
     label: 项目经历
     priority: ALWAYS_ONE

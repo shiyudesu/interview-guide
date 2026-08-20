@@ -9,6 +9,8 @@ InterviewGuide 是一个自托管 AI 面试平台，覆盖简历分析、文字�
 
 - 上传 PDF、DOC、DOCX 简历，生成结构化分析和 PDF 报告
 - 按岗位 Skill 或 JD 生成文字面试，异步评估并保存报告
+- 内置 Java、Python、Go、前端、数据工程、DevOps/SRE、系统设计、算法、测试和 AI Agent 等面试方向
+- 使用可追溯的多来源题目目录维护普通面试参考资料，生产链路不依赖外部题库
 - 实时 ASR/TTS 语音面试，支持暂停、恢复和会后评估
 - 管理面试日程，支持自然语言解析和状态流转
 - 上传知识库文件，完成清洗、切片、向量化和 RAG 对话
@@ -209,12 +211,18 @@ uv sync --frozen
 uv run python -m unittest discover -s tests -v
 ```
 
+普通面试参考资料来源校验：
+
+```bash
+python3 tools/scripts/reference_sources.py --root . validate
+```
+
 ## 目录
 
 ```text
 backend/                FastAPI 后端、Alembic、资源和测试
 frontend/               React 前端、Playwright 和 Nginx 配置
-tools/                  仓库清单、模型诊断代理、生产模型验收
+tools/                  仓库清单、参考资料采集、模型诊断代理、生产模型验收
 docs/                   配置、运维和架构说明
 docker-compose.yml      完整生产拓扑
 docker-compose.dev.yml  本地基础设施
@@ -228,6 +236,7 @@ docker-compose.dev.yml  本地基础设施
 - [后端开发](backend/README.md)
 - [前端开发](frontend/README.md)
 - [仓库工具](tools/README.md)
+- [普通面试参考资料来源](docs/REFERENCE_SOURCES.md)
 
 ## CI
 

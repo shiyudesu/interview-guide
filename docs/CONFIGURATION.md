@@ -181,6 +181,10 @@ APP_VOICE_TURN_MIN_REMAINING_SECONDS=30
 会话创建时只生成主问题，追问在回答提交后动态决定。知识库专项面试使用创建请求中的
 `followUpCount` 作为每道主问题的上限。
 
+普通面试生成主问题后，会按题目 `type` 或分类名称匹配当前 Skill reference，并将最多 3000
+个 Unicode 字符保存为题目 `source_context` 快照。动态追问和最终评估读取该快照，不会在面试
+过程中访问外部题库；已经创建的会话不会因 reference 文件更新而改变。
+
 Embedding 维度与 PostgreSQL `vector(1024)` 必须一致，不要只改环境变量而不修改 schema 和
 相关测试。
 

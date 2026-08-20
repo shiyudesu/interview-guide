@@ -7,6 +7,8 @@
 - 方法重载 vs 重写，静态分派与动态分派。
 - 接口 vs 抽象类，Java 8+ default 方法的影响。
 - 深拷贝 vs 浅拷贝，序列化方案。
+- 泛型擦除、桥接方法与运行时类型边界；反射、MethodHandle 和动态代理的适用场景。
+- record、sealed class、模式匹配等现代语法解决的问题，以及升级时的兼容性考虑。
 
 ## String
 - 不可变性原理（final byte[]），安全与性能影响。
@@ -33,7 +35,7 @@
 - AQS 原理（state + CLH 队列），Semaphore/CountDownLatch/CyclicBarrier。
 - ThreadLocal：原理、内存泄漏与弱引用、跨线程传递（TransmittableThreadLocal）。
 - CompletableFuture：编排、异常处理、自定义线程池。
-- 虚拟线程（Java 21）：用途与调度模型。
+- 虚拟线程（Java 21+）：适合大量阻塞式 I/O 任务，不用于让 CPU 密集计算自动并行；关注 pinning、ThreadLocal 和限流。
 
 ## JVM
 - 运行时数据区：堆/栈/方法区/元空间/程序计数器/直接内存。
@@ -43,10 +45,17 @@
 - 垃圾收集器：Serial→Parallel→CMS→G1→ZGC，各自适用场景。
 - G1 回收流程（Young GC / Mixed GC），ZGC 着色指针与读屏障。
 - 双亲委派模型与打破方式（SPI、OSGi、线程上下文类加载器）。
-- OOM 排查：Heap Dump、jmap/jstat/arthuras、GC 日志分析。
+- OOM 排查：Heap Dump、jmap/jstat/Arthas、JFR、GC 日志与 Native Memory Tracking。
+
+## I/O 与运行时工程
+- BIO、NIO 与异步 I/O 的线程模型差异；Selector、ByteBuffer、零拷贝和背压的适用边界。
+- Java 序列化的安全与演进风险；服务间契约优先使用显式 Schema 并处理前后兼容。
+- 线程池、连接池和队列必须有容量、超时、拒绝、监控与关闭策略，不能只使用默认参数。
+- CPU 飙升、频繁 Full GC、直接内存耗尽和类加载泄漏需要采用不同证据链排查。
 
 ## 面试追问模板
 - 这个机制底层是怎么实现的？有什么性能代价？
 - 多线程环境下会有什么问题？如何保证线程安全？
 - 框架（Spring/MyBatis）中哪里用到了这个机制？
 - 线上遇到 OOM/GC 频繁怎么排查？参数怎么调？
+- 引入虚拟线程后，数据库连接池和下游限流为什么仍然必要？

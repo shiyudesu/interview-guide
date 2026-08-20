@@ -115,10 +115,58 @@
       "sha256": "2a682a65af36de0a4e60512f51fd35e5ff063efa41713e2a6a69815487a7308f"
     },
     {
-      "bytes": 2348,
+      "bytes": 1781,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/batch-processing.md",
+      "sha256": "6bc67c6499a15c1a1ab1d0596dd432ba054ce4fe1f44cebcb0abfb754ec9b942"
+    },
+    {
+      "bytes": 2501,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/browser.md",
-      "sha256": "8f54a0fd02a4c0f4bcb050cc196213caed4f6ad96af9d20737135270a5642b92"
+      "sha256": "9eddc3c2377019f6992f9534cfe92a85bddd65141c69656e69f8fd23794cdf90"
+    },
+    {
+      "bytes": 2161,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/cicd.md",
+      "sha256": "cfd70ff3d24219237101a79114e184846da431f866ca2f8a4f1cbb8b120e650c"
+    },
+    {
+      "bytes": 2221,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/cloud-iac.md",
+      "sha256": "f83d7915b68ef556bb70c282dc420ed49a5a1addcd05bfd5303da2ef892f5928"
+    },
+    {
+      "bytes": 2781,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/css.md",
+      "sha256": "6548d282f0de81fb772bfa008f74f1575e8ef615ca1a6a32b5367623dee416ad"
+    },
+    {
+      "bytes": 1617,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/data-modeling.md",
+      "sha256": "86feb66cc3f5a0f826088b53b863d0c396b2df21cc94d228172a6ed62bdd213b"
+    },
+    {
+      "bytes": 1841,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/data-orchestration.md",
+      "sha256": "a398ad69a235bcd3eed541f432e31c984619a18c74303a2b95b28b361db7ca69"
+    },
+    {
+      "bytes": 1722,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/data-quality.md",
+      "sha256": "53adede947b94393b6b191b606b2c3f49976fa0b175ed300700955dc303aeaaf"
+    },
+    {
+      "bytes": 1680,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/data-warehouse.md",
+      "sha256": "c18116d25d700a5fb30304627656a6214c78fc0bed6d25df60273522da5a3502"
     },
     {
       "bytes": 2862,
@@ -133,34 +181,76 @@
       "sha256": "3f7bba5678f50e8dbef1455d87078a8272261948281d00fb0c566da3a74ef5b4"
     },
     {
+      "bytes": 2835,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/deployment-observability.md",
+      "sha256": "be8deaebc97d078528de13b0a377f48fe5e9d1131009fe8c1d63ee4a71806890"
+    },
+    {
       "bytes": 1696,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/design-pattern.md",
       "sha256": "5656a90004472d84ec39f847586eb0395c209b4bba3dbe2a2cfccc7d9b66acfe"
     },
     {
-      "bytes": 1787,
+      "bytes": 2724,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/distributed.md",
-      "sha256": "0d7fbdac1cde72e8438fe3058714f684c424f705f0bc75d4803b205bd3becf3a"
+      "sha256": "b4dfefad11cb466dadaa415f57d6e7d613b2ab361ccdf3e849b1c3df6a6b979f"
     },
     {
-      "bytes": 2934,
+      "bytes": 3810,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/django-flask.md",
-      "sha256": "641d9058fefc0c3e195c8b8d455fb962624011d64d735083277253be21908c93"
+      "sha256": "8fbd72c739d642a070ebd1a38b18fa8753ad567903ad87a7e455e6e10db841e1"
     },
     {
-      "bytes": 2716,
+      "bytes": 2811,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/frontend-engineering.md",
+      "sha256": "030039d14b4a726a2de8ebe0be8ed37ff0d14af99d9fea4166941eb482824b3c"
+    },
+    {
+      "bytes": 2777,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/frontend-performance.md",
+      "sha256": "7f0d111a3f93255fec14691b02b54e28978a0e85b5a2f71ce4127274a96516b0"
+    },
+    {
+      "bytes": 2221,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/go-concurrency.md",
+      "sha256": "7bbdb4a10f6d3490c9480e8ccea24c9b9caef03d3259860e74075e058fd64787"
+    },
+    {
+      "bytes": 2366,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/go-language.md",
+      "sha256": "d1d24b0cc45a88ec81886badbad285d30b07ccf1d74687b3ed0a4aedb6a2bce7"
+    },
+    {
+      "bytes": 2042,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/go-runtime.md",
+      "sha256": "e856a183afdc8f4dba225ccedc8feac1715a3be5736f5d3a7eb49b790854c0db"
+    },
+    {
+      "bytes": 2153,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/go-service-engineering.md",
+      "sha256": "d025ef61bf1369ddd5a0bc8de7fc00c4afddeb2f8807e5688bb10c440805d54f"
+    },
+    {
+      "bytes": 3553,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/high-availability.md",
-      "sha256": "0e07fab915d1159a9ee419732521056b79011c27c9f8652c98034e1d205b8932"
+      "sha256": "0ede78e0a6c4d461ca8ac94bb11945b6776564f33a5b86985385d58645683362"
     },
     {
-      "bytes": 3078,
+      "bytes": 3978,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/java.md",
-      "sha256": "345a67393059f4700e4bc5108a355f4723c8f720a31ae855e2d0840173a1c737"
+      "sha256": "bc577f6e60aa3fd148d187f4ee52bc79cfe59fe9662afc1587b865af93afa148"
     },
     {
       "bytes": 2753,
@@ -169,52 +259,82 @@
       "sha256": "780315a4ab96164b798e125d3686295c925cd108ccf3f2b6859826b2e9b03be7"
     },
     {
-      "bytes": 2735,
+      "bytes": 2206,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/kubernetes.md",
+      "sha256": "c1898ce69771f1710f63503f9db323312135d78f9a9d340111f74c81177f71e0"
+    },
+    {
+      "bytes": 3101,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/mq.md",
-      "sha256": "b541a75a3983cde1b229e68facecaa7c94d5a1329d9a19c2d6a1c4771953708e"
+      "sha256": "384821a25d3e8df6045ea865d7fd7e846d1ba3fa767c6614631705c2b66cc871"
     },
     {
-      "bytes": 1682,
+      "bytes": 2381,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/mysql.md",
-      "sha256": "d30f329c442385725196f827d8b5571f7aaa714fc8042fda92df4e473f553a38"
+      "sha256": "cbe732c266218ccd03c1393e60880fbeb006c94ba2e0723d4ba04d3c12eadd7e"
     },
     {
-      "bytes": 979,
+      "bytes": 3180,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/network-os.md",
-      "sha256": "eb282d9d6699e2efd453531984b1df771faced270452a68e22f751ac9c6b193c"
+      "sha256": "62709bd60c0e28efb77e99fde01961be371d9ec5c73c8abd7c4cc24ef8bf54de"
     },
     {
-      "bytes": 2814,
+      "bytes": 2232,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/observability-sre.md",
+      "sha256": "6b4e8cda2a532bb95ac9780379b6f0b1e8231b2ce9793ab24bdb0e94b1436f42"
+    },
+    {
+      "bytes": 2913,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/postgresql.md",
+      "sha256": "d6ba8d3b6db3ce323d4fa6972aecbae1696c14e817ef94b2c50243165f7cb917"
+    },
+    {
+      "bytes": 3425,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/python-basic.md",
-      "sha256": "7b0b6b8b406fe17cbfc5b22f5c0b0cb6ee2d6f89a08a611eb0715d04749e9834"
+      "sha256": "e50169fe687faa77bf9672806144e2dec0bd6da13d81713ec1af83852de4ed8f"
     },
     {
-      "bytes": 3362,
+      "bytes": 3966,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/react-vue.md",
-      "sha256": "fcc214cfa7984099214189dd7b649829848de916b52778699a3d32cce464e9bc"
+      "sha256": "0402c20b1e99c6ab5e5759dfe0e773b33129c1c84c9e62069e58196bb96107b6"
     },
     {
-      "bytes": 1714,
+      "bytes": 2261,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/redis.md",
-      "sha256": "bbf0457d09f12674abdafcc80c76ad99e57b00c2d9b603b2cfa3c3996ae27526"
+      "sha256": "d53e066752a54623a12212f864328a30ce5c941c712744edc93a9c785487dd99"
     },
     {
-      "bytes": 2052,
+      "bytes": 2906,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/security.md",
+      "sha256": "4c5eb1e02bd2c4faff50c116f93481dd62fa22aae5b99eb4f2fae79ddeb92350"
+    },
+    {
+      "bytes": 3136,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/spring.md",
-      "sha256": "92dfdaac59c29ac10763297266fc3d45c78fae0d66a28b180e8dd18a9d581084"
+      "sha256": "cd67f44223010ca571185428a10595724b2aa003a4d79a72a25b87344113fe8c"
     },
     {
-      "bytes": 3730,
+      "bytes": 1751,
+      "category": "skill",
+      "file": "backend/resources/skills/_shared/references/stream-processing.md",
+      "sha256": "4587ef9b865f39de941eabd03d4ca5a18a9411ed6889e2b4ffcbdd1d1b8a41d7"
+    },
+    {
+      "bytes": 5578,
       "category": "skill",
       "file": "backend/resources/skills/_shared/references/system-design-scenarios.md",
-      "sha256": "8e4d37d552e0606792a3c647f15734e41c034b4d418f803d4a27630866c84a21"
+      "sha256": "2795ab8a4d687fb8a19be1437043d4142e5cf56769242bf3a312b0a9622a0e55"
     },
     {
       "bytes": 5366,
@@ -277,28 +397,64 @@
       "sha256": "13418b93dd992888ce864f8530008dc855125236c9e3c963d8e9fe9af26a8027"
     },
     {
-      "bytes": 942,
+      "bytes": 1147,
+      "category": "skill",
+      "file": "backend/resources/skills/data-engineering/SKILL.md",
+      "sha256": "6537e66e662aa544ffee03315fffa9895dcf3712dab45788a5ad5655c3e1a211"
+    },
+    {
+      "bytes": 1077,
+      "category": "skill",
+      "file": "backend/resources/skills/data-engineering/skill.meta.yml",
+      "sha256": "8a3358ce9343b36029e5bbda57c183bf68300ab40927e09e9bb00e57be0eedce"
+    },
+    {
+      "bytes": 1025,
+      "category": "skill",
+      "file": "backend/resources/skills/devops-sre/SKILL.md",
+      "sha256": "2715a36877c54f1649b429627b8aae7c51b74e239ca4a20127e83d4293818ad4"
+    },
+    {
+      "bytes": 1017,
+      "category": "skill",
+      "file": "backend/resources/skills/devops-sre/skill.meta.yml",
+      "sha256": "4a1c7d88f6104683eed2de8b9ce176bdb319ffb25bc64f11fbbc19e74446ba18"
+    },
+    {
+      "bytes": 1038,
       "category": "skill",
       "file": "backend/resources/skills/frontend/SKILL.md",
-      "sha256": "1d0af9b533549d744844206f6e806cf70e94128f797b0e94c98ab2d8a75afdf0"
+      "sha256": "1226d975edf0134ef08009de0cc237d1e7f09f4168ca86cc5fe3bdc3ba866337"
     },
     {
-      "bytes": 729,
+      "bytes": 963,
       "category": "skill",
       "file": "backend/resources/skills/frontend/skill.meta.yml",
-      "sha256": "758ea52e7139a3e5218782bc82205a0c771cd9db1285e8dcbcac7ad7b2785d33"
+      "sha256": "6273518b7be00528bd4bbde73c9c3e7788d5eedf941e6187cfa7c6562a2ff876"
     },
     {
-      "bytes": 970,
+      "bytes": 1110,
+      "category": "skill",
+      "file": "backend/resources/skills/go-backend/SKILL.md",
+      "sha256": "5d874354a1c846b4fb7328ff7b2460273cfb8a56bad67b3e2a6526f531e35316"
+    },
+    {
+      "bytes": 1130,
+      "category": "skill",
+      "file": "backend/resources/skills/go-backend/skill.meta.yml",
+      "sha256": "f13aafe4991aef668c00e5b1b6c94bca42730435bb943ec91cbeb39fa6e52800"
+    },
+    {
+      "bytes": 1185,
       "category": "skill",
       "file": "backend/resources/skills/java-backend/SKILL.md",
-      "sha256": "16a37db4a0635c2087ffab278126922899ebc8e8a9d8b134bfc74264f11bea51"
+      "sha256": "2af6c7c580a4452023126f8d0accdf1bac8473563b7675ffa53d76b9cdd8eb9a"
     },
     {
-      "bytes": 744,
+      "bytes": 1303,
       "category": "skill",
       "file": "backend/resources/skills/java-backend/skill.meta.yml",
-      "sha256": "f3acbd9fe405925ab6b9912644505ca5dfe6b1b615784f912eb6d8d4017090bd"
+      "sha256": "0af76ea2821c6de378870ae0fda4621bf518abdff1b99af672c28c653c330ad5"
     },
     {
       "bytes": 1067,
@@ -313,28 +469,28 @@
       "sha256": "f5a7ee27c78ba65b6a85b17503d10894e3d0d7998c8aed5fcb01118d6e020230"
     },
     {
-      "bytes": 856,
+      "bytes": 1052,
       "category": "skill",
       "file": "backend/resources/skills/python-backend/SKILL.md",
-      "sha256": "69f1e20e60d7107e0ace15877d41c6824e8f567a9ca2bead4cd4aa7d03f02300"
+      "sha256": "47bc470b999b08a2a272f4e94fb797bdf265577e9c3b9c478ec3336eadbfdea2"
     },
     {
-      "bytes": 861,
+      "bytes": 1140,
       "category": "skill",
       "file": "backend/resources/skills/python-backend/skill.meta.yml",
-      "sha256": "6d6077fe6f03d032e1ff692057d02b3707b1cd5a3145ff296a5473270e2d38f4"
+      "sha256": "cbb2217c245640ee30eda6fa214c928c23020e367856492300fbcc9092daae7f"
     },
     {
-      "bytes": 868,
+      "bytes": 884,
       "category": "skill",
       "file": "backend/resources/skills/system-design/SKILL.md",
-      "sha256": "74a9f3735c98d3510bfa434a7596981827655bb063d778a2dbd097b900878d4a"
+      "sha256": "56ec966dd97849b629f324c06190aac239d93e033ff15abd135a1cfc9b21e7b2"
     },
     {
-      "bytes": 876,
+      "bytes": 1048,
       "category": "skill",
       "file": "backend/resources/skills/system-design/skill.meta.yml",
-      "sha256": "0d40e46c9e5c3e98c84625ec37f8ba6eb2304511f5fa81c4621e278640192d0d"
+      "sha256": "8a775ed3d16affa46a2ed52321dc6a69cbd21d553e6bd62e5397a5012d1a105c"
     },
     {
       "bytes": 1275,
@@ -352,12 +508,12 @@
   "schemaVersion": 1,
   "summary": {
     "disabledTestMarkerCount": 1,
-    "resourceCount": 58,
+    "resourceCount": 84,
     "resourceCountsByCategory": {
       "font": 1,
       "prompt": 16,
       "redis-script": 1,
-      "skill": 40
+      "skill": 66
     },
     "testFileCount": 47
   },
@@ -415,7 +571,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_ai_resources.py",
-      "sha256": "bfe23dbc5a2118bc7e84efcb3cd6301262540a5c100ebb09c3f361d2be0e986c"
+      "sha256": "e501e3e1d41b8e458ac2f860c44775befeb9ba4fa821995e29c2a10edd0d151e"
     },
     {
       "disabledMarkers": 0,
@@ -455,7 +611,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_skill.py",
-      "sha256": "f69cb0bd7ee127ff619b049d5065193909be3246a1d9198448b745d170836d15"
+      "sha256": "e3ce78643552f7c684bfe18987c021f93adf793a7aa1cf566dfb9e70a5890e76"
     },
     {
       "disabledMarkers": 0,

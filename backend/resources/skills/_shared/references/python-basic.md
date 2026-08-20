@@ -14,11 +14,13 @@
 - 类装饰器 vs 函数装饰器，`__call__` 实现。
 
 ## GIL 与并发模型
-- GIL（全局解释器锁）：CPython 的内存安全机制，CPU 密集型多线程无法并行。
+- 标准 CPython 的 GIL 限制同一进程内 Python 字节码并行；Python 3.13 提供可选 free-threaded 构建，但兼容性和性能需要实测。
 - 多线程（`threading`）：适合 I/O 密集型（网络请求/文件读写），GIL 在 I/O 等待时释放。
 - 多进程（`multiprocessing`）：绕过 GIL，进程间通信（Queue/Pipe/共享内存），进程池。
 - 异步（`asyncio`）：事件循环 + 协程（`async`/`await`），适合高并发 I/O，单线程无锁。
 - `concurrent.futures`：`ThreadPoolExecutor` vs `ProcessPoolExecutor`，统一的 Future 接口。
+- `TaskGroup` 提供结构化并发和关联取消；取消异常、超时边界及后台任务生命周期需要显式处理。
+- 阻塞数据库驱动、文件操作或 CPU 计算会卡住事件循环，应进入受限线程池、进程池或独立任务系统。
 
 ## 内存管理与垃圾回收
 - 引用计数：主要回收机制，实时性好但无法处理循环引用。
@@ -32,9 +34,12 @@
 - 包管理：`pip` + `requirements.txt` vs `poetry`/`uv`（锁文件、依赖解析）。
 - 虚拟环境：`venv`/`conda`，隔离项目依赖避免版本冲突。
 - 代码质量：`ruff`（lint + format）、`pytest`（测试框架）、`pre-commit`（Git 钩子）。
+- `Protocol` 支持结构化子类型，泛型参数的协变/逆变影响容器和回调 API 设计。
+- 异常链、`ExceptionGroup` 和资源清理决定并发任务失败时能否保留完整根因。
 
 ## 面试追问模板
 - Python 的 GIL 在你的项目中造成过问题吗？怎么解决的？
 - 装饰器写过什么功能？带参数的装饰器怎么实现的？
 - 内存泄漏怎么排查？用过哪些工具？
 - 大量数据处理时，你会用生成器还是列表？权衡点是什么？
+- asyncio 服务吞吐下降但 CPU 不高时，如何发现事件循环被阻塞？
