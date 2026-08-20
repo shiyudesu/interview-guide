@@ -1,4 +1,4 @@
-import { request } from './request';
+import { request, type PageOptions } from './request';
 import type {
   CreateInterviewRequest,
   CurrentQuestionResponse,
@@ -26,12 +26,20 @@ export interface TextSessionMeta {
   completedAt: string | null;
 }
 
+export interface InterviewListOptions extends PageOptions {
+  sessionIds?: string[];
+}
+
 export const interviewApi = {
   /**
    * 列出所有文字面试会话
    */
-  async listSessions(): Promise<TextSessionMeta[]> {
-    return request.get<TextSessionMeta[]>('/api/interview/sessions');
+  async listSessions(options?: InterviewListOptions): Promise<TextSessionMeta[]> {
+    const params = new URLSearchParams();
+    options?.sessionIds?.forEach(id => params.append('sessionIds', id));
+    if (options?.limit !== undefined) params.append('limit', String(options.limit));
+    if (options?.offset !== undefined) params.append('offset', String(options.offset));
+    return request.get<TextSessionMeta[]>('/api/interview/sessions', { params });
   },
 
   /**

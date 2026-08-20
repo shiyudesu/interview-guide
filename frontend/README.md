@@ -38,12 +38,10 @@ VITE_API_PROXY_TARGET=http://127.0.0.1:8080 pnpm run dev
 ```bash
 pnpm run dev
 pnpm run build
+pnpm run lint
 pnpm run preview
+pnpm run test:unit
 pnpm run test:e2e
-pnpm run test:interview-history
-pnpm run test:question-generation
-pnpm run test:interview-capacity
-pnpm run test:interview-entry
 ```
 
 `pnpm run build` 会先运行 TypeScript 检查，再执行 Vite 构建。

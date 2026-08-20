@@ -8,12 +8,14 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
 
-from interview_guide.common.api.responses import result_response
+from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
 from interview_guide.modules.interview_schedule.models import (
     CreateInterviewRequest,
+    InterviewScheduleResponse,
     ParseRequest,
+    ParseResponse,
 )
 from interview_guide.modules.interview_schedule.parser import InterviewParseService
 from interview_guide.modules.interview_schedule.service import (
@@ -21,7 +23,10 @@ from interview_guide.modules.interview_schedule.service import (
     schedule_now,
 )
 
-router = APIRouter(prefix="/api/interview-schedule")
+router = APIRouter(
+    prefix="/api/interview-schedule",
+    responses=STANDARD_ERROR_RESPONSES,
+)
 
 
 async def database_session(request: Request) -> AsyncIterator[AsyncSession]:
@@ -79,7 +84,7 @@ def parse_query_datetime(
     return parsed
 
 
-@router.post("")
+@router.post("", response_model=InterviewScheduleResponse, status_code=201)
 async def create_schedule(
     payload: CreateInterviewRequest,
     service: ServiceDependency,
@@ -88,7 +93,7 @@ async def create_schedule(
     return result_response(Result.ok(created), status_code=201)
 
 
-@router.post("/parse")
+@router.post("/parse", response_model=ParseResponse)
 async def parse_schedule(
     payload: ParseRequest,
     service: ParseServiceDependency,
@@ -97,7 +102,7 @@ async def parse_schedule(
     return result_response(Result.ok(parsed))
 
 
-@router.get("/{schedule_id}")
+@router.get("/{schedule_id}", response_model=InterviewScheduleResponse)
 async def get_schedule(
     schedule_id: int,
     service: ServiceDependency,
@@ -106,7 +111,7 @@ async def get_schedule(
     return result_response(Result.ok(schedule))
 
 
-@router.get("")
+@router.get("", response_model=list[InterviewScheduleResponse])
 async def list_schedules(
     service: ServiceDependency,
     status: str | None = None,
@@ -121,7 +126,7 @@ async def list_schedules(
     return result_response(Result.ok(schedules))
 
 
-@router.put("/{schedule_id}")
+@router.put("/{schedule_id}", response_model=InterviewScheduleResponse)
 async def update_schedule(
     schedule_id: int,
     payload: CreateInterviewRequest,
@@ -134,7 +139,7 @@ async def update_schedule(
     return result_response(Result.ok(updated))
 
 
-@router.delete("/{schedule_id}")
+@router.delete("/{schedule_id}", status_code=204)
 async def delete_schedule(
     schedule_id: int,
     service: ServiceDependency,
@@ -155,7 +160,7 @@ async def update_schedule_status(
     return result_response(Result.ok(updated))
 
 
-@router.patch("/{schedule_id}/status")
+@router.patch("/{schedule_id}/status", response_model=InterviewScheduleResponse)
 async def patch_schedule_status(
     schedule_id: int,
     status: Annotated[str, Query()],
@@ -164,7 +169,7 @@ async def patch_schedule_status(
     return await update_schedule_status(schedule_id, status, service)
 
 
-@router.put("/{schedule_id}/status")
+@router.put("/{schedule_id}/status", response_model=InterviewScheduleResponse)
 async def put_schedule_status(
     schedule_id: int,
     status: Annotated[str, Query()],

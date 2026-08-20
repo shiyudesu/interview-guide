@@ -78,8 +78,6 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         if (endHour > maxHour || (endHour === 0 && eventEnd.isAfter(eventStart, 'day'))) {
           maxHour = 23;
           hasLateEvent = true;
-        } else if (endHour > maxHour) {
-          maxHour = Math.min(23, endHour);
         }
       }
     });

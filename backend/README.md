@@ -65,6 +65,10 @@ tests/               单元、契约和真实基础设施集成测试
 路由只处理参数、校验、Service 调用和响应。Service 负责编排，Repository 负责数据库读写。
 API 返回 Pydantic Model，不直接暴露 SQLAlchemy ORM。
 
+主要列表接口支持可选 `limit`（最大 200）和 `offset`；省略时保持原有完整数组响应。简历、
+文字面试、语音面试和知识库列表还支持重复的 `ids` 或 `sessionIds` 参数，供前端轮询时只刷新
+活动记录。OpenAPI 明确登记成功状态、响应 Model 和标准 `code + detail` 错误结构。
+
 ## 检查
 
 ```bash

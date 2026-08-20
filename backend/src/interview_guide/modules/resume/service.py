@@ -13,6 +13,7 @@ from interview_guide.common.redis.streams import (
     RESUME_ANALYZE,
     RedisStreamService,
 )
+from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.infrastructure.export.pdf import (
     PdfDocumentBuilder,
     ScoreRow,
@@ -43,6 +44,7 @@ class ResumeService:
         storage: S3Storage,
         streams: RedisStreamService | None = None,
         parser: AsyncDocumentParser | None = None,
+        blocking_executor: BlockingExecutor | None = None,
         now: datetime | None = None,
     ) -> None:
         self._session = session
@@ -50,9 +52,16 @@ class ResumeService:
         self._storage = storage
         self._streams = streams
         self._parser = parser
+        self._blocking_executor = blocking_executor
         self._now = now or datetime.now()
 
-    async def list(self) -> list[ResumeListResponse]:
+    async def list(
+        self,
+        *,
+        ids: list[int] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[ResumeListResponse]:
         return [
             ResumeListResponse(
                 id=row.resume.id,
@@ -66,7 +75,11 @@ class ResumeService:
                 analyze_status=row.resume.analyze_status,
                 analyze_error=row.resume.analyze_error,
             )
-            for row in await self._repository.list_rows()
+            for row in await self._repository.list_rows(
+                ids=ids,
+                limit=limit,
+                offset=offset,
+            )
         ]
 
     async def detail(self, resume_id: int) -> ResumeDetailResponse:
@@ -307,7 +320,10 @@ class ResumeService:
                     ]
                 )
             sections.append(("改进建议", paragraphs))
-        pdf = PdfDocumentBuilder(font).build(
+        if self._blocking_executor is None:
+            raise RuntimeError("Resume PDF export executor is unavailable")
+        pdf = await self._blocking_executor.run(
+            PdfDocumentBuilder(font).build,
             "简历分析报告",
             sections,
             score_rows=[

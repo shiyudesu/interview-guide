@@ -362,14 +362,14 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 124
+        "line": 147
       },
       "value": "interview:create"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 169
+        "line": 192
       },
       "value": "interview:submit-turn"
     },
@@ -411,35 +411,35 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview_skill/api.py",
-        "line": 58
+        "line": 63
       },
       "value": "interview-skill:parse-jd"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 110
+        "line": 116
       },
       "value": "data:{line}\\n"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 139
+        "line": 158
       },
       "value": "knowledge-base:query"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 150
+        "line": 169
       },
       "value": "knowledge-base:query-stream"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
-        "line": 66
+        "line": 71
       },
       "value": "knowledge-base:generate-questions"
     },
@@ -577,7 +577,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 103
+        "line": 113
       }
     },
     {
@@ -585,7 +585,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_skill/api.py",
-        "line": 57
+        "line": 62
       }
     },
     {
@@ -593,7 +593,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 97
+        "line": 103
       }
     },
     {
@@ -601,7 +601,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
-        "line": 65
+        "line": 70
       }
     }
   ],

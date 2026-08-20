@@ -61,15 +61,25 @@ class KnowledgeBaseRepository:
         vector_status: str | None = None,
         category: str | None = None,
         uncategorized: bool = False,
+        ids: list[int] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> list[KnowledgeBase]:
         statement = select(KnowledgeBase)
         if vector_status is not None:
             statement = statement.where(KnowledgeBase.vector_status == vector_status)
+        if ids is not None:
+            statement = statement.where(KnowledgeBase.id.in_(ids))
         if uncategorized:
             statement = statement.where(KnowledgeBase.category.is_(None))
         elif category is not None:
             statement = statement.where(KnowledgeBase.category == category)
-        result = await self._session.scalars(statement.order_by(KnowledgeBase.uploaded_at.desc()))
+        statement = statement.order_by(KnowledgeBase.uploaded_at.desc())
+        if offset:
+            statement = statement.offset(offset)
+        if limit is not None:
+            statement = statement.limit(limit)
+        result = await self._session.scalars(statement)
         return list(result)
 
     async def search(self, keyword: str) -> list[KnowledgeBase]:

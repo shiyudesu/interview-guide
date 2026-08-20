@@ -157,6 +157,10 @@ class VoiceInterviewRepository:
         self,
         user_id: str,
         status: str | None,
+        *,
+        session_ids: list[int] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> list[VoiceSessionListRow]:
         async with self._sessions() as session:
             statement = (
@@ -189,6 +193,12 @@ class VoiceInterviewRepository:
             )
             if status is not None:
                 statement = statement.where(VoiceInterviewSession.status == status)
+            if session_ids is not None:
+                statement = statement.where(VoiceInterviewSession.id.in_(session_ids))
+            if offset:
+                statement = statement.offset(offset)
+            if limit is not None:
+                statement = statement.limit(limit)
             rows = (await session.execute(statement)).all()
             return [
                 VoiceSessionListRow(

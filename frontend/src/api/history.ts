@@ -1,7 +1,11 @@
-import { request } from './request';
+import { request, type PageOptions } from './request';
 
 export type AnalyzeStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 export type EvaluateStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface ResumeListOptions extends PageOptions {
+  ids?: number[];
+}
 
 export interface ResumeListItem {
   id: number;
@@ -92,8 +96,12 @@ export const historyApi = {
   /**
    * 获取所有简历列表
    */
-  async getResumes(): Promise<ResumeListItem[]> {
-    return request.get<ResumeListItem[]>('/api/resumes');
+  async getResumes(options?: ResumeListOptions): Promise<ResumeListItem[]> {
+    const params = new URLSearchParams();
+    options?.ids?.forEach(id => params.append('ids', String(id)));
+    if (options?.limit !== undefined) params.append('limit', String(options.limit));
+    if (options?.offset !== undefined) params.append('offset', String(options.offset));
+    return request.get<ResumeListItem[]>('/api/resumes', { params });
   },
 
   /**

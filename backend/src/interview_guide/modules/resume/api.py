@@ -3,15 +3,20 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile
 from starlette.responses import Response
 
-from interview_guide.common.api.responses import result_response
+from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
+from interview_guide.modules.resume.models import (
+    ResumeDetailResponse,
+    ResumeListResponse,
+    UploadResumeResponse,
+)
 from interview_guide.modules.resume.service import ResumeService
 
-router = APIRouter(prefix="/api/resumes")
+router = APIRouter(prefix="/api/resumes", responses=STANDARD_ERROR_RESPONSES)
 
 
 async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
@@ -22,18 +27,24 @@ async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
             infrastructure.storage,
             infrastructure.streams,
             infrastructure.document_parser,
+            infrastructure.blocking_executor,
         )
 
 
 ServiceDependency = Annotated[ResumeService, Depends(resume_service)]
 
 
-@router.get("")
-async def list_resumes(service: ServiceDependency) -> Response:
-    return result_response(Result.ok(await service.list()))
+@router.get("", response_model=list[ResumeListResponse])
+async def list_resumes(
+    service: ServiceDependency,
+    ids: Annotated[list[int] | None, Query()] = None,
+    limit: Annotated[int | None, Query(ge=1, le=200)] = None,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> Response:
+    return result_response(Result.ok(await service.list(ids=ids, limit=limit, offset=offset)))
 
 
-@router.post("/upload")
+@router.post("/upload", response_model=UploadResumeResponse, status_code=201)
 async def upload_resume(
     file: Annotated[UploadFile, File()],
     service: ServiceDependency,
@@ -59,7 +70,7 @@ async def resume_health() -> Response:
     )
 
 
-@router.get("/{resume_id}/detail")
+@router.get("/{resume_id}/detail", response_model=ResumeDetailResponse)
 async def resume_detail(
     resume_id: int,
     service: ServiceDependency,
@@ -72,18 +83,15 @@ async def export_resume_pdf(
     resume_id: int,
     service: ServiceDependency,
 ) -> Response:
-    try:
-        pdf, headers = await service.export_pdf(resume_id)
-        return Response(
-            content=pdf,
-            media_type="application/pdf",
-            headers=headers,
-        )
-    except Exception:
-        return Response(status_code=500)
+    pdf, headers = await service.export_pdf(resume_id)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers=headers,
+    )
 
 
-@router.delete("/{resume_id}")
+@router.delete("/{resume_id}", status_code=204)
 async def delete_resume(
     resume_id: int,
     service: ServiceDependency,
@@ -92,7 +100,7 @@ async def delete_resume(
     return result_response(Result.ok())
 
 
-@router.post("/{resume_id}/reanalyze")
+@router.post("/{resume_id}/reanalyze", status_code=204)
 async def reanalyze_resume(
     resume_id: int,
     service: ServiceDependency,

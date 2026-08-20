@@ -140,6 +140,10 @@ class VoiceInterviewService:
         self,
         user_id: str | None,
         status: str | None,
+        *,
+        session_ids: list[int] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> list[VoiceSessionMeta]:
         normalized_status: str | None = None
         if status is not None and status:
@@ -147,6 +151,9 @@ class VoiceInterviewService:
         rows = await self.repository.list_sessions(
             user_id if user_id is not None else DEFAULT_USER_ID,
             normalized_status,
+            session_ids=session_ids,
+            limit=limit,
+            offset=offset,
         )
         return [
             VoiceSessionMeta(

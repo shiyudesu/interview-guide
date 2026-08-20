@@ -247,7 +247,10 @@ export default function InterviewHistoryPage({
     setCompletionFilter('all');
   };
 
-  const loadAll = useCallback(async (isPolling = false) => {
+  const loadAll = useCallback(async (
+    isPolling = false,
+    targets?: {textSessionIds: string[]; voiceSessionIds: number[]},
+  ) => {
     if (!isPolling) setLoading(true);
 
     try {
@@ -257,11 +260,13 @@ export default function InterviewHistoryPage({
         skillsLoadedRef.current = true;
       }
       const loadedSkills = skillsRef.current;
-      const textInterviews = await loadTextInterviews(loadedSkills);
+      const textInterviews = await loadTextInterviews(loadedSkills, targets?.textSessionIds);
       const scopedTextInterviews = isKnowledgeBaseView
         ? textInterviews.filter(item => item.knowledgeBaseId === knowledgeBaseFilterId)
         : textInterviews.filter(item => item.channel !== 'KNOWLEDGE_BASE');
-      const voiceSessions = isKnowledgeBaseView ? [] : await loadVoiceInterviews();
+      const voiceSessions = isKnowledgeBaseView
+        ? []
+        : await loadVoiceInterviews(targets?.voiceSessionIds);
 
       const voiceWithNames = voiceSessions.map(item => {
         const skillName = getTemplateName(item.title, loadedSkills);
@@ -272,6 +277,10 @@ export default function InterviewHistoryPage({
       all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
       setItems(prev => {
+        if (isPolling) {
+          const updates = new Map(all.map(item => [item.id, item]));
+          return prev.map(item => updates.get(item.id) ?? item);
+        }
         const hasActiveEvaluation = all.some(item =>
           shouldRefreshVoiceEvaluationPresentation(item.evaluateStatus));
         if (isPolling && itemsEqual(prev, all) && !hasActiveEvaluation) return prev;
@@ -285,9 +294,14 @@ export default function InterviewHistoryPage({
   }, [isKnowledgeBaseView, knowledgeBaseFilterId]);
 
   // Load text interviews from dedicated API
-  async function loadTextInterviews(skills: SkillDTO[]): Promise<UnifiedInterviewItem[]> {
+  async function loadTextInterviews(
+    skills: SkillDTO[],
+    sessionIds?: string[],
+  ): Promise<UnifiedInterviewItem[]> {
     try {
-      const sessions = await interviewApi.listSessions();
+      const sessions = await interviewApi.listSessions(
+        sessionIds ? {sessionIds} : undefined,
+      );
       return sessions.filter(session => session.channel !== 'VOICE').map((session: TextSessionMeta) => ({
         id: session.sessionId,
         type: 'text' as const,
@@ -312,9 +326,13 @@ export default function InterviewHistoryPage({
   }
 
   // Load voice interviews from voice API
-  async function loadVoiceInterviews(): Promise<UnifiedInterviewItem[]> {
+  async function loadVoiceInterviews(sessionIds?: number[]): Promise<UnifiedInterviewItem[]> {
     try {
-      const sessions = await voiceInterviewApi.getAllSessions();
+      const sessions = await voiceInterviewApi.getAllSessions(
+        undefined,
+        undefined,
+        sessionIds ? {sessionIds} : undefined,
+      );
       return sessions.map((session: SessionMeta) => ({
         id: `voice-${session.sessionId}`,
         type: 'voice' as const,
@@ -338,24 +356,36 @@ export default function InterviewHistoryPage({
     loadAll();
   }, [loadAll]);
 
-  // Polling for evaluation status
+  const evaluatingTextIds = items
+    .filter(item => item.type === 'text' && isEvaluating(item))
+    .map(item => item.sessionId);
+  const evaluatingVoiceIds = items
+    .filter(item => item.type === 'voice' && isEvaluating(item) && item.voiceSessionId)
+    .map(item => item.voiceSessionId!);
+  const pollingKey = `${evaluatingTextIds.join(',')}|${evaluatingVoiceIds.join(',')}`;
+
+  // Poll only active evaluation records and wait for each request before scheduling the next one.
   useEffect(() => {
-    const hasEvaluating = items.some(i => isEvaluating(i));
-
-    if (hasEvaluating && !pollingRef.current) {
-      pollingRef.current = window.setInterval(() => loadAll(true), 3000);
-    } else if (!hasEvaluating && pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
-    }
-
+    if (pollingKey === '|') return;
+    let cancelled = false;
+    const [textPart, voicePart] = pollingKey.split('|');
+    const targets = {
+      textSessionIds: textPart ? textPart.split(',') : [],
+      voiceSessionIds: voicePart ? voicePart.split(',').map(Number) : [],
+    };
+    const poll = async () => {
+      await loadAll(true, targets);
+      if (!cancelled) pollingRef.current = window.setTimeout(poll, 3000);
+    };
+    pollingRef.current = window.setTimeout(poll, 3000);
     return () => {
+      cancelled = true;
       if (pollingRef.current) {
-        clearInterval(pollingRef.current);
+        clearTimeout(pollingRef.current);
         pollingRef.current = null;
       }
     };
-  }, [items, loadAll]);
+  }, [loadAll, pollingKey]);
 
   const handleRowClick = (item: UnifiedInterviewItem) => {
     if (item.type === 'text') {

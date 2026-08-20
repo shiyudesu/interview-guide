@@ -5,9 +5,14 @@ export interface ApiProblem {
   detail: string;
 }
 
+export interface PageOptions {
+  limit?: number;
+  offset?: number;
+}
+
 const PROBLEM_BLOB_PARSE_LIMIT = 64 * 1024;
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+export const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL ?? '';
 
 const instance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

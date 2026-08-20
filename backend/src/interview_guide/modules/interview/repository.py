@@ -63,7 +63,13 @@ class InterviewRepository:
         self._now = now
         self._uuid_factory = uuid_factory
 
-    async def list_sessions(self) -> list[tuple[InterviewSession, int]]:
+    async def list_sessions(
+        self,
+        *,
+        session_ids: list[str] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[tuple[InterviewSession, int]]:
         async with self._sessions() as session:
             answered_main = (
                 select(
@@ -78,7 +84,7 @@ class InterviewRepository:
                 .group_by(InterviewTurnRecord.interview_session_id)
                 .subquery()
             )
-            rows = await session.execute(
+            statement = (
                 select(
                     InterviewSession,
                     func.coalesce(answered_main.c.answered_main, 0),
@@ -86,6 +92,13 @@ class InterviewRepository:
                 .outerjoin(answered_main, answered_main.c.session_id == InterviewSession.id)
                 .order_by(InterviewSession.created_at.desc())
             )
+            if session_ids is not None:
+                statement = statement.where(InterviewSession.session_id.in_(session_ids))
+            if offset:
+                statement = statement.offset(offset)
+            if limit is not None:
+                statement = statement.limit(limit)
+            rows = await session.execute(statement)
             return [(row[0], int(row[1])) for row in rows]
 
     async def find_session(self, session_id: str) -> SessionAggregate | None:

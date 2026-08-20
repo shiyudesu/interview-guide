@@ -20,7 +20,6 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
             'ui-vendor': ['framer-motion', 'lucide-react'],
-            'syntax-highlighter': ['react-syntax-highlighter'],
           },
         },
       },

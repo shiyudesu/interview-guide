@@ -215,7 +215,7 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [knowledgeBaseIdNum, trackedTaskId]);
+  }, [knowledgeBaseIdNum, loadKnowledgeBase, trackedTaskId]);
 
   // 切换筛选/Tab 时清空已选并回到第一页
   useEffect(() => {

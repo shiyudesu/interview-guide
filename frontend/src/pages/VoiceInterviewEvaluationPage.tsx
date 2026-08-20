@@ -25,6 +25,8 @@ export default function VoiceInterviewEvaluationPage() {
         clearTimeout(pollingRef.current);
       }
     };
+    // The polling callbacks are recreated for the route session and manage their own timer chain.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   const loadEvaluation = async () => {

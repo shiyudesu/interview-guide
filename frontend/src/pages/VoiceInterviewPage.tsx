@@ -262,7 +262,13 @@ export default function VoiceInterviewPage() {
     } catch (e) {
       console.error('[ChunkAudio] Decode/play error:', e);
     }
-  }, [getAudioContext, playNextChunk, scheduleChunkDrainCompletion, setAiSpeaking]);
+  }, [
+    clearPendingAiTextCommit,
+    getAudioContext,
+    playNextChunk,
+    scheduleChunkDrainCompletion,
+    setAiSpeaking,
+  ]);
 
   // Load skills for template name display
   useEffect(() => {
@@ -718,7 +724,7 @@ export default function VoiceInterviewPage() {
     try {
       await voiceInterviewApi.pauseSession(sessionId);
       navigate('/interviews');
-    } catch (error) {
+    } catch {
       alert('暂停失败，请重试');
     }
   };

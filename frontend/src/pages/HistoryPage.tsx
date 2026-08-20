@@ -49,12 +49,16 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; filename: string } | null>(null);
 
-  const loadResumes = useCallback(async (isPolling = false) => {
+  const loadResumes = useCallback(async (isPolling = false, ids?: number[]) => {
     if (!isPolling) setLoading(true);
     try {
-      const data = await historyApi.getResumes();
+      const data = await historyApi.getResumes(ids ? {ids} : undefined);
       setResumes(prev => {
-        if (isPolling && resumesEqual(prev, data)) return prev;
+        if (isPolling) {
+          const updates = new Map(data.map(item => [item.id, item]));
+          const merged = prev.map(item => updates.get(item.id) ?? item);
+          return resumesEqual(prev, merged) ? prev : merged;
+        }
         return data;
       });
     } catch (err) {
@@ -69,13 +73,24 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
   }, [loadResumes]);
 
   // 轮询：有分析中的简历时启动 3s 轮询
-  const hasAnalyzing = resumes.some(r => isAnalyzing(r.analyzeStatus));
+  const analyzingIds = resumes.filter(r => isAnalyzing(r.analyzeStatus)).map(r => r.id);
+  const analyzingKey = analyzingIds.join(',');
 
   useEffect(() => {
-    if (!hasAnalyzing) return;
-    const id = window.setInterval(() => loadResumes(true), 3000);
-    return () => clearInterval(id);
-  }, [hasAnalyzing, loadResumes]);
+    if (!analyzingKey) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const ids = analyzingKey.split(',').map(Number);
+    const poll = async () => {
+      await loadResumes(true, ids);
+      if (!cancelled) timer = setTimeout(poll, 3000);
+    };
+    timer = setTimeout(poll, 3000);
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [analyzingKey, loadResumes]);
 
   const handleDeleteClick = (id: number, filename: string, e: React.MouseEvent) => {
     e.stopPropagation();

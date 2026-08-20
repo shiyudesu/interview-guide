@@ -50,7 +50,7 @@ class RequestContextMiddleware:
         finally:
             duration = time.monotonic() - started
             route = scope.get("route")
-            path_template = getattr(route, "path", scope.get("path", "unknown"))
+            path_template = getattr(route, "path", "__unmatched__")
             method = scope.get("method", "UNKNOWN")
             self._metrics.http_requests.labels(
                 method=method,

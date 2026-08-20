@@ -10,6 +10,7 @@ from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.api.responses import (
+    STANDARD_ERROR_RESPONSES,
     result_response,
     serialized_result,
     serialized_result_response,
@@ -20,15 +21,19 @@ from interview_guide.common.redis.rate_limit import (
     RateLimitRule,
 )
 from interview_guide.common.result import Result
+from interview_guide.modules.interview.models import CategoryRequest
 from interview_guide.modules.interview.question import (
     InterviewSkillLibrary,
     JdParseService,
 )
-from interview_guide.modules.interview_skill.models import ParseJdRequest
+from interview_guide.modules.interview_skill.models import ParseJdRequest, SkillResponse
 from interview_guide.modules.interview_skill.service import InterviewSkillService
 from interview_guide.modules.knowledge_base.api import client_ip
 
-router = APIRouter(prefix="/api/interview/skills")
+router = APIRouter(
+    prefix="/api/interview/skills",
+    responses=STANDARD_ERROR_RESPONSES,
+)
 RESOURCES = Path(__file__).resolve().parents[4] / "resources"
 service = InterviewSkillService(SkillRepository(RESOURCES))
 skill_list_result = serialized_result(Result.ok(service.all()))
@@ -38,12 +43,12 @@ skill_library = InterviewSkillLibrary(skill_repository, RESOURCES)
 prompts = PromptRepository(RESOURCES)
 
 
-@router.get("")
+@router.get("", response_model=list[SkillResponse])
 async def list_skills() -> Response:
     return serialized_result_response(skill_list_result)
 
 
-@router.get("/{skill_id}")
+@router.get("/{skill_id}", response_model=SkillResponse)
 async def get_skill(skill_id: str) -> Response:
     content = skill_results.get(skill_id)
     if content is None:
@@ -51,7 +56,7 @@ async def get_skill(skill_id: str) -> Response:
     return serialized_result_response(content)
 
 
-@router.post("/parse-jd")
+@router.post("/parse-jd", response_model=list[CategoryRequest])
 async def parse_jd(request: Request, payload: ParseJdRequest) -> Response:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     await infrastructure.rate_limiter.check(

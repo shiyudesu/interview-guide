@@ -57,7 +57,7 @@ class CategoryRequest(CamelModel):
 
 class CreateInterviewRequest(CamelModel):
     resume_text: str | None = None
-    question_count: int = Field(default=0, ge=1, le=30)
+    question_count: int = Field(default=8, ge=1, le=30)
     resume_id: int | None = None
     force_create: bool | None = None
     llm_provider: str | None = None
@@ -126,6 +126,12 @@ class InterviewSessionDTO(CamelModel):
     progress: InterviewProgressDTO
     knowledge_base_id: int | None
     interview_category: str | None
+
+
+class CurrentQuestionResponse(CamelModel):
+    completed: bool
+    message: str | None = None
+    question: InterviewQuestionDTO | None = None
 
 
 class SessionListItemDTO(CamelModel):

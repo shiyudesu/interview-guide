@@ -115,7 +115,6 @@ export function useInterviewConfig(options?: {
       loadSkills();
       loadResumes();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoLoad, defaultMode, defaultResumeId]);
 
   return {

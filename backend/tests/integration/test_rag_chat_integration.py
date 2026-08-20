@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from collections.abc import AsyncIterator, Sequence
 from dataclasses import dataclass, field
@@ -307,4 +308,47 @@ async def test_real_postgres_rag_chat_crud_stream_error_and_cancel_leave_redis_c
         await cleanup(database)
         await redis.delete(KB_VECTORIZE.key)
         await redis.aclose()
+        await database.close()
+
+
+@pytest.mark.asyncio
+async def test_concurrent_rag_messages_allocate_distinct_order_ranges() -> None:
+    database = Database(integration_settings())
+    await cleanup(database)
+    first_id, _ = await seed_knowledge_bases(database)
+    repository = RagChatRepository(database.sessions, now=lambda: FIXED_NOW)
+    service = RagChatService(
+        repository,
+        ExplicitFakeRagQueryService(streams=[]),
+        history_enabled=True,
+        history_max_messages=10,
+    )
+
+    try:
+        created = await service.create_session(
+            CreateSessionRequest(
+                knowledgeBaseIds=[first_id],
+                title="rag-chat-integration-concurrent",
+            )
+        )
+        await asyncio.gather(
+            *(service.prepare_stream_message(created.id, f"并发问题 {index}") for index in range(8))
+        )
+
+        async with database.sessions() as session:
+            orders = list(
+                await session.scalars(
+                    select(RagChatMessage.message_order)
+                    .where(RagChatMessage.session_id == created.id)
+                    .order_by(RagChatMessage.message_order)
+                )
+            )
+            message_count = await session.scalar(
+                select(RagChatSession.message_count).where(RagChatSession.id == created.id)
+            )
+
+        assert orders == list(range(16))
+        assert message_count == 16
+    finally:
+        await cleanup(database)
         await database.close()

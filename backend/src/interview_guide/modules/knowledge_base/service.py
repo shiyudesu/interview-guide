@@ -112,15 +112,28 @@ class KnowledgeBaseService:
         self,
         vector_status: str | None,
         sort_by: str | None,
+        *,
+        ids: list[int] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> list[dict[str, Any]]:
-        entities = await self._repository.list_entities(vector_status=vector_status)
-        if sort_by and sort_by.lower() in {"size", "access", "question"}:
+        custom_sort = bool(sort_by and sort_by.lower() in {"size", "access", "question"})
+        entities = await self._repository.list_entities(
+            vector_status=vector_status,
+            ids=ids,
+            limit=None if custom_sort else limit,
+            offset=0 if custom_sort else offset,
+        )
+        if custom_sort:
+            assert sort_by is not None
             field = {
                 "size": lambda value: value.file_size or 0,
                 "access": lambda value: value.access_count or 0,
                 "question": lambda value: value.question_count or 0,
             }[sort_by.lower()]
             entities.sort(key=field, reverse=True)
+            end = offset + limit if limit is not None else None
+            entities = entities[offset:end]
         return [item(entity) for entity in entities]
 
     async def detail(self, knowledge_base_id: int) -> dict[str, Any] | None:

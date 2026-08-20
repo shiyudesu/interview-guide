@@ -1,4 +1,4 @@
-import { request } from './request';
+import { request, type PageOptions } from './request';
 import { streamSse } from './stream';
 import type { InterviewSession } from '../types/interview';
 
@@ -34,6 +34,9 @@ export interface KnowledgeBaseStats {
 }
 
 export type SortOption = 'time' | 'size' | 'access' | 'question';
+export interface KnowledgeBaseListOptions extends PageOptions {
+  ids?: number[];
+}
 
 export interface UploadKnowledgeBaseResponse {
   knowledgeBase: {
@@ -209,7 +212,11 @@ export const knowledgeBaseApi = {
   /**
    * 获取所有知识库列表
    */
-  async getAllKnowledgeBases(sortBy?: SortOption, vectorStatus?: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'): Promise<KnowledgeBaseItem[]> {
+  async getAllKnowledgeBases(
+    sortBy?: SortOption,
+    vectorStatus?: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED',
+    page?: KnowledgeBaseListOptions,
+  ): Promise<KnowledgeBaseItem[]> {
     const params = new URLSearchParams();
     if (sortBy) {
       params.append('sortBy', sortBy);
@@ -217,6 +224,13 @@ export const knowledgeBaseApi = {
     if (vectorStatus) {
       params.append('vectorStatus', vectorStatus);
     }
+    if (page?.limit !== undefined) {
+      params.append('limit', String(page.limit));
+    }
+    if (page?.offset !== undefined) {
+      params.append('offset', String(page.offset));
+    }
+    page?.ids?.forEach(id => params.append('ids', String(id)));
     const queryString = params.toString();
     return request.get<KnowledgeBaseItem[]>(`/api/knowledgebase/list${queryString ? `?${queryString}` : ''}`);
   },

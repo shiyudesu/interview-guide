@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "lint": "eslint .",
     "preview": "vite preview",
+    "test:unit": "node --test src/pages/interviewHistoryStats.test.ts src/pages/questionGenerationStatus.test.ts src/components/knowledgebaseInterview/interviewCapacity.test.ts src/pages/interviewEntry.test.ts src/pages/knowledgeBaseInterviewCompletion.test.ts src/pages/voiceEvaluationStatus.test.ts src/api/voiceReconnect.test.ts",
     "test:e2e": "playwright test",
     "test:interview-history": "node --test src/pages/interviewHistoryStats.test.ts",
     "test:question-generation": "node --test src/pages/questionGenerationStatus.test.ts",
@@ -31,6 +33,7 @@
     "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^25.5.2",
@@ -40,9 +43,14 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.23",
+    "eslint": "^10.8.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.11.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.6.2",
+    "typescript-eslint": "^8.67.0",
     "vite": "^5.4.10",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.6.0"

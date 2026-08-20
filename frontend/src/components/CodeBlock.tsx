@@ -4,7 +4,7 @@ import { Check, Copy } from 'lucide-react';
 
 // Lazy load SyntaxHighlighter
 const SyntaxHighlighter = lazy(() =>
-  import('react-syntax-highlighter/dist/esm/prism').then(module => ({ default: module.default }))
+  import('./LightCodeHighlighter')
 );
 
 interface CodeBlockProps {

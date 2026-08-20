@@ -97,7 +97,13 @@ class InterviewService:
     def follow_up_count(self) -> int:
         return self._follow_up_count
 
-    async def list_sessions(self) -> list[SessionListItemDTO]:
+    async def list_sessions(
+        self,
+        *,
+        session_ids: list[str] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[SessionListItemDTO]:
         return [
             SessionListItemDTO(
                 session_id=entity.session_id,
@@ -116,7 +122,11 @@ class InterviewService:
                 created_at=entity.created_at,
                 completed_at=entity.completed_at,
             )
-            for entity, answered_main in await self._repository.list_sessions()
+            for entity, answered_main in await self._repository.list_sessions(
+                session_ids=session_ids,
+                limit=limit,
+                offset=offset,
+            )
         ]
 
     async def create_session(self, request: CreateInterviewRequest) -> InterviewSessionDTO:

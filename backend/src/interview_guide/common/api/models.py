@@ -22,6 +22,11 @@ class CamelModel(BaseModel):
     )
 
 
+class ApiProblem(CamelModel):
+    code: int
+    detail: str
+
+
 def format_api_datetime(value: datetime, *, seconds_only: bool = False) -> str:
     if seconds_only or value.microsecond == 0:
         return value.isoformat(timespec="seconds")

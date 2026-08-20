@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 // @ts-ignore - vad is loaded via script tag
 import { Mic, MicOff } from 'lucide-react';
 
@@ -51,14 +51,14 @@ export default function AudioRecorder({
 
   const TARGET_SAMPLE_RATE = 16000;
 
-  const cleanupRecordingResources = (updateVolume = true) => {
+  const cleanupRecordingResources = useCallback((updateVolume = true) => {
     recordingActiveRef.current = false;
 
     if (vadRef.current) {
       try {
         vadRef.current.pause();
         vadRef.current.destroy?.();
-      } catch (e) {
+      } catch {
         // Ignore cleanup errors
       }
       vadRef.current = null;
@@ -73,7 +73,7 @@ export default function AudioRecorder({
       try {
         workletNodeRef.current.port.onmessage = null;
         workletNodeRef.current.disconnect();
-      } catch (e) {
+      } catch {
         // Ignore disconnect errors
       }
       workletNodeRef.current = null;
@@ -82,7 +82,7 @@ export default function AudioRecorder({
     if (gainNodeRef.current) {
       try {
         gainNodeRef.current.disconnect();
-      } catch (e) {
+      } catch {
         // Ignore disconnect errors
       }
       gainNodeRef.current = null;
@@ -91,7 +91,7 @@ export default function AudioRecorder({
     if (analyserRef.current) {
       try {
         analyserRef.current.disconnect();
-      } catch (e) {
+      } catch {
         // Ignore disconnect errors
       }
       analyserRef.current = null;
@@ -105,7 +105,7 @@ export default function AudioRecorder({
     if (audioContextRef.current) {
       try {
         audioContextRef.current.close();
-      } catch (e) {
+      } catch {
         // Ignore close errors
       }
       audioContextRef.current = null;
@@ -114,7 +114,7 @@ export default function AudioRecorder({
     if (updateVolume) {
       setVolume(0);
     }
-  };
+  }, []);
 
   /**
    * Convert ArrayBuffer (Int16 PCM) to Base64
@@ -286,9 +286,9 @@ export default function AudioRecorder({
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      stopRecording();
+      cleanupRecordingResources(false);
     };
-  }, []);
+  }, [cleanupRecordingResources]);
 
   useEffect(() => {
     if ((disabled || !isRecording) && recordingActiveRef.current) {
@@ -297,7 +297,7 @@ export default function AudioRecorder({
         onRecordingChange(false);
       }
     }
-  }, [disabled, isRecording, onRecordingChange]);
+  }, [cleanupRecordingResources, disabled, isRecording, onRecordingChange]);
 
   const toggleRecording = () => {
     if (disabled && !isRecording) {

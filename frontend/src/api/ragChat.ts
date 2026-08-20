@@ -1,4 +1,4 @@
-import { request } from './request';
+import { request, type PageOptions } from './request';
 import { streamSse } from './stream';
 
 // ========== 类型定义 ==========
@@ -63,8 +63,8 @@ export const ragChatApi = {
   /**
    * 获取会话列表
    */
-  async listSessions(): Promise<RagChatSessionListItem[]> {
-    return request.get<RagChatSessionListItem[]>('/api/rag-chat/sessions');
+  async listSessions(page?: PageOptions): Promise<RagChatSessionListItem[]> {
+    return request.get<RagChatSessionListItem[]>('/api/rag-chat/sessions', { params: page });
   },
 
   /**

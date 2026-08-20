@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from datetime import datetime
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 from pdfminer.high_level import extract_text
@@ -15,6 +18,7 @@ from interview_guide.infrastructure.export.pdf import (
     pdf_download_headers,
     sanitize_pdf_text,
 )
+from interview_guide.modules.resume.service import ResumeService
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 FONT_PATH = BACKEND_ROOT / "resources/fonts/ZhuqueFangsong-Regular.ttf"
@@ -68,3 +72,51 @@ def test_download_headers_encode_unicode_filenames() -> None:
 
 def test_sanitize_pdf_text_removes_unicode_symbol_and_surrogate() -> None:
     assert sanitize_pdf_text("A😀B\ud800C") == "ABC"
+
+
+@pytest.mark.asyncio
+async def test_resume_pdf_build_runs_through_the_bounded_executor() -> None:
+    class RecordingExecutor:
+        def __init__(self) -> None:
+            self.calls: list[tuple[object, tuple[object, ...], dict[str, object]]] = []
+
+        async def run(
+            self,
+            function: object,
+            *args: object,
+            **kwargs: object,
+        ) -> bytes:
+            self.calls.append((function, args, kwargs))
+            return b"%PDF-test"
+
+    executor = RecordingExecutor()
+    service = ResumeService.__new__(ResumeService)
+    service._blocking_executor = executor  # type: ignore[assignment]
+    service._required = AsyncMock(  # type: ignore[method-assign]
+        return_value=SimpleNamespace(
+            original_filename="candidate.pdf",
+            uploaded_at=datetime(2026, 8, 20, 8, 0),
+        )
+    )
+    service._repository = SimpleNamespace(
+        latest_analysis=AsyncMock(
+            return_value=SimpleNamespace(
+                content_score=12,
+                expression_score=8,
+                overall_score=80,
+                project_score=32,
+                skill_match_score=16,
+                strengths_json="[]",
+                structure_score=12,
+                suggestions_json="[]",
+                summary="稳定",
+            )
+        )
+    )
+
+    pdf, headers = await service.export_pdf(1)
+
+    assert pdf == b"%PDF-test"
+    assert headers["Content-Type"] == "application/pdf"
+    assert len(executor.calls) == 1
+    assert getattr(executor.calls[0][0], "__name__", "") == "build"

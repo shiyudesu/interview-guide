@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 47
+    "testFileCount": 48
   },
   "tests": [
     {
@@ -551,7 +551,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_rag_chat_integration.py",
-      "sha256": "5234003cd13582c2b8693a54cfe096aed3a5b8ba2d03ac181f1da10d66e3d66b"
+      "sha256": "0d54c8f44ee967c3b186a6136c5a2c7161a39ef6bfbb064a74694f0de4f10c93"
     },
     {
       "disabledMarkers": 0,
@@ -576,7 +576,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_api_foundation.py",
-      "sha256": "630720b4fade969f0d7ca2b851e6653a04d87bcc9c070c479b512eba5c868c34"
+      "sha256": "f7ad88c5a4a85791e419b3f6f0514554cb9144434aec87ee206d1c712f613da8"
     },
     {
       "disabledMarkers": 0,
@@ -596,7 +596,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_module.py",
-      "sha256": "aa16c9bb25edb9212887c6370783e73f5afddbd38f455223a05b511822bbe94f"
+      "sha256": "70fe87790a8163bb455667938b1e972d26e546b5f52ba5611158eb94d8741c80"
     },
     {
       "disabledMarkers": 0,
@@ -646,7 +646,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_pdf_export.py",
-      "sha256": "f70a887387a3701d124683dd38441256f53601bb9c67c6595500750604833070"
+      "sha256": "37595a8c0656ccc179d087d9b81f85ae1293ecf390ee20e4fc83a6f2fd7f9302"
     },
     {
       "disabledMarkers": 0,
@@ -681,7 +681,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_s3_storage.py",
-      "sha256": "bd58f8388eec4524b885ebf401a15af4dd56fbc6a199a8c5b1a3f89ec50ce269"
+      "sha256": "c6c966a1995ad3d23a5e497ed1b85cae4a2a9e573b8ef305dd1a8e7416807313"
     },
     {
       "disabledMarkers": 0,
@@ -722,6 +722,11 @@
       "disabledMarkers": 0,
       "file": "frontend/e2e/voice-interview.spec.ts",
       "sha256": "9db0272084b58e08f7363c51b7aa7ed7278d5771e9a565fddd2d6482feae8811"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/api/voiceReconnect.test.ts",
+      "sha256": "b7bba260f135d70658164b7432d9407a1b4e1dbc11d6524dd1d2f056e9579437"
     },
     {
       "disabledMarkers": 0,

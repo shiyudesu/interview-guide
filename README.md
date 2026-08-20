@@ -194,10 +194,8 @@ uv run pytest
 
 ```bash
 cd frontend
-pnpm run test:interview-history
-pnpm run test:question-generation
-pnpm run test:interview-capacity
-pnpm run test:interview-entry
+pnpm run lint
+pnpm run test:unit
 pnpm run test:e2e
 pnpm run build
 ```

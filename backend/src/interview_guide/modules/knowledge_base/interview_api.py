@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Request
 from starlette.responses import Response
 
-from interview_guide.common.api.responses import result_response
+from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.redis.rate_limit import RateLimitDimension, RateLimitRule
@@ -15,12 +15,17 @@ from interview_guide.common.result import Result
 from interview_guide.modules.interview.api import (
     ServiceDependency as InterviewServiceDependency,
 )
+from interview_guide.modules.interview.models import InterviewSessionDTO
 from interview_guide.modules.knowledge_base.api import client_ip
 from interview_guide.modules.knowledge_base.question_models import (
+    CategoryCount,
     CreateKnowledgeBaseInterviewRequest,
     CreateKnowledgeBaseQuestionRequest,
     GenerateKnowledgeBaseQuestionsRequest,
+    KnowledgeBaseInterviewCapacityResponse,
+    KnowledgeBaseQuestionDTO,
     KnowledgeBaseQuestionStatus,
+    QuestionGenStatusResponse,
     UpdateKnowledgeBaseQuestionRequest,
     UpdateKnowledgeBaseQuestionStatusRequest,
 )
@@ -31,7 +36,7 @@ from interview_guide.modules.knowledge_base.question_service import (
     QuestionGenStreamProducer,
 )
 
-router = APIRouter()
+router = APIRouter(responses=STANDARD_ERROR_RESPONSES)
 
 
 def generation_state(
@@ -73,7 +78,10 @@ async def enforce_generation_rate_limit(request: Request) -> None:
     )
 
 
-@router.get("/api/knowledgebase/{knowledge_base_id}/questions")
+@router.get(
+    "/api/knowledgebase/{knowledge_base_id}/questions",
+    response_model=list[KnowledgeBaseQuestionDTO],
+)
 async def list_questions(
     knowledge_base_id: int,
     service: QuestionServiceDependency,
@@ -95,7 +103,10 @@ async def list_questions(
     )
 
 
-@router.get("/api/knowledgebase/{knowledge_base_id}/questions/categories")
+@router.get(
+    "/api/knowledgebase/{knowledge_base_id}/questions/categories",
+    response_model=list[CategoryCount],
+)
 async def list_question_categories(
     knowledge_base_id: int,
     service: QuestionServiceDependency,
@@ -103,7 +114,10 @@ async def list_question_categories(
     return result_response(Result.ok(await service.list_categories(knowledge_base_id)))
 
 
-@router.post("/api/knowledgebase/{knowledge_base_id}/questions/generate")
+@router.post(
+    "/api/knowledgebase/{knowledge_base_id}/questions/generate",
+    response_model=QuestionGenStatusResponse,
+)
 async def generate_questions(
     knowledge_base_id: int,
     payload: GenerateKnowledgeBaseQuestionsRequest,
@@ -121,7 +135,10 @@ async def generate_questions(
     )
 
 
-@router.get("/api/knowledgebase/{knowledge_base_id}/questions/generation-status")
+@router.get(
+    "/api/knowledgebase/{knowledge_base_id}/questions/generation-status",
+    response_model=QuestionGenStatusResponse,
+)
 async def question_generation_status(
     knowledge_base_id: int,
     service: QuestionServiceDependency,
@@ -129,7 +146,11 @@ async def question_generation_status(
     return result_response(Result.ok(await service.generation_status(knowledge_base_id)))
 
 
-@router.post("/api/knowledgebase/{knowledge_base_id}/questions")
+@router.post(
+    "/api/knowledgebase/{knowledge_base_id}/questions",
+    response_model=KnowledgeBaseQuestionDTO,
+    status_code=201,
+)
 async def create_question(
     knowledge_base_id: int,
     payload: CreateKnowledgeBaseQuestionRequest,
@@ -141,7 +162,10 @@ async def create_question(
     )
 
 
-@router.put("/api/knowledgebase/questions/{question_id}")
+@router.put(
+    "/api/knowledgebase/questions/{question_id}",
+    response_model=KnowledgeBaseQuestionDTO,
+)
 async def update_question(
     question_id: int,
     payload: UpdateKnowledgeBaseQuestionRequest,
@@ -150,7 +174,10 @@ async def update_question(
     return result_response(Result.ok(await service.update_question(question_id, payload)))
 
 
-@router.put("/api/knowledgebase/questions/{question_id}/status")
+@router.put(
+    "/api/knowledgebase/questions/{question_id}/status",
+    response_model=KnowledgeBaseQuestionDTO,
+)
 async def update_question_status(
     question_id: int,
     payload: UpdateKnowledgeBaseQuestionStatusRequest,
@@ -160,7 +187,7 @@ async def update_question_status(
     return result_response(Result.ok(await service.update_status(question_id, payload.status)))
 
 
-@router.delete("/api/knowledgebase/questions/{question_id}")
+@router.delete("/api/knowledgebase/questions/{question_id}", status_code=204)
 async def delete_question(
     question_id: int,
     service: QuestionServiceDependency,
@@ -169,7 +196,11 @@ async def delete_question(
     return result_response(Result.ok())
 
 
-@router.post("/api/knowledgebase-interviews/sessions")
+@router.post(
+    "/api/knowledgebase-interviews/sessions",
+    response_model=InterviewSessionDTO,
+    status_code=201,
+)
 async def create_knowledge_base_interview(
     payload: CreateKnowledgeBaseInterviewRequest,
     request: Request,
@@ -186,7 +217,10 @@ async def create_knowledge_base_interview(
     )
 
 
-@router.get("/api/knowledgebase/{knowledge_base_id}/interview-capacity")
+@router.get(
+    "/api/knowledgebase/{knowledge_base_id}/interview-capacity",
+    response_model=KnowledgeBaseInterviewCapacityResponse,
+)
 async def knowledge_base_interview_capacity(
     knowledge_base_id: int,
     request: Request,

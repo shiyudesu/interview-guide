@@ -15,6 +15,8 @@ from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.result import Result
 from interview_guide.main import create_app
+from interview_guide.modules.interview.api import interview_service
+from interview_guide.modules.resume.api import resume_service
 
 
 def settings(**overrides: object) -> Settings:
@@ -92,6 +94,80 @@ def test_business_and_routing_errors_use_http_statuses() -> None:
     assert missing.status_code == 404
     assert method.json()["detail"] == "请求方法不支持: POST"
     assert method.status_code == 405
+
+
+def test_unmatched_routes_share_a_bounded_metrics_label() -> None:
+    app = create_app(settings())
+
+    with TestClient(app) as client:
+        client.get("/random-not-found-one")
+        client.get("/random-not-found-two")
+        metrics = client.get("/metrics").text
+
+    assert 'pathTemplate="__unmatched__",status="404"' in metrics
+    assert "random-not-found-one" not in metrics
+    assert "random-not-found-two" not in metrics
+
+
+def test_pdf_exports_preserve_standard_business_errors() -> None:
+    class MissingInterviewExport:
+        async def export_pdf(self, session_id: str) -> tuple[bytes, dict[str, str]]:
+            del session_id
+            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
+
+    class MissingResumeExport:
+        async def export_pdf(self, resume_id: int) -> tuple[bytes, dict[str, str]]:
+            del resume_id
+            raise BusinessException(ErrorCode.RESUME_NOT_FOUND)
+
+    app = create_app(settings())
+    app.dependency_overrides[interview_service] = MissingInterviewExport
+    app.dependency_overrides[resume_service] = MissingResumeExport
+
+    with TestClient(app) as client:
+        interview = client.get("/api/interview/sessions/missing/export")
+        resume = client.get("/api/resumes/999/export")
+
+    assert interview.status_code == 404
+    assert interview.json() == {"code": 3001, "detail": "面试会话不存在"}
+    assert resume.status_code == 404
+    assert resume.json() == {"code": 2001, "detail": "简历不存在"}
+
+
+def test_interview_list_supports_bounded_backward_compatible_paging() -> None:
+    class CapturingInterviewList:
+        def __init__(self) -> None:
+            self.arguments: dict[str, object] = {}
+
+        async def list_sessions(self, **arguments: object) -> list[object]:
+            self.arguments = arguments
+            return []
+
+    service = CapturingInterviewList()
+    app = create_app(settings())
+    app.dependency_overrides[interview_service] = lambda: service
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/api/interview/sessions",
+            params=[
+                ("sessionIds", "session-one"),
+                ("sessionIds", "session-two"),
+                ("limit", "20"),
+                ("offset", "5"),
+            ],
+        )
+        invalid = client.get("/api/interview/sessions?limit=201")
+
+    assert response.status_code == 200
+    assert response.json() == []
+    assert service.arguments == {
+        "session_ids": ["session-one", "session-two"],
+        "limit": 20,
+        "offset": 5,
+    }
+    assert invalid.status_code == 422
+    assert set(invalid.json()) == {"code", "detail"}
 
 
 class Payload(BaseModel):
@@ -179,3 +255,26 @@ def test_native_openapi_and_docs_paths() -> None:
     assert docs.status_code == 200
     assert "/api/interview/sessions/{session_id}/turns" in document["paths"]
     assert "/api/interview/sessions/{session_id}/answers" not in document["paths"]
+    sessions = document["paths"]["/api/interview/sessions"]
+    assert sessions["post"]["responses"]["201"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/InterviewSessionDTO"
+    }
+    turn = document["paths"]["/api/interview/sessions/{session_id}/turns"]["post"]
+    assert turn["responses"]["200"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/SubmitTurnResponse"
+    }
+    assert turn["responses"]["422"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ApiProblem"
+    }
+    delete = document["paths"]["/api/interview/sessions/{session_id}"]["delete"]
+    assert set(delete["responses"]) >= {"204", "404"}
+    create_schema = document["components"]["schemas"][
+        "interview_guide__modules__interview__models__CreateInterviewRequest"
+    ]
+    assert create_schema["properties"]["questionCount"] == {
+        "type": "integer",
+        "maximum": 30.0,
+        "minimum": 1.0,
+        "title": "Questioncount",
+        "default": 8,
+    }

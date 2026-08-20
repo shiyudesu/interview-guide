@@ -48,7 +48,12 @@ class RagChatService:
         )
         return self._session_dto(record)
 
-    async def list_sessions(self) -> list[SessionListItemDTO]:
+    async def list_sessions(
+        self,
+        *,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[SessionListItemDTO]:
         return [
             SessionListItemDTO(
                 id=record.session.id,
@@ -60,7 +65,7 @@ class RagChatService:
                 updated_at=record.session.updated_at,
                 is_pinned=record.session.is_pinned or False,
             )
-            for record in await self._repository.list_sessions()
+            for record in await self._repository.list_sessions(limit=limit, offset=offset)
         ]
 
     async def session_detail(self, session_id: int) -> SessionDetailDTO:

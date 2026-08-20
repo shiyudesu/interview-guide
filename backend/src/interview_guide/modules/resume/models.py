@@ -31,3 +31,39 @@ class ResumeDetailResponse(CamelModel):
     analyze_error: str | None
     analyses: list[object]
     interviews: list[object]
+
+
+class ResumeScoreDetail(CamelModel):
+    content_score: int | None
+    structure_score: int | None
+    skill_match_score: int | None
+    expression_score: int | None
+    project_score: int | None
+
+
+class ResumeAnalysisResponse(CamelModel):
+    overall_score: int | None
+    score_detail: ResumeScoreDetail
+    summary: str | None
+    strengths: list[object]
+    suggestions: list[object]
+    original_text: str | None
+
+
+class UploadedResumeResponse(CamelModel):
+    analyze_status: str
+    filename: str
+    id: int
+
+
+class ResumeStorageResponse(CamelModel):
+    resume_id: int
+    file_url: str
+    file_key: str
+
+
+class UploadResumeResponse(CamelModel):
+    resume: UploadedResumeResponse | None = None
+    analysis: ResumeAnalysisResponse | None = None
+    storage: ResumeStorageResponse
+    duplicate: bool

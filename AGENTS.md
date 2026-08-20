@@ -104,7 +104,8 @@ docker compose logs migrate app worker scheduler
 - 真实模型验收必须使用受保护 Key，不能用 fake 冒充。
 - 集成测试使用真实 PostgreSQL/pgvector、Redis 和 S3 兼容存储。
 - 集成测试不能指向保存业务数据的数据库或 bucket。
-- 前端改动运行相关测试、Playwright 和 `pnpm run build`。
+- 前端改动运行 `pnpm run lint`、`pnpm run test:unit`、相关 Playwright 和
+  `pnpm run build`。
 - 浏览器验证使用 Windows Chrome：
   `/mnt/c/Program Files/Google/Chrome/Application/chrome.exe`。
 

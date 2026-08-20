@@ -6,6 +6,7 @@ from typing import Any
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse, Response
 
+from interview_guide.common.api.models import ApiProblem
 from interview_guide.common.result import Result
 
 NOT_FOUND_CODES = {2001, 2008, 3001, 3003, 6001, 9001, 10001, 10006, 11001, 11008}
@@ -13,6 +14,10 @@ CONFLICT_CODES = {2004, 3004, 3007, 11002, 11007}
 UNPROCESSABLE_CODES = {2002, 2006, 3009, 6002}
 SERVICE_UNAVAILABLE_CODES = {2007, 3005, 3006, 6004, 6006, 7001, 7003, 11006, 11011}
 INTERNAL_CODES = {2003, 3008, 4001, 4002, 4003, 5001, 6005, 11004, 11005, 11009, 11010}
+STANDARD_ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
+    status: {"model": ApiProblem}
+    for status in (400, 401, 403, 404, 405, 409, 410, 422, 429, 500, 503, 504)
+}
 
 
 def http_status_for_code(code: int) -> int:

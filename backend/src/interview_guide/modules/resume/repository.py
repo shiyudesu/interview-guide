@@ -27,7 +27,13 @@ class ResumeRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def list_rows(self) -> list[ResumeListRow]:
+    async def list_rows(
+        self,
+        *,
+        ids: list[int] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[ResumeListRow]:
         latest = select(
             ResumeAnalysis.resume_id.label("resume_id"),
             ResumeAnalysis.overall_score.label("latest_score"),
@@ -48,7 +54,7 @@ class ResumeRepository:
             .group_by(InterviewSession.resume_id)
             .subquery()
         )
-        result = await self._session.execute(
+        statement = (
             select(
                 Resume,
                 latest.c.latest_score,
@@ -60,7 +66,15 @@ class ResumeRepository:
                 (latest.c.resume_id == Resume.id) & (latest.c.row_number == 1),
             )
             .outerjoin(counts, counts.c.resume_id == Resume.id)
+            .order_by(Resume.uploaded_at.desc())
         )
+        if ids is not None:
+            statement = statement.where(Resume.id.in_(ids))
+        if offset:
+            statement = statement.offset(offset)
+        if limit is not None:
+            statement = statement.limit(limit)
+        result = await self._session.execute(statement)
         return [
             ResumeListRow(
                 resume=row[0],

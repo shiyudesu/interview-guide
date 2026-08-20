@@ -245,6 +245,7 @@ async def test_low_confidence_follow_up_becomes_next_main() -> None:
 
 
 def test_request_and_voice_duration_validation() -> None:
+    assert CreateInterviewRequest().question_count == 8
     request = CreateInterviewRequest(
         questionCount=5,
         skillId="java-backend",

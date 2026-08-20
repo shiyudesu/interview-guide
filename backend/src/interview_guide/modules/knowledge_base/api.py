@@ -6,12 +6,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, File, Form, Request, UploadFile
+from fastapi import APIRouter, Body, Depends, File, Form, Query, Request, UploadFile
 from starlette.responses import Response, StreamingResponse
 
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
-from interview_guide.common.api.responses import result_response
+from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.redis.rate_limit import (
@@ -19,7 +19,13 @@ from interview_guide.common.redis.rate_limit import (
     RateLimitRule,
 )
 from interview_guide.common.result import Result
-from interview_guide.modules.knowledge_base.models import QueryRequest
+from interview_guide.modules.knowledge_base.models import (
+    KnowledgeBaseItemResponse,
+    KnowledgeBaseStatisticsResponse,
+    QueryRequest,
+    QueryResponse,
+    UploadKnowledgeBaseResponse,
+)
 from interview_guide.modules.knowledge_base.query_service import (
     KnowledgeBaseQueryService,
     QueryConfiguration,
@@ -29,7 +35,7 @@ from interview_guide.modules.knowledge_base.repository import (
 )
 from interview_guide.modules.knowledge_base.service import KnowledgeBaseService
 
-router = APIRouter(prefix="/api/knowledgebase")
+router = APIRouter(prefix="/api/knowledgebase", responses=STANDARD_ERROR_RESPONSES)
 RESOURCES = Path(__file__).resolve().parents[4] / "resources"
 QUERY_TOOLS = [SkillRepository(RESOURCES).tool_definition()]
 
@@ -115,11 +121,14 @@ async def sse_stream(chunks: AsyncIterator[str]) -> AsyncIterator[bytes]:
         yield sse_data(chunk)
 
 
-@router.get("/list")
+@router.get("/list", response_model=list[KnowledgeBaseItemResponse])
 async def list_knowledge_bases(
     service: ServiceDependency,
     sortBy: str | None = None,
     vectorStatus: str | None = None,
+    ids: Annotated[list[int] | None, Query()] = None,
+    limit: Annotated[int | None, Query(ge=1, le=200)] = None,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> Response:
     status = vectorStatus.upper() if vectorStatus and vectorStatus.strip() else None
     if status not in {None, "PENDING", "PROCESSING", "COMPLETED", "FAILED"}:
@@ -127,10 +136,20 @@ async def list_knowledge_bases(
             ErrorCode.BAD_REQUEST,
             f"无效的向量化状态: {vectorStatus}",
         )
-    return result_response(Result.ok(await service.list_items(status, sortBy)))
+    return result_response(
+        Result.ok(
+            await service.list_items(
+                status,
+                sortBy,
+                ids=ids,
+                limit=limit,
+                offset=offset,
+            )
+        )
+    )
 
 
-@router.post("/query")
+@router.post("/query", response_model=QueryResponse)
 async def query_knowledge_base(
     request: Request,
     payload: QueryRequest,
@@ -159,7 +178,7 @@ async def query_knowledge_base_stream(
     )
 
 
-@router.post("/upload")
+@router.post("/upload", response_model=UploadKnowledgeBaseResponse, status_code=201)
 async def upload_knowledge_base(
     service: ServiceDependency,
     file: Annotated[UploadFile, File()],
@@ -181,7 +200,7 @@ async def categories(service: ServiceDependency) -> Response:
     return result_response(Result.ok(await service.categories()))
 
 
-@router.get("/category/{category}")
+@router.get("/category/{category}", response_model=list[KnowledgeBaseItemResponse])
 async def by_category(
     category: str,
     service: ServiceDependency,
@@ -189,12 +208,12 @@ async def by_category(
     return result_response(Result.ok(await service.list_by_category(category)))
 
 
-@router.get("/uncategorized")
+@router.get("/uncategorized", response_model=list[KnowledgeBaseItemResponse])
 async def uncategorized(service: ServiceDependency) -> Response:
     return result_response(Result.ok(await service.list_by_category(None)))
 
 
-@router.get("/search")
+@router.get("/search", response_model=list[KnowledgeBaseItemResponse])
 async def search(
     keyword: str,
     service: ServiceDependency,
@@ -202,12 +221,12 @@ async def search(
     return result_response(Result.ok(await service.search(keyword)))
 
 
-@router.get("/stats")
+@router.get("/stats", response_model=KnowledgeBaseStatisticsResponse)
 async def statistics(service: ServiceDependency) -> Response:
     return result_response(Result.ok(await service.statistics()))
 
 
-@router.put("/{knowledge_base_id}/category")
+@router.put("/{knowledge_base_id}/category", status_code=204)
 async def update_category(
     knowledge_base_id: int,
     service: ServiceDependency,
@@ -226,7 +245,7 @@ async def download_knowledge_base(
     return Response(content=content, headers=headers)
 
 
-@router.post("/{knowledge_base_id}/revectorize")
+@router.post("/{knowledge_base_id}/revectorize", status_code=204)
 async def revectorize_knowledge_base(
     knowledge_base_id: int,
     service: ServiceDependency,
@@ -235,7 +254,7 @@ async def revectorize_knowledge_base(
     return result_response(Result.ok())
 
 
-@router.delete("/{knowledge_base_id}")
+@router.delete("/{knowledge_base_id}", status_code=204)
 async def delete_knowledge_base(
     knowledge_base_id: int,
     service: ServiceDependency,
@@ -244,7 +263,7 @@ async def delete_knowledge_base(
     return result_response(Result.ok())
 
 
-@router.get("/{knowledge_base_id}")
+@router.get("/{knowledge_base_id}", response_model=KnowledgeBaseItemResponse)
 async def get_knowledge_base(
     knowledge_base_id: int,
     service: ServiceDependency,

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 
@@ -16,8 +15,6 @@ from interview_guide.infrastructure.storage.keys import FileKeyGenerator
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -116,11 +113,6 @@ class S3Storage:
         return key
 
     async def download(self, key: str) -> bytes:
-        if not await self.exists(key):
-            raise BusinessException(
-                ErrorCode.STORAGE_DOWNLOAD_FAILED,
-                f"文件不存在: {key}",
-            )
         try:
             response = await self._call(
                 self._client.get_object,
@@ -128,7 +120,17 @@ class S3Storage:
                 Key=key,
             )
             return await self._executor.run(response["Body"].read)
-        except (BotoCoreError, ClientError) as error:
+        except ClientError as error:
+            if self._status_code(error) == 404:
+                raise BusinessException(
+                    ErrorCode.STORAGE_DOWNLOAD_FAILED,
+                    f"文件不存在: {key}",
+                ) from error
+            raise BusinessException(
+                ErrorCode.STORAGE_DOWNLOAD_FAILED,
+                f"文件下载失败: {error}",
+            ) from error
+        except BotoCoreError as error:
             raise BusinessException(
                 ErrorCode.STORAGE_DOWNLOAD_FAILED,
                 f"文件下载失败: {error}",
@@ -142,9 +144,18 @@ class S3Storage:
                 Key=key,
             )
             return True
-        except (BotoCoreError, ClientError) as error:
-            logger.warning("object HEAD failed; treating as missing key=%s error=%s", key, error)
-            return False
+        except ClientError as error:
+            if self._status_code(error) == 404:
+                return False
+            raise BusinessException(
+                ErrorCode.STORAGE_DOWNLOAD_FAILED,
+                f"检查文件状态失败: {error}",
+            ) from error
+        except BotoCoreError as error:
+            raise BusinessException(
+                ErrorCode.STORAGE_DOWNLOAD_FAILED,
+                f"检查文件状态失败: {error}",
+            ) from error
 
     async def stat(self, key: str) -> StoredObject:
         try:
@@ -165,7 +176,7 @@ class S3Storage:
         )
 
     async def delete(self, key: str | None) -> None:
-        if not key or not await self.exists(key):
+        if not key:
             return
         try:
             await self._call(
@@ -173,7 +184,14 @@ class S3Storage:
                 Bucket=self._settings.storage_bucket,
                 Key=key,
             )
-        except (BotoCoreError, ClientError) as error:
+        except ClientError as error:
+            if self._status_code(error) == 404:
+                return
+            raise BusinessException(
+                ErrorCode.STORAGE_DELETE_FAILED,
+                f"文件删除失败: {error}",
+            ) from error
+        except BotoCoreError as error:
             raise BusinessException(
                 ErrorCode.STORAGE_DELETE_FAILED,
                 f"文件删除失败: {error}",

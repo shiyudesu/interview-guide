@@ -1,5 +1,6 @@
-import { request } from './request';
+import { request, type PageOptions } from './request';
 import type { InterviewReport } from '../types/interview';
+import { ReconnectTimer } from './voiceReconnect';
 
 // ========== 类型定义 ==========
 
@@ -65,6 +66,10 @@ export interface SessionMeta {
   evaluateStatus?: string;
   evaluateError?: string;
   overallScore?: number | null;
+}
+
+export interface VoiceSessionListOptions extends PageOptions {
+  sessionIds?: number[];
 }
 
 // WebSocket 消息类型
@@ -207,10 +212,17 @@ export const voiceInterviewApi = {
   /**
    * Get all sessions
    */
-  async getAllSessions(userId?: string, status?: string): Promise<SessionMeta[]> {
+  async getAllSessions(
+    userId?: string,
+    status?: string,
+    page?: VoiceSessionListOptions,
+  ): Promise<SessionMeta[]> {
     const params = new URLSearchParams();
     if (userId) params.append('userId', userId);
     if (status) params.append('status', status);
+    if (page?.limit !== undefined) params.append('limit', String(page.limit));
+    if (page?.offset !== undefined) params.append('offset', String(page.offset));
+    page?.sessionIds?.forEach(id => params.append('sessionIds', String(id)));
 
     return request.get<SessionMeta[]>(
       `/api/voice-interview/sessions?${params.toString()}`
@@ -235,6 +247,8 @@ export class VoiceInterviewWebSocket {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 3;
   private reconnectDelay = 2000;
+  private reconnectTimer = new ReconnectTimer();
+  private manuallyClosed = false;
 
   constructor(_sessionId: number, url: string, handlers: WebSocketEventHandlers) {
     this.url = url;
@@ -245,15 +259,18 @@ export class VoiceInterviewWebSocket {
    * 建立 WebSocket 连接
    */
   connect(): void {
+    this.manuallyClosed = false;
+    this.reconnectTimer.activate();
     try {
-      this.ws = new WebSocket(this.url);
+      const socket = new WebSocket(this.url);
+      this.ws = socket;
 
-      this.ws.onopen = () => {
+      socket.onopen = () => {
         this.reconnectAttempts = 0;
         this.handlers.onOpen?.();
       };
 
-      this.ws.onmessage = (event) => {
+      socket.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data) as WebSocketMessage;
 
@@ -299,16 +316,27 @@ export class VoiceInterviewWebSocket {
         }
       };
 
-      this.ws.onclose = (event) => {
+      socket.onclose = (event) => {
+        if (this.ws === socket) {
+          this.ws = null;
+        }
         this.handlers.onClose?.(event);
 
-        if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
+        if (
+          !this.manuallyClosed
+          && !event.wasClean
+          && this.reconnectAttempts < this.maxReconnectAttempts
+        ) {
           this.reconnectAttempts++;
-          setTimeout(() => this.connect(), this.reconnectDelay);
+          this.reconnectTimer.schedule(this.reconnectDelay, () => {
+            if (!this.manuallyClosed) {
+              this.connect();
+            }
+          });
         }
       };
 
-      this.ws.onerror = (error) => {
+      socket.onerror = (error) => {
         this.handlers.onError?.(error);
       };
     } catch (error) {
@@ -356,11 +384,13 @@ export class VoiceInterviewWebSocket {
    * 关闭连接
    */
   disconnect(): void {
-    if (this.ws) {
-      // 不重连
-      this.reconnectAttempts = this.maxReconnectAttempts;
-      this.ws.close(1000, 'User disconnected');
-      this.ws = null;
+    this.manuallyClosed = true;
+    this.reconnectAttempts = this.maxReconnectAttempts;
+    this.reconnectTimer.stop();
+    const socket = this.ws;
+    this.ws = null;
+    if (socket && socket.readyState !== WebSocket.CLOSED) {
+      socket.close(1000, 'User disconnected');
     }
   }
 

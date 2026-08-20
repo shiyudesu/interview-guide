@@ -81,16 +81,22 @@ class RagChatRepository:
             await session.flush()
             return SessionRecord(entity, tuple(knowledge_bases))
 
-    async def list_sessions(self) -> list[SessionRecord]:
+    async def list_sessions(
+        self,
+        *,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[SessionRecord]:
         async with self._sessions() as session:
-            entities = list(
-                await session.scalars(
-                    select(RagChatSession).order_by(
-                        RagChatSession.is_pinned.desc(),
-                        RagChatSession.updated_at.desc(),
-                    )
-                )
+            statement = select(RagChatSession).order_by(
+                RagChatSession.is_pinned.desc(),
+                RagChatSession.updated_at.desc(),
             )
+            if offset:
+                statement = statement.offset(offset)
+            if limit is not None:
+                statement = statement.limit(limit)
+            entities = list(await session.scalars(statement))
             if not entities:
                 return []
             rows = await session.execute(
@@ -192,7 +198,14 @@ class RagChatRepository:
 
     async def prepare_stream_message(self, session_id: int, question: str) -> int:
         async with self._sessions() as session, session.begin():
-            entity = await self._require_session(session, session_id)
+            entity = cast(
+                RagChatSession | None,
+                await session.scalar(
+                    select(RagChatSession).where(RagChatSession.id == session_id).with_for_update()
+                ),
+            )
+            if entity is None:
+                raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
             next_order = entity.message_count
             if next_order is None:
                 raise TypeError("messageCount is null")

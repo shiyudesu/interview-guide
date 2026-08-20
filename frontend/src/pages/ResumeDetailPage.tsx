@@ -121,7 +121,7 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       alert('导出失败，请重试');
     } finally {
       setExporting(null);
@@ -140,7 +140,7 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       alert('导出失败，请重试');
     } finally {
       setExporting(null);
@@ -153,7 +153,7 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
       const detail = await historyApi.getInterviewDetail(sessionId);
       setSelectedInterview(detail);
       setDetailView('interviewDetail');
-    } catch (err) {
+    } catch {
       alert('加载面试详情失败');
     } finally {
       setLoadingInterview(false);

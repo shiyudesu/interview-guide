@@ -133,8 +133,18 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
   const [revectorizing, setRevectorizing] = useState<number | null>(null);
 
   // 加载数据（不显示loading状态，用于轮询）
-  const loadDataSilent = useCallback(async () => {
+  const loadDataSilent = useCallback(async (ids?: number[]) => {
     try {
+      if (ids) {
+        const [statsData, updates] = await Promise.all([
+          knowledgeBaseApi.getStatistics(),
+          knowledgeBaseApi.getAllKnowledgeBases(undefined, undefined, {ids}),
+        ]);
+        const byId = new Map(updates.map(item => [item.id, item]));
+        setStats(statsData);
+        setKnowledgeBases(previous => previous.map(item => byId.get(item.id) ?? item));
+        return;
+      }
       const [statsData, kbList, categoryList] = await Promise.all([
         knowledgeBaseApi.getStatistics(),
         searchKeyword
@@ -179,20 +189,27 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
     loadData();
   }, [loadData]);
 
-  // 轮询：当有 PENDING 或 PROCESSING 状态时，每5秒刷新一次
+  // 轮询：只刷新仍在处理的记录，避免反复拉取完整知识库列表。
+  const pendingIds = knowledgeBases
+    .filter(kb => kb.vectorStatus === 'PENDING' || kb.vectorStatus === 'PROCESSING')
+    .map(kb => kb.id);
+  const pendingKey = pendingIds.join(',');
+
   useEffect(() => {
-    const hasPendingItems = knowledgeBases.some(
-      kb => kb.vectorStatus === 'PENDING' || kb.vectorStatus === 'PROCESSING'
-    );
-
-    if (hasPendingItems && !loading) {
-      const timer = setInterval(() => {
-        loadDataSilent();
-      }, 5000);
-
-      return () => clearInterval(timer);
-    }
-  }, [knowledgeBases, loading, loadDataSilent]);
+    if (!pendingKey || loading) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const ids = pendingKey.split(',').map(Number);
+    const poll = async () => {
+      await loadDataSilent(ids);
+      if (!cancelled) timer = setTimeout(poll, 5000);
+    };
+    timer = setTimeout(poll, 5000);
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [loading, loadDataSilent, pendingKey]);
 
   // 重新向量化
   const handleRevectorize = async (id: number) => {

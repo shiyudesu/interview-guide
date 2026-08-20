@@ -50,6 +50,10 @@ POST /api/interview/sessions/{sessionId}/turns
 响应包含 `turnId`、`action`、`acknowledgement`、`nextQuestion`、`completed` 和只按主问题
 计算的 `progress`。重复 requestId 且载荷相同返回原结果；载荷不同返回业务错误。
 
+`GET /api/interview/sessions` 保持直接返回数组，并支持可选 `limit`、`offset` 及重复
+`sessionIds` 查询参数。前端评估轮询使用 `sessionIds` 只刷新活动会话，避免随历史记录增长反复
+下载完整列表。
+
 ## Turn 状态机
 
 1. 短事务锁定会话、验证当前问题并创建带租约的 `PROCESSING` Turn。

@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState, useTransition} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState, useTransition} from 'react';
 import {AnimatePresence, motion} from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -62,18 +62,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
 
   const [, startTransition] = useTransition();
 
-  useEffect(() => {
-    loadKnowledgeBases();
-    loadSessions();
-  }, []);
-
-  useEffect(() => {
-    if (!searchKeyword) {
-      loadKnowledgeBases();
-    }
-  }, [sortBy]);
-
-  const loadKnowledgeBases = async () => {
+  const loadKnowledgeBases = useCallback(async () => {
     setLoadingList(true);
     try {
       // 问答助手只显示向量化完成的知识库
@@ -84,7 +73,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
     } finally {
       setLoadingList(false);
     }
-  };
+  }, [sortBy]);
 
   const handleSearch = async () => {
     if (!searchKeyword.trim()) {
@@ -143,7 +132,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
     });
   };
 
-  const loadSessions = async () => {
+  const loadSessions = useCallback(async () => {
     setLoadingSessions(true);
     try {
       const list = await ragChatApi.listSessions();
@@ -153,7 +142,17 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
     } finally {
       setLoadingSessions(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadSessions();
+  }, [loadSessions]);
+
+  useEffect(() => {
+    if (!searchKeyword) {
+      void loadKnowledgeBases();
+    }
+  }, [loadKnowledgeBases, searchKeyword]);
 
   const handleToggleKb = (kbId: number) => {
     setSelectedKbIds(prev => {

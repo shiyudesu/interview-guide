@@ -5,16 +5,19 @@ from collections.abc import AsyncIterator
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from starlette.responses import Response, StreamingResponse
 
-from interview_guide.common.api.responses import result_response
+from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
 from interview_guide.modules.knowledge_base.api import knowledge_base_query_service
 from interview_guide.modules.knowledge_base.rag_chat_models import (
     CreateSessionRequest,
     SendMessageRequest,
+    SessionDetailDTO,
+    SessionDTO,
+    SessionListItemDTO,
     UpdateKnowledgeBasesRequest,
     UpdateTitleRequest,
 )
@@ -23,7 +26,7 @@ from interview_guide.modules.knowledge_base.rag_chat_repository import (
 )
 from interview_guide.modules.knowledge_base.rag_chat_service import RagChatService
 
-router = APIRouter(prefix="/api/rag-chat")
+router = APIRouter(prefix="/api/rag-chat", responses=STANDARD_ERROR_RESPONSES)
 
 
 def rag_chat_service(request: Request) -> RagChatService:
@@ -74,7 +77,7 @@ async def rag_chat_sse_stream(
             await close()
 
 
-@router.post("/sessions")
+@router.post("/sessions", response_model=SessionDTO, status_code=201)
 async def create_session(
     payload: CreateSessionRequest,
     service: ServiceDependency,
@@ -85,12 +88,16 @@ async def create_session(
     )
 
 
-@router.get("/sessions")
-async def list_sessions(service: ServiceDependency) -> Response:
-    return result_response(Result.ok(await service.list_sessions()))
+@router.get("/sessions", response_model=list[SessionListItemDTO])
+async def list_sessions(
+    service: ServiceDependency,
+    limit: Annotated[int | None, Query(ge=1, le=200)] = None,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> Response:
+    return result_response(Result.ok(await service.list_sessions(limit=limit, offset=offset)))
 
 
-@router.get("/sessions/{session_id}")
+@router.get("/sessions/{session_id}", response_model=SessionDetailDTO)
 async def session_detail(
     session_id: int,
     service: ServiceDependency,
@@ -98,7 +105,7 @@ async def session_detail(
     return result_response(Result.ok(await service.session_detail(session_id)))
 
 
-@router.put("/sessions/{session_id}/title")
+@router.put("/sessions/{session_id}/title", status_code=204)
 async def update_title(
     session_id: int,
     payload: UpdateTitleRequest,
@@ -108,7 +115,7 @@ async def update_title(
     return result_response(Result.ok())
 
 
-@router.put("/sessions/{session_id}/pin")
+@router.put("/sessions/{session_id}/pin", status_code=204)
 async def toggle_pin(
     session_id: int,
     service: ServiceDependency,
@@ -117,7 +124,7 @@ async def toggle_pin(
     return result_response(Result.ok())
 
 
-@router.put("/sessions/{session_id}/knowledge-bases")
+@router.put("/sessions/{session_id}/knowledge-bases", status_code=204)
 async def update_knowledge_bases(
     session_id: int,
     payload: UpdateKnowledgeBasesRequest,
@@ -130,7 +137,7 @@ async def update_knowledge_bases(
     return result_response(Result.ok())
 
 
-@router.delete("/sessions/{session_id}")
+@router.delete("/sessions/{session_id}", status_code=204)
 async def delete_session(
     session_id: int,
     service: ServiceDependency,

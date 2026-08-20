@@ -149,10 +149,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Run frontend tests
         run: |
-          pnpm run test:interview-history
-          pnpm run test:question-generation
-          pnpm run test:interview-capacity
-          pnpm run test:interview-entry
+          pnpm run lint
+          pnpm run test:unit
       - name: Build frontend
         run: pnpm run build
 
