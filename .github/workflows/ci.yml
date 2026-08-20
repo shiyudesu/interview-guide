@@ -69,6 +69,13 @@ jobs:
       - name: Check repository manifests
         if: needs.changes.outputs.manifests == 'true'
         run: bash tools/scripts/check-manifests.sh
+      - name: Validate lifecycle scripts
+        if: needs.changes.outputs.deployment == 'true'
+        run: |
+          bash -n scripts/start.sh
+          bash -n scripts/stop.sh
+          pwsh -NoProfile -Command '$tokens = $null; $errors = $null; [System.Management.Automation.Language.Parser]::ParseFile("scripts/start.ps1", [ref]$tokens, [ref]$errors) | Out-Null; if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }'
+          pwsh -NoProfile -Command '$tokens = $null; $errors = $null; [System.Management.Automation.Language.Parser]::ParseFile("scripts/stop.ps1", [ref]$tokens, [ref]$errors) | Out-Null; if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }'
       - name: Validate production Compose
         if: needs.changes.outputs.deployment == 'true'
         run: docker compose config --quiet
@@ -256,7 +263,7 @@ jobs:
       - name: Verify frontend proxy after API recreation
         run: |
           docker compose up -d --force-recreate --no-deps --wait app
-          curl --fail --retry 10 --retry-delay 1 http://127.0.0.1/health
+          curl --fail --retry 10 --retry-delay 1 http://127.0.0.1:5173/health
           test "$(docker inspect -f '{{.State.Health.Status}}' interview-frontend)" = healthy
       - name: Capture Compose logs
         if: failure()

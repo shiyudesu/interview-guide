@@ -2,16 +2,67 @@
 
 ## 启动和检查
 
+推荐使用一键启动脚本。脚本会检查 Docker、Compose 和 Docker daemon；Windows、macOS、
+Ubuntu、Debian 和 WSL 缺少 Docker 时，可以在确认后自动安装。脚本还会自动创建 `.env`，并在
+失败时输出关键日志：
+
+```bash
+./scripts/start.sh
+```
+
+Windows 可双击根目录的 `start.cmd`，或在 PowerShell 中运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
+```
+
+跳过安装确认可使用 Bash 的 `--yes` 或 PowerShell 的 `-Yes`。自动安装可能触发 UAC、请求
+sudo 密码或要求完成 Docker Desktop 的首次许可提示；脚本不会关闭安全确认，也不会删除数据卷。
+
+手工启动命令：
+
 ```bash
 docker compose up -d --build --wait
 docker compose ps -a
 ```
+
+关闭服务时使用配套脚本，默认保留所有数据卷：
+
+```bash
+./scripts/stop.sh
+```
+
+Windows 可双击 `stop.cmd`，或运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\stop.ps1
+```
+
+关闭脚本不会自动安装或启动 Docker：Docker daemon 已关闭时，本地容器本身已不可用，脚本会
+直接成功退出。需要彻底清空数据时仍必须手工执行 `docker compose down -v`，避免误触删除。
 
 正常情况下：
 
 - `migrate` 执行成功后退出
 - `app`、`postgres`、`redis`、`minio` 为 healthy
 - `worker`、`scheduler`、`frontend` 为 running
+
+## 端口占用
+
+启动脚本会在构建前检查端口，并在 Compose 仍因端口竞争失败时再次解析错误。提示会直接列出
+占用进程和建议修改项，例如：
+
+```env
+FRONTEND_PORT=5174
+SERVER_PORT=18080
+POSTGRES_PORT=15432
+REDIS_PORT=16379
+APP_STORAGE_PORT=19000
+APP_STORAGE_CONSOLE_PORT=19001
+```
+
+只修改宿主机映射变量即可，不要修改容器内部端口。修改 `FRONTEND_PORT` 后，访问地址也要带上
+新端口，例如 <http://localhost:5174>。
 
 健康检查：
 
@@ -120,7 +171,7 @@ env | grep '^APP_AI_CONFIG_ENCRYPTION_KEY='
 检查端口：
 
 ```bash
-ss -ltnp | grep -E ':(80|5432|6379|8080|9000|9001)\b'
+ss -ltnp | grep -E ':(5173|5432|6379|8080|9000|9001)\b'
 docker ps --format 'table {{.Names}}\t{{.Ports}}'
 ```
 
@@ -128,7 +179,7 @@ docker ps --format 'table {{.Names}}\t{{.Ports}}'
 
 ```env
 SERVER_PORT=18080
-FRONTEND_PORT=8088
+FRONTEND_PORT=5174
 POSTGRES_PORT=15432
 REDIS_PORT=16379
 APP_STORAGE_PORT=19000

@@ -140,8 +140,8 @@ APP_STORAGE_REGION=us-east-1
 
 ```env
 SERVER_PORT=8080
-FRONTEND_PORT=80
-CORS_ALLOWED_ORIGINS=http://localhost,http://localhost:5173
+FRONTEND_PORT=5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
 LOG_LEVEL=INFO
 TZ=Asia/Shanghai
 ```

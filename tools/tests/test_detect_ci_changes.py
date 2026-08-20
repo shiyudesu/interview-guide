@@ -78,6 +78,20 @@ class DetectCiChangesTest(unittest.TestCase):
         self.assertTrue(areas.deployment)
         self.assertTrue(areas.production)
 
+    def test_startup_script_change_runs_deployment_validation(self) -> None:
+        for path in (
+            "scripts/start.sh",
+            "scripts/start.ps1",
+            "scripts/stop.sh",
+            "scripts/stop.ps1",
+            "start.cmd",
+            "stop.cmd",
+        ):
+            with self.subTest(path=path):
+                areas = classify_paths([path])
+                self.assertTrue(areas.deployment)
+                self.assertTrue(areas.production)
+
     def test_ci_control_change_forces_all_jobs(self) -> None:
         self.assertEqual(
             ChangeAreas.all(),

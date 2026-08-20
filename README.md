@@ -29,10 +29,31 @@ InterviewGuide 是一个自托管 AI 面试平台，覆盖简历分析、文字�
 
 ## 快速启动
 
-准备配置：
+启动脚本会检查 Docker CLI、Docker Compose v2 和 Docker daemon。缺少 Docker 时，它会先
+询问一次，确认后在 Windows、macOS、Ubuntu、Debian 或 WSL 上自动安装官方组件；过程中可能
+弹出 UAC 或请求 sudo 密码。
+
+Windows 可以直接双击仓库根目录的 `start.cmd`。
+
+Linux、macOS 或 WSL：
 
 ```bash
-cp .env.example .env
+./scripts/start.sh
+```
+
+脚本会自动创建 `.env`、校验 Compose、构建并等待所有服务就绪；失败时会输出容器状态和关键
+日志。启动前还会检查 5173、8080、5432、6379、9000、9001 等映射端口；如有占用，会指出
+占用进程，并给出应修改的 `.env` 变量和建议端口。成功后会打开前端。服务器或不希望自动打开
+浏览器时使用：
+
+```bash
+./scripts/start.sh --no-open
+```
+
+用于无人值守环境、希望自动同意安装提示时：
+
+```bash
+./scripts/start.sh --yes --no-open
 ```
 
 AI 配置无需写入 `.env`。首次启动会自动生成 Provider 加密主密钥，并只创建一个不带 API Key
@@ -40,9 +61,10 @@ AI 配置无需写入 `.env`。首次启动会自动生成 Provider 加密主密
 
 对外部署前还要修改 PostgreSQL 和对象存储的默认密码。
 
-启动完整环境：
+需要手工启动时，等价命令为：
 
 ```bash
+cp .env.example .env
 docker compose up -d --build --wait
 docker compose ps
 ```
@@ -51,7 +73,7 @@ docker compose ps
 
 | 服务 | 地址 |
 | --- | --- |
-| 前端 | <http://localhost> |
+| 前端 | <http://localhost:5173> |
 | API | <http://localhost:8080> |
 | Swagger UI | <http://localhost:8080/docs> |
 | OpenAPI | <http://localhost:8080/openapi.json> |
@@ -64,11 +86,16 @@ docker compose logs -f app worker scheduler
 docker compose logs migrate
 ```
 
-停止服务：
+停止服务并保留所有数据：
+
+- Windows：双击根目录的 `stop.cmd`
+- Linux、macOS、WSL：
 
 ```bash
-docker compose down
+./scripts/stop.sh
 ```
+
+手工执行的等价命令是 `docker compose down --remove-orphans`。
 
 `docker compose down -v` 会删除 PostgreSQL、Redis 和对象存储数据，只能在确认不再需要本地
 数据时使用。

@@ -110,6 +110,12 @@ def classify_paths(paths: Iterable[str], *, force_full: bool = False) -> ChangeA
             "frontend/nginx.conf",
             "frontend/package.json",
             "frontend/pnpm-lock.yaml",
+            "scripts/start.ps1",
+            "scripts/start.sh",
+            "scripts/stop.ps1",
+            "scripts/stop.sh",
+            "start.cmd",
+            "stop.cmd",
         }
         or path.startswith("docker/")
         or path.startswith(".github/workflows/")

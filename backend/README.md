@@ -5,6 +5,8 @@ Scheduler 与 Migrate 共用同一代码和镜像。
 
 ## 安装
 
+启动完整应用优先在仓库根目录运行 `./scripts/start.sh`；以下步骤用于只开发 Python 后端。
+
 从仓库根目录创建 `.env`：
 
 ```bash

@@ -11,6 +11,7 @@
 backend/                Python 后端
 frontend/               React 前端
 tools/                  仓库清单、模型诊断和生产验收工具
+scripts/                跨平台一键启动和仓库辅助脚本
 docs/                   配置、运维和架构说明
 docker-compose.yml      生产 Compose
 docker-compose.dev.yml  本地基础设施
@@ -68,6 +69,14 @@ docker-compose.dev.yml  本地基础设施
   - `qwen3-tts-flash-realtime`
 
 ## 运行方式
+
+合作开发者优先使用 `scripts/start.sh` 或 Windows 根目录 `start.cmd`。启动脚本必须保持非破坏性，
+不得覆盖已有 `.env` 或删除数据卷；只允许在用户确认或显式 `--yes`/`-Yes` 后安装 Docker 官方
+组件，不得绕过 UAC、sudo 或 Docker Desktop 的许可提示。
+启动脚本必须在构建前检查常用宿主机端口，并在 Compose 绑定失败时给出对应 `.env` 变量、建议
+端口和占用进程；不得要求用户修改容器内部端口。
+关闭服务优先使用 `scripts/stop.sh` 或 `stop.cmd`，只能执行非破坏性的 Compose down 并保留
+数据卷；不得在一键关闭入口中提供或隐式调用 `down -v`。
 
 同一镜像启动：
 
