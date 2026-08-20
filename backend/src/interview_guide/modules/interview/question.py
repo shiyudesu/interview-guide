@@ -184,37 +184,8 @@ JD_OUTPUT_FORMAT = structured_output_format(
 )
 
 
-def utf16_polynomial_hash(value: str) -> int:
-    result = 0
-    for character in value:
-        codepoint = ord(character)
-        units = (
-            (codepoint,)
-            if codepoint <= 0xFFFF
-            else (
-                0xD800 + ((codepoint - 0x10000) >> 10),
-                0xDC00 + ((codepoint - 0x10000) & 0x3FF),
-            )
-        )
-        for unit in units:
-            result = (31 * result + unit) & 0xFFFFFFFF
-    return result
-
-
-def stable_bucket_key_order(values: list[str | None]) -> list[str | None]:
-    unique: list[str | None] = []
-    for value in values:
-        if value not in unique:
-            unique.append(value)
-
-    def bucket(value: str | None) -> int:
-        if value is None:
-            return 0
-        hash_value = utf16_polynomial_hash(value)
-        spread = hash_value ^ (hash_value >> 16)
-        return spread & 15
-
-    return sorted(unique, key=lambda item: (bucket(item), unique.index(item)))
+def stable_key_order(values: list[str | None]) -> list[str | None]:
+    return sorted(set(values), key=lambda item: (item is not None, item or ""))
 
 
 class InterviewSkillLibrary:
@@ -839,7 +810,7 @@ class InterviewQuestionService:
                 summary = f"{item.question[:30]}…" if len(item.question) > 30 else item.question
             grouped.setdefault(question_type, []).append(summary)
         lines = ["已考过的知识点（避免重复出题）："]
-        for key in stable_bucket_key_order(list(grouped)):
+        for key in stable_key_order(list(grouped)):
             assert key is not None
             lines.append(f"- {key}: {', '.join(grouped[key])}")
         return "\n".join(lines) + "\n"

@@ -33,7 +33,7 @@ from interview_guide.modules.voice_interview.repository import (
 )
 
 logger = logging.getLogger(__name__)
-SESSION_CACHE_KEY_PREFIX = "voice:v2:interview:session:"
+SESSION_CACHE_KEY_PREFIX = "voice:interview:session:"
 SESSION_CACHE_TTL_SECONDS = 60 * 60
 DEFAULT_USER_ID = "default"
 DEFAULT_SKILL_ID = "java-backend"

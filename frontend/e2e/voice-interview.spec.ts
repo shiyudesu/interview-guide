@@ -91,11 +91,9 @@ test.describe('语音面试', () => {
     await page.route('**/api/interview/skills', async route => {
       await route.fulfill({
         contentType: 'application/json',
-        body: JSON.stringify({
-          code: 200,
-          message: 'success',
-          data: [{ id: 'java-backend', name: 'Java 后端', description: '', categories: [], isPreset: true, sourceJd: null }],
-        }),
+        body: JSON.stringify([
+          { id: 'java-backend', name: 'Java 后端', description: '', categories: [], isPreset: true, sourceJd: null },
+        ]),
       });
     });
     await page.route('**/api/voice-interview/sessions', async route => {
@@ -103,22 +101,18 @@ test.describe('语音面试', () => {
       await route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify({
-          code: 200,
-          message: 'success',
-          data: {
-            sessionId: 42,
-            roleType: 'JAVA_BACKEND',
-            currentPhase: 'TECH',
-            status: 'IN_PROGRESS',
-            startTime: '2026-08-03T00:00:00Z',
-            plannedDuration: 15,
-            webSocketUrl: 'ws://voice-test.local/42',
-          },
+          sessionId: 42,
+          roleType: 'JAVA_BACKEND',
+          currentPhase: 'TECH',
+          status: 'IN_PROGRESS',
+          startTime: '2026-08-03T00:00:00Z',
+          plannedDuration: 15,
+          webSocketUrl: 'ws://voice-test.local/42',
         }),
       });
     });
     await page.route(`**/api/voice-interview/sessions/${SESSION_ID}/end`, async route => {
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ code: 200, message: 'success', data: {} }) });
+      await route.fulfill({ status: 204, body: '' });
     });
   });
 

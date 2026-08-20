@@ -28,8 +28,8 @@ def format_api_datetime(value: datetime, *, seconds_only: bool = False) -> str:
     return value.isoformat(timespec="microseconds")
 
 
-def utf16_code_unit_length(value: str) -> int:
-    return len(value.encode("utf-16-le")) // 2
+def character_length(value: str) -> int:
+    return len(value)
 
 
 def compact_json_text(value: Any) -> str:

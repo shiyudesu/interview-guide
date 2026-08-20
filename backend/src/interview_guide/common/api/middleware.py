@@ -6,20 +6,14 @@ import time
 import uuid
 from collections.abc import Awaitable, Callable
 
-from starlette.datastructures import Headers, MutableHeaders
+from starlette.datastructures import Headers
 from starlette.types import Message, Receive, Scope, Send
 
 from interview_guide.common.logging.config import bind_request_id, reset_request_id
 from interview_guide.common.metrics import ApplicationMetrics
-from interview_guide.common.result import Result
 
 AsgiApp = Callable[[Scope, Receive, Send], Awaitable[None]]
 logger = logging.getLogger(__name__)
-VARY_HEADERS = (
-    "Origin",
-    "Access-Control-Request-Method",
-    "Access-Control-Request-Headers",
-)
 
 
 def request_log_level(status_code: int, duration_seconds: float) -> int:
@@ -78,69 +72,6 @@ class RequestContextMiddleware:
             reset_request_id(token)
 
 
-class CompatibilityCorsMiddleware:
-    def __init__(self, app: AsgiApp, allowed_origins: tuple[str, ...]) -> None:
-        self._app = app
-        self._allowed_origins = set(allowed_origins)
-
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http" or not scope.get("path", "").startswith("/api/"):
-            await self._app(scope, receive, send)
-            return
-        headers = Headers(scope=scope)
-        origin = headers.get("origin")
-        requested_method = headers.get("access-control-request-method")
-        if scope.get("method") == "OPTIONS" and origin and requested_method:
-            if origin not in self._allowed_origins:
-                await self._send_plain_response(send, 403, b"Invalid CORS request")
-                return
-            response_headers = [
-                (b"access-control-allow-origin", origin.encode("latin-1")),
-                (b"access-control-allow-methods", b"GET,POST,PUT,DELETE,PATCH,OPTIONS"),
-                (
-                    b"access-control-allow-headers",
-                    headers.get("access-control-request-headers", "").encode("latin-1"),
-                ),
-                (b"access-control-allow-credentials", b"true"),
-            ]
-            response_headers.extend((b"vary", value.encode("latin-1")) for value in VARY_HEADERS)
-            await send(
-                {
-                    "type": "http.response.start",
-                    "status": 200,
-                    "headers": response_headers,
-                }
-            )
-            await send({"type": "http.response.body", "body": b""})
-            return
-
-        async def send_wrapper(message: Message) -> None:
-            if message["type"] == "http.response.start":
-                mutable_headers = MutableHeaders(scope=message)
-                for value in VARY_HEADERS:
-                    mutable_headers.append("vary", value)
-                if origin in self._allowed_origins:
-                    mutable_headers["access-control-allow-origin"] = origin
-                    mutable_headers["access-control-allow-credentials"] = "true"
-            await send(message)
-
-        await self._app(scope, receive, send_wrapper)
-
-    @staticmethod
-    async def _send_plain_response(send: Send, status: int, body: bytes) -> None:
-        await send(
-            {
-                "type": "http.response.start",
-                "status": status,
-                "headers": [
-                    (b"content-length", str(len(body)).encode("ascii")),
-                    (b"content-type", b"text/plain;charset=UTF-8"),
-                ],
-            }
-        )
-        await send({"type": "http.response.body", "body": body})
-
-
 class MultipartLimitExceeded(Exception):
     pass
 
@@ -182,14 +113,14 @@ class MultipartSizeLimitMiddleware:
     @staticmethod
     async def _send_error(send: Send) -> None:
         body = json.dumps(
-            Result.error(400, "文件大小超过限制").model_dump(),
+            {"code": 400, "detail": "文件大小超过限制"},
             ensure_ascii=False,
             separators=(",", ":"),
         ).encode("utf-8")
         await send(
             {
                 "type": "http.response.start",
-                "status": 200,
+                "status": 413,
                 "headers": [
                     (b"content-length", str(len(body)).encode("ascii")),
                     (b"content-type", b"application/json"),

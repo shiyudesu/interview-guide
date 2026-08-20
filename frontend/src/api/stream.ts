@@ -1,4 +1,9 @@
-import { API_BASE_URL, getErrorMessage, getResultError, parseResultPayload } from './request';
+import {
+  API_BASE_URL,
+  getApiProblemError,
+  getErrorMessage,
+  parseProblemPayload,
+} from './request';
 
 type SseParseMode = 'line' | 'event';
 
@@ -44,9 +49,9 @@ async function readResponsePayload(response: Response): Promise<unknown> {
 
 async function createHttpError(response: Response): Promise<Error> {
   const payload = await readResponsePayload(response);
-  const result = await parseResultPayload(payload);
-  if (result) {
-    return new Error(result.message || `请求失败 (${response.status})`);
+  const problem = await parseProblemPayload(payload);
+  if (problem) {
+    return new Error(problem.detail || `请求失败 (${response.status})`);
   }
 
   if (typeof payload === 'string' && payload.trim()) {
@@ -67,10 +72,9 @@ async function assertStreamResponse(response: Response): Promise<void> {
   }
 
   const payload = await readResponsePayload(response);
-  const result = await parseResultPayload(payload);
-  const resultError = getResultError(result);
-  if (resultError) {
-    throw resultError;
+  const problem = await parseProblemPayload(payload);
+  if (problem) {
+    throw new Error(problem.detail);
   }
 
   throw new Error('服务端未返回流式数据');
@@ -99,9 +103,9 @@ function getStringField(value: unknown, key: string): string | null {
 }
 
 function getBusinessEventError(value: unknown): Error | null {
-  const resultError = getResultError(value);
-  if (resultError) {
-    return resultError;
+  const problemError = getApiProblemError(value);
+  if (problemError) {
+    return problemError;
   }
 
   const marker = getStringField(value, 'type')

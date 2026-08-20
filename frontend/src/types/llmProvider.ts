@@ -2,6 +2,7 @@ export interface ProviderItem {
   id: string;
   baseUrl: string;
   maskedApiKey: string;
+  hasApiKey: boolean;
   model: string;
   embeddingModel: string | null;
   embeddingDimensions: number | null;
@@ -38,12 +39,27 @@ export interface ProviderTestResult {
   model: string;
 }
 
+export interface ModelDiscoveryRequest {
+  providerId?: string;
+  baseUrl?: string;
+  apiKey?: string;
+  refresh?: boolean;
+}
+
+export interface ProviderModelList {
+  chatModels: string[];
+  embeddingModels: string[];
+  source: 'remote' | 'configured';
+  warning: string | null;
+}
+
 export interface DefaultProvider {
   defaultProvider: string;
   defaultEmbeddingProvider: string;
 }
 
 export interface AsrConfig {
+  providerId: string;
   url: string;
   model: string;
   maskedApiKey: string;
@@ -57,6 +73,8 @@ export interface AsrConfig {
 }
 
 export interface TtsConfig {
+  providerId: string;
+  url: string;
   model: string;
   maskedApiKey: string;
   voice: string;
@@ -69,6 +87,7 @@ export interface TtsConfig {
 }
 
 export interface AsrConfigRequest {
+  providerId?: string;
   url?: string;
   model?: string;
   apiKey?: string;
@@ -82,6 +101,8 @@ export interface AsrConfigRequest {
 }
 
 export interface TtsConfigRequest {
+  providerId?: string;
+  url?: string;
   model?: string;
   apiKey?: string;
   voice?: string;

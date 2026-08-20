@@ -214,15 +214,13 @@ def query_service(
     )
 
 
-def test_query_request_uses_compatibility_validation_messages() -> None:
+def test_query_request_uses_unicode_whitespace_validation() -> None:
     with pytest.raises(ValidationError, match="至少选择一个知识库"):
         QueryRequest.model_validate({"knowledgeBaseIds": [], "question": "问题"})
     with pytest.raises(ValidationError, match="问题不能为空"):
         QueryRequest.model_validate({"knowledgeBaseIds": [1], "question": " \t"})
-    assert (
-        QueryRequest.model_validate({"knowledgeBaseIds": [1], "question": "\u00a0"}).question
-        == "\u00a0"
-    )
+    with pytest.raises(ValidationError, match="问题不能为空"):
+        QueryRequest.model_validate({"knowledgeBaseIds": [1], "question": "\u00a0"})
 
 
 @pytest.mark.asyncio
@@ -342,7 +340,7 @@ async def test_explicit_fake_no_hit_and_no_result_answer_are_normalized() -> Non
 
 
 @pytest.mark.asyncio
-async def test_null_knowledge_base_id_reaches_compatibility_business_error() -> None:
+async def test_null_knowledge_base_id_reaches_business_error() -> None:
     repository = ExplicitFakeQueryRepository(search_results=[])
     adapter = ExplicitFakeLlmAdapter(chat_contents=[])
     service = query_service(repository, adapter, rewrite_enabled=False)
@@ -451,12 +449,12 @@ async def test_explicit_fake_rag_history_is_used_for_rewrite_and_answer() -> Non
     assert adapter.chat_messages[1][1:3] == history
 
 
-def test_rag_history_truncates_by_compatibility_utf16_units() -> None:
+def test_rag_history_truncates_by_unicode_characters() -> None:
     formatted = KnowledgeBaseQueryService._format_history_for_rewrite(
-        [{"role": "assistant", "content": "😀" * 101}]
+        [{"role": "assistant", "content": "😀" * 201}]
     )
 
-    assert formatted == f"助手: {'😀' * 100}..."
+    assert formatted == f"助手: {'😀' * 200}..."
 
 
 def test_sse_data_matches_contract_event_framing() -> None:

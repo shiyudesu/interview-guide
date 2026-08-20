@@ -5,16 +5,6 @@ from pydantic import field_validator
 from interview_guide.common.api.models import CamelModel
 
 
-def trim_codepoints_leq_space(value: str) -> str:
-    start = 0
-    end = len(value)
-    while start < end and ord(value[start]) <= 0x20:
-        start += 1
-    while end > start and ord(value[end - 1]) <= 0x20:
-        end -= 1
-    return value[start:end]
-
-
 class QueryRequest(CamelModel):
     knowledge_base_ids: list[int | None]
     question: str
@@ -29,7 +19,7 @@ class QueryRequest(CamelModel):
     @field_validator("question", mode="before")
     @classmethod
     def validate_question(cls, value: object) -> object:
-        if value is None or (isinstance(value, str) and not trim_codepoints_leq_space(value)):
+        if value is None or (isinstance(value, str) and not value.strip()):
             raise ValueError("问题不能为空")
         return value
 

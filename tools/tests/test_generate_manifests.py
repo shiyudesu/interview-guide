@@ -26,12 +26,9 @@ class GenerateManifestsTest(unittest.TestCase):
         self.assertEqual({"/api/resumes/statistics"}, frontend_only_paths)
         self.assertEqual(
             {
-                "/actuator/health",
-                "/actuator/info",
-                "/actuator/metrics",
-                "/actuator/prometheus",
-                "/swagger-ui.html",
-                "/v3/api-docs",
+                "/health",
+                "/info",
+                "/metrics",
             },
             backend_only_paths,
         )
@@ -50,7 +47,11 @@ class GenerateManifestsTest(unittest.TestCase):
         vector_store = next(item for item in database["tables"] if item["name"] == "vector_store")
         embedding = next(item for item in vector_store["columns"] if item["name"] == "embedding")
         self.assertIn("vector(1024)", embedding["definition"])
-        self.assertEqual(redis["summary"]["streamCount"], 5)
+        self.assertIn(
+            "voice_model_config",
+            {item["name"] for item in database["tables"]},
+        )
+        self.assertEqual(redis["summary"]["streamCount"], 4)
 
     def test_resource_inventory_records_prompts_and_disabled_tests(self) -> None:
         resources = GENERATOR.extract_resources(REPOSITORY_ROOT)

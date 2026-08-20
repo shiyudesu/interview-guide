@@ -10,6 +10,8 @@ import pytest
 
 from interview_guide.common.ai.encryption import (
     ApiKeyEncryption,
+    load_or_create_key,
+    resolve_configured_key,
     resolve_key_bytes,
 )
 from interview_guide.common.ai.prompts import (
@@ -17,13 +19,14 @@ from interview_guide.common.ai.prompts import (
     PromptSanitizer,
 )
 from interview_guide.common.ai.skills import SkillRepository
+from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 RESOURCES = BACKEND_ROOT / "resources"
 
 
-def test_aes_gcm_matches_fixed_compatibility_fixture() -> None:
+def test_aes_gcm_matches_fixed_fixture() -> None:
     encryption = ApiKeyEncryption(
         "fixed-test-key",
         nonce_factory=lambda size: bytes(range(size)),
@@ -40,6 +43,29 @@ def test_base64_32_byte_key_is_used_without_hashing() -> None:
     raw = bytes(range(32))
 
     assert resolve_key_bytes(base64.b64encode(raw).decode()) == raw
+
+
+def test_provider_encryption_key_is_generated_once_with_private_permissions(tmp_path) -> None:
+    key_file = tmp_path / "secrets" / "provider.key"
+
+    first = load_or_create_key(key_file, key_factory=lambda size: bytes(range(size)))
+    second = load_or_create_key(key_file, key_factory=lambda size: b"x" * size)
+
+    assert first == base64.b64encode(bytes(range(32))).decode()
+    assert second == first
+    assert key_file.stat().st_mode & 0o777 == 0o600
+
+
+def test_configured_provider_encryption_key_overrides_generated_file(tmp_path) -> None:
+    key_file = tmp_path / "provider.key"
+    settings = Settings(
+        _env_file=None,
+        APP_AI_CONFIG_ENCRYPTION_KEY="external-key",
+        APP_AI_CONFIG_ENCRYPTION_KEY_FILE=key_file,
+    )
+
+    assert resolve_configured_key(settings) == "external-key"
+    assert not key_file.exists()
 
 
 def test_decryption_with_wrong_key_fails_explicitly() -> None:
@@ -72,7 +98,7 @@ def test_prompt_renderer_preserves_template_and_requires_variables() -> None:
         )
 
 
-def test_prompt_sanitizer_matches_compatibility_boundaries() -> None:
+def test_prompt_sanitizer_uses_stable_boundaries() -> None:
     sanitizer = PromptSanitizer(
         uuid_factory=lambda: uuid.UUID("12345678-0000-0000-0000-000000000000")
     )
@@ -95,7 +121,7 @@ def test_skill_repository_loads_sorted_presets_and_references() -> None:
     assert "Java" in (skills.reference("java-backend", "JAVA") or "")
 
 
-def test_skill_tool_definition_matches_compatibility_agent_utils() -> None:
+def test_skill_tool_definition_has_expected_schema() -> None:
     tool = SkillRepository(RESOURCES).tool_definition()
     function = tool["function"]
     description = function["description"]

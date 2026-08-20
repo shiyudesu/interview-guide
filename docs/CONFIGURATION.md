@@ -10,25 +10,37 @@ cp .env.example .env
 
 `.env` 不应提交。生产环境也可以直接注入同名环境变量。
 
-## 必填项
+## 零配置启动
 
-### Provider 加密密钥
+AI Provider 不需要任何环境变量即可启动。首次运行时：
+
+- 系统只创建百炼 Provider，默认模型为 `qwen3.7-max` 和
+  `qwen3.7-text-embedding`，API Key 为空。
+- API、Worker 和 Scheduler 会在共享的 `provider_key` Docker Volume 中自动生成并复用
+  `/var/lib/interview-guide/provider-encryption.key`。
+- 在前端设置页录入百炼 API Key 后，密钥使用该主密钥进行 AES-GCM 加密并保存到 PostgreSQL。
+
+本地直接运行 Python 后端时，默认密钥文件位于
+`~/.local/share/interview-guide/provider-encryption.key`。
+
+直接运行 Python 后端且需要由外部密钥系统管理主密钥时，可以在首次录入 Provider Key 之前
+设置可选覆盖：
 
 ```env
 APP_AI_CONFIG_ENCRYPTION_KEY=replace_with_a_stable_random_secret
 ```
 
-该值用于 AES-GCM 加密 PostgreSQL 中保存的 Provider API Key。API、Worker 和 Scheduler
-必须使用同一个值。
+Compose 不读取该变量，始终使用独立 `provider_key` 卷，避免旧 `.env` 中的历史配置意外覆盖
+自动密钥。直接运行后端时，设置该变量后不会创建或读取自动密钥文件。
 
-首次保存 Provider 后不要轮换这个值。更换后，启动会报：
+主密钥或 `provider_key` 卷在首次保存 Provider 后不能随意更换，否则会报：
 
 ```text
-解密 Provider API Key 失败，请检查 APP_AI_CONFIG_ENCRYPTION_KEY
+解密 Provider API Key 失败，请检查加密主密钥或 provider_key 卷
 ```
 
-恢复方式只有两种：使用原密钥重新启动，或清空无法解密的 Provider 配置后重新录入 API Key。
-应用不会静默忽略错误，也不会把解密失败伪装成空密钥。
+恢复方式只有三种：恢复原 `provider_key` 卷、使用原环境变量主密钥重新启动，或清空无法解密的
+Provider 配置后重新录入 API Key。应用不会静默忽略错误，也不会把解密失败伪装成空密钥。
 
 可以生成一个随机值：
 
@@ -36,31 +48,29 @@ APP_AI_CONFIG_ENCRYPTION_KEY=replace_with_a_stable_random_secret
 openssl rand -hex 32
 ```
 
-### 默认 DashScope Key
-
-```env
-AI_BAILIAN_API_KEY=your_dashscope_api_key
-```
-
-默认 LLM、Embedding、ASR 和 TTS 都使用 DashScope。若改用其他聊天 Provider，应用仍可启动，
-但默认语音模型需要可用的 DashScope Key。
-
 ## Provider 配置
 
-Provider 初始种子来自环境变量：
+内置 Provider 只有百炼：
 
-| Provider | Key | 默认聊天模型 |
-| --- | --- | --- |
-| DashScope | `AI_BAILIAN_API_KEY` | `qwen3.7-max` |
-| Kimi | `PROVIDER_KIMI_API_KEY` | `PROVIDER_KIMI_MODEL` |
-| DeepSeek | `PROVIDER_DEEPSEEK_API_KEY` | `PROVIDER_DEEPSEEK_MODEL` |
-| GLM | `PROVIDER_GLM_API_KEY` | `PROVIDER_GLM_MODEL` |
-| LM Studio | `PROVIDER_LMSTUDIO_API_KEY` | `qwen2.5-7b-instruct` |
+| Provider | Base URL | 默认聊天模型 | 默认向量模型 |
+| --- | --- | --- | --- |
+| 百炼 | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3.7-max` | `qwen3.7-text-embedding` |
 
-这些种子只在 `llm_provider_config` 表为空时写入。数据库初始化后，修改 `.env` 不会覆盖已经
-保存的 Provider；请在前端设置页编辑并测试连接。
+初始 API Key 为空，请在前端设置页录入。Kimi、DeepSeek、GLM、LM Studio 和其他 OpenAI
+兼容服务均通过“新增 Provider”添加，不再由环境变量初始化。
 
-系统不会自动拉取厂商模型列表。每个 Provider 保存一组当前模型配置：
+设置页会自动调用 Provider 的 OpenAI 兼容模型列表接口。后端先请求
+`{baseUrl}/models`；当 Base URL 没有版本后缀时，还会尝试 `{baseUrl}/v1/models`。
+拉取结果写入 `llm:provider:models:*`，TTL 为 5 分钟；设置页的“刷新列表”会跳过缓存重新请求。
+
+编辑已有 Provider 时使用数据库中加密保存的 API Key。新建 Provider 时，填写 Base URL 和
+API Key 后即可自动拉取。API Key 只发送给本系统后端，不会由浏览器直接请求厂商接口。
+
+并非所有 OpenAI 兼容 Provider 都实现模型列表接口。请求失败时，接口会明确返回警告并仅展示
+当前已配置模型；模型输入框始终允许手工填写。模型列表只能说明账号可见的模型 ID，不能替代
+权限、地区、余额和实际调用测试。
+
+每个 Provider 保存一组当前模型配置：
 
 - `model`：聊天模型
 - `embeddingModel`：向量模型，可为空
@@ -71,35 +81,29 @@ Provider 初始种子来自环境变量：
 `qwen3.7-text-embedding` 是有效的 Embedding 模型。不要把聊天模型名填到
 `embeddingModel`。
 
-当前默认值：
+当前固定模型默认值和可配置语音默认值：
 
 ```env
-AI_MODEL=qwen3.7-max
-AI_EMBEDDING_MODEL=qwen3.7-text-embedding
 APP_AI_EMBEDDING_DIMENSIONS=1024
-APP_VOICE_INTERVIEW_QWEN_ASR_MODEL=qwen3-asr-flash-realtime
-APP_VOICE_INTERVIEW_QWEN_TTS_MODEL=qwen3-tts-flash-realtime
+APP_VOICE_ASR_MODEL=qwen3-asr-flash-realtime
+APP_VOICE_TTS_MODEL=qwen3-tts-flash-realtime
 ```
 
 ## 语音配置
 
-ASR 和 TTS 可在设置页修改。默认值来自环境变量，运行时修改会写入
-`APP_VOICE_CONFIG_PATH` 指向的 JSON 文件。
-
-生产 Compose 没有为该文件单独挂载 volume，因此重建容器后会重新使用环境变量。需要长期
-保持自定义语音配置时，应把模型、音色、采样率等写入部署环境变量。
-
-该 JSON 文件包含语音 API Key 明文，不要提交、上传或使用宽松文件权限共享。
+ASR 和 TTS 可在设置页选择已配置的 Provider，并修改模型、WebSocket URL、音色和采样参数。
+配置保存在 PostgreSQL 的 `voice_model_config` 表中，API Key 复用 Provider 表中的 AES-GCM
+密文，不会写入本地 JSON 文件。环境变量只用于首次初始化默认值。
 
 常用变量：
 
 ```env
-APP_VOICE_INTERVIEW_QWEN_ASR_MODEL=qwen3-asr-flash-realtime
-APP_VOICE_INTERVIEW_QWEN_ASR_SAMPLE_RATE=16000
+APP_VOICE_ASR_MODEL=qwen3-asr-flash-realtime
+APP_VOICE_ASR_SAMPLE_RATE=16000
 APP_VOICE_ASR_SILENCE_MS=2000
-APP_VOICE_INTERVIEW_QWEN_TTS_MODEL=qwen3-tts-flash-realtime
-APP_VOICE_INTERVIEW_QWEN_TTS_VOICE=Cherry
-APP_VOICE_INTERVIEW_QWEN_TTS_SAMPLE_RATE=24000
+APP_VOICE_TTS_MODEL=qwen3-tts-flash-realtime
+APP_VOICE_TTS_VOICE=Cherry
+APP_VOICE_TTS_SAMPLE_RATE=24000
 ```
 
 ## PostgreSQL、Redis 和对象存储
@@ -149,6 +153,9 @@ VITE_API_PROXY_TARGET=http://localhost:8080
 VITE_API_BASE_URL=
 ```
 
+API 文档位于 `/docs`，OpenAPI 位于 `/openapi.json`，健康检查位于 `/health`。REST 成功响应
+直接返回业务 JSON；错误使用标准 HTTP 状态码和 `code + detail` JSON。
+
 ## RAG 和面试
 
 ```env
@@ -170,18 +177,9 @@ APP_INTERVIEW_TURN_RECENT_COUNT=6
 APP_VOICE_TURN_MIN_REMAINING_SECONDS=30
 ```
 
-`APP_INTERVIEW_FOLLOW_UP_COUNT` 表示普通文字和语音面试每道主问题允许的动态追问上限，
-不再在创建会话时预生成追问。知识库专项面试继续使用创建请求中的 `followUpCount`
-作为每道主问题的上限。
-
-自适应面试 contract 迁移会清空现有面试、答案、评估和语音会话数据。首次执行该迁移前
-必须完成备份，并仅在升级窗口设置：
-
-```env
-ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1
-```
-
-迁移完成后应恢复为 `0`。该开关只负责确认破坏性迁移，不会改变迁移内容。
+`APP_INTERVIEW_FOLLOW_UP_COUNT` 表示普通文字和语音面试每道主问题允许的动态追问上限。
+会话创建时只生成主问题，追问在回答提交后动态决定。知识库专项面试使用创建请求中的
+`followUpCount` 作为每道主问题的上限。
 
 Embedding 维度与 PostgreSQL `vector(1024)` 必须一致，不要只改环境变量而不修改 schema 和
 相关测试。

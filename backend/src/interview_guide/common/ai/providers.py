@@ -17,6 +17,7 @@ from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.models import (
     LlmGlobalSetting,
     LlmProviderConfig,
+    VoiceModelConfig,
 )
 from interview_guide.common.errors import BusinessException, ErrorCode
 
@@ -25,13 +26,18 @@ GLOBAL_SETTING_ID = 1
 PROVIDER_VERSION_KEY = "llm:provider:config:version"
 PROVIDER_CHANGED_CHANNEL = "llm:provider:config:changed"
 PROVIDER_BOOTSTRAP_LOCK = 0x49475F50524F5644
+VOICE_CONFIG_ID = 1
+DASHSCOPE_PROVIDER_ID = "dashscope"
+DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DASHSCOPE_CHAT_MODEL = "qwen3.7-max"
+DASHSCOPE_EMBEDDING_MODEL = "qwen3.7-text-embedding"
+DASHSCOPE_EMBEDDING_DIMENSIONS = 1024
 
 
 @dataclass(frozen=True)
 class ProviderSeed:
     provider_id: str
     base_url: str
-    api_key: str
     model: str
     embedding_model: str | None = None
     embedding_dimensions: int | None = None
@@ -39,43 +45,14 @@ class ProviderSeed:
     temperature: float | None = None
 
 
-def static_provider_seeds(settings: Settings) -> tuple[ProviderSeed, ...]:
+def static_provider_seeds() -> tuple[ProviderSeed, ...]:
     return (
         ProviderSeed(
-            "dashscope",
-            settings.ai_dashscope_base_url,
-            settings.ai_bailian_api_key.get_secret_value(),
-            settings.ai_model,
-            settings.ai_embedding_model,
-            1024,
-            True,
-        ),
-        ProviderSeed(
-            "lmstudio",
-            "http://localhost:1234",
-            settings.provider_lmstudio_api_key.get_secret_value(),
-            "qwen2.5-7b-instruct",
-        ),
-        ProviderSeed(
-            "kimi",
-            "https://api.moonshot.cn/v1",
-            settings.provider_kimi_api_key.get_secret_value(),
-            settings.provider_kimi_model,
-            temperature=1,
-        ),
-        ProviderSeed(
-            "deepseek",
-            "https://api.deepseek.com",
-            settings.provider_deepseek_api_key.get_secret_value(),
-            settings.provider_deepseek_model,
-        ),
-        ProviderSeed(
-            "glm",
-            "https://open.bigmodel.cn/api/coding/paas/v4",
-            settings.provider_glm_api_key.get_secret_value(),
-            settings.provider_glm_model,
-            "embedding-3",
-            1024,
+            DASHSCOPE_PROVIDER_ID,
+            DASHSCOPE_BASE_URL,
+            DASHSCOPE_CHAT_MODEL,
+            DASHSCOPE_EMBEDDING_MODEL,
+            DASHSCOPE_EMBEDDING_DIMENSIONS,
             True,
         ),
     )
@@ -99,8 +76,8 @@ class ProviderRepository:
             count = await session.scalar(select(func.count()).select_from(LlmProviderConfig))
             if count == 0:
                 timestamp = now()
-                for seed in static_provider_seeds(settings):
-                    encrypted = encryption.encrypt(seed.api_key)
+                for seed in static_provider_seeds():
+                    encrypted = encryption.encrypt("")
                     session.add(
                         LlmProviderConfig(
                             id=seed.provider_id,
@@ -128,11 +105,11 @@ class ProviderRepository:
                 timestamp = now()
                 chat_provider = await self._existing_provider_or_first(
                     session,
-                    settings.ai_default_provider,
+                    DASHSCOPE_PROVIDER_ID,
                 )
                 embedding_provider = await self._existing_embedding_provider(
                     session,
-                    settings.ai_default_embedding_provider,
+                    DASHSCOPE_PROVIDER_ID,
                     chat_provider,
                 )
                 session.add(
@@ -142,6 +119,38 @@ class ProviderRepository:
                         default_chat_provider_id=chat_provider,
                         default_embedding_provider_id=embedding_provider,
                         updated_at=timestamp,
+                    )
+                )
+            voice_config = await session.get(VoiceModelConfig, VOICE_CONFIG_ID)
+            if voice_config is None:
+                provider_id = await self._existing_provider_or_first(
+                    session,
+                    DASHSCOPE_PROVIDER_ID,
+                )
+                session.add(
+                    VoiceModelConfig(
+                        id=VOICE_CONFIG_ID,
+                        asr_provider_id=provider_id,
+                        asr_url=settings.voice_asr_url,
+                        asr_model=settings.voice_asr_model,
+                        asr_language=settings.voice_asr_language,
+                        asr_format=settings.voice_asr_format,
+                        asr_sample_rate=settings.voice_asr_sample_rate,
+                        asr_enable_turn_detection=(settings.voice_asr_enable_turn_detection),
+                        asr_turn_detection_type=(settings.voice_asr_turn_detection_type),
+                        asr_turn_detection_threshold=(settings.voice_asr_turn_detection_threshold),
+                        asr_silence_ms=settings.voice_asr_silence_ms,
+                        tts_provider_id=provider_id,
+                        tts_url=settings.voice_tts_url,
+                        tts_model=settings.voice_tts_model,
+                        tts_voice=settings.voice_tts_voice,
+                        tts_format=settings.voice_tts_format,
+                        tts_sample_rate=settings.voice_tts_sample_rate,
+                        tts_mode=settings.voice_tts_mode,
+                        tts_language_type=settings.voice_tts_language_type,
+                        tts_speech_rate=settings.voice_tts_speech_rate,
+                        tts_volume=settings.voice_tts_volume,
+                        updated_at=now(),
                     )
                 )
 
@@ -213,6 +222,27 @@ class ProviderRepository:
                     "读取 Provider 配置失败",
                 )
             return setting
+
+    async def voice_config(self) -> VoiceModelConfig:
+        async with self._sessions() as session:
+            config = await session.get(VoiceModelConfig, VOICE_CONFIG_ID)
+            if config is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "语音模型配置未初始化",
+                )
+            return config
+
+    async def update_voice_config(self, values: dict[str, object]) -> None:
+        async with self._sessions() as session, session.begin():
+            config = await session.get(VoiceModelConfig, VOICE_CONFIG_ID)
+            if config is None:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                    "语音模型配置未初始化",
+                )
+            for name, value in values.items():
+                setattr(config, name, value)
 
     async def update_model(self, provider_id: str, model: str) -> None:
         async with self._sessions() as session, session.begin():
@@ -311,6 +341,21 @@ class ProviderRepository:
                     ErrorCode.PROVIDER_DEFAULT_CANNOT_DELETE,
                     f"默认 Provider '{provider_id}' 不可删除，请先切换默认 Provider",
                 )
+            voice_provider_ids = await session.execute(
+                select(
+                    VoiceModelConfig.asr_provider_id,
+                    VoiceModelConfig.tts_provider_id,
+                ).where(VoiceModelConfig.id == VOICE_CONFIG_ID)
+            )
+            voice_provider = voice_provider_ids.one_or_none()
+            if voice_provider is not None and provider_id in {
+                voice_provider.asr_provider_id,
+                voice_provider.tts_provider_id,
+            }:
+                raise BusinessException(
+                    ErrorCode.PROVIDER_DEFAULT_CANNOT_DELETE,
+                    f"语音服务正在使用 Provider '{provider_id}'，请先切换语音 Provider",
+                )
             provider = await session.get(LlmProviderConfig, provider_id)
             if provider is None:
                 raise BusinessException(
@@ -321,6 +366,7 @@ class ProviderRepository:
 
     async def clear_for_tests(self) -> None:
         async with self._sessions() as session, session.begin():
+            await session.execute(delete(VoiceModelConfig))
             await session.execute(delete(LlmGlobalSetting))
             await session.execute(delete(LlmProviderConfig))
 
@@ -380,8 +426,8 @@ class LlmProviderRegistry:
         self._redis = redis
         self._settings = settings
         self._providers: dict[str, ProviderConfig] = {}
-        self._default_chat = settings.ai_default_provider
-        self._default_embedding = settings.ai_default_embedding_provider
+        self._default_chat = DASHSCOPE_PROVIDER_ID
+        self._default_embedding = DASHSCOPE_PROVIDER_ID
         self._version = -1
         self._lock = asyncio.Lock()
         self._listener_task: asyncio.Task[None] | None = None
@@ -440,6 +486,10 @@ class LlmProviderRegistry:
             )
         return provider
 
+    async def get_voice(self, provider_id: str) -> ProviderConfig:
+        await self._refresh_if_stale()
+        return self._get(provider_id)
+
     async def publish_change(self) -> int:
         version = int(await self._redis.incr(PROVIDER_VERSION_KEY))
         await self._redis.publish(PROVIDER_CHANGED_CHANNEL, str(version))
@@ -449,12 +499,18 @@ class LlmProviderRegistry:
 
     def _get(self, provider_id: str) -> ProviderConfig:
         try:
-            return self._providers[provider_id]
+            provider = self._providers[provider_id]
         except KeyError as error:
             raise BusinessException(
                 ErrorCode.PROVIDER_NOT_FOUND,
                 f"Unknown LLM provider: {provider_id}",
             ) from error
+        if not provider.api_key.strip():
+            raise BusinessException(
+                ErrorCode.PROVIDER_CONFIG_READ_FAILED,
+                f"Provider '{provider_id}' 未配置 API Key",
+            )
+        return provider
 
     async def _refresh_if_stale(self) -> None:
         version = await self._read_version()

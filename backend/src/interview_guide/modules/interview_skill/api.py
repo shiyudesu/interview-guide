@@ -55,8 +55,7 @@ async def get_skill(skill_id: str) -> Response:
 async def parse_jd(request: Request, payload: ParseJdRequest) -> Response:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     await infrastructure.rate_limiter.check(
-        class_name="InterviewSkillController",
-        method_name="parseJd",
+        scope="interview-skill:parse-jd",
         rules=(RateLimitRule(RateLimitDimension.IP, 5),),
         client_ip=client_ip(request),
         now_ms=time.time_ns() // 1_000_000,

@@ -27,7 +27,7 @@ from interview_guide.modules.knowledge_base.question_service import (
 FIXED_NOW = datetime(2026, 8, 17, 8, 0)
 
 
-def test_requests_keep_compatibility_defaults_and_validation_messages() -> None:
+def test_requests_apply_defaults_and_validation_messages() -> None:
     generation = GenerateKnowledgeBaseQuestionsRequest(
         questionCount=2,
         categoryLimit=3,
@@ -58,10 +58,9 @@ def test_requests_keep_compatibility_defaults_and_validation_messages() -> None:
         )
 
 
-def test_follow_up_parser_supports_legacy_strings_only_for_crud_response() -> None:
-    value = json.dumps(["历史追问"])
-    assert [item.question for item in parse_follow_ups(value)] == ["历史追问"]
-    assert parse_follow_ups(value, allow_legacy_strings=False) == []
+def test_follow_up_parser_rejects_non_structured_items() -> None:
+    value = json.dumps(["非结构化追问"])
+    assert parse_follow_ups(value) == []
 
 
 def test_explicit_fake_generation_normalizes_duplicates_and_strict_followup_limit() -> None:

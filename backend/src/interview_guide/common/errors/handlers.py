@@ -9,10 +9,9 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.responses import Response
 
-from interview_guide.common.api.responses import result_response
+from interview_guide.common.api.responses import problem_response
 from interview_guide.common.errors.codes import ErrorCode
 from interview_guide.common.errors.exceptions import BusinessException
-from interview_guide.common.result import Result
 
 logger = logging.getLogger(__name__)
 MISSING_FIELD_MESSAGES = {
@@ -68,7 +67,7 @@ def install_exception_handlers(app: FastAPI) -> None:
             exception.code,
             exception.message,
         )
-        return result_response(Result.error(exception.code, exception.message))
+        return problem_response(exception.code, exception.message)
 
     @app.exception_handler(RequestValidationError)
     async def handle_validation_exception(
@@ -77,11 +76,11 @@ def install_exception_handlers(app: FastAPI) -> None:
     ) -> Response:
         del request
         if any(error.get("type") == "json_invalid" for error in exception.errors()):
-            logger.exception("malformed JSON request", exc_info=exception)
-            return result_response(Result.error(ErrorCode.INTERNAL_ERROR, "系统繁忙，请稍后重试"))
+            logger.warning("malformed JSON request")
+            return problem_response(400, "请求体不是有效的 JSON", 400)
         message = validation_message(exception.errors())
         logger.warning("request validation failed message=%s", message)
-        return result_response(Result.error(ErrorCode.BAD_REQUEST, message))
+        return problem_response(ErrorCode.BAD_REQUEST.code, message, 422)
 
     @app.exception_handler(HTTPException)
     async def handle_http_exception(
@@ -89,17 +88,17 @@ def install_exception_handlers(app: FastAPI) -> None:
         exception: HTTPException,
     ) -> Response:
         if exception.status_code == 404:
-            return result_response(Result.error(ErrorCode.NOT_FOUND, "API 接口不存在"))
+            return problem_response(ErrorCode.NOT_FOUND.code, "API 接口不存在", 404)
         if exception.status_code == 405:
-            return result_response(
-                Result.error(
-                    ErrorCode.METHOD_NOT_ALLOWED,
-                    f"请求方法不支持: {request.method}",
-                )
+            return problem_response(
+                ErrorCode.METHOD_NOT_ALLOWED.code,
+                f"请求方法不支持: {request.method}",
+                405,
             )
-        return result_response(
-            Result.error(exception.status_code, str(exception.detail)),
-            status_code=exception.status_code,
+        return problem_response(
+            exception.status_code,
+            str(exception.detail),
+            exception.status_code,
         )
 
     @app.exception_handler(ValueError)
@@ -109,7 +108,7 @@ def install_exception_handlers(app: FastAPI) -> None:
     ) -> Response:
         del request
         logger.warning("illegal argument message=%s", exception)
-        return result_response(Result.error(ErrorCode.BAD_REQUEST, str(exception)))
+        return problem_response(ErrorCode.BAD_REQUEST.code, str(exception), 400)
 
     @app.exception_handler(Exception)
     async def handle_unexpected_exception(
@@ -118,4 +117,4 @@ def install_exception_handlers(app: FastAPI) -> None:
     ) -> Response:
         del request
         logger.exception("unexpected application exception", exc_info=exception)
-        return result_response(Result.error(ErrorCode.INTERNAL_ERROR, "系统繁忙，请稍后重试"))
+        return problem_response(ErrorCode.INTERNAL_ERROR.code, "服务器内部错误", 500)

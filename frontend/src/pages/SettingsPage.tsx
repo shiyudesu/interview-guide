@@ -9,75 +9,19 @@ import { llmProviderApi } from '../api/llmProvider';
 import ConfirmDialog from '../components/ConfirmDialog';
 import type {
   ProviderItem, CreateProviderRequest, UpdateProviderRequest,
-  ProviderTestResult, AsrConfig, TtsConfig, AsrConfigRequest, TtsConfigRequest,
+  ProviderTestResult, ProviderModelList, AsrConfig, TtsConfig, AsrConfigRequest, TtsConfigRequest,
 } from '../types/llmProvider';
 
-// Provider 预设：已知 Provider 的 Base URL、推荐模型和向量模型
+// Provider 预设只负责连接默认值；模型列表由 Provider 接口实时发现。
 const PROVIDER_PRESETS: Record<string, {
   baseUrl: string;
-  models: { value: string; label: string }[];
-  embeddingModels?: { value: string; label: string }[];
   embeddingDimensions?: number;
   supportsEmbedding: boolean;
 }> = {
   dashscope: {
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-    models: [
-      { value: 'qwen3.7-max', label: 'Qwen3.7 Max — 当前旗舰' },
-      { value: 'qwen3.6-flash', label: 'Qwen3.6 Flash — 最新旗舰' },
-      { value: 'qwen3.5-plus', label: 'Qwen3.5 Plus — 高性能' },
-      { value: 'qwen3.5-flash', label: 'Qwen3.5 Flash — 性价比' },
-      { value: 'qwen3-max', label: 'Qwen3 Max — 旗舰' },
-      { value: 'qwen-max', label: 'Qwen Max — 稳定版' },
-      { value: 'qwen-plus', label: 'Qwen Plus — 均衡' },
-      { value: 'qwen-flash', label: 'Qwen Flash — 经济' },
-      { value: 'qwq-32b', label: 'QwQ-32B — 推理专用' },
-    ],
-    embeddingModels: [
-      { value: 'qwen3.7-text-embedding', label: 'Qwen3.7 Text Embedding — 最新' },
-      { value: 'text-embedding-v3', label: 'text-embedding-v3 — 推荐' },
-    ],
     embeddingDimensions: 1024,
     supportsEmbedding: true,
-  },
-  deepseek: {
-    baseUrl: 'https://api.deepseek.com',
-    models: [
-      { value: 'deepseek-v4-flash', label: 'DeepSeek V4 Flash — 最新·快速' },
-      { value: 'deepseek-v4-pro', label: 'DeepSeek V4 Pro — 最强推理' },
-      { value: 'deepseek-chat', label: 'DeepSeek V3.2 — 旧版对话（即将弃用）' },
-      { value: 'deepseek-reasoner', label: 'DeepSeek R1 — 旧版推理（即将弃用）' },
-    ],
-    supportsEmbedding: false,
-  },
-  glm: {
-    baseUrl: 'https://open.bigmodel.cn/api/coding/paas/v4',
-    models: [
-      { value: 'glm-5.1', label: 'GLM-5.1 — 最新旗舰' },
-      { value: 'glm-5', label: 'GLM-5 — 旗舰' },
-      { value: 'glm-4.7', label: 'GLM-4.7 — Coding 强' },
-      { value: 'glm-4.7-flash', label: 'GLM-4.7 Flash — 免费' },
-      { value: 'glm-4.6', label: 'GLM-4.6 — 200K 上下文' },
-      { value: 'glm-4-plus', label: 'GLM-4 Plus — 高性能' },
-      { value: 'glm-4-air-250414', label: 'GLM-4 Air — 高性价比' },
-      { value: 'glm-4-flash-250414', label: 'GLM-4 Flash — 免费' },
-    ],
-    embeddingModels: [
-      { value: 'embedding-3', label: 'embedding-3 — 推荐' },
-    ],
-    embeddingDimensions: 1024,
-    supportsEmbedding: true,
-  },
-  kimi: {
-    baseUrl: 'https://api.moonshot.cn/v1',
-    models: [
-      { value: 'kimi-k2.6', label: 'Kimi K2.6 — 最新最智能' },
-      { value: 'kimi-k2.5', label: 'Kimi K2.5 — 多模态' },
-      { value: 'kimi-k2', label: 'Kimi K2 — MoE 基座' },
-      { value: 'kimi-k2-thinking', label: 'Kimi K2 Thinking — 深度推理' },
-      { value: 'kimi-latest', label: 'kimi-latest — 自动最新' },
-    ],
-    supportsEmbedding: false,
   },
 };
 
@@ -162,12 +106,10 @@ export default function SettingsPage() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showEmbeddingDropdown, setShowEmbeddingDropdown] = useState(false);
-
-  // 当前表单 Provider ID 匹配的预设
-  const currentPreset = useMemo(
-    () => PROVIDER_PRESETS[formId.toLowerCase()],
-    [formId],
-  );
+  const [availableModels, setAvailableModels] = useState<ProviderModelList | null>(null);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [modelDiscoveryError, setModelDiscoveryError] = useState<string | null>(null);
+  const apiKeyRequired = !editingProvider?.hasApiKey;
 
   // Test state
   const [testingId, setTestingId] = useState<string | null>(null);
@@ -250,6 +192,8 @@ export default function SettingsPage() {
     setFormEmbeddingDimensions('1024');
     setFormSupportsEmbedding(false);
     setShowApiKey(false);
+    setAvailableModels(null);
+    setModelDiscoveryError(null);
     setShowModal(true);
   };
 
@@ -264,6 +208,8 @@ export default function SettingsPage() {
     setFormSupportsEmbedding(provider.supportsEmbedding);
     setFormTemperature(provider.temperature != null ? String(provider.temperature) : '');
     setShowApiKey(false);
+    setAvailableModels(null);
+    setModelDiscoveryError(null);
     setShowModal(true);
   };
 
@@ -271,6 +217,54 @@ export default function SettingsPage() {
     setShowModal(false);
     setEditingProvider(null);
   };
+
+  const loadAvailableModels = useCallback(async (refresh = false) => {
+    const baseUrl = formBaseUrl.trim();
+    const apiKey = formApiKey.trim();
+    if (!baseUrl || (!editingProvider && !apiKey)) {
+      return;
+    }
+    setLoadingModels(true);
+    setModelDiscoveryError(null);
+    try {
+      const result = await llmProviderApi.discoverModels({
+        providerId: editingProvider?.id,
+        baseUrl,
+        apiKey: apiKey || undefined,
+        refresh,
+      });
+      setAvailableModels(result);
+    } catch (err) {
+      setAvailableModels(null);
+      setModelDiscoveryError(err instanceof Error ? err.message : '模型列表拉取失败');
+    } finally {
+      setLoadingModels(false);
+    }
+  }, [editingProvider, formApiKey, formBaseUrl]);
+
+  useEffect(() => {
+    if (!showModal || !editingProvider) {
+      return;
+    }
+    let active = true;
+    setLoadingModels(true);
+    setModelDiscoveryError(null);
+    void llmProviderApi.discoverModels({ providerId: editingProvider.id })
+      .then((result) => {
+        if (active) setAvailableModels(result);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        setAvailableModels(null);
+        setModelDiscoveryError(err instanceof Error ? err.message : '模型列表拉取失败');
+      })
+      .finally(() => {
+        if (active) setLoadingModels(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [editingProvider, showModal]);
 
   // --- CRUD handlers ---
   const handleCreate = async () => {
@@ -318,6 +312,10 @@ export default function SettingsPage() {
 
   const handleUpdate = async () => {
     if (!editingProvider) return;
+    if (apiKeyRequired && !formApiKey.trim()) {
+      showToast('请填写 API Key', 'error');
+      return;
+    }
     if (!formBaseUrl.trim() || !formModel.trim()) {
       showToast('请填写必填字段', 'error');
       return;
@@ -468,6 +466,7 @@ export default function SettingsPage() {
   const openAsrModal = () => {
     if (!asrConfig) return;
     setAsrForm({
+      providerId: asrConfig.providerId,
       url: asrConfig.url,
       model: asrConfig.model,
       language: asrConfig.language,
@@ -484,6 +483,8 @@ export default function SettingsPage() {
   const openTtsModal = () => {
     if (!ttsConfig) return;
     setTtsForm({
+      providerId: ttsConfig.providerId,
+      url: ttsConfig.url,
       model: ttsConfig.model,
       voice: ttsConfig.voice,
       format: ttsConfig.format,
@@ -764,6 +765,7 @@ export default function SettingsPage() {
                       </div>
 
                       <dl className={DETAILS_CLASS}>
+                        <ConfigRow label="Provider" value={asrConfig.providerId} emphasis />
                         <ConfigRow label="WebSocket URL" value={asrConfig.url} title={asrConfig.url} emphasis />
                         <ConfigRow label="识别模型" value={asrConfig.model} title={asrConfig.model} emphasis />
                         <ConfigRow label="识别语言" value={asrConfig.language} />
@@ -840,6 +842,8 @@ export default function SettingsPage() {
                       </div>
 
                       <dl className={DETAILS_CLASS}>
+                        <ConfigRow label="Provider" value={ttsConfig.providerId} emphasis />
+                        <ConfigRow label="WebSocket URL" value={ttsConfig.url} title={ttsConfig.url} emphasis />
                         <ConfigRow label="合成模型" value={ttsConfig.model} title={ttsConfig.model} emphasis />
                         <ConfigRow label="音色" value={ttsConfig.voice} title={ttsConfig.voice} emphasis />
                         <ConfigRow label="采样率" value={`${ttsConfig.sampleRate}Hz`} />
@@ -905,13 +909,15 @@ export default function SettingsPage() {
                       onChange={(e) => {
                         const newId = e.target.value;
                         setFormId(newId);
+                        setAvailableModels(null);
+                        setModelDiscoveryError(null);
                         // 新建时自动填充已知 Provider 的 Base URL
                         if (!editingProvider) {
                           const preset = PROVIDER_PRESETS[newId.toLowerCase()];
                           if (preset) {
                             setFormBaseUrl(preset.baseUrl);
                             setFormSupportsEmbedding(preset.supportsEmbedding);
-                            setFormEmbeddingModel(preset.embeddingModels?.[0]?.value ?? '');
+                            setFormEmbeddingModel('');
                             setFormEmbeddingDimensions(String(preset.embeddingDimensions ?? 1024));
                           }
                         }
@@ -934,7 +940,12 @@ export default function SettingsPage() {
                     <input
                       type="text"
                       value={formBaseUrl}
-                      onChange={(e) => setFormBaseUrl(e.target.value)}
+                      onChange={(e) => {
+                        setFormBaseUrl(e.target.value);
+                        setAvailableModels(null);
+                        setModelDiscoveryError(null);
+                      }}
+                      onBlur={() => void loadAvailableModels()}
                       placeholder="例如: https://api.openai.com/v1"
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600
                         bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white
@@ -947,17 +958,22 @@ export default function SettingsPage() {
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       API Key{' '}
-                      {editingProvider && (
+                      <span className="text-red-500">*</span>{' '}
+                      {editingProvider?.hasApiKey && (
                         <span className="text-slate-400 font-normal">(留空则不修改)</span>
                       )}
-                      {!editingProvider && <span className="text-red-500">*</span>}
                     </label>
                     <div className="relative">
                       <input
                         type={showApiKey ? 'text' : 'password'}
                         value={formApiKey}
-                        onChange={(e) => setFormApiKey(e.target.value)}
-                        placeholder={editingProvider ? '留空则保持原值' : '输入 API Key'}
+                        onChange={(e) => {
+                          setFormApiKey(e.target.value);
+                          setAvailableModels(null);
+                          setModelDiscoveryError(null);
+                        }}
+                        onBlur={() => void loadAvailableModels()}
+                        placeholder={editingProvider?.hasApiKey ? '留空则保持原值' : '输入 API Key'}
                         className="w-full px-4 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-600
                           bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white
                           placeholder:text-slate-400 focus:outline-none focus:ring-2
@@ -976,9 +992,22 @@ export default function SettingsPage() {
 
                   {/* Chat Model */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                      聊天模型 <span className="text-red-500">*</span>
-                    </label>
+                    <div className="mb-1.5 flex items-center justify-between gap-3">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        聊天模型 <span className="text-red-500">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => void loadAvailableModels(true)}
+                        disabled={loadingModels || !formBaseUrl.trim() || (!editingProvider && !formApiKey.trim())}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-primary-600
+                          hover:text-primary-700 disabled:cursor-not-allowed disabled:opacity-40
+                          dark:text-primary-400 dark:hover:text-primary-300"
+                      >
+                        <RefreshCw className={`h-3.5 w-3.5 ${loadingModels ? 'animate-spin' : ''}`} />
+                        刷新列表
+                      </button>
+                    </div>
                     <div className="relative">
                       <input
                         type="text"
@@ -987,15 +1016,18 @@ export default function SettingsPage() {
                           setFormModel(e.target.value);
                           setShowModelDropdown(false);
                         }}
-                        onFocus={() => currentPreset && setShowModelDropdown(true)}
+                        onFocus={() => {
+                          setShowModelDropdown(true);
+                          if (!availableModels && !loadingModels) void loadAvailableModels();
+                        }}
                         onBlur={() => setTimeout(() => setShowModelDropdown(false), 150)}
-                        placeholder={currentPreset ? '从下拉列表选择或输入自定义聊天模型名' : '例如: qwen3.5-flash, deepseek-v4-flash, glm-5'}
+                        placeholder="从 Provider 拉取列表，或输入自定义聊天模型名"
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600
                           bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white
                           placeholder:text-slate-400 focus:outline-none focus:ring-2
                           focus:ring-primary-500/50 focus:border-primary-400 transition-shadow"
                       />
-                      {currentPreset && (
+                      {!!availableModels?.chatModels.length && (
                         <button
                           type="button"
                           onClick={() => setShowModelDropdown(!showModelDropdown)}
@@ -1005,31 +1037,49 @@ export default function SettingsPage() {
                           <ChevronDown className="w-4 h-4" />
                         </button>
                       )}
-                      {showModelDropdown && currentPreset && (
+                      {showModelDropdown && !!availableModels?.chatModels.length && (
                         <div className="absolute z-10 mt-1 w-full bg-white dark:bg-slate-700
                           border border-slate-200 dark:border-slate-600 rounded-xl shadow-lg
                           max-h-60 overflow-auto">
-                          {currentPreset.models.map((m) => (
+                          {availableModels.chatModels.map((model) => (
                             <button
-                              key={m.value}
+                              key={model}
                               type="button"
                               onClick={() => {
-                                setFormModel(m.value);
+                                setFormModel(model);
                                 setShowModelDropdown(false);
                               }}
                               className={`w-full px-4 py-2.5 text-left text-sm hover:bg-primary-50
                                 dark:hover:bg-slate-600 transition-colors flex justify-between items-center
-                                ${formModel === m.value
+                                ${formModel === model
                                   ? 'text-primary-600 dark:text-primary-400 font-medium bg-primary-50 dark:bg-slate-600'
                                   : 'text-slate-700 dark:text-slate-200'}`}
                             >
-                              <span className="font-mono">{m.value}</span>
-                              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2 whitespace-nowrap">{m.label}</span>
+                              <span className="font-mono">{model}</span>
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
+                    {loadingModels && (
+                      <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">正在从 Provider 拉取模型列表…</p>
+                    )}
+                    {!loadingModels && modelDiscoveryError && (
+                      <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{modelDiscoveryError}</p>
+                    )}
+                    {!loadingModels && availableModels && (
+                      <p className={`mt-1.5 text-xs ${availableModels.source === 'remote'
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-amber-600 dark:text-amber-400'}`}
+                      >
+                        {availableModels.source === 'remote'
+                          ? `已获取 ${availableModels.chatModels.length} 个聊天模型，列表缓存 5 分钟`
+                          : '当前仅显示已配置模型'}
+                      </p>
+                    )}
+                    {!loadingModels && availableModels?.warning && (
+                      <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">{availableModels.warning}</p>
+                    )}
                   </div>
 
                   {/* Embedding Model */}
@@ -1062,11 +1112,15 @@ export default function SettingsPage() {
                           setFormEmbeddingModel(e.target.value);
                           setShowEmbeddingDropdown(false);
                         }}
-                        onFocus={() => formSupportsEmbedding && currentPreset?.embeddingModels && setShowEmbeddingDropdown(true)}
+                        onFocus={() => {
+                          if (!formSupportsEmbedding) return;
+                          setShowEmbeddingDropdown(true);
+                          if (!availableModels && !loadingModels) void loadAvailableModels();
+                        }}
                         onBlur={() => setTimeout(() => setShowEmbeddingDropdown(false), 150)}
                         disabled={!formSupportsEmbedding}
                         placeholder={formSupportsEmbedding
-                          ? (currentPreset?.embeddingModels ? '从下拉列表选择或输入自定义向量模型名' : '例如: text-embedding-v3, embedding-3')
+                          ? '从 Provider 拉取列表，或输入自定义向量模型名'
                           : 'DeepSeek / Kimi 等 Provider 通常不支持 Embedding'}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600
                           bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white
@@ -1074,7 +1128,7 @@ export default function SettingsPage() {
                           focus:ring-primary-500/50 focus:border-primary-400 transition-shadow
                           disabled:cursor-not-allowed disabled:opacity-60"
                       />
-                      {formSupportsEmbedding && currentPreset?.embeddingModels && (
+                      {formSupportsEmbedding && !!availableModels?.embeddingModels.length && (
                         <button
                           type="button"
                           onClick={() => setShowEmbeddingDropdown(!showEmbeddingDropdown)}
@@ -1084,26 +1138,25 @@ export default function SettingsPage() {
                           <ChevronDown className="w-4 h-4" />
                         </button>
                       )}
-                      {formSupportsEmbedding && showEmbeddingDropdown && currentPreset?.embeddingModels && (
+                      {formSupportsEmbedding && showEmbeddingDropdown && !!availableModels?.embeddingModels.length && (
                         <div className="absolute z-10 mt-1 w-full bg-white dark:bg-slate-700
                           border border-slate-200 dark:border-slate-600 rounded-xl shadow-lg
                           max-h-60 overflow-auto">
-                          {currentPreset.embeddingModels.map((m) => (
+                          {availableModels.embeddingModels.map((model) => (
                             <button
-                              key={m.value}
+                              key={model}
                               type="button"
                               onClick={() => {
-                                setFormEmbeddingModel(m.value);
+                                setFormEmbeddingModel(model);
                                 setShowEmbeddingDropdown(false);
                               }}
                               className={`w-full px-4 py-2.5 text-left text-sm hover:bg-primary-50
                                 dark:hover:bg-slate-600 transition-colors flex justify-between items-center
-                                ${formEmbeddingModel === m.value
+                                ${formEmbeddingModel === model
                                   ? 'text-primary-600 dark:text-primary-400 font-medium bg-primary-50 dark:bg-slate-600'
                                   : 'text-slate-700 dark:text-slate-200'}`}
                             >
-                              <span className="font-mono">{m.value}</span>
-                              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2 whitespace-nowrap">{m.label}</span>
+                              <span className="font-mono">{model}</span>
                             </button>
                           ))}
                         </div>
@@ -1216,6 +1269,13 @@ export default function SettingsPage() {
                   <div className="space-y-4">
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">连接配置</p>
                     <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Provider</label>
+                      <select value={asrForm.providerId || ''} onChange={(e) => setAsrForm(f => ({ ...f, providerId: e.target.value }))}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow">
+                        {providers.map(provider => <option key={provider.id} value={provider.id}>{provider.id}</option>)}
+                      </select>
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">WebSocket URL</label>
                       <input type="text" value={asrForm.url || ''} onChange={(e) => setAsrForm(f => ({ ...f, url: e.target.value }))}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow" />
@@ -1285,6 +1345,18 @@ export default function SettingsPage() {
                 ) : (
                   <div className="space-y-4">
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">连接配置</p>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Provider</label>
+                      <select value={ttsForm.providerId || ''} onChange={(e) => setTtsForm(f => ({ ...f, providerId: e.target.value }))}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow">
+                        {providers.map(provider => <option key={provider.id} value={provider.id}>{provider.id}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">WebSocket URL</label>
+                      <input type="text" value={ttsForm.url || ''} onChange={(e) => setTtsForm(f => ({ ...f, url: e.target.value }))}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow" />
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Model</label>

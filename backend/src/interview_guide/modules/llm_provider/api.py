@@ -12,6 +12,7 @@ from interview_guide.modules.llm_provider.models import (
     AsrConfigRequest,
     CreateProviderRequest,
     DefaultProviderRequest,
+    ModelDiscoveryRequest,
     TtsConfigRequest,
     UpdateProviderRequest,
 )
@@ -27,6 +28,7 @@ async def provider_service(request: Request) -> LlmProviderService:
         infrastructure.provider_registry,
         infrastructure.api_key_encryption,
         request.app.state.settings,
+        infrastructure.redis.client,
     )
 
 
@@ -82,13 +84,21 @@ async def reload_providers(service: ServiceDependency) -> Response:
     return result_response(Result.ok())
 
 
+@router.post("/models/discover")
+async def discover_provider_models(
+    payload: ModelDiscoveryRequest,
+    service: ServiceDependency,
+) -> Response:
+    return result_response(Result.ok(await service.discover_models(payload)))
+
+
 @router.post("")
 async def create_provider(
     payload: CreateProviderRequest,
     service: ServiceDependency,
 ) -> Response:
     await service.create(payload)
-    return result_response(Result.ok())
+    return result_response(Result.ok(), status_code=201)
 
 
 @router.get("/default-provider")

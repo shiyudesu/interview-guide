@@ -447,7 +447,7 @@ class StuckAsrSession(VoiceAsrSession):
         return None
 
 
-def test_protocol_helpers_match_compatibility_shapes() -> None:
+def test_protocol_helpers_use_expected_shapes() -> None:
     assert join_segments("第一段", "第二段") == "第一段，第二段"
     assert join_segments("第一段。", "第二段") == "第一段。 第二段"
     assert optimize_for_voice("", 120) == "请继续。"

@@ -79,7 +79,10 @@ async def create_session(
     payload: CreateSessionRequest,
     service: ServiceDependency,
 ) -> Response:
-    return result_response(Result.ok(await service.create_session(payload)))
+    return result_response(
+        Result.ok(await service.create_session(payload)),
+        status_code=201,
+    )
 
 
 @router.get("/sessions")

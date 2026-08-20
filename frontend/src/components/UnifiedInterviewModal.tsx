@@ -7,10 +7,6 @@ import {
 import { useInterviewConfig, CUSTOM_SKILL_ID, DIFFICULTY_OPTIONS, type InterviewMode, type Difficulty } from '../hooks/useInterviewConfig';
 import { getSkillIcon } from '../utils/skillIcons';
 
-// Re-export for backward compatibility
-export type { InterviewMode, Difficulty };
-export { DIFFICULTY_OPTIONS };
-
 export interface UnifiedInterviewConfig {
   mode: InterviewMode;
   skillId: string;

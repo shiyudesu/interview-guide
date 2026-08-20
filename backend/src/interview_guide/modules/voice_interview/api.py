@@ -8,6 +8,7 @@ from starlette.responses import Response
 
 from interview_guide.common.api.responses import result_response
 from interview_guide.common.config.settings import Settings
+from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.result import Result
@@ -56,14 +57,20 @@ async def create_session(
     payload: CreateVoiceSessionRequest,
     service: Service,
 ) -> Response:
-    return result_response(Result.ok(await service.create_session(payload)))
+    return result_response(
+        Result.ok(await service.create_session(payload)),
+        status_code=201,
+    )
 
 
 @router.get("/sessions/{session_id}")
 async def get_session(session_id: int, service: Service) -> Response:
     session = await service.get_session_response(session_id)
     if session is None:
-        return result_response(Result.error(500, f"Session not found: {session_id}"))
+        raise BusinessException(
+            ErrorCode.VOICE_SESSION_NOT_FOUND,
+            f"Session not found: {session_id}",
+        )
     return result_response(Result.ok(session))
 
 

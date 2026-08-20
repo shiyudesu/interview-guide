@@ -71,8 +71,6 @@ jobs:
         run: bash tools/scripts/check-manifests.sh
       - name: Validate production Compose
         if: needs.changes.outputs.deployment == 'true'
-        env:
-          APP_AI_CONFIG_ENCRYPTION_KEY: ci-compose-encryption-key
         run: docker compose config --quiet
 
   backend:
@@ -194,9 +192,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      AI_BAILIAN_API_KEY: ci-placeholder
-      APP_AI_CONFIG_ENCRYPTION_KEY: ci-compose-encryption-key
-      ALLOW_DESTRUCTIVE_INTERVIEW_RESET: "1"
       CORS_ALLOWED_ORIGINS: http://localhost,http://127.0.0.1:4173
       INTEGRATION_DATABASE: interview_guide_integration
       TEST_S3_BUCKET: interview-guide-integration-${{ github.run_id }}
@@ -241,7 +236,6 @@ jobs:
           POSTGRES_DB="$INTEGRATION_DATABASE" \
           POSTGRES_USER=postgres \
           POSTGRES_PASSWORD=password \
-          ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1 \
           uv run --frozen interview-guide-migrate
       - name: Run infrastructure integration tests
         working-directory: backend
@@ -259,6 +253,11 @@ jobs:
           REAL_BACKEND_URL: http://127.0.0.1:8080
           RUN_REAL_BACKEND_E2E: "true"
         run: pnpm run test:e2e --grep @real-backend
+      - name: Verify frontend proxy after API recreation
+        run: |
+          docker compose up -d --force-recreate --no-deps --wait app
+          curl --fail --retry 10 --retry-delay 1 http://127.0.0.1/health
+          test "$(docker inspect -f '{{.State.Health.Status}}' interview-frontend)" = healthy
       - name: Capture Compose logs
         if: failure()
         run: |

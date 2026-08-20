@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import builtins
+import hashlib
+import json
+import logging
 import re
 
 import httpx
+from redis.asyncio import Redis
+from redis.exceptions import RedisError
 
 from interview_guide.common.ai.encryption import ApiKeyEncryption
 from interview_guide.common.ai.providers import (
@@ -16,14 +22,26 @@ from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.llm_provider.models import (
     CreateProviderRequest,
     DefaultProviderRequest,
+    ModelDiscoveryRequest,
+    ProviderModelList,
     ProviderResponse,
     ProviderTestResult,
     UpdateProviderRequest,
 )
 
+logger = logging.getLogger(__name__)
+MODEL_LIST_CACHE_PREFIX = "llm:provider:models:"
+MODEL_LIST_CACHE_TTL_SECONDS = 300
+MODEL_LIST_LIMIT = 1000
+NON_CHAT_MODEL_KIND = re.compile(
+    r"(?:^|[-_/])(asr|tts|speech|audio|image|video|ocr|rerank|moderation)(?:[-_/]|$)"
+)
+
 
 def mask_api_key(api_key: str | None) -> str:
-    if api_key is None or len(api_key) <= 6:
+    if api_key is None or not api_key.strip():
+        return "未配置"
+    if len(api_key) <= 6:
         return "***"
     return f"{api_key[:3]}***{api_key[-3:]}"
 
@@ -42,11 +60,13 @@ class LlmProviderService:
         registry: LlmProviderRegistry,
         encryption: ApiKeyEncryption,
         settings: Settings,
+        redis: Redis,
     ) -> None:
         self._repository = repository
         self._registry = registry
         self._encryption = encryption
         self._settings = settings
+        self._redis = redis
 
     async def list(self) -> list[ProviderResponse]:
         setting, providers = await self._repository.provider_listing()
@@ -200,6 +220,12 @@ class LlmProviderService:
             provider.api_key_nonce,
             provider.api_key_ciphertext,
         )
+        if not api_key.strip():
+            return ProviderTestResult(
+                success=False,
+                message="连接失败: Provider 未配置 API Key",
+                model=provider.model,
+            )
         candidates = connectivity_test_urls(provider.base_url)
         last_failure = "Unknown error"
         async with httpx.AsyncClient(
@@ -239,6 +265,110 @@ class LlmProviderService:
             model=provider.model,
         )
 
+    async def discover_models(
+        self,
+        request: ModelDiscoveryRequest,
+    ) -> ProviderModelList:
+        provider = None
+        provider_id = self._trim(request.provider_id)
+        if provider_id is not None:
+            provider = await self._repository.get_provider(provider_id)
+
+        base_url = self._trim(request.base_url)
+        if base_url is None and provider is not None:
+            base_url = provider.base_url
+        if base_url is None:
+            raise BusinessException(ErrorCode.BAD_REQUEST, "baseUrl 不能为空")
+
+        configured_chat = self._trim(request.model)
+        configured_embedding = self._trim(request.embedding_model)
+        if provider is not None:
+            configured_chat = configured_chat or provider.model
+            configured_embedding = configured_embedding or provider.embedding_model
+
+        api_key = self._trim(request.api_key)
+        if api_key is None and provider is not None:
+            api_key = self._trim(
+                self._encryption.decrypt(
+                    provider.api_key_nonce,
+                    provider.api_key_ciphertext,
+                )
+            )
+        if api_key is None:
+            if provider is not None:
+                return ProviderModelList(
+                    chat_models=optional_model_list(configured_chat),
+                    embedding_models=optional_model_list(configured_embedding),
+                    source="configured",
+                    warning="Provider 未配置 API Key，无法拉取模型列表",
+                )
+            raise BusinessException(ErrorCode.BAD_REQUEST, "apiKey 不能为空")
+
+        cache_key = model_list_cache_key(base_url, api_key)
+        models = None if request.refresh else await self._read_cached_models(cache_key)
+        warning = None
+        if models is None:
+            models, warning = await fetch_remote_models(base_url, api_key)
+            if models:
+                await self._write_cached_models(cache_key, models)
+
+        if not models:
+            return ProviderModelList(
+                chat_models=optional_model_list(configured_chat),
+                embedding_models=optional_model_list(configured_embedding),
+                source="configured",
+                warning=warning or "厂商未返回可用模型，当前仅显示已配置模型",
+            )
+
+        remote_chat, remote_embedding = classify_models(models)
+        chat_models = configured_model_first(configured_chat, remote_chat)
+        embedding_models = configured_model_first(
+            configured_embedding,
+            remote_embedding,
+        )
+        configured_missing: list[str] = []
+        if configured_chat is not None and configured_chat not in models:
+            configured_missing.append(configured_chat)
+        if configured_embedding is not None and configured_embedding not in models:
+            configured_missing.append(configured_embedding)
+        if configured_missing:
+            missing = "、".join(configured_missing)
+            warning = f"当前配置模型未出现在厂商列表中，已保留供编辑：{missing}"
+        return ProviderModelList(
+            chat_models=chat_models,
+            embedding_models=embedding_models,
+            source="remote",
+            warning=warning,
+        )
+
+    async def _read_cached_models(self, cache_key: str) -> builtins.list[str] | None:
+        try:
+            raw = await self._redis.get(cache_key)
+        except RedisError:
+            logger.warning("failed to read provider model cache", exc_info=True)
+            return None
+        if raw is None:
+            return None
+        try:
+            value = json.loads(raw)
+        except (TypeError, json.JSONDecodeError):
+            return None
+        return parse_model_ids(value)
+
+    async def _write_cached_models(
+        self,
+        cache_key: str,
+        models: builtins.list[str],
+    ) -> None:
+        try:
+            await self._redis.setex(
+                cache_key,
+                MODEL_LIST_CACHE_TTL_SECONDS,
+                json.dumps(models, ensure_ascii=False, separators=(",", ":")),
+            )
+        except RedisError:
+            logger.warning("failed to write provider model cache", exc_info=True)
+
     def _response(
         self,
         provider: LlmProviderConfig,
@@ -253,6 +383,7 @@ class LlmProviderService:
             id=provider.id,
             base_url=provider.base_url,
             masked_api_key=mask_api_key(api_key),
+            has_api_key=bool(api_key.strip()),
             model=provider.model,
             embedding_model=provider.embedding_model,
             embedding_dimensions=(
@@ -326,3 +457,95 @@ def connectivity_test_urls(base_url: str) -> list[str]:
     if not re.search(r"/v\d+[A-Za-z0-9]*$", normalized):
         candidates.append(f"{normalized}/v1/chat/completions")
     return list(dict.fromkeys(candidates))
+
+
+def model_list_urls(base_url: str) -> list[str]:
+    normalized = base_url.strip().rstrip("/")
+    candidates = [f"{normalized}/models"]
+    if not re.search(r"/v\d+[A-Za-z0-9]*$", normalized):
+        candidates.append(f"{normalized}/v1/models")
+    return list(dict.fromkeys(candidates))
+
+
+def model_list_cache_key(base_url: str, api_key: str) -> str:
+    identity = f"{base_url.strip().rstrip('/')}\0{api_key}".encode()
+    return f"{MODEL_LIST_CACHE_PREFIX}{hashlib.sha256(identity).hexdigest()}"
+
+
+async def fetch_remote_models(
+    base_url: str,
+    api_key: str,
+) -> tuple[list[str], str | None]:
+    last_failure = "Unknown error"
+    async with httpx.AsyncClient(
+        timeout=httpx.Timeout(connect=5, read=10, write=10, pool=5),
+        follow_redirects=False,
+    ) as client:
+        for url in model_list_urls(base_url):
+            try:
+                response = await client.get(
+                    url,
+                    headers={
+                        "Accept": "application/json",
+                        "Authorization": f"Bearer {api_key}",
+                    },
+                )
+                response.raise_for_status()
+                models = parse_model_ids(response.json())
+                if not models:
+                    last_failure = f"{url} 未返回模型 ID"
+                    continue
+                return models, None
+            except httpx.HTTPStatusError as error:
+                body = abbreviate(error.response.text)
+                last_failure = f"HTTP {error.response.status_code} on {url}, body={body}"
+            except (httpx.HTTPError, ValueError, TypeError) as error:
+                last_failure = f"{type(error).__name__} on {url}: {error}"
+    return [], f"模型列表拉取失败: {last_failure}"
+
+
+def parse_model_ids(payload: object) -> list[str]:
+    raw_models = payload.get("data") if isinstance(payload, dict) else payload
+    if not isinstance(raw_models, list):
+        return []
+    models: list[str] = []
+    for item in raw_models:
+        model_id = item.get("id") if isinstance(item, dict) else item
+        if isinstance(model_id, str) and model_id.strip():
+            models.append(model_id.strip())
+        if len(models) >= MODEL_LIST_LIMIT:
+            break
+    return sorted(set(models), key=str.casefold)
+
+
+def is_embedding_model(model: str) -> bool:
+    normalized = model.casefold()
+    return any(
+        marker in normalized for marker in ("embedding", "embed", "text2vec", "bge-", "gte-")
+    )
+
+
+def is_chat_model(model: str) -> bool:
+    normalized = model.casefold()
+    return (
+        not is_embedding_model(model)
+        and "realtime" not in normalized
+        and "livetranslate" not in normalized
+        and NON_CHAT_MODEL_KIND.search(normalized) is None
+    )
+
+
+def classify_models(models: list[str]) -> tuple[list[str], list[str]]:
+    chat_models = [model for model in models if is_chat_model(model)]
+    embedding_models = [model for model in models if is_embedding_model(model)]
+    return chat_models, embedding_models
+
+
+def optional_model_list(model: str | None) -> list[str]:
+    return [] if model is None else [model]
+
+
+def configured_model_first(configured: str | None, models: list[str]) -> list[str]:
+    if configured is None:
+        return models
+    return [configured, *(model for model in models if model != configured)]

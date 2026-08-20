@@ -1,15 +1,13 @@
-# 统一自适应面试轮次实施记录
+# 统一自适应面试
 
-## 目标
+## 能力概览
 
 普通文字、知识库专项和语音面试统一使用标准化主问题、动态追问和 Turn 状态机：
 
 - 会话创建时只生成或抽取主问题。
 - 回答提交后最多调用一次结构化模型决定追问或进入下一主问题。
-- 追问基于当前真实回答生成，不再保存在预生成问题数组中。
+- 每次提交回答后，基于当前真实回答即时决定是否生成追问。
 - 三种渠道共用 `InterviewTurnService`、幂等规则和统一评估服务。
-
-本次是已批准的破坏性升级，不转换旧面试数据。
 
 ## 数据结构
 
@@ -52,8 +50,6 @@ POST /api/interview/sessions/{sessionId}/turns
 响应包含 `turnId`、`action`、`acknowledgement`、`nextQuestion`、`completed` 和只按主问题
 计算的 `progress`。重复 requestId 且载荷相同返回原结果；载荷不同返回业务错误。
 
-旧 `/answers`、`questionIndex`、`questions[]` 和草稿保存接口已经删除。
-
 ## Turn 状态机
 
 1. 短事务锁定会话、验证当前问题并创建带租约的 `PROCESSING` Turn。
@@ -78,8 +74,8 @@ requestId，失败重试和页面恢复必须复用。
 
 ### 知识库专项
 
-创建会话只抽取满足方向和难度的主问题。题库候选追问只是决策素材，不再作为容量门槛；
-容量响应额外返回参考答案、关键点和 rubric 覆盖数量。
+创建会话只抽取满足方向和难度的主问题。题库候选追问用作轮次决策素材；容量按可用主问题
+计算，并返回参考答案、关键点和 rubric 覆盖数量。
 
 ### 语音
 
@@ -95,26 +91,26 @@ requestId，失败重试和页面恢复必须复用。
 统一评估按主问题组评分。追问影响技术深度、补充和纠错评价，但不作为独立题重复加权。
 总分是已回答主问题组的等权平均，未回答的计划问题不计入平均分。
 
-`GET /report` 只读取保存结果，`POST /report` 幂等触发重新生成。遗留
-`voice:evaluate:stream` 消息只转投 `interview:evaluate:stream`，两个 Stream 的 Pending、
-reclaim、重试和 ACK 顺序保持不变。
+`GET /report` 只读取保存结果，`POST /report` 幂等触发重新生成。文字和语音评估统一写入
+`interview:evaluate:stream`，并保持 Pending、reclaim、重试和 ACK 顺序。
 
-## 迁移与发布
+## 运行与恢复
 
-- `0003_expand_adaptive_interview` 添加标准表和可空关联。
-- `0004_contract_adaptive_interview` 清空面试相关数据，删除旧表和问题数组字段并收紧约束。
-- contract 迁移要求 `ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`，否则拒绝执行；执行前输出目标表
-  行数。
-- 保留简历、知识库、题库、Provider 和日程数据。
-- Redis 会话缓存使用 `interview:v2:*` 与 `voice:v2:*`，旧缓存按原 TTL 自然过期。
-- 禁止删除生产 Stream key 或重建 Consumer Group。
+- Alembic 管理当前面试表结构和约束，API 不直接执行 schema 变更。
+- Redis 会话缓存使用 `interview:create:*`、`interview:turn:*` 与 `voice:interview:*`。
+- Worker 按 Stream 消费评估任务，失败时先重投或写失败状态，再执行 ACK。
+- Scheduler 回收租约过期的 Turn、恢复遗漏的评估任务并清理过期语音会话。
+- requestId 幂等锁、结果缓存和数据库唯一索引共同防止重复决策与重复写入。
+- 文本长度和上下文截断按 Unicode 字符计算；稳定输出使用显式排序，不依赖运行时 hash。
 
-## 验收
+## 质量保障
 
-- 创建会话时不存在预生成追问。
-- 三种渠道只使用统一轮次服务，单 Turn 的真实决策模型调用不超过一次。
-- 重复提交不会重复调用模型或创建追问。
-- 达到上限、跳过、时间不足和模型失败时均能确定性推进。
-- 语音问题数、阶段分配、显式提交、断线恢复和 TTS 顺序符合约定。
-- 报告按主问题树展示且追问不重复加权。
-- Ruff、mypy、pytest、前端测试、Playwright、生产 Compose 和真实模型工作流通过。
+- 单元测试覆盖轮次决策、幂等提交、追问上限、确定性回退、评估聚合和语音生命周期。
+- 集成测试使用真实 PostgreSQL、Redis 和 S3 兼容存储验证迁移、事务与异步任务。
+- 前端状态测试和 Playwright 覆盖文字面试、知识库专项面试、语音提交与报告展示。
+- 生产 Compose 验证 Migrate、API、Worker、Scheduler、前端代理和 Python-only 镜像。
+- 真实模型验收覆盖动态轮次决策、Embedding、ASR、TTS 和异步报告生成。
+
+回归检查命令见根目录
+[README](../README.md)，配置见 [CONFIGURATION.md](CONFIGURATION.md)，部署和排障见
+[OPERATIONS.md](OPERATIONS.md)。

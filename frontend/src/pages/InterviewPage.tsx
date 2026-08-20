@@ -5,7 +5,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import InterviewChatPanel from '../components/InterviewChatPanel';
 import InterviewPageHeader from '../components/InterviewPageHeader';
 import type {InterviewQuestion, InterviewSession} from '../types/interview';
-import type {Difficulty} from '../components/UnifiedInterviewModal';
+import type { Difficulty } from '../hooks/useInterviewConfig';
 import type {CategoryDTO} from '../api/skill';
 import { CUSTOM_SKILL_ID } from '../hooks/useInterviewConfig';
 import {resolveInterviewEntry} from './interviewEntry';

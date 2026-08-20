@@ -14,7 +14,7 @@ from interview_guide.common.config.settings import Settings
 from interview_guide.modules.llm_provider.voice import (
     AsrConfig,
     TtsConfig,
-    VoiceConfigStore,
+    VoiceConfigService,
 )
 from interview_guide.modules.voice_interview.protocols import (
     AsrAppendError,
@@ -232,7 +232,7 @@ class DashScopeAsrSession(VoiceAsrSession):
 
 
 class DashScopeAsrProvider(VoiceAsrProvider):
-    def __init__(self, config_store: VoiceConfigStore) -> None:
+    def __init__(self, config_store: VoiceConfigService) -> None:
         self._config_store = config_store
 
     async def open(
@@ -259,11 +259,10 @@ class DashScopeAsrProvider(VoiceAsrProvider):
 class DashScopeTtsSynthesizer:
     def __init__(
         self,
-        config_store: VoiceConfigStore,
+        config_store: VoiceConfigService,
         settings: Settings,
     ) -> None:
         self._config_store = config_store
-        self._url = settings.voice_tts_url
         self._connect_timeout = max(1, settings.voice_tts_connect_timeout_seconds)
 
     async def synthesize(self, text: str) -> bytes:
@@ -282,7 +281,7 @@ class DashScopeTtsSynthesizer:
         audio = bytearray()
         async with asyncio.timeout(TTS_SDK_WAIT_SECONDS):
             async with connect(
-                _model_url(self._url, config.model),
+                _model_url(config.url, config.model),
                 additional_headers={"Authorization": f"Bearer {config.api_key}"},
                 open_timeout=self._connect_timeout,
                 max_size=2 * 1024 * 1024,

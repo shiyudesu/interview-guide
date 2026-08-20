@@ -63,8 +63,7 @@ QuestionServiceDependency = Annotated[
 async def enforce_generation_rate_limit(request: Request) -> None:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     await infrastructure.rate_limiter.check(
-        class_name="KnowledgeBaseInterviewController",
-        method_name="generateQuestions",
+        scope="knowledge-base:generate-questions",
         rules=(
             RateLimitRule(RateLimitDimension.GLOBAL, 2),
             RateLimitRule(RateLimitDimension.IP, 2),
@@ -136,7 +135,10 @@ async def create_question(
     payload: CreateKnowledgeBaseQuestionRequest,
     service: QuestionServiceDependency,
 ) -> Response:
-    return result_response(Result.ok(await service.create_question(knowledge_base_id, payload)))
+    return result_response(
+        Result.ok(await service.create_question(knowledge_base_id, payload)),
+        status_code=201,
+    )
 
 
 @router.put("/api/knowledgebase/questions/{question_id}")
@@ -178,7 +180,10 @@ async def create_knowledge_base_interview(
         infrastructure.database.sessions,
         interview,
     )
-    return result_response(Result.ok(await service.create_session(payload)))
+    return result_response(
+        Result.ok(await service.create_session(payload)),
+        status_code=201,
+    )
 
 
 @router.get("/api/knowledgebase/{knowledge_base_id}/interview-capacity")

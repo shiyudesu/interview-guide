@@ -27,15 +27,15 @@ def settings(**overrides: object) -> Settings:
     )
 
 
-def test_health_response_matches_compatibility_contract() -> None:
+def test_native_health_response() -> None:
     app = create_app(settings())
 
     with TestClient(app) as client:
-        response = client.get("/actuator/health")
+        response = client.get("/health")
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/json"
-    assert response.content == b'{"groups":["liveness","readiness"],"status":"UP"}'
+    assert response.json() == {"status": "ok"}
 
 
 def test_request_logging_keeps_normal_traffic_nonblocking_at_info_level() -> None:
@@ -45,7 +45,7 @@ def test_request_logging_keeps_normal_traffic_nonblocking_at_info_level() -> Non
     assert request_log_level(500, 0.1) == logging.WARNING
 
 
-def test_cors_preflight_matches_compatibility_headers() -> None:
+def test_native_cors_preflight() -> None:
     app = create_app(settings())
 
     with TestClient(app) as client:
@@ -59,19 +59,15 @@ def test_cors_preflight_matches_compatibility_headers() -> None:
         )
 
     assert response.status_code == 200
-    assert response.content == b""
+    assert response.text == "OK"
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
-    assert response.headers["access-control-allow-methods"] == ("GET,POST,PUT,DELETE,PATCH,OPTIONS")
-    assert response.headers["access-control-allow-headers"] == "content-type"
+    assert "GET" in response.headers["access-control-allow-methods"]
+    assert "content-type" in response.headers["access-control-allow-headers"].lower()
     assert response.headers["access-control-allow-credentials"] == "true"
-    assert response.headers.get_list("vary") == [
-        "Origin",
-        "Access-Control-Request-Method",
-        "Access-Control-Request-Headers",
-    ]
+    assert "Origin" in response.headers.get("vary", "")
 
 
-def test_business_and_routing_errors_keep_http_200() -> None:
+def test_business_and_routing_errors_use_http_statuses() -> None:
     app = create_app(settings())
 
     @app.get("/api/test/business")
@@ -89,15 +85,13 @@ def test_business_and_routing_errors_keep_http_200() -> None:
 
     assert business.json() == {
         "code": 9001,
-        "data": None,
-        "message": "面试日程不存在: 9",
-        "success": False,
+        "detail": "面试日程不存在: 9",
     }
-    assert business.status_code == 200
-    assert missing.json()["message"] == "API 接口不存在"
-    assert missing.status_code == 200
-    assert method.json()["message"] == "请求方法不支持: POST"
-    assert method.status_code == 200
+    assert business.status_code == 404
+    assert missing.json()["detail"] == "API 接口不存在"
+    assert missing.status_code == 404
+    assert method.json()["detail"] == "请求方法不支持: POST"
+    assert method.status_code == 405
 
 
 class Payload(BaseModel):
@@ -116,7 +110,7 @@ class ResponsePayload(BaseModel):
     optional: str | None
 
 
-def test_result_response_preserves_compact_compatibility_json() -> None:
+def test_result_adapter_returns_direct_json_data() -> None:
     result = Result.ok(
         ResponsePayload(
             company_name="示例公司",
@@ -129,17 +123,14 @@ def test_result_response_preserves_compact_compatibility_json() -> None:
 
     assert response.headers["content-type"] == "application/json"
     expected = (
-        b'{"code":200,"data":{"companyName":"'
-        + "示例公司".encode()
-        + b'","created_at":"2026-08-16T08:00:00",'
-        b'"identifier":"11111111-1111-1111-1111-111111111111","optional":null},'
-        b'"message":"success","success":true}'
+        b'{"companyName":"' + "示例公司".encode() + b'","created_at":"2026-08-16T08:00:00",'
+        b'"identifier":"11111111-1111-1111-1111-111111111111","optional":null}'
     )
     assert serialized_result(result) == expected
     assert response.body == expected
 
 
-def test_malformed_json_matches_compatibility_internal_error() -> None:
+def test_malformed_json_returns_bad_request() -> None:
     app = create_app(settings())
 
     @app.post("/api/test/json")
@@ -153,12 +144,10 @@ def test_malformed_json_matches_compatibility_internal_error() -> None:
             headers={"Content-Type": "application/json"},
         )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert response.json() == {
-        "code": 500,
-        "data": None,
-        "message": "系统繁忙，请稍后重试",
-        "success": False,
+        "code": 400,
+        "detail": "请求体不是有效的 JSON",
     }
 
 
@@ -175,22 +164,18 @@ def test_multipart_limit_returns_business_error() -> None:
             files={"file": ("sample.txt", b"too large", "text/plain")},
         )
 
-    assert response.status_code == 200
-    assert response.json()["message"] == "文件大小超过限制"
+    assert response.status_code == 413
+    assert response.json()["detail"] == "文件大小超过限制"
 
 
-def test_openapi_metadata_and_dynamic_server_url() -> None:
+def test_native_openapi_and_docs_paths() -> None:
     app = create_app(settings())
 
     with TestClient(app, base_url="http://comparison:28080") as client:
-        response = client.get("/v3/api-docs")
+        response = client.get("/openapi.json")
+        docs = client.get("/docs")
 
     document = response.json()
-    assert document["servers"] == [
-        {
-            "url": "http://comparison:28080",
-            "description": "Generated server url",
-        }
-    ]
+    assert docs.status_code == 200
     assert "/api/interview/sessions/{session_id}/turns" in document["paths"]
     assert "/api/interview/sessions/{session_id}/answers" not in document["paths"]

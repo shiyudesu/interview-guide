@@ -85,7 +85,7 @@ async def create_schedule(
     service: ServiceDependency,
 ) -> Response:
     created = await service.create(payload)
-    return result_response(Result.ok(created))
+    return result_response(Result.ok(created), status_code=201)
 
 
 @router.post("/parse")

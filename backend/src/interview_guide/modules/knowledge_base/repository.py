@@ -4,8 +4,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import cast
 
-from sqlalchemy import BigInteger, delete, func, or_, select, text
-from sqlalchemy import cast as sql_cast
+from sqlalchemy import delete, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from interview_guide.common.db.models import (
@@ -15,16 +14,6 @@ from interview_guide.common.db.models import (
     VectorStore,
 )
 from interview_guide.common.errors import BusinessException, ErrorCode
-
-
-def trim_codepoints_leq_space(value: str) -> str:
-    start = 0
-    end = len(value)
-    while start < end and ord(value[start]) <= 0x20:
-        start += 1
-    while end > start and ord(value[end - 1]) <= 0x20:
-        end -= 1
-    return value[start:end]
 
 
 @dataclass(frozen=True)
@@ -84,7 +73,7 @@ class KnowledgeBaseRepository:
         return list(result)
 
     async def search(self, keyword: str) -> list[KnowledgeBase]:
-        value = f"%{trim_codepoints_leq_space(keyword).lower()}%"
+        value = f"%{keyword.strip().lower()}%"
         result = await self._session.scalars(
             select(KnowledgeBase)
             .where(
@@ -145,17 +134,7 @@ class KnowledgeBaseRepository:
     async def delete_vectors(self, knowledge_base_id: int) -> None:
         await self._session.execute(
             delete(VectorStore).where(
-                (VectorStore.metadata_json["kb_id"].astext == str(knowledge_base_id))
-                | (
-                    VectorStore.metadata_json["kb_id_long"].astext.is_not(None)
-                    & (
-                        sql_cast(
-                            VectorStore.metadata_json["kb_id_long"].astext,
-                            BigInteger,
-                        )
-                        == knowledge_base_id
-                    )
-                )
+                VectorStore.metadata_json["kb_id"].astext == str(knowledge_base_id)
             )
         )
 

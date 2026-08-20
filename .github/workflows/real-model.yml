@@ -11,17 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: real-model
-    env:
-      AI_EMBEDDING_MODEL: qwen3.7-text-embedding
-      AI_MODEL: qwen3.7-max
-      APP_VOICE_INTERVIEW_QWEN_ASR_MODEL: qwen3-asr-flash-realtime
-      APP_VOICE_INTERVIEW_QWEN_TTS_MODEL: qwen3-tts-flash-realtime
     steps:
       - uses: actions/checkout@v7
       - name: Require protected secret
         env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
-        run: test -n "$AI_BAILIAN_API_KEY"
+          REAL_MODEL_API_KEY: ${{ secrets.REAL_MODEL_API_KEY }}
+        run: test -n "$REAL_MODEL_API_KEY"
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13.13"
@@ -35,7 +30,7 @@ jobs:
         run: uv sync --frozen
       - name: Run protected production model checks
         env:
-          AI_BAILIAN_API_KEY: ${{ secrets.AI_BAILIAN_API_KEY }}
+          REAL_MODEL_API_KEY: ${{ secrets.REAL_MODEL_API_KEY }}
         working-directory: backend
         run: uv run --frozen python ../tools/scripts/production_model_acceptance.py
       - name: Upload redacted records

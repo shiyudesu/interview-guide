@@ -14,7 +14,7 @@ from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.providers import LlmProviderRegistry
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.db.models import Resume, ResumeAnalysis
-from interview_guide.common.errors import BusinessException, ErrorCode
+from interview_guide.common.errors import ErrorCode
 from interview_guide.common.redis.streams import (
     RESUME_ANALYZE,
     RedisStreamService,
@@ -65,56 +65,25 @@ class ResumeGradingService:
         self._prompts = prompts
 
     async def analyze(self, resume_text: str) -> ResumeAnalysisResult:
-        try:
-            system_prompt = self._prompts.render("resume-analysis-system.st")
-            user_prompt = self._prompts.render(
-                "resume-analysis-user.st",
-                {"resumeText": resume_text},
-            )
-            schema = json.dumps(
-                AnalysisOutput.model_json_schema(),
-                ensure_ascii=False,
-                separators=(",", ":"),
-            )
-            try:
-                output = await self._structured.invoke(
-                    await self._registry.get_chat(),
-                    f"{system_prompt}\n\n{schema}",
-                    user_prompt,
-                    AnalysisOutput,
-                    ErrorCode.RESUME_ANALYSIS_FAILED,
-                    "简历分析失败：",
-                )
-            except Exception as error:
-                raise BusinessException(
-                    ErrorCode.RESUME_ANALYSIS_FAILED,
-                    f"简历分析失败：{error}",
-                ) from error
-            return ResumeAnalysisResult(output, resume_text)
-        except Exception as error:
-            return ResumeAnalysisResult(
-                AnalysisOutput(
-                    overallScore=0,
-                    scoreDetail=ScoreDetail(
-                        contentScore=0,
-                        structureScore=0,
-                        skillMatchScore=0,
-                        expressionScore=0,
-                        projectScore=0,
-                    ),
-                    summary=f"分析过程中出现错误: {error}",
-                    strengths=[],
-                    suggestions=[
-                        Suggestion(
-                            category="系统",
-                            priority="高",
-                            issue="AI分析服务暂时不可用",
-                            recommendation="请稍后重试，或检查AI服务是否正常运行",
-                        )
-                    ],
-                ),
-                resume_text,
-            )
+        system_prompt = self._prompts.render("resume-analysis-system.st")
+        user_prompt = self._prompts.render(
+            "resume-analysis-user.st",
+            {"resumeText": resume_text},
+        )
+        schema = json.dumps(
+            AnalysisOutput.model_json_schema(),
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        output = await self._structured.invoke(
+            await self._registry.get_chat(),
+            f"{system_prompt}\n\n{schema}",
+            user_prompt,
+            AnalysisOutput,
+            ErrorCode.RESUME_ANALYSIS_FAILED,
+            "简历分析失败：",
+        )
+        return ResumeAnalysisResult(output, resume_text)
 
 
 @dataclass(frozen=True)

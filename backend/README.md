@@ -39,8 +39,8 @@ uv run --frozen interview-guide-scheduler
 | 入口 | 作用 |
 | --- | --- |
 | `interview-guide-migrate` | 执行 Alembic 到最新版本 |
-| `interview-guide-api` | REST、SSE、WebSocket 和静态 OpenAPI 兼容文档 |
-| `interview-guide-worker` | 消费五组 Redis Stream |
+| `interview-guide-api` | REST、SSE、WebSocket、OpenAPI 和 Swagger UI |
+| `interview-guide-worker` | 消费四组 Redis Stream |
 | `interview-guide-scheduler` | 日程过期及失败任务恢复 |
 
 ## 代码结构
@@ -56,7 +56,7 @@ src/interview_guide/
 └── scheduler.py     APScheduler
 
 alembic/             数据库版本
-resources/           Prompt、Skill、字体、Lua 和兼容契约
+resources/           Prompt、Skill、字体和 Lua 脚本
 tests/               单元、契约和真实基础设施集成测试
 ```
 
@@ -101,10 +101,6 @@ Alembic 是唯一升级入口：
 uv run --frozen interview-guide-migrate
 ```
 
-首次升级到自适应面试 v2 时，该命令要求
-`ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`，并会清空已有面试与语音会话数据。升级前必须备份；
-迁移完成后恢复为 `0`。
-
 生产环境不要直接执行 SQL 文件，也不要让 API 在启动时修改 schema。
 
 ## 关键约束
@@ -112,10 +108,13 @@ uv run --frozen interview-guide-migrate
 - API 固定单 Uvicorn worker。
 - SQLAlchemy 连接池默认 `pool_size=10`、`max_overflow=0`。
 - Embedding 维度固定为 1024。
-- Provider API Key 使用 AES-GCM 加密，所有进程必须使用同一个
-  `APP_AI_CONFIG_ENCRYPTION_KEY`。
+- Provider API Key 使用 AES-GCM 加密，Compose 主密钥自动生成到共享 `provider_key` 卷；
+  直接运行 Python 后端时可用 `APP_AI_CONFIG_ENCRYPTION_KEY` 覆盖本地密钥文件。
+- Provider 模型发现使用 OpenAI 兼容 `/models` 接口，Redis 缓存 TTL 为 5 分钟；不支持该
+  接口时返回明确警告并保留当前配置。
 - 阻塞文件操作进入受限线程池。
-- 普通业务错误沿用 HTTP 200 包装响应；文件、SSE 和 WebSocket 保持各自状态语义。
+- REST 成功响应直接返回业务 JSON，无响应体操作使用 HTTP 204。
+- REST 错误使用标准 4xx/5xx 和 `code + detail` 响应；SSE、WebSocket 保持各自状态语义。
 
 完整环境变量见 [配置说明](../docs/CONFIGURATION.md)，部署和排障见
 [运行与排障](../docs/OPERATIONS.md)。

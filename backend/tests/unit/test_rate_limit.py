@@ -6,24 +6,22 @@ from interview_guide.common.redis.rate_limit import (
 )
 
 
-def test_rate_limit_keys_keep_compatibility_class_and_method_names() -> None:
+def test_rate_limit_keys_use_business_scope() -> None:
     assert (
         RateLimiter._key(
-            "KnowledgeBaseController",
-            "queryKnowledgeBase",
+            "knowledge-base:query",
             RateLimitDimension.GLOBAL,
             "127.0.0.1",
             "anonymous",
         )
-        == "ratelimit:{KnowledgeBaseController:queryKnowledgeBase}:global"
+        == "ratelimit:{knowledge-base:query}:global"
     )
     assert (
         RateLimiter._key(
-            "KnowledgeBaseController",
-            "queryKnowledgeBase",
+            "knowledge-base:query",
             RateLimitDimension.IP,
             "127.0.0.1",
             "anonymous",
         )
-        == "ratelimit:{KnowledgeBaseController:queryKnowledgeBase}:ip:127.0.0.1"
+        == "ratelimit:{knowledge-base:query}:ip:127.0.0.1"
     )

@@ -2,15 +2,13 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from copy import deepcopy
 
 import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.responses import JSONResponse, Response
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 from interview_guide.common.api.middleware import (
-    CompatibilityCorsMiddleware,
     MultipartSizeLimitMiddleware,
     RequestContextMiddleware,
 )
@@ -88,9 +86,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="智能 AI 面试官平台 API",
         description="简历分析、模拟面试、知识库管理 RESTful API 文档",
         version="1.0.0",
-        docs_url=None,
+        docs_url="/docs",
         redoc_url=None,
-        openapi_url=None,
+        openapi_url="/openapi.json",
         lifespan=lifespan,
     )
     app.state.settings = resolved_settings
@@ -113,53 +111,30 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         metrics=metrics,
     )
     app.add_middleware(
-        CompatibilityCorsMiddleware,
-        allowed_origins=resolved_settings.allowed_origins,
+        CORSMiddleware,
+        allow_origins=list(resolved_settings.allowed_origins),
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     app.add_middleware(
         MultipartSizeLimitMiddleware,
         max_bytes=resolved_settings.multipart_max_bytes,
     )
 
-    @app.get("/actuator/health", include_in_schema=False)
-    async def actuator_health() -> JSONResponse:
-        return JSONResponse(
-            content={"groups": ["liveness", "readiness"], "status": "UP"},
-        )
+    @app.get("/health", include_in_schema=False)
+    async def health() -> dict[str, str]:
+        return {"status": "ok"}
 
-    @app.get("/actuator/info", include_in_schema=False)
-    async def actuator_info() -> JSONResponse:
-        return JSONResponse(content={})
+    @app.get("/info", include_in_schema=False)
+    async def info() -> dict[str, str]:
+        return {"name": "interview-guide", "version": app.version}
 
-    @app.get("/actuator/metrics", include_in_schema=False)
-    async def actuator_metrics() -> JSONResponse:
-        return JSONResponse(
-            content={"names": metrics.metric_names},
-        )
-
-    @app.get("/actuator/prometheus", include_in_schema=False)
-    async def actuator_prometheus() -> Response:
+    @app.get("/metrics", include_in_schema=False)
+    async def prometheus_metrics() -> Response:
         return Response(
             content=metrics.render_prometheus(),
             media_type="text/plain;version=0.0.4;charset=utf-8",
-        )
-
-    @app.get("/v3/api-docs", include_in_schema=False)
-    async def openapi_document(request: Request) -> JSONResponse:
-        schema = deepcopy(app.openapi())
-        schema["servers"] = [
-            {
-                "url": str(request.base_url).rstrip("/"),
-                "description": "Generated server url",
-            }
-        ]
-        return JSONResponse(content=schema)
-
-    @app.get("/swagger-ui.html", include_in_schema=False)
-    async def swagger_ui() -> Response:
-        return get_swagger_ui_html(
-            openapi_url="/v3/api-docs",
-            title="Swagger UI",
         )
 
     configure_tracing(app, resolved_settings)

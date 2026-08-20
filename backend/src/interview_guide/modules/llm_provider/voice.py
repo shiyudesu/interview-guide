@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import asyncio
-import json
-import os
-from dataclasses import asdict, dataclass, replace
+from dataclasses import dataclass
 from urllib.parse import urlsplit
 
-from interview_guide.common.config.settings import Settings
+from interview_guide.common.ai.encryption import ApiKeyEncryption
+from interview_guide.common.ai.providers import (
+    LlmProviderRegistry,
+    ProviderRepository,
+    provider_now,
+)
 from interview_guide.modules.llm_provider.models import (
     AsrConfigRequest,
     AsrConfigResponse,
@@ -33,6 +36,7 @@ class AsrConfig:
 
 @dataclass(frozen=True)
 class TtsConfig:
+    url: str
     model: str
     api_key: str
     voice: str
@@ -44,153 +48,141 @@ class TtsConfig:
     volume: int
 
 
-class VoiceConfigStore:
-    def __init__(self, settings: Settings) -> None:
-        self._path = settings.voice_config_path.expanduser()
-        api_key = settings.ai_bailian_api_key.get_secret_value()
-        self._asr = AsrConfig(
-            url=settings.voice_asr_url,
-            model=settings.voice_asr_model,
-            api_key=api_key,
-            language=settings.voice_asr_language,
-            format=settings.voice_asr_format,
-            sample_rate=settings.voice_asr_sample_rate,
-            enable_turn_detection=settings.voice_asr_enable_turn_detection,
-            turn_detection_type=settings.voice_asr_turn_detection_type,
-            turn_detection_threshold=settings.voice_asr_turn_detection_threshold,
-            turn_detection_silence_duration_ms=settings.voice_asr_silence_ms,
-        )
-        self._tts = TtsConfig(
-            model=settings.voice_tts_model,
-            api_key=api_key,
-            voice=settings.voice_tts_voice,
-            format=settings.voice_tts_format,
-            sample_rate=settings.voice_tts_sample_rate,
-            mode=settings.voice_tts_mode,
-            language_type=settings.voice_tts_language_type,
-            speech_rate=settings.voice_tts_speech_rate,
-            volume=settings.voice_tts_volume,
-        )
-        self._lock = asyncio.Lock()
-
-    async def start(self) -> None:
-        if not self._path.is_file():
-            return
-        document = json.loads(await asyncio.to_thread(self._path.read_text, encoding="utf-8"))
-        self._asr = AsrConfig(**document["asr"])
-        self._tts = TtsConfig(**document["tts"])
+class VoiceConfigService:
+    def __init__(
+        self,
+        repository: ProviderRepository,
+        registry: LlmProviderRegistry,
+        encryption: ApiKeyEncryption,
+    ) -> None:
+        self._repository = repository
+        self._registry = registry
+        self._encryption = encryption
 
     async def asr(self) -> AsrConfigResponse:
-        async with self._lock:
-            return AsrConfigResponse(
-                url=self._asr.url,
-                model=self._asr.model,
-                masked_api_key=mask_api_key(self._asr.api_key),
-                language=self._asr.language,
-                format=self._asr.format,
-                sample_rate=self._asr.sample_rate,
-                enable_turn_detection=self._asr.enable_turn_detection,
-                turn_detection_type=self._asr.turn_detection_type,
-                turn_detection_threshold=self._asr.turn_detection_threshold,
-                turn_detection_silence_duration_ms=(self._asr.turn_detection_silence_duration_ms),
-            )
+        entity = await self._repository.voice_config()
+        provider = await self._repository.get_provider(entity.asr_provider_id)
+        api_key = self._encryption.decrypt(
+            provider.api_key_nonce,
+            provider.api_key_ciphertext,
+        )
+        return AsrConfigResponse(
+            provider_id=entity.asr_provider_id,
+            url=entity.asr_url,
+            model=entity.asr_model,
+            masked_api_key=mask_api_key(api_key),
+            language=entity.asr_language,
+            format=entity.asr_format,
+            sample_rate=entity.asr_sample_rate,
+            enable_turn_detection=entity.asr_enable_turn_detection,
+            turn_detection_type=entity.asr_turn_detection_type,
+            turn_detection_threshold=entity.asr_turn_detection_threshold,
+            turn_detection_silence_duration_ms=entity.asr_silence_ms,
+        )
 
     async def asr_config(self) -> AsrConfig:
-        async with self._lock:
-            return self._asr
+        entity = await self._repository.voice_config()
+        provider = await self._registry.get_voice(entity.asr_provider_id)
+        return AsrConfig(
+            url=entity.asr_url,
+            model=entity.asr_model,
+            api_key=provider.api_key,
+            language=entity.asr_language,
+            format=entity.asr_format,
+            sample_rate=entity.asr_sample_rate,
+            enable_turn_detection=entity.asr_enable_turn_detection,
+            turn_detection_type=entity.asr_turn_detection_type,
+            turn_detection_threshold=entity.asr_turn_detection_threshold,
+            turn_detection_silence_duration_ms=entity.asr_silence_ms,
+        )
 
     async def tts(self) -> TtsConfigResponse:
-        async with self._lock:
-            return TtsConfigResponse(
-                model=self._tts.model,
-                masked_api_key=mask_api_key(self._tts.api_key),
-                voice=self._tts.voice,
-                format=self._tts.format,
-                sample_rate=self._tts.sample_rate,
-                mode=self._tts.mode,
-                language_type=self._tts.language_type,
-                speech_rate=self._tts.speech_rate,
-                volume=self._tts.volume,
-            )
+        entity = await self._repository.voice_config()
+        provider = await self._repository.get_provider(entity.tts_provider_id)
+        api_key = self._encryption.decrypt(
+            provider.api_key_nonce,
+            provider.api_key_ciphertext,
+        )
+        return TtsConfigResponse(
+            provider_id=entity.tts_provider_id,
+            url=entity.tts_url,
+            model=entity.tts_model,
+            masked_api_key=mask_api_key(api_key),
+            voice=entity.tts_voice,
+            format=entity.tts_format,
+            sample_rate=entity.tts_sample_rate,
+            mode=entity.tts_mode,
+            language_type=entity.tts_language_type,
+            speech_rate=entity.tts_speech_rate,
+            volume=entity.tts_volume,
+        )
 
     async def tts_config(self) -> TtsConfig:
-        async with self._lock:
-            return self._tts
+        entity = await self._repository.voice_config()
+        provider = await self._registry.get_voice(entity.tts_provider_id)
+        return TtsConfig(
+            url=entity.tts_url,
+            model=entity.tts_model,
+            api_key=provider.api_key,
+            voice=entity.tts_voice,
+            format=entity.tts_format,
+            sample_rate=entity.tts_sample_rate,
+            mode=entity.tts_mode,
+            language_type=entity.tts_language_type,
+            speech_rate=entity.tts_speech_rate,
+            volume=entity.tts_volume,
+        )
 
     async def update_asr(self, request: AsrConfigRequest) -> None:
-        async with self._lock:
-            api_key = request.api_key
-            self._asr = replace(
-                self._asr,
-                url=request.url if request.url is not None else self._asr.url,
-                model=(request.model if request.model is not None else self._asr.model),
-                api_key=api_key if api_key is not None else self._asr.api_key,
-                language=(request.language if request.language is not None else self._asr.language),
-                format=(request.format if request.format is not None else self._asr.format),
-                sample_rate=(
-                    request.sample_rate
-                    if request.sample_rate is not None
-                    else self._asr.sample_rate
-                ),
-                enable_turn_detection=(
-                    request.enable_turn_detection
-                    if request.enable_turn_detection is not None
-                    else self._asr.enable_turn_detection
-                ),
-                turn_detection_type=(
-                    request.turn_detection_type
-                    if request.turn_detection_type is not None
-                    else self._asr.turn_detection_type
-                ),
-                turn_detection_threshold=(
-                    request.turn_detection_threshold
-                    if request.turn_detection_threshold is not None
-                    else self._asr.turn_detection_threshold
-                ),
-                turn_detection_silence_duration_ms=(
-                    request.turn_detection_silence_duration_ms
-                    if request.turn_detection_silence_duration_ms is not None
-                    else self._asr.turn_detection_silence_duration_ms
-                ),
-            )
-            if api_key is not None:
-                self._tts = replace(self._tts, api_key=api_key)
-            await self._persist()
+        entity = await self._repository.voice_config()
+        provider_id = request.provider_id or entity.asr_provider_id
+        await self._repository.get_provider(provider_id)
+        await self._update_api_key(provider_id, request.api_key)
+        values: dict[str, object] = {
+            "asr_provider_id": provider_id,
+            "updated_at": provider_now(),
+        }
+        for name, value in (
+            ("asr_url", request.url),
+            ("asr_model", request.model),
+            ("asr_language", request.language),
+            ("asr_format", request.format),
+            ("asr_sample_rate", request.sample_rate),
+            ("asr_enable_turn_detection", request.enable_turn_detection),
+            ("asr_turn_detection_type", request.turn_detection_type),
+            ("asr_turn_detection_threshold", request.turn_detection_threshold),
+            ("asr_silence_ms", request.turn_detection_silence_duration_ms),
+        ):
+            if value is not None:
+                values[name] = value
+        await self._repository.update_voice_config(values)
 
     async def update_tts(self, request: TtsConfigRequest) -> None:
-        async with self._lock:
-            api_key = request.api_key
-            self._tts = replace(
-                self._tts,
-                model=(request.model if request.model is not None else self._tts.model),
-                api_key=api_key if api_key is not None else self._tts.api_key,
-                voice=(request.voice if request.voice is not None else self._tts.voice),
-                format=(request.format if request.format is not None else self._tts.format),
-                sample_rate=(
-                    request.sample_rate
-                    if request.sample_rate is not None
-                    else self._tts.sample_rate
-                ),
-                mode=(request.mode if request.mode is not None else self._tts.mode),
-                language_type=(
-                    request.language_type
-                    if request.language_type is not None
-                    else self._tts.language_type
-                ),
-                speech_rate=(
-                    request.speech_rate
-                    if request.speech_rate is not None
-                    else self._tts.speech_rate
-                ),
-                volume=(request.volume if request.volume is not None else self._tts.volume),
-            )
-            if api_key is not None:
-                self._asr = replace(self._asr, api_key=api_key)
-            await self._persist()
+        entity = await self._repository.voice_config()
+        provider_id = request.provider_id or entity.tts_provider_id
+        await self._repository.get_provider(provider_id)
+        await self._update_api_key(provider_id, request.api_key)
+        values: dict[str, object] = {
+            "tts_provider_id": provider_id,
+            "updated_at": provider_now(),
+        }
+        for name, value in (
+            ("tts_url", request.url),
+            ("tts_model", request.model),
+            ("tts_voice", request.voice),
+            ("tts_format", request.format),
+            ("tts_sample_rate", request.sample_rate),
+            ("tts_mode", request.mode),
+            ("tts_language_type", request.language_type),
+            ("tts_speech_rate", request.speech_rate),
+            ("tts_volume", request.volume),
+        ):
+            if value is not None:
+                values[name] = value
+        await self._repository.update_voice_config(values)
 
     async def test_asr(self) -> ProviderTestResult:
-        async with self._lock:
-            config = self._asr
+        config = await self.asr_config()
         try:
             uri = urlsplit(config.url)
             if uri.hostname is None:
@@ -214,16 +206,16 @@ class VoiceConfigStore:
                 model=config.model,
             )
 
-    async def _persist(self) -> None:
-        document = json.dumps(
-            {"asr": asdict(self._asr), "tts": asdict(self._tts)},
-            ensure_ascii=False,
-            separators=(",", ":"),
+    async def _update_api_key(self, provider_id: str, api_key: str | None) -> None:
+        if api_key is None or not api_key.strip():
+            return
+        encrypted = self._encryption.encrypt(api_key.strip())
+        await self._repository.update_provider(
+            provider_id,
+            {
+                "api_key_nonce": encrypted.nonce,
+                "api_key_ciphertext": encrypted.ciphertext,
+                "updated_at": provider_now(),
+            },
         )
-        await asyncio.to_thread(self._write_atomic, document)
-
-    def _write_atomic(self, document: str) -> None:
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self._path.with_suffix(f"{self._path.suffix}.tmp")
-        temporary.write_text(document, encoding="utf-8")
-        os.replace(temporary, self._path)
+        await self._registry.publish_change()

@@ -32,7 +32,7 @@ def provider() -> ProviderConfig:
     )
 
 
-def test_versioned_base_url_matches_compatibility_resolver() -> None:
+def test_versioned_base_url_resolver() -> None:
     assert resolve_versioned_base_url("https://example.test") == ("https://example.test/v1")
     assert resolve_versioned_base_url("https://example.test/v1/") == ("https://example.test/v1")
 
@@ -176,7 +176,7 @@ class FakeAdapter:
 
 
 @pytest.mark.asyncio
-async def test_structured_output_repairs_then_retries_in_compatibility_order() -> None:
+async def test_structured_output_repairs_then_retries_in_order() -> None:
     fake = FakeAdapter(
         [
             '{"answer":"candidate said "quoted" text"}',
@@ -199,5 +199,5 @@ async def test_structured_output_repairs_then_retries_in_compatibility_order() -
     assert "\n\n\n# 安全边界" not in fake.system_prompts[0]
 
 
-def test_quote_repair_matches_compatibility_heuristic() -> None:
+def test_quote_repair_heuristic() -> None:
     assert repair_unescaped_quotes('{"value":"a "quote" b"}') == ('{"value":"a \\"quote\\" b"}')

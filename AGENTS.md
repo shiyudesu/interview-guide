@@ -2,8 +2,8 @@
 
 ## 项目状态
 
-生产后端为 Python/FastAPI。旧后端迁移已经完成，旧实现、回滚镜像和对比证据已经删除。
-兼容行为由后端测试、仓库清单、生产 Compose 集成和受保护真实模型工作流验证。
+生产后端为 Python/FastAPI。当前行为由后端测试、仓库清单、生产 Compose 集成和受保护
+真实模型工作流验证。
 
 目录：
 
@@ -11,27 +11,21 @@
 backend/                Python 后端
 frontend/               React 前端
 tools/                  仓库清单、模型诊断和生产验收工具
-docs/                   配置、运维和迁移完成记录
+docs/                   配置、运维和架构说明
 docker-compose.yml      生产 Compose
 docker-compose.dev.yml  本地基础设施
 ```
 
 ## 不能改变的行为
 
-自适应面试 v2 是一次已批准的破坏性升级，以下旧契约已删除：
+面试提交协议为 `POST /api/interview/sessions/{sessionId}/turns`，使用
+`requestId + questionId + answer`。以下行为不可改变：
 
-- 文字面试 `/answers`、`questionIndex`、`questions[]` 和 `questionsJson`。
-- `interview_answers`、旧问题数组推进字段和独立语音评估表。
-- 面试会话缓存切换为 `interview:v2:*` 和 `voice:v2:*`。
-
-新面试提交协议为 `POST /api/interview/sessions/{sessionId}/turns`，使用
-`requestId + questionId + answer`。除上述明确列出的面试契约外，以下行为仍不可改变：
-
-- 保持 REST 路径、HTTP 方法、参数、请求体、multipart 字段和响应头。
-- 保持响应字段、默认值、null、数组顺序、时间格式、错误码和错误文案。
-- 普通业务错误继续使用 HTTP 200；文件、SSE 和 WebSocket 保持特殊状态行为。
+- 保持当前 REST 路径、HTTP 方法、参数、请求体、multipart 字段和响应头。
+- 成功响应直接返回业务 JSON，无响应体操作使用 HTTP 204。
+- 错误使用标准 4xx/5xx，响应体固定为 `code + detail`；SSE 和 WebSocket 保持各自协议。
 - 保持当前 PostgreSQL 表、字段、约束、索引、事务结果和 `vector(1024)`。
-- 保持 Redis key、TTL、Stream 字段、Pending、reclaim、重试和 ACK 顺序。
+- 保持当前 Redis key、TTL、Stream 字段、Pending、reclaim、重试和 ACK 顺序。
 - 保持 requestId 幂等锁、结果缓存和数据库唯一索引。
 - 保持 Prompt、Skill、Provider、Tool、JSON Schema、重试和回退顺序。
 - 保持 SSE 分帧、WebSocket JSON/Base64 音频和语音生命周期。
@@ -44,6 +38,7 @@ docker-compose.dev.yml  本地基础设施
 - Service 负责编排；Repository 负责数据库读写。
 - API 使用 Pydantic Model，数据库使用 SQLAlchemy Model，不直接返回 ORM。
 - 输出 camelCase，明确控制 null、字段顺序、Unicode、时间和数字。
+- 字符长度、截断和文本切片使用 Python Unicode 字符语义，不模拟 UTF-16 或 Java hash。
 - 使用 `BusinessException` 和 `ErrorCode`。
 - 不使用 bare `except`，不静默吞异常，不伪装成功。
 - 基础设施客户端通过依赖注入提供。
@@ -55,12 +50,17 @@ docker-compose.dev.yml  本地基础设施
 - Alembic 是唯一数据库升级入口。
 - SQLAlchemy 连接池默认 10 个常驻连接、0 overflow。
 - Redis Stream 使用 XGROUP、XREADGROUP、XAUTOCLAIM、XADD 和 XACK。
-- 五组 Stream 每组内部顺序消费，失败时先重投或写失败状态，再 ACK。
-- `voice:evaluate:stream` 只负责把遗留语音任务转投统一的
-  `interview:evaluate:stream`，不得重新引入独立语音评估实现。
+- 四组 Stream 每组内部顺序消费，失败时先重投或写失败状态，再 ACK。
+- 文字和语音面试统一写入 `interview:evaluate:stream`。
+- 限流 key 使用业务 scope，不使用 Controller 或方法类名。
 - 所有模型客户端由 `LlmProviderRegistry` 和统一 LLM Adapter 提供。
 - 关闭 SDK、LangChain 和 LangGraph 隐式重试。
 - Provider 配置以数据库为准，修改后通过 Redis 版本通知清理进程缓存。
+- 内置 Provider 只有百炼，初始不带 API Key；其他 Provider 必须从设置页添加。
+- Compose 的 Provider 加密主密钥自动生成到共享 `provider_key` 卷，不读取 `.env` 主密钥；
+  直接运行 Python 后端时才允许环境变量作为可选外部覆盖。
+- Provider 模型列表通过 OpenAI 兼容 `/models` 自动发现，缓存 5 分钟；远端失败时必须明确
+  标记为当前配置兜底，不能伪装成远端发现成功。
 - 当前模型默认值：
   - `qwen3.7-max`
   - `qwen3.7-text-embedding`，1024 维
@@ -73,8 +73,11 @@ docker-compose.dev.yml  本地基础设施
 
 1. Migrate：Alembic，成功后其他服务才能启动。
 2. API：单 Uvicorn worker。
-3. Worker：处理五组 Redis Stream。
+3. Worker：处理四组 Redis Stream。
 4. Scheduler：单实例恢复和过期任务。
+
+生产前端 Nginx 必须通过 Docker DNS 动态解析 `app`，健康检查经由反向代理访问 `/health`，
+后端容器重建不能要求同时重启前端。
 
 ```bash
 docker compose up -d --build --wait

@@ -158,7 +158,6 @@ async def cleanup_database(database: Database) -> None:
                     delete(VectorStore).where(
                         (VectorStore.metadata_json["kb_id"].astext == target)
                         | (VectorStore.metadata_json["kb_target_id"].astext == target)
-                        | (VectorStore.metadata_json["kb_id_long"].astext == target)
                     )
                 )
             await session.execute(
@@ -302,19 +301,12 @@ async def test_real_infrastructure_knowledge_base_business_flow_with_no_embeddin
                     knowledge_base_id=second_id,
                 )
             )
-            seed_session.add_all(
-                [
-                    VectorStore(
-                        content="formal vector",
-                        metadata_json={"kb_id": str(second_id)},
-                        embedding=[0.0] * EMBEDDING_DIMENSIONS,
-                    ),
-                    VectorStore(
-                        content="legacy vector",
-                        metadata_json={"kb_id_long": str(second_id)},
-                        embedding=[0.0] * EMBEDDING_DIMENSIONS,
-                    ),
-                ]
+            seed_session.add(
+                VectorStore(
+                    content="formal vector",
+                    metadata_json={"kb_id": str(second_id)},
+                    embedding=[0.0] * EMBEDDING_DIMENSIONS,
+                )
             )
         assert await resources.storage.exists(second_key)
 
@@ -332,8 +324,7 @@ async def test_real_infrastructure_knowledge_base_business_flow_with_no_embeddin
         )
         vector_count = await verification.scalar(
             select(VectorStore.id).where(
-                (VectorStore.metadata_json["kb_id"].astext == str(second_id))
-                | (VectorStore.metadata_json["kb_id_long"].astext == str(second_id))
+                VectorStore.metadata_json["kb_id"].astext == str(second_id)
             )
         )
         assert vector_count is None

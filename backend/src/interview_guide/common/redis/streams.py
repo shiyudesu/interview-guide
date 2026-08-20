@@ -21,7 +21,6 @@ FIELD_CONTENT = "content"
 FIELD_KB_ID = "kbId"
 FIELD_RESUME_ID = "resumeId"
 FIELD_SESSION_ID = "sessionId"
-FIELD_VOICE_SESSION_ID = "voiceSessionId"
 FIELD_TASK_ID = "taskId"
 FIELD_DIFFICULTY = "difficulty"
 FIELD_QUESTION_COUNT = "questionCount"
@@ -52,11 +51,6 @@ INTERVIEW_EVALUATE = StreamDefinition(
     "evaluate-group",
     "evaluate-consumer-",
 )
-VOICE_EVALUATE = StreamDefinition(
-    "voice:evaluate:stream",
-    "voice-evaluate-group",
-    "voice-evaluate-consumer-",
-)
 KB_QUESTION_GEN = StreamDefinition(
     "knowledgebase:question-gen:stream",
     "question-gen-group",
@@ -66,7 +60,6 @@ STREAM_DEFINITIONS = (
     KB_VECTORIZE,
     RESUME_ANALYZE,
     INTERVIEW_EVALUATE,
-    VOICE_EVALUATE,
     KB_QUESTION_GEN,
 )
 

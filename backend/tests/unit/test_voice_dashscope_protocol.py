@@ -9,23 +9,53 @@ import pytest
 from websockets.asyncio.server import ServerConnection, serve
 
 from interview_guide.common.config.settings import Settings
-from interview_guide.modules.llm_provider.voice import VoiceConfigStore
+from interview_guide.modules.llm_provider.voice import AsrConfig, TtsConfig
 from interview_guide.modules.voice_interview.dashscope import (
     DashScopeAsrProvider,
     DashScopeTtsSynthesizer,
 )
 
 
-def settings(asr_url: str, tts_url: str) -> Settings:
+def settings() -> Settings:
     return Settings(
         _env_file=None,
         APP_AI_CONFIG_ENCRYPTION_KEY="voice-protocol-test-key",
-        AI_BAILIAN_API_KEY="explicit-fake-protocol-key",
-        APP_VOICE_CONFIG_PATH=".voice-protocol-test.json",
-        APP_VOICE_INTERVIEW_QWEN_ASR_URL=asr_url,
-        APP_VOICE_INTERVIEW_QWEN_TTS_URL=tts_url,
         OTEL_ENABLED=False,
     )
+
+
+class StaticVoiceConfig:
+    def __init__(self, asr_url: str, tts_url: str) -> None:
+        self._asr = AsrConfig(
+            url=asr_url,
+            model="qwen3-asr-flash-realtime",
+            api_key="explicit-fake-protocol-key",
+            language="zh",
+            format="pcm",
+            sample_rate=16000,
+            enable_turn_detection=True,
+            turn_detection_type="server_vad",
+            turn_detection_threshold=0,
+            turn_detection_silence_duration_ms=2000,
+        )
+        self._tts = TtsConfig(
+            url=tts_url,
+            model="qwen3-tts-flash-realtime",
+            api_key="explicit-fake-protocol-key",
+            voice="Cherry",
+            format="pcm",
+            sample_rate=24000,
+            mode="commit",
+            language_type="Chinese",
+            speech_rate=1,
+            volume=60,
+        )
+
+    async def asr_config(self) -> AsrConfig:
+        return self._asr
+
+    async def tts_config(self) -> TtsConfig:
+        return self._tts
 
 
 @pytest.mark.asyncio
@@ -62,7 +92,10 @@ async def test_dashscope_asr_adapter_sends_protocol_and_dispatches_text() -> Non
 
     server = await serve(handler, "127.0.0.1", 0)
     port = server.sockets[0].getsockname()[1]
-    config = VoiceConfigStore(settings(f"ws://127.0.0.1:{port}/asr", f"ws://127.0.0.1:{port}/tts"))
+    config = StaticVoiceConfig(
+        f"ws://127.0.0.1:{port}/asr",
+        f"ws://127.0.0.1:{port}/tts",
+    )
     ready = asyncio.Event()
     partials: list[str] = []
     finals: list[str] = []
@@ -128,11 +161,11 @@ async def test_dashscope_tts_adapter_collects_audio_delta() -> None:
 
     server = await serve(handler, "127.0.0.1", 0)
     port = server.sockets[0].getsockname()[1]
-    resolved = settings(
+    config = StaticVoiceConfig(
         f"ws://127.0.0.1:{port}/asr",
         f"ws://127.0.0.1:{port}/tts",
     )
-    synthesizer = DashScopeTtsSynthesizer(VoiceConfigStore(resolved), resolved)
+    synthesizer = DashScopeTtsSynthesizer(config, settings())
     try:
         audio = await synthesizer.synthesize("测试语音")
     finally:

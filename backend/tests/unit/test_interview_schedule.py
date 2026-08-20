@@ -9,7 +9,7 @@ from interview_guide.modules.interview_schedule.models import (
 )
 
 
-def test_interview_time_accepts_compatibility_minute_and_second_formats() -> None:
+def test_interview_time_accepts_minute_and_second_formats() -> None:
     minute = CreateInterviewRequest.model_validate(
         {
             "companyName": "Company",

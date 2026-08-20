@@ -96,13 +96,12 @@ ServiceDependency = Annotated[InterviewService, Depends(interview_service)]
 
 async def enforce_rate_limit(
     request: Request,
-    method_name: str,
+    scope: str,
     rules: tuple[RateLimitRule, ...],
 ) -> None:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     await infrastructure.rate_limiter.check(
-        class_name="InterviewController",
-        method_name=method_name,
+        scope=scope,
         rules=rules,
         client_ip=client_ip(request),
         now_ms=time.time_ns() // 1_000_000,
@@ -122,13 +121,16 @@ async def create_session(
 ) -> Response:
     await enforce_rate_limit(
         request,
-        "createSession",
+        "interview:create",
         (
             RateLimitRule(RateLimitDimension.GLOBAL, 5),
             RateLimitRule(RateLimitDimension.IP, 5),
         ),
     )
-    return result_response(Result.ok(await service.create_session(payload)))
+    return result_response(
+        Result.ok(await service.create_session(payload)),
+        status_code=201,
+    )
 
 
 @router.get("/unfinished/{resume_id}")
@@ -164,7 +166,7 @@ async def submit_turn(
 ) -> Response:
     await enforce_rate_limit(
         request,
-        "submitTurn",
+        "interview:submit-turn",
         (RateLimitRule(RateLimitDimension.GLOBAL, 10),),
     )
     return result_response(Result.ok(await service.submit_turn(session_id, payload)))

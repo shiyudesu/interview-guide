@@ -46,7 +46,7 @@ def test_missing_font_fails_explicitly(tmp_path: Path) -> None:
         PdfDocumentBuilder(tmp_path / "missing.ttf")
 
 
-def test_download_headers_match_compatibility_encoding_variants() -> None:
+def test_download_headers_encode_unicode_filenames() -> None:
     assert pdf_download_headers("模拟面试报告 session.pdf") == {
         "Content-Disposition": (
             "attachment; filename*=UTF-8''"

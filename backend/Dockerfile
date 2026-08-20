@@ -31,7 +31,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --gid 10001 interview-guide \
-    && useradd --uid 10001 --gid interview-guide --create-home interview-guide
+    && useradd --uid 10001 --gid interview-guide --create-home interview-guide \
+    && install -d --owner=interview-guide --group=interview-guide /var/lib/interview-guide
 
 WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv

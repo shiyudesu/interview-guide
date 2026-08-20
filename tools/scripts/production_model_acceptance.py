@@ -14,6 +14,11 @@ import httpx
 
 from interview_guide.common.ai.adapter import LlmAdapter, ProviderConfig
 from interview_guide.common.ai.prompts import PromptRepository, PromptSanitizer
+from interview_guide.common.ai.providers import (
+    DASHSCOPE_BASE_URL,
+    DASHSCOPE_CHAT_MODEL,
+    DASHSCOPE_EMBEDDING_MODEL,
+)
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.config.settings import Settings
@@ -22,7 +27,7 @@ from interview_guide.modules.interview.models import QuestionKind
 from interview_guide.modules.interview.question import InterviewSkillLibrary
 from interview_guide.modules.interview.repository import SessionAggregate
 from interview_guide.modules.interview.turn import InterviewTurnDecisionService
-from interview_guide.modules.llm_provider.voice import VoiceConfigStore
+from interview_guide.modules.llm_provider.voice import AsrConfig, TtsConfig
 from interview_guide.modules.voice_interview.dashscope import (
     DashScopeAsrProvider,
     DashScopeTtsSynthesizer,
@@ -33,9 +38,44 @@ REPORT = REPOSITORY_ROOT / ".artifacts/real-model-production.json"
 TEXT = "这是生产模型验收。"
 
 
+class AcceptanceVoiceConfig:
+    def __init__(self, settings: Settings, api_key: str) -> None:
+        self._asr = AsrConfig(
+            url=settings.voice_asr_url,
+            model=settings.voice_asr_model,
+            api_key=api_key,
+            language=settings.voice_asr_language,
+            format=settings.voice_asr_format,
+            sample_rate=settings.voice_asr_sample_rate,
+            enable_turn_detection=settings.voice_asr_enable_turn_detection,
+            turn_detection_type=settings.voice_asr_turn_detection_type,
+            turn_detection_threshold=settings.voice_asr_turn_detection_threshold,
+            turn_detection_silence_duration_ms=settings.voice_asr_silence_ms,
+        )
+        self._tts = TtsConfig(
+            url=settings.voice_tts_url,
+            model=settings.voice_tts_model,
+            api_key=api_key,
+            voice=settings.voice_tts_voice,
+            format=settings.voice_tts_format,
+            sample_rate=settings.voice_tts_sample_rate,
+            mode=settings.voice_tts_mode,
+            language_type=settings.voice_tts_language_type,
+            speech_rate=settings.voice_tts_speech_rate,
+            volume=settings.voice_tts_volume,
+        )
+
+    async def asr_config(self) -> AsrConfig:
+        return self._asr
+
+    async def tts_config(self) -> TtsConfig:
+        return self._tts
+
+
 async def verify_turn_decisions(
     settings: Settings,
     adapter: LlmAdapter,
+    api_key: str,
 ) -> dict[str, Any]:
     resources = REPOSITORY_ROOT / "backend/resources"
     service = InterviewTurnDecisionService(
@@ -47,9 +87,9 @@ async def verify_turn_decisions(
     )
     provider = ProviderConfig(
         provider_id="dashscope",
-        base_url=settings.ai_dashscope_base_url,
-        api_key=settings.ai_bailian_api_key.get_secret_value(),
-        model=settings.ai_model,
+        base_url=DASHSCOPE_BASE_URL,
+        api_key=api_key,
+        model=DASHSCOPE_CHAT_MODEL,
     )
     now = datetime.now().replace(tzinfo=None)
     current_id = uuid.uuid4()
@@ -144,8 +184,8 @@ async def verify_turn_decisions(
     }
 
 
-async def verify_voice(settings: Settings) -> dict[str, Any]:
-    store = VoiceConfigStore(settings)
+async def verify_voice(settings: Settings, api_key: str) -> dict[str, Any]:
+    store = AcceptanceVoiceConfig(settings, api_key)
     pcm = await DashScopeTtsSynthesizer(store, settings).synthesize(TEXT)
     if not pcm:
         raise AssertionError("TTS returned no PCM")
@@ -185,13 +225,12 @@ async def verify_voice(settings: Settings) -> dict[str, Any]:
 async def main() -> None:
     settings = Settings(
         _env_file=None,
-        APP_AI_CONFIG_ENCRYPTION_KEY="protected-production-model-check",
-        AI_BAILIAN_API_KEY=os.environ["AI_BAILIAN_API_KEY"],
         OTEL_ENABLED=False,
     )
-    headers = {"Authorization": f"Bearer {settings.ai_bailian_api_key.get_secret_value()}"}
-    chat_url = f"{settings.ai_dashscope_base_url.rstrip('/')}/chat/completions"
-    embedding_url = f"{settings.ai_dashscope_base_url.rstrip('/')}/embeddings"
+    api_key = os.environ["REAL_MODEL_API_KEY"]
+    headers = {"Authorization": f"Bearer {api_key}"}
+    chat_url = f"{DASHSCOPE_BASE_URL}/chat/completions"
+    embedding_url = f"{DASHSCOPE_BASE_URL}/embeddings"
     samples: list[float] = []
     usage = {"inputTokens": 0, "outputTokens": 0}
     async with httpx.AsyncClient(timeout=120, trust_env=False) as client:
@@ -201,7 +240,7 @@ async def main() -> None:
                 chat_url,
                 headers=headers,
                 json={
-                    "model": settings.ai_model,
+                    "model": DASHSCOPE_CHAT_MODEL,
                     "messages": [{"role": "user", "content": "Reply with OK only."}],
                     "max_tokens": 1,
                 },
@@ -216,7 +255,7 @@ async def main() -> None:
             embedding_url,
             headers=headers,
             json={
-                "model": settings.ai_embedding_model,
+                "model": DASHSCOPE_EMBEDDING_MODEL,
                 "input": ["生产模型向量验收"],
                 "dimensions": settings.ai_embedding_dimensions,
             },
@@ -227,8 +266,8 @@ async def main() -> None:
         raise AssertionError(f"Unexpected embedding dimensions: {dimensions}")
     async with httpx.AsyncClient(timeout=120, trust_env=False) as turn_client:
         adapter = LlmAdapter(turn_client)
-        turns = await verify_turn_decisions(settings, adapter)
-    voice = await verify_voice(settings)
+        turns = await verify_turn_decisions(settings, adapter, api_key)
+    voice = await verify_voice(settings, api_key)
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(
         json.dumps(
@@ -237,12 +276,12 @@ async def main() -> None:
                 "chat": {
                     "calls": len(samples),
                     "medianMs": round(statistics.median(samples), 3),
-                    "model": settings.ai_model,
+                    "model": DASHSCOPE_CHAT_MODEL,
                     "usage": usage,
                 },
                 "embedding": {
                     "dimensions": dimensions,
-                    "model": settings.ai_embedding_model,
+                    "model": DASHSCOPE_EMBEDDING_MODEL,
                 },
                 "fakeModel": False,
                 "passed": True,

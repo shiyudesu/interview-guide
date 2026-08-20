@@ -4,32 +4,32 @@
   ],
   "manifests": {
     "api.json": {
-      "backendEndpointCount": 94,
-      "backendOnlyCount": 6,
+      "backendEndpointCount": 92,
+      "backendOnlyCount": 3,
       "controllerCount": 5,
-      "frontendCallCount": 88,
+      "frontendCallCount": 89,
       "frontendOnlyCount": 1,
       "sseEndpointCount": 2,
       "webSocketEndpointCount": 1
     },
     "configuration.json": {
-      "configurationValueCount": 149,
-      "envExampleCount": 53,
+      "configurationValueCount": 142,
+      "envExampleCount": 41,
       "envReferencedButUndocumentedCount": 0,
-      "propertyBindingCount": 90
+      "propertyBindingCount": 75
     },
     "database.json": {
-      "alterationCount": 16,
+      "alterationCount": 1,
       "extensionCount": 3,
-      "indexCount": 19,
-      "migrationCount": 5,
+      "indexCount": 17,
+      "migrationCount": 2,
       "tableCount": 17
     },
     "redis.json": {
-      "constantCount": 34,
+      "constantCount": 35,
       "rateLimitRuleCount": 4,
       "scheduledMethodCount": 4,
-      "streamCount": 5
+      "streamCount": 4
     },
     "resources.json": {
       "disabledTestMarkerCount": 1,
@@ -40,7 +40,7 @@
         "redis-script": 1,
         "skill": 40
       },
-      "testFileCount": 49
+      "testFileCount": 47
     }
   },
   "schemaVersion": 1

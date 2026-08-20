@@ -4,20 +4,13 @@ from dataclasses import dataclass
 
 import pytest
 
-from interview_guide.modules.knowledge_base.repository import trim_codepoints_leq_space
 from interview_guide.modules.knowledge_base.service import (
     KnowledgeBaseService,
     is_blank_text,
-    utf16_code_unit_length,
 )
 
 
-def test_compatibility_string_length_counts_utf16_code_units() -> None:
-    assert utf16_code_unit_length("知识库😀") == 5
-
-
-def test_compatibility_blank_and_trim_compatibility() -> None:
-    assert trim_codepoints_leq_space("\t fixed \n") == "fixed"
+def test_blank_text_uses_unicode_whitespace() -> None:
     assert is_blank_text("") is True
     assert is_blank_text(" \t\n") is True
     assert is_blank_text(" value ") is False

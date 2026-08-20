@@ -18,12 +18,10 @@ from interview_guide.common.redis.streams import (
     KB_VECTORIZE,
     RESUME_ANALYZE,
     STREAM_DEFINITIONS,
-    VOICE_EVALUATE,
     RedisStreamService,
     SequentialStreamConsumer,
     run_stream_consumers,
 )
-from interview_guide.modules.interview.api import build_interview_service
 from interview_guide.modules.interview.evaluation import UnifiedEvaluationService
 from interview_guide.modules.interview.repository import InterviewRepository
 from interview_guide.modules.interview.service import InterviewEvaluateHandler
@@ -42,11 +40,6 @@ from interview_guide.modules.resume.analysis import (
     ResumeAnalyzeHandler,
     ResumeGradingService,
 )
-from interview_guide.modules.voice_interview.evaluation import (
-    VoiceEvaluateStreamHandler,
-)
-from interview_guide.modules.voice_interview.repository import VoiceInterviewRepository
-from interview_guide.modules.voice_interview.service import VoiceInterviewService
 from interview_guide.process import install_shutdown_handlers
 
 logger = logging.getLogger(__name__)
@@ -156,33 +149,12 @@ async def run_worker(
                     infrastructure.provider_registry,
                 ),
             )
-            voice_repository = VoiceInterviewRepository(
-                infrastructure.database.sessions,
-                now_factory,
-            )
-            voice_service = VoiceInterviewService(
-                voice_repository,
-                infrastructure.redis.client,
-                build_interview_service(infrastructure, settings),
-                now_factory,
-            )
-            voice_consumer = SequentialStreamConsumer(
-                streams,
-                VOICE_EVALUATE,
-                f"{VOICE_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}",
-                VoiceEvaluateStreamHandler(
-                    voice_repository,
-                    streams,
-                    voice_service,
-                ),
-            )
             await run_stream_consumers(
                 (
                     resume_consumer,
                     vector_consumer,
                     question_generation_consumer,
                     interview_consumer,
-                    voice_consumer,
                 ),
                 resolved_stop_event,
             )

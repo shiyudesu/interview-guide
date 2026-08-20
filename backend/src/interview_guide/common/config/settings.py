@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote_plus
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -124,39 +124,14 @@ class Settings(BaseSettings):
         default=None,
         validation_alias="APP_AI_CONFIG_ENCRYPTION_KEY",
     )
-    ai_config_require_encryption_key: bool = Field(
-        default=True,
-        validation_alias="APP_AI_CONFIG_REQUIRE_ENCRYPTION_KEY",
-    )
-    ai_config_allow_fallback_encryption_key: bool = Field(
-        default=False,
-        validation_alias="APP_AI_CONFIG_ALLOW_FALLBACK_ENCRYPTION_KEY",
-    )
-    ai_default_provider: str = Field(
-        default="dashscope",
-        validation_alias="APP_AI_DEFAULT_PROVIDER",
-    )
-    ai_default_embedding_provider: str = Field(
-        default="dashscope",
-        validation_alias="APP_AI_DEFAULT_EMBEDDING_PROVIDER",
+    ai_config_encryption_key_file: Path = Field(
+        default=Path.home() / ".local" / "share" / "interview-guide" / "provider-encryption.key",
+        validation_alias="APP_AI_CONFIG_ENCRYPTION_KEY_FILE",
     )
     ai_embedding_dimensions: int = Field(
         default=1024,
         gt=0,
         validation_alias="APP_AI_EMBEDDING_DIMENSIONS",
-    )
-    ai_embedding_model: str = Field(
-        default="qwen3.7-text-embedding",
-        validation_alias="AI_EMBEDDING_MODEL",
-    )
-    ai_bailian_api_key: SecretStr = Field(
-        default=SecretStr(""),
-        validation_alias="AI_BAILIAN_API_KEY",
-    )
-    ai_model: str = Field(default="qwen3.7-max", validation_alias="AI_MODEL")
-    ai_dashscope_base_url: str = Field(
-        default="https://dashscope.aliyuncs.com/compatible-mode/v1",
-        validation_alias="APP_AI_PROVIDERS_DASHSCOPE_BASE_URL",
     )
     ai_rag_rewrite_enabled: bool = Field(
         default=True,
@@ -237,69 +212,37 @@ class Settings(BaseSettings):
         le=300,
         validation_alias="APP_VOICE_TURN_MIN_REMAINING_SECONDS",
     )
-    provider_lmstudio_api_key: SecretStr = Field(
-        default=SecretStr("lm-studio"),
-        validation_alias="PROVIDER_LMSTUDIO_API_KEY",
-    )
-    provider_kimi_api_key: SecretStr = Field(
-        default=SecretStr(""),
-        validation_alias="PROVIDER_KIMI_API_KEY",
-    )
-    provider_kimi_model: str = Field(
-        default="kimi-latest",
-        validation_alias="PROVIDER_KIMI_MODEL",
-    )
-    provider_deepseek_api_key: SecretStr = Field(
-        default=SecretStr(""),
-        validation_alias="PROVIDER_DEEPSEEK_API_KEY",
-    )
-    provider_deepseek_model: str = Field(
-        default="deepseek-v4-flash",
-        validation_alias="PROVIDER_DEEPSEEK_MODEL",
-    )
-    provider_glm_api_key: SecretStr = Field(
-        default=SecretStr(""),
-        validation_alias="PROVIDER_GLM_API_KEY",
-    )
-    provider_glm_model: str = Field(
-        default="glm-5",
-        validation_alias="PROVIDER_GLM_MODEL",
-    )
-    voice_config_path: Path = Field(
-        default=Path("~/.interview-guide/voice-config.json"),
-        validation_alias="APP_VOICE_CONFIG_PATH",
-    )
     voice_asr_url: str = Field(
         default="wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_URL",
+        validation_alias="APP_VOICE_ASR_URL",
     )
     voice_asr_model: str = Field(
         default="qwen3-asr-flash-realtime",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_MODEL",
+        validation_alias="APP_VOICE_ASR_MODEL",
     )
     voice_asr_language: str = Field(
         default="zh",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_LANGUAGE",
+        validation_alias="APP_VOICE_ASR_LANGUAGE",
     )
     voice_asr_format: str = Field(
         default="pcm",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_FORMAT",
+        validation_alias="APP_VOICE_ASR_FORMAT",
     )
     voice_asr_sample_rate: int = Field(
         default=16000,
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_SAMPLE_RATE",
+        validation_alias="APP_VOICE_ASR_SAMPLE_RATE",
     )
     voice_asr_enable_turn_detection: bool = Field(
         default=True,
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_ENABLE_TURN_DETECTION",
+        validation_alias="APP_VOICE_ASR_ENABLE_TURN_DETECTION",
     )
     voice_asr_turn_detection_type: str = Field(
         default="server_vad",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_TURN_DETECTION_TYPE",
+        validation_alias="APP_VOICE_ASR_TURN_DETECTION_TYPE",
     )
     voice_asr_turn_detection_threshold: float = Field(
         default=0,
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_ASR_TURN_DETECTION_THRESHOLD",
+        validation_alias="APP_VOICE_ASR_TURN_DETECTION_THRESHOLD",
     )
     voice_asr_silence_ms: int = Field(
         default=2000,
@@ -307,39 +250,39 @@ class Settings(BaseSettings):
     )
     voice_tts_model: str = Field(
         default="qwen3-tts-flash-realtime",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_MODEL",
+        validation_alias="APP_VOICE_TTS_MODEL",
     )
     voice_tts_url: str = Field(
         default="wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_URL",
+        validation_alias="APP_VOICE_TTS_URL",
     )
     voice_tts_voice: str = Field(
         default="Cherry",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_VOICE",
+        validation_alias="APP_VOICE_TTS_VOICE",
     )
     voice_tts_format: str = Field(
         default="pcm",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_FORMAT",
+        validation_alias="APP_VOICE_TTS_FORMAT",
     )
     voice_tts_sample_rate: int = Field(
         default=24000,
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_SAMPLE_RATE",
+        validation_alias="APP_VOICE_TTS_SAMPLE_RATE",
     )
     voice_tts_mode: str = Field(
         default="commit",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_MODE",
+        validation_alias="APP_VOICE_TTS_MODE",
     )
     voice_tts_language_type: str = Field(
         default="Chinese",
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_LANGUAGE_TYPE",
+        validation_alias="APP_VOICE_TTS_LANGUAGE_TYPE",
     )
     voice_tts_speech_rate: float = Field(
         default=1,
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_SPEECH_RATE",
+        validation_alias="APP_VOICE_TTS_SPEECH_RATE",
     )
     voice_tts_volume: int = Field(
         default=60,
-        validation_alias="APP_VOICE_INTERVIEW_QWEN_TTS_VOLUME",
+        validation_alias="APP_VOICE_TTS_VOLUME",
     )
     voice_tts_connect_timeout_seconds: float = Field(
         default=5,
@@ -376,26 +319,6 @@ class Settings(BaseSettings):
         default=None,
         validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT",
     )
-
-    @model_validator(mode="after")
-    def validate_required_secrets(self) -> Settings:
-        missing_key = (
-            self.ai_config_encryption_key is None
-            or not self.ai_config_encryption_key.get_secret_value().strip()
-        )
-        if missing_key and self.ai_config_require_encryption_key:
-            raise ValueError(
-                "APP_AI_CONFIG_ENCRYPTION_KEY 未配置，无法初始化 Provider API Key 加密"
-            )
-        if (
-            missing_key
-            and not self.ai_config_require_encryption_key
-            and not self.ai_config_allow_fallback_encryption_key
-        ):
-            raise ValueError(
-                "APP_AI_CONFIG_ENCRYPTION_KEY 未配置，且未显式允许 Provider API Key 开发 fallback"
-            )
-        return self
 
     @property
     def allowed_origins(self) -> tuple[str, ...]:

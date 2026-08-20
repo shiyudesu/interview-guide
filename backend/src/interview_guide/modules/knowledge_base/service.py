@@ -25,10 +25,7 @@ from interview_guide.infrastructure.file.validation import (
     validate_content_type,
     validate_file,
 )
-from interview_guide.modules.knowledge_base.repository import (
-    KnowledgeBaseRepository,
-    trim_codepoints_leq_space,
-)
+from interview_guide.modules.knowledge_base.repository import KnowledgeBaseRepository
 
 logger = logging.getLogger(__name__)
 
@@ -67,10 +64,6 @@ class KnowledgeBaseStreams(Protocol):
         max_len: int = 1000,
         message_id: str = "*",
     ) -> str: ...
-
-
-def utf16_code_unit_length(value: str) -> int:
-    return len(value.encode("utf-16-le", errors="surrogatepass")) // 2
 
 
 def is_blank_text(value: str | None) -> bool:
@@ -235,7 +228,7 @@ class KnowledgeBaseService:
         resolved_filename = filename or ""
         knowledge_name = (
             name
-            if name is not None and trim_codepoints_leq_space(name)
+            if name is not None and name.strip()
             else resolved_filename.rsplit(".", 1)[0]
             if "." in resolved_filename
             else resolved_filename or "未命名知识库"
@@ -244,8 +237,8 @@ class KnowledgeBaseService:
             entity = await self._repository.add(
                 KnowledgeBase(
                     access_count=1,
-                    category=trim_codepoints_leq_space(category)
-                    if category is not None and trim_codepoints_leq_space(category)
+                    category=category.strip()
+                    if category is not None and category.strip()
                     else None,
                     chunk_count=0,
                     content_type=upload_content_type,
@@ -269,7 +262,7 @@ class KnowledgeBaseService:
                 "name": entity.name,
                 "category": entity.category or "",
                 "fileSize": entity.file_size,
-                "contentLength": utf16_code_unit_length(content),
+                "contentLength": len(content),
                 "vectorStatus": "PENDING",
             },
             "storage": {"fileKey": file_key, "fileUrl": file_url},

@@ -6,10 +6,10 @@ import pytest
 
 from interview_guide.common.api.models import (
     CamelModel,
+    character_length,
     compact_json_text,
     format_api_datetime,
     normalize_request_id,
-    utf16_code_unit_length,
 )
 from interview_guide.common.result import Result
 
@@ -19,7 +19,7 @@ class ExampleModel(CamelModel):
     session_id: int
 
 
-def test_result_field_order_matches_compatibility_json() -> None:
+def test_internal_result_field_order_is_stable() -> None:
     result = Result.ok({"status": "UP"})
 
     assert list(result.model_dump().keys()) == [
@@ -43,8 +43,8 @@ def test_camel_case_and_datetime_helpers() -> None:
     assert format_api_datetime(model.created_at) == "2026-08-16T08:00:00"
 
 
-def test_compatibility_utf16_length_counts_surrogate_pairs() -> None:
-    assert utf16_code_unit_length("A😀B") == 4
+def test_character_length_counts_unicode_characters() -> None:
+    assert character_length("A😀B") == 3
 
 
 def test_compact_json_preserves_unicode_and_insertion_order() -> None:

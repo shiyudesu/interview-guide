@@ -5,7 +5,6 @@ from datetime import datetime
 from pydantic import field_validator
 
 from interview_guide.common.api.models import CamelModel
-from interview_guide.modules.knowledge_base.models import trim_codepoints_leq_space
 
 
 def validate_not_empty(value: object) -> object:
@@ -15,7 +14,7 @@ def validate_not_empty(value: object) -> object:
 
 
 def validate_not_blank(value: object, message: str) -> object:
-    if value is None or (isinstance(value, str) and not trim_codepoints_leq_space(value)):
+    if value is None or (isinstance(value, str) and not value.strip()):
         raise ValueError(message)
     return value
 

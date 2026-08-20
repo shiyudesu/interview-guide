@@ -35,15 +35,8 @@ InterviewGuide 是一个自托管 AI 面试平台，覆盖简历分析、文字�
 cp .env.example .env
 ```
 
-使用默认四个模型时，至少修改下面两项：
-
-```env
-AI_BAILIAN_API_KEY=your_dashscope_api_key
-APP_AI_CONFIG_ENCRYPTION_KEY=replace_with_a_stable_random_secret
-```
-
-`APP_AI_CONFIG_ENCRYPTION_KEY` 用于加密数据库中的 Provider API Key。首次部署后不要更换，
-否则已有密钥无法解密。
+AI 配置无需写入 `.env`。首次启动会自动生成 Provider 加密主密钥，并只创建一个不带 API Key
+的百炼 Provider；启动后在设置页录入百炼 API Key 即可。`.env` 主要用于端口和基础设施配置。
 
 对外部署前还要修改 PostgreSQL 和对象存储的默认密码。
 
@@ -60,8 +53,8 @@ docker compose ps
 | --- | --- |
 | 前端 | <http://localhost> |
 | API | <http://localhost:8080> |
-| Swagger UI | <http://localhost:8080/swagger-ui.html> |
-| OpenAPI | <http://localhost:8080/v3/api-docs> |
+| Swagger UI | <http://localhost:8080/docs> |
+| OpenAPI | <http://localhost:8080/openapi.json> |
 | MinIO Console | <http://localhost:9001> |
 
 查看日志：
@@ -70,10 +63,6 @@ docker compose ps
 docker compose logs -f app worker scheduler
 docker compose logs migrate
 ```
-
-首次升级到自适应面试 v2 前，必须备份数据并在 `.env` 中临时设置
-`ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`。该迁移会清空已有面试与语音会话数据；完成后请把
-开关恢复为 `0`。详细步骤见 `docs/OPERATIONS.md`。
 
 停止服务：
 
@@ -90,8 +79,8 @@ docker compose down
 
 1. `interview-guide-migrate` 执行 `alembic upgrade head`。
 2. `interview-guide-api` 提供 REST、SSE 和 WebSocket，固定为单 Uvicorn worker。
-3. `interview-guide-worker` 消费五组 Redis Stream：简历分析、知识库向量化、知识库出题、
-   文字面试评估和语音面试评估。
+3. `interview-guide-worker` 消费四组 Redis Stream：简历分析、知识库向量化、知识库出题和
+   统一面试评估。
 4. `interview-guide-scheduler` 处理日程过期、题目生成恢复和语音会话恢复。
 
 API、Worker 和 Scheduler 会等 Migrate 成功后再启动。前端由 Nginx 提供静态文件，并把
@@ -138,11 +127,13 @@ pnpm run dev
 Vite 默认监听 <http://localhost:5173>，并把 `/api` 转发到
 `VITE_API_PROXY_TARGET`，默认值为 `http://localhost:8080`。
 
+REST API 成功时直接返回业务 JSON；无响应体操作返回 HTTP 204。错误使用标准 4xx/5xx
+状态码，响应体为 `{"code": 业务错误码, "detail": "错误说明"}`。
+
 ## Provider 和模型
 
-内置种子包括 DashScope、Kimi、DeepSeek、GLM 和 LM Studio，也可以添加任意 OpenAI
-兼容 Provider。种子只在 Provider 表为空时写入；系统启动后，数据库和设置页中的配置是实际
-数据源。
+系统只内置百炼 Provider，也可以在设置页添加任意 OpenAI 兼容 Provider。百炼种子只在
+Provider 表为空时写入，且不包含 API Key；系统启动后，数据库和设置页中的配置是实际数据源。
 
 当前默认模型：
 
@@ -153,7 +144,9 @@ ASR        qwen3-asr-flash-realtime
 TTS        qwen3-tts-flash-realtime
 ```
 
-系统不会自动从厂商拉取模型列表。聊天模型、Embedding 模型和向量维度需要按厂商文档填写。
+设置页会通过 Provider 的 OpenAI 兼容 `GET /models` 接口自动拉取聊天和 Embedding 模型，
+结果在 Redis 中缓存 5 分钟，也可以手工强制刷新。厂商不支持模型列表接口或请求失败时，页面会
+明确显示原因并保留当前配置和手工输入；向量维度仍需按厂商文档确认。
 详细配置见 [配置说明](docs/CONFIGURATION.md)。
 
 ## 检查命令
@@ -195,7 +188,7 @@ uv run python -m unittest discover -s tests -v
 backend/                FastAPI 后端、Alembic、资源和测试
 frontend/               React 前端、Playwright 和 Nginx 配置
 tools/                  仓库清单、模型诊断代理、生产模型验收
-docs/                   配置、运维和已完成迁移记录
+docs/                   配置、运维和架构说明
 docker-compose.yml      完整生产拓扑
 docker-compose.dev.yml  本地基础设施
 ```
@@ -204,11 +197,10 @@ docker-compose.dev.yml  本地基础设施
 
 - [配置说明](docs/CONFIGURATION.md)
 - [运行与排障](docs/OPERATIONS.md)
-- [自适应面试轮次实施计划](docs/ADAPTIVE_INTERVIEW_PLAN.md)
+- [统一自适应面试](docs/ADAPTIVE_INTERVIEW.md)
 - [后端开发](backend/README.md)
 - [前端开发](frontend/README.md)
 - [仓库工具](tools/README.md)
-- [迁移完成记录](docs/MIGRATION_PLAN.md)
 
 ## CI
 
@@ -218,6 +210,7 @@ docker-compose.dev.yml  本地基础设施
   PostgreSQL/Redis/S3 集成测试、生产 Compose 及前端真实后端 E2E。
 - `CI gate` 汇总必需 Job，允许未命中的检查安全跳过。
 - 每日定时和手动触发始终执行全量 CI。
-- `Real model production checks`：在受保护环境中调用真实 LLM、Embedding、ASR 和 TTS。
+- `Real model production checks`：使用 `real-model` 环境中的受保护 Secret
+  `REAL_MODEL_API_KEY` 调用真实 LLM、Embedding、ASR 和 TTS。
 
 CI 还会检查生产镜像保持 Python-only。

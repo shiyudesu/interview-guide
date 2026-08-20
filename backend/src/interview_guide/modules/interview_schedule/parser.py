@@ -213,9 +213,9 @@ class InterviewParseService:
                 result.interview_time = parse_datetime(f"{match.group(1)} {match.group(2)}")
             meeting_link = ""
             if match := MEETING_ID_TENCENT.search(raw_text):
-                meeting_link += f"会议号: {match.group(0)}"
+                meeting_link += f"会议号: {match.group(1)}"
             if match := PASSWORD_TENCENT.search(raw_text):
-                meeting_link += f" 密码: {match.group(0)}"
+                meeting_link += f" 密码: {match.group(1)}"
             if meeting_link:
                 result.meeting_link = meeting_link
             if match := COMPANY_TENCENT.search(raw_text):
@@ -297,8 +297,9 @@ def parse_round_number(text: str | None) -> int:
     if match is None:
         return 1
     value = match.group(0)
-    default_value = int(re.sub(r"\D", "", value))
-    return CHINESE_NUMBERS.get(value, default_value)
+    if value.isdigit():
+        return int(value)
+    return CHINESE_NUMBERS.get(value, 1)
 
 
 def parsed_schedule_from_ai(value: dict[str, Any]) -> ParsedSchedule:

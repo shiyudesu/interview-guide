@@ -21,7 +21,7 @@ from interview_guide.common.redis.streams import RedisStreamService
 from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.infrastructure.file.document import create_document_parser
 from interview_guide.infrastructure.storage.s3 import S3Storage
-from interview_guide.modules.llm_provider.voice import VoiceConfigStore
+from interview_guide.modules.llm_provider.voice import VoiceConfigService
 
 
 class RuntimeInfrastructure:
@@ -54,7 +54,11 @@ class RuntimeInfrastructure:
         )
         self.llm_adapter = LlmAdapter()
         self.prompt_sanitizer = PromptSanitizer()
-        self.voice_config = VoiceConfigStore(settings)
+        self.voice_config = VoiceConfigService(
+            repository,
+            self.provider_registry,
+            encryption,
+        )
         self.storage = S3Storage(
             settings,
             self.blocking_executor,
@@ -76,7 +80,6 @@ class RuntimeInfrastructure:
             now=provider_now,
         )
         await self.provider_registry.start()
-        await self.voice_config.start()
         self._started = True
 
     async def close(self) -> None:

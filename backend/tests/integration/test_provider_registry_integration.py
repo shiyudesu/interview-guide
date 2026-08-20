@@ -35,7 +35,6 @@ def settings_from_environment() -> Settings:
     return Settings(
         _env_file=None,
         APP_AI_CONFIG_ENCRYPTION_KEY="comparison-provider-encryption-key",
-        AI_BAILIAN_API_KEY="comparison-placeholder-key",
         POSTGRES_HOST=postgres.hostname or "127.0.0.1",
         POSTGRES_PORT=postgres.port or 5432,
         POSTGRES_DB=postgres.path.removeprefix("/"),
@@ -60,9 +59,6 @@ async def test_bootstrap_registry_and_cross_process_version_reload() -> None:
         [
             bytes.fromhex("000102030405060708090a0b"),
             bytes.fromhex("0c0d0e0f1011121314151617"),
-            bytes.fromhex("18191a1b1c1d1e1f20212223"),
-            bytes.fromhex("2425262728292a2b2c2d2e2f"),
-            bytes.fromhex("303132333435363738393a3b"),
         ]
     )
     encryption = ApiKeyEncryption(
@@ -74,6 +70,14 @@ async def test_bootstrap_registry_and_cross_process_version_reload() -> None:
         encryption,
         now=lambda: datetime(2026, 8, 16, 8, 0),
     )
+    encrypted = encryption.encrypt("comparison-placeholder-key")
+    await repository.update_provider(
+        "dashscope",
+        {
+            "api_key_ciphertext": encrypted.ciphertext,
+            "api_key_nonce": encrypted.nonce,
+        },
+    )
 
     first = LlmProviderRegistry(repository, encryption, redis, settings)
     second = LlmProviderRegistry(repository, encryption, redis, settings)
@@ -82,6 +86,10 @@ async def test_bootstrap_registry_and_cross_process_version_reload() -> None:
     try:
         assert (await first.get_chat()).provider_id == "dashscope"
         assert (await first.get_embedding()).embedding_dimensions == 1024
+        voice_config = await repository.voice_config()
+        assert voice_config.asr_provider_id == "dashscope"
+        assert voice_config.tts_provider_id == "dashscope"
+        assert (await first.get_voice("dashscope")).api_key == "comparison-placeholder-key"
 
         await repository.update_model("dashscope", "qwen-updated")
         assert await first.publish_change() == 1
@@ -96,10 +104,6 @@ async def test_bootstrap_registry_and_cross_process_version_reload() -> None:
         restore_nonces = iter(
             [
                 bytes.fromhex("000102030405060708090a0b"),
-                bytes.fromhex("0c0d0e0f1011121314151617"),
-                bytes.fromhex("18191a1b1c1d1e1f20212223"),
-                bytes.fromhex("2425262728292a2b2c2d2e2f"),
-                bytes.fromhex("303132333435363738393a3b"),
             ]
         )
         await repository.bootstrap(

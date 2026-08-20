@@ -1,4 +1,4 @@
-"""Create the accepted production schema.
+"""Create the current application schema.
 
 Revision ID: 0001_initial_schema
 Revises:
@@ -20,18 +20,19 @@ depends_on: str | Sequence[str] | None = None
 
 TABLES = (
     "voice_interview_messages",
-    "voice_interview_evaluations",
     "voice_interview_sessions",
+    "interview_turns",
+    "interview_questions",
     "rag_session_knowledge_bases",
     "rag_chat_messages",
     "rag_chat_sessions",
     "knowledge_base_questions",
     "vector_store",
-    "interview_answers",
     "interview_sessions",
     "resume_analyses",
     "knowledge_bases",
     "resumes",
+    "voice_model_config",
     "llm_global_setting",
     "llm_provider_config",
     "interview_schedule",

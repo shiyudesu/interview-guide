@@ -3,7 +3,7 @@ import Layout from './components/Layout';
 import { useEffect, useState, Suspense, lazy } from 'react';
 import { historyApi, type InterviewDetail } from './api/history';
 import type { UploadKnowledgeBaseResponse } from './api/knowledgebase';
-import type { Difficulty } from './components/UnifiedInterviewModal';
+import type { Difficulty } from './hooks/useInterviewConfig';
 import type { CategoryDTO } from './api/skill';
 import { Loader2 } from 'lucide-react';
 import { ROUTE_PATTERNS, ROUTES } from './constants/routes';
@@ -221,9 +221,6 @@ function App() {
 
             {/* 进行中的文本面试，刷新时按会话 ID 恢复 */}
             <Route path={ROUTE_PATTERNS.interviewSession} element={<InterviewWrapper />} />
-
-            {/* 模拟面试 */}
-            <Route path="interview/:resumeId" element={<InterviewWrapper />} />
 
             {/* 语音面试 */}
             <Route path="voice-interview" element={<VoiceInterviewPageWrapper />} />

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import field_validator
 
 from interview_guide.common.api.models import CamelModel
@@ -9,6 +11,7 @@ class ProviderResponse(CamelModel):
     id: str
     base_url: str
     masked_api_key: str
+    has_api_key: bool
     model: str
     embedding_model: str | None
     embedding_dimensions: int
@@ -52,6 +55,7 @@ class UpdateProviderRequest(CamelModel):
 
 
 class AsrConfigResponse(CamelModel):
+    provider_id: str
     enable_turn_detection: bool
     format: str
     language: str
@@ -65,6 +69,7 @@ class AsrConfigResponse(CamelModel):
 
 
 class AsrConfigRequest(CamelModel):
+    provider_id: str | None = None
     url: str | None = None
     model: str | None = None
     api_key: str | None = None
@@ -78,6 +83,8 @@ class AsrConfigRequest(CamelModel):
 
 
 class TtsConfigResponse(CamelModel):
+    provider_id: str
+    url: str
     format: str
     language_type: str
     masked_api_key: str
@@ -90,6 +97,8 @@ class TtsConfigResponse(CamelModel):
 
 
 class TtsConfigRequest(CamelModel):
+    provider_id: str | None = None
+    url: str | None = None
     model: str | None = None
     api_key: str | None = None
     voice: str | None = None
@@ -105,3 +114,19 @@ class ProviderTestResult(CamelModel):
     success: bool
     message: str
     model: str
+
+
+class ModelDiscoveryRequest(CamelModel):
+    provider_id: str | None = None
+    base_url: str | None = None
+    api_key: str | None = None
+    model: str | None = None
+    embedding_model: str | None = None
+    refresh: bool = False
+
+
+class ProviderModelList(CamelModel):
+    chat_models: list[str]
+    embedding_models: list[str]
+    source: Literal["remote", "configured"]
+    warning: str | None = None

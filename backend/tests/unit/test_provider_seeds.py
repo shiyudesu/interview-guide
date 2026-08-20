@@ -1,28 +1,15 @@
 from __future__ import annotations
 
 from interview_guide.common.ai.providers import static_provider_seeds
-from interview_guide.common.config.settings import Settings
 
 
-def test_static_provider_seed_order_and_defaults_match_compatibility() -> None:
-    settings = Settings(
-        _env_file=None,
-        APP_AI_CONFIG_ENCRYPTION_KEY="test-key",
-        AI_BAILIAN_API_KEY="dashscope-key",
-        AI_EMBEDDING_MODEL="qwen-embedding-test",
-        AI_MODEL="qwen-test",
-        PROVIDER_KIMI_API_KEY="kimi-key",
-    )
+def test_only_dashscope_is_seeded_without_credentials() -> None:
+    seeds = static_provider_seeds()
 
-    seeds = static_provider_seeds(settings)
-
-    assert [seed.provider_id for seed in seeds] == [
-        "dashscope",
-        "lmstudio",
-        "kimi",
-        "deepseek",
-        "glm",
-    ]
-    assert seeds[0].model == "qwen-test"
-    assert seeds[0].embedding_model == "qwen-embedding-test"
-    assert seeds[2].temperature == 1
+    assert len(seeds) == 1
+    assert seeds[0].provider_id == "dashscope"
+    assert seeds[0].base_url == "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    assert seeds[0].model == "qwen3.7-max"
+    assert seeds[0].embedding_model == "qwen3.7-text-embedding"
+    assert seeds[0].embedding_dimensions == 1024
+    assert seeds[0].supports_embedding is True

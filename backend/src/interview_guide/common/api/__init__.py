@@ -1,1 +1,1 @@
-"""HTTP compatibility helpers."""
+"""HTTP API helpers."""

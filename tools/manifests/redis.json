@@ -1,18 +1,18 @@
 {
   "constants": [
     {
-      "name": "DEV_FALLBACK_KEY",
+      "name": "KEY_BYTES",
       "source": {
         "file": "backend/src/interview_guide/common/ai/encryption.py",
-        "line": 14
+        "line": 18
       },
-      "valueExpression": "\"interview-guide-dev-only-provider-api-key-encryption\""
+      "valueExpression": "32"
     },
     {
       "name": "PROVIDER_VERSION_KEY",
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 25
+        "line": 26
       },
       "valueExpression": "\"llm:provider:config:version\""
     },
@@ -20,7 +20,7 @@
       "name": "PROVIDER_BOOTSTRAP_LOCK",
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 27
+        "line": 28
       },
       "valueExpression": "0x49475F50524F5644"
     },
@@ -28,7 +28,7 @@
       "name": "MISSING_FIELD_MESSAGES",
       "source": {
         "file": "backend/src/interview_guide/common/errors/handlers.py",
-        "line": 18
+        "line": 17
       },
       "valueExpression": "{"
     },
@@ -121,18 +121,10 @@
       "valueExpression": "\"sessionId\""
     },
     {
-      "name": "FIELD_VOICE_SESSION_ID",
-      "source": {
-        "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 24
-      },
-      "valueExpression": "\"voiceSessionId\""
-    },
-    {
       "name": "FIELD_TASK_ID",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 25
+        "line": 24
       },
       "valueExpression": "\"taskId\""
     },
@@ -140,7 +132,7 @@
       "name": "FIELD_DIFFICULTY",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 26
+        "line": 25
       },
       "valueExpression": "\"difficulty\""
     },
@@ -148,7 +140,7 @@
       "name": "FIELD_QUESTION_COUNT",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 27
+        "line": 26
       },
       "valueExpression": "\"questionCount\""
     },
@@ -156,7 +148,7 @@
       "name": "FIELD_FOLLOW_UP_COUNT",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 28
+        "line": 27
       },
       "valueExpression": "\"followUpCount\""
     },
@@ -164,7 +156,7 @@
       "name": "FIELD_CATEGORY_LIMIT",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 29
+        "line": 28
       },
       "valueExpression": "\"categoryLimit\""
     },
@@ -172,7 +164,7 @@
       "name": "FIELD_LLM_PROVIDER",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 30
+        "line": 29
       },
       "valueExpression": "\"llmProvider\""
     },
@@ -180,7 +172,7 @@
       "name": "STREAM_DEFINITIONS",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 65
+        "line": 59
       },
       "valueExpression": "("
     },
@@ -190,7 +182,7 @@
         "file": "backend/src/interview_guide/modules/interview/cache.py",
         "line": 13
       },
-      "valueExpression": "\"interview:v2:create:\""
+      "valueExpression": "\"interview:create:lock:\""
     },
     {
       "name": "RESULT_TTL_SECONDS",
@@ -236,7 +228,7 @@
       "name": "STREAM_ERROR_RESPONSE",
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/query_service.py",
-        "line": 26
+        "line": 24
       },
       "valueExpression": "\"【错误】知识库查询失败：AI服务暂时不可用，请稍后重试。\""
     },
@@ -244,7 +236,7 @@
       "name": "STREAM_PROBE_CHARS",
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/query_service.py",
-        "line": 27
+        "line": 25
       },
       "valueExpression": "120"
     },
@@ -257,12 +249,28 @@
       "valueExpression": "10"
     },
     {
+      "name": "MODEL_LIST_CACHE_PREFIX",
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/service.py",
+        "line": 33
+      },
+      "valueExpression": "\"llm:provider:models:\""
+    },
+    {
+      "name": "MODEL_LIST_CACHE_TTL_SECONDS",
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/service.py",
+        "line": 34
+      },
+      "valueExpression": "300"
+    },
+    {
       "name": "SESSION_CACHE_KEY_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
         "line": 36
       },
-      "valueExpression": "\"voice:v2:interview:session:\""
+      "valueExpression": "\"voice:interview:session:\""
     },
     {
       "name": "SESSION_CACHE_TTL_SECONDS",
@@ -277,107 +285,114 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 25
+        "line": 26
       },
       "value": "llm:provider:config:version"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 26
+        "line": 27
       },
       "value": "llm:provider:config:changed"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 413
+        "line": 336
       },
       "value": "{self.postgres_host}:{self.postgres_port}/{database}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/rate_limit.py",
-        "line": 117
+        "line": 114
       },
-      "value": "ratelimit:{{{class_name}:{method_name}}}"
+      "value": "ratelimit:{{{scope}}}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/rate_limit.py",
-        "line": 119
+        "line": 116
       },
       "value": "{prefix}:global"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/rate_limit.py",
-        "line": 121
+        "line": 118
       },
       "value": "{prefix}:ip:{client_ip}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/rate_limit.py",
-        "line": 122
+        "line": 119
       },
       "value": "{prefix}:user:{user_id}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 41
+        "line": 40
       },
       "value": "knowledgebase:vectorize:stream"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 46
+        "line": 45
       },
       "value": "resume:analyze:stream"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 51
+        "line": 50
       },
       "value": "interview:evaluate:stream"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 56
+        "line": 55
       },
-      "value": "voice:evaluate:stream"
+      "value": "knowledgebase:question-gen:stream"
     },
     {
       "source": {
-        "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 61
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 124
       },
-      "value": "knowledgebase:question-gen:stream"
+      "value": "interview:create"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/interview/api.py",
+        "line": 169
+      },
+      "value": "interview:submit-turn"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
         "line": 13
       },
-      "value": "interview:v2:create:"
+      "value": "interview:create:lock:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
         "line": 14
       },
-      "value": "interview:v2:create:result:"
+      "value": "interview:create:result:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
         "line": 15
       },
-      "value": "interview:v2:turn:result:"
+      "value": "interview:turn:result:"
     },
     {
       "source": {
@@ -395,6 +410,13 @@
     },
     {
       "source": {
+        "file": "backend/src/interview_guide/modules/interview_skill/api.py",
+        "line": 58
+      },
+      "value": "interview-skill:parse-jd"
+    },
+    {
+      "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
         "line": 110
       },
@@ -402,52 +424,94 @@
     },
     {
       "source": {
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 139
+      },
+      "value": "knowledge-base:query"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
+        "line": 150
+      },
+      "value": "knowledge-base:query-stream"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
+        "line": 66
+      },
+      "value": "knowledge-base:generate-questions"
+    },
+    {
+      "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/vectorization.py",
-        "line": 160
+        "line": 151
       },
       "value": "pending:{knowledge_base_id}:{job_id}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/service.py",
+        "line": 33
+      },
+      "value": "llm:provider:models:"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/service.py",
+        "line": 37
+      },
+      "value": "(?:^|[-_/])(asr|tts|speech|audio|image|video|ocr|rerank|moderation)(?:[-_/]|$)"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/service.py",
+        "line": 46
+      },
+      "value": "{api_key[:3]}***{api_key[-3:]}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/service.py",
+        "line": 451
+      },
+      "value": "{normalized[:200]}..."
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
         "line": 36
       },
-      "value": "voice:v2:interview:session:"
+      "value": "voice:interview:session:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 91
+        "line": 84
       },
       "value": "{RESUME_ANALYZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 103
+        "line": 96
       },
       "value": "{KB_VECTORIZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 125
+        "line": 118
       },
       "value": "{KB_QUESTION_GEN.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 148
+        "line": 141
       },
       "value": "{INTERVIEW_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
-    },
-    {
-      "source": {
-        "file": "backend/src/interview_guide/worker.py",
-        "line": 172
-      },
-      "value": "{VOICE_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     }
   ],
   "luaScripts": [
@@ -468,48 +532,48 @@
       "code": "result = await self._redis.evalsha(",
       "source": {
         "file": "backend/src/interview_guide/common/redis/rate_limit.py",
-        "line": 87
+        "line": 85
       }
     },
     {
       "code": "result = await self._redis.evalsha(",
       "source": {
         "file": "backend/src/interview_guide/common/redis/rate_limit.py",
-        "line": 97
+        "line": 95
       }
     },
     {
       "code": "result = await self._redis.xadd(",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 112
+        "line": 105
       }
     },
     {
       "code": "response = await self._redis.xreadgroup(",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 139
+        "line": 132
       }
     },
     {
       "code": "response = await self._redis.xautoclaim(",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 160
+        "line": 153
       }
     },
     {
       "code": "await self._redis.xack(",
       "source": {
         "file": "backend/src/interview_guide/common/redis/streams.py",
-        "line": 210
+        "line": 203
       }
     }
   ],
   "rateLimits": [
     {
-      "arguments": "class_name=\"InterviewController\", method_name=method_name, rules=rules, client_ip=client_ip(request), now_ms=time.time_ns() // 1_000_000,",
+      "arguments": "scope=scope, rules=rules, client_ip=client_ip(request), now_ms=time.time_ns() // 1_000_000,",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
@@ -517,7 +581,7 @@
       }
     },
     {
-      "arguments": "class_name=\"InterviewSkillController\", method_name=\"parseJd\", rules=(RateLimitRule(RateLimitDimension.IP, 5),), client_ip=client_ip(request), now_ms=time.time_ns() // 1_000_000,",
+      "arguments": "scope=\"interview-skill:parse-jd\", rules=(RateLimitRule(RateLimitDimension.IP, 5),), client_ip=client_ip(request), now_ms=time.time_ns() // 1_000_000,",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_skill/api.py",
@@ -525,15 +589,15 @@
       }
     },
     {
-      "arguments": "class_name=\"KnowledgeBaseController\", method_name=method_name, rules=( RateLimitRule(RateLimitDimension.GLOBAL, float(count)), RateLimitRule(RateLimitDimension.IP, float(count)),",
+      "arguments": "scope=scope, rules=( RateLimitRule(RateLimitDimension.GLOBAL, float(count)), RateLimitRule(RateLimitDimension.IP, float(count)),",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 96
+        "line": 97
       }
     },
     {
-      "arguments": "class_name=\"KnowledgeBaseInterviewController\", method_name=\"generateQuestions\", rules=( RateLimitRule(RateLimitDimension.GLOBAL, 2), RateLimitRule(RateLimitDimension.IP, 2),",
+      "arguments": "scope=\"knowledge-base:generate-questions\", rules=( RateLimitRule(RateLimitDimension.GLOBAL, 2), RateLimitRule(RateLimitDimension.IP, 2),",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
@@ -577,9 +641,9 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "constantCount": 34,
+    "constantCount": 35,
     "rateLimitRuleCount": 4,
     "scheduledMethodCount": 4,
-    "streamCount": 5
+    "streamCount": 4
   }
 }

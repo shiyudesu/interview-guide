@@ -10,9 +10,9 @@ from redis.asyncio import Redis
 
 from interview_guide.common.errors import BusinessException, ErrorCode
 
-CREATE_LOCK_PREFIX = "interview:v2:create:"
-CREATE_RESULT_PREFIX = "interview:v2:create:result:"
-TURN_RESULT_PREFIX = "interview:v2:turn:result:"
+CREATE_LOCK_PREFIX = "interview:create:lock:"
+CREATE_RESULT_PREFIX = "interview:create:result:"
+TURN_RESULT_PREFIX = "interview:turn:result:"
 RESULT_TTL_SECONDS = 24 * 60 * 60
 CREATE_LOCK_WAIT_SECONDS = 185
 CREATE_LOCK_LEASE_SECONDS = 600

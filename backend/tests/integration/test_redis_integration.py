@@ -76,7 +76,7 @@ async def test_stream_read_pending_reclaim_and_ack(redis_client: Redis) -> None:
 
 
 @pytest.mark.asyncio
-async def test_rate_limit_lua_is_atomic_and_sets_compatibility_ttl(redis_client: Redis) -> None:
+async def test_rate_limit_lua_is_atomic_and_sets_ttl(redis_client: Redis) -> None:
     script = Path(__file__).resolve().parents[2] / "resources/scripts/rate_limit_single.lua"
     limiter = RateLimiter(redis_client, script)
     await limiter.start()
@@ -86,8 +86,7 @@ async def test_rate_limit_lua_is_atomic_and_sets_compatibility_ttl(redis_client:
     )
 
     await limiter.check(
-        class_name="KnowledgeBaseController",
-        method_name="queryKnowledgeBase",
+        scope="knowledge-base:query",
         rules=rules,
         client_ip="127.0.0.1",
         now_ms=1_000,
@@ -95,8 +94,7 @@ async def test_rate_limit_lua_is_atomic_and_sets_compatibility_ttl(redis_client:
     )
     with pytest.raises(BusinessException) as captured:
         await limiter.check(
-            class_name="KnowledgeBaseController",
-            method_name="queryKnowledgeBase",
+            scope="knowledge-base:query",
             rules=rules,
             client_ip="127.0.0.1",
             now_ms=1_001,
@@ -104,14 +102,14 @@ async def test_rate_limit_lua_is_atomic_and_sets_compatibility_ttl(redis_client:
         )
 
     assert captured.value.code == 8001
-    global_value_key = "ratelimit:{KnowledgeBaseController:queryKnowledgeBase}:global:value"
+    global_value_key = "ratelimit:{knowledge-base:query}:global:value"
     assert await redis_client.get(global_value_key) == "0"
     ttl = await redis_client.ttl(global_value_key)
     assert ttl in {1, 2}
 
 
 @pytest.mark.asyncio
-async def test_worker_creates_all_five_stream_groups(redis_client: Redis) -> None:
+async def test_worker_creates_all_stream_groups(redis_client: Redis) -> None:
     assert REDIS_URL is not None
     parsed_url = urlsplit(REDIS_URL)
     settings = Settings(

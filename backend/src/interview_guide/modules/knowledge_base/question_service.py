@@ -59,10 +59,6 @@ from interview_guide.modules.knowledge_base.question_repository import (
     QuestionRow,
 )
 from interview_guide.modules.knowledge_base.repository import KnowledgeBaseQueryRepository
-from interview_guide.modules.knowledge_base.vectorization import (
-    utf16_code_unit_length,
-    utf16_prefix,
-)
 
 logger = logging.getLogger(__name__)
 DEFAULT_SKILL_ID = "knowledge-base"
@@ -171,11 +167,7 @@ def parse_string_list(value: str | None) -> list[str]:
         return []
 
 
-def parse_follow_ups(
-    value: str | None,
-    *,
-    allow_legacy_strings: bool = True,
-) -> list[KnowledgeBaseQuestionFollowUp]:
+def parse_follow_ups(value: str | None) -> list[KnowledgeBaseQuestionFollowUp]:
     if value is None or not value.strip():
         return []
     try:
@@ -184,16 +176,7 @@ def parse_follow_ups(
             return []
         result: list[KnowledgeBaseQuestionFollowUp] = []
         for item in parsed:
-            if allow_legacy_strings and isinstance(item, str):
-                result.append(
-                    KnowledgeBaseQuestionFollowUp(
-                        question=item,
-                        reference_answer=None,
-                        key_points=[],
-                        scoring_rubric=None,
-                    )
-                )
-            elif isinstance(item, dict):
+            if isinstance(item, dict):
                 result.append(KnowledgeBaseQuestionFollowUp.model_validate(item))
             else:
                 raise ValueError("invalid follow-up")
@@ -838,9 +821,9 @@ class KnowledgeBaseQuestionGenerationService:
                 "知识库未检索到可用于生成题目的内容",
             )
         context = "\n\n---\n\n".join(texts)
-        if utf16_code_unit_length(context) <= MAX_CONTEXT_CHARS:
+        if len(context) <= MAX_CONTEXT_CHARS:
             return context
-        return utf16_prefix(context, MAX_CONTEXT_CHARS) + "\n...(知识库片段过长，已截断)"
+        return context[:MAX_CONTEXT_CHARS] + "\n...(知识库片段过长，已截断)"
 
     async def _call_llm(
         self,
@@ -1231,7 +1214,7 @@ class KnowledgeBaseInterviewService:
     ) -> list[KnowledgeBaseQuestionFollowUp]:
         return [
             follow_up.model_copy(update={"question": follow_up.question.strip()})
-            for follow_up in parse_follow_ups(value, allow_legacy_strings=False)
+            for follow_up in parse_follow_ups(value)
             if follow_up.question is not None and follow_up.question.strip()
         ]
 

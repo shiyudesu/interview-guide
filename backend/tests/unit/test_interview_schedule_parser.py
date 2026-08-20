@@ -85,7 +85,7 @@ async def test_feishu_rule_parse_has_priority_over_ai() -> None:
 
 
 @pytest.mark.asyncio
-async def test_chinese_round_preserves_compatibility_partial_parse_bug() -> None:
+async def test_chinese_round_is_parsed_without_aborting_feishu_fields() -> None:
     parser, _, _ = service()
     raw = "公司：字节跳动 岗位：Java工程师 时间：2026-08-20 10:30 第二轮"
 
@@ -93,18 +93,19 @@ async def test_chinese_round_preserves_compatibility_partial_parse_bug() -> None
 
     assert result.success
     assert result.data is not None
-    assert result.data.interview_type is None
+    assert result.data.round_number == 2
+    assert result.data.interview_type == "VIDEO"
 
 
 @pytest.mark.asyncio
-async def test_tencent_meeting_text_preserves_duplicate_labels() -> None:
+async def test_tencent_meeting_text_normalizes_labels() -> None:
     parser, _, _ = service()
     raw = "腾讯会议 公司：腾讯 岗位：后端工程师 2026-08-20 10:30 会议号：123456789 密码：1234"
 
     result = await parser.parse(raw, "tencent")
 
     assert result.data is not None
-    assert result.data.meeting_link == ("会议号: 会议号：123456789 密码: 密码：1234")
+    assert result.data.meeting_link == "会议号: 123456789 密码: 1234"
 
 
 @pytest.mark.asyncio

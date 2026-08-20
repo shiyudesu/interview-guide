@@ -37,8 +37,7 @@ class RateLimiter:
     async def check(
         self,
         *,
-        class_name: str,
-        method_name: str,
+        scope: str,
         rules: tuple[RateLimitRule, ...],
         client_ip: str = "unknown",
         user_id: str = "anonymous",
@@ -49,8 +48,7 @@ class RateLimiter:
             return
         keys = [
             self._key(
-                class_name,
-                method_name,
+                scope,
                 rule.dimension,
                 client_ip,
                 user_id,
@@ -108,13 +106,12 @@ class RateLimiter:
 
     @staticmethod
     def _key(
-        class_name: str,
-        method_name: str,
+        scope: str,
         dimension: RateLimitDimension,
         client_ip: str,
         user_id: str,
     ) -> str:
-        prefix = f"ratelimit:{{{class_name}:{method_name}}}"
+        prefix = f"ratelimit:{{{scope}}}"
         if dimension is RateLimitDimension.GLOBAL:
             return f"{prefix}:global"
         if dimension is RateLimitDimension.IP:

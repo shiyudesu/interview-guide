@@ -12,6 +12,7 @@ from starlette.responses import Response, StreamingResponse
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.api.responses import result_response
+from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.redis.rate_limit import (
     RateLimitDimension,
@@ -89,13 +90,12 @@ def client_ip(request: Request) -> str:
 
 async def enforce_query_rate_limit(
     request: Request,
-    method_name: str,
+    scope: str,
     count: int,
 ) -> None:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     await infrastructure.rate_limiter.check(
-        class_name="KnowledgeBaseController",
-        method_name=method_name,
+        scope=scope,
         rules=(
             RateLimitRule(RateLimitDimension.GLOBAL, float(count)),
             RateLimitRule(RateLimitDimension.IP, float(count)),
@@ -123,7 +123,10 @@ async def list_knowledge_bases(
 ) -> Response:
     status = vectorStatus.upper() if vectorStatus and vectorStatus.strip() else None
     if status not in {None, "PENDING", "PROCESSING", "COMPLETED", "FAILED"}:
-        return result_response(Result.error(500, f"无效的向量化状态: {vectorStatus}"))
+        raise BusinessException(
+            ErrorCode.BAD_REQUEST,
+            f"无效的向量化状态: {vectorStatus}",
+        )
     return result_response(Result.ok(await service.list_items(status, sortBy)))
 
 
@@ -133,7 +136,7 @@ async def query_knowledge_base(
     payload: QueryRequest,
     service: QueryServiceDependency,
 ) -> Response:
-    await enforce_query_rate_limit(request, "queryKnowledgeBase", 10)
+    await enforce_query_rate_limit(request, "knowledge-base:query", 10)
     response = await service.query(payload)
     return result_response(Result.ok(response))
 
@@ -144,7 +147,7 @@ async def query_knowledge_base_stream(
     payload: QueryRequest,
     service: QueryServiceDependency,
 ) -> Response:
-    await enforce_query_rate_limit(request, "queryKnowledgeBaseStream", 5)
+    await enforce_query_rate_limit(request, "knowledge-base:query-stream", 5)
     chunks = await service.answer_question_stream(
         payload.knowledge_base_ids,
         payload.question,
@@ -170,7 +173,7 @@ async def upload_knowledge_base(
         name,
         category,
     )
-    return result_response(Result.ok(result))
+    return result_response(Result.ok(result), status_code=201)
 
 
 @router.get("/categories")
@@ -248,5 +251,5 @@ async def get_knowledge_base(
 ) -> Response:
     entity = await service.detail(knowledge_base_id)
     if entity is None:
-        return result_response(Result.error(500, "知识库不存在"))
+        raise BusinessException(ErrorCode.KNOWLEDGE_BASE_NOT_FOUND)
     return result_response(Result.ok(entity))

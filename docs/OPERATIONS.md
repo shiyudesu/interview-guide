@@ -16,8 +16,8 @@ docker compose ps -a
 健康检查：
 
 ```bash
-curl http://127.0.0.1:8080/actuator/health
-curl http://127.0.0.1:8080/actuator/info
+curl http://127.0.0.1:8080/health
+curl http://127.0.0.1:8080/info
 ```
 
 日志：
@@ -69,7 +69,7 @@ docker compose logs --tail=200 worker
 - 文字面试报告评估
 - 语音面试报告评估
 
-Worker 启动时会创建五组 Redis consumer group，并 reclaim 空闲超过 5 分钟的 Pending 消息。
+Worker 启动时会创建四组 Redis consumer group，并 reclaim 空闲超过 5 分钟的 Pending 消息。
 失败消息最多重试 3 次，之后写入失败状态再 ACK。
 
 ## Provider API Key 无法解密
@@ -78,24 +78,24 @@ Worker 启动时会创建五组 Redis consumer group，并 reclaim 空闲超过 
 
 ```text
 cryptography.exceptions.InvalidTag
-解密 Provider API Key 失败，请检查 APP_AI_CONFIG_ENCRYPTION_KEY
+解密 Provider API Key 失败，请检查加密主密钥或 provider_key 卷
 ```
 
-检查当前 shell 是否覆盖了 `.env`：
+先确认自动密钥卷和文件仍然存在：
+
+```bash
+docker volume ls | grep provider_key
+docker compose exec app ls -l /var/lib/interview-guide/provider-encryption.key
+```
+
+如果不是通过 Compose 运行，并使用了可选环境变量覆盖，再检查当前 shell 是否注入了不同的值：
 
 ```bash
 env | grep '^APP_AI_CONFIG_ENCRYPTION_KEY='
 ```
 
-如果 shell 中是旧值，先清除再启动：
-
-```bash
-unset APP_AI_CONFIG_ENCRYPTION_KEY
-docker compose up -d --force-recreate app worker scheduler
-```
-
-必须恢复最初用于加密 Provider 的密钥。没有原密钥时，只能删除对应 Provider 配置并重新录入
-API Key。
+必须恢复最初用于加密 Provider 的 `provider_key` 卷或外部主密钥。两者都无法恢复时，只能删除
+对应 Provider 配置并重新录入 API Key。备份 PostgreSQL 数据时应同时备份 `provider_key` 卷。
 
 ## Provider 连接失败
 
@@ -105,7 +105,15 @@ API Key。
    `/chat/completions` 和必要时的 `/v1/chat/completions`。
 4. Embedding 需要单独填写真实模型名和 1024 维。
 
-系统不会自动发现可用模型。模型是否存在、权限和地区可用性以厂商控制台为准。
+设置页会依次尝试 `/models` 和必要时的 `/v1/models`，结果缓存 5 分钟。列表过期或厂商刚刚
+开放模型时，点击“刷新列表”绕过缓存。若页面提示厂商未返回列表：
+
+1. 检查 API Key 是否具有列出模型的权限。
+2. 检查 Base URL 是否已经包含正确的版本路径。
+3. 查看提示中的 HTTP 状态和厂商响应摘要。
+4. 对未实现模型列表接口的 Provider，按厂商文档手工填写模型 ID，再执行连接测试。
+
+模型出现在列表中不代表一定有调用权限、余额或地区可用性，最终仍以连接测试和厂商控制台为准。
 
 ## 端口被占用
 
@@ -129,19 +137,17 @@ APP_STORAGE_CONSOLE_PORT=19001
 
 容器内部端口不变。
 
-## 自适应面试破坏性升级
+生产前端通过 Docker DNS 动态解析 `app`，后端容器重建后不需要重启前端。前端健康检查会经由
+Nginx 请求 `/health`；若前端显示正常但 API 返回 502，检查 `frontend` 和 `app` 是否在
+同一 Compose 网络，并运行 `docker compose logs frontend app`。
 
-`0004_contract_adaptive_interview` 会删除所有面试相关业务数据和旧问题数组结构。升级前：
+## 数据库初始化
 
-1. 备份 PostgreSQL，并确认不需要保留历史面试报告。
-2. 记录 `interview_sessions`、`interview_answers`、`voice_interview_sessions` 等表行数。
-3. 在迁移服务环境中设置 `ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`。
-4. 执行 `docker compose up -d --build --wait`，检查 migrate 日志中的清理行数。
-5. 迁移成功后把开关恢复为 `0`。
+Migrate 会把空数据库直接创建为当前 schema。执行 `docker compose up -d --build --wait` 后，
+使用 `docker compose logs migrate` 确认 Alembic 成功到达 head。
 
-旧 Redis 会话缓存不需要手工删除，`interview:v2:*` 和 `voice:v2:*` 使用新前缀，旧 key
-会按原 TTL 过期。不要删除 `interview:evaluate:stream` 或 `voice:evaluate:stream`；遗留语音
-消息会按 Pending/reclaim/ACK 顺序转投统一评估 Stream。
+面试缓存使用 `interview:create:*`、`interview:turn:*` 和 `voice:interview:*`。不要手工删除
+`interview:evaluate:stream`，以免破坏 Pending、reclaim 和 ACK 状态。
 
 ## PostgreSQL 密码不一致
 
@@ -180,7 +186,6 @@ docker compose exec redis redis-cli XPENDING resume:analyze:stream analyze-group
 knowledgebase:vectorize:stream
 knowledgebase:question-gen:stream
 interview:evaluate:stream
-voice:evaluate:stream
 ```
 
 不要直接删除生产 Stream key。删除 key 会同时删除 consumer group，必须重启 Worker 才会重建。

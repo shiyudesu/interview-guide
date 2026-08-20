@@ -1,18 +1,21 @@
 from __future__ import annotations
 
 import base64
+import fcntl
 import hashlib
+import os
 import secrets
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
 
-DEV_FALLBACK_KEY = "interview-guide-dev-only-provider-api-key-encryption"
 NONCE_BYTES = 12
+KEY_BYTES = 32
 
 
 @dataclass(frozen=True)
@@ -37,17 +40,45 @@ def resolve_configured_key(settings: Settings) -> str:
         configured = settings.ai_config_encryption_key.get_secret_value()
         if configured.strip():
             return configured
-    if settings.ai_config_require_encryption_key:
+    return load_or_create_key(settings.ai_config_encryption_key_file)
+
+
+def load_or_create_key(
+    path: Path,
+    key_factory: Callable[[int], bytes] = secrets.token_bytes,
+) -> str:
+    resolved = path.expanduser().resolve()
+    try:
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = resolved.with_name(f".{resolved.name}.lock")
+        with lock_path.open("a+b") as lock:
+            os.chmod(lock_path, 0o600)
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            if not resolved.exists():
+                raw_key = key_factory(KEY_BYTES)
+                if len(raw_key) != KEY_BYTES:
+                    raise ValueError(f"key must contain {KEY_BYTES} bytes")
+                temporary = resolved.with_name(f".{resolved.name}.{os.getpid()}.tmp")
+                try:
+                    with temporary.open("xb") as target:
+                        os.chmod(temporary, 0o600)
+                        target.write(base64.b64encode(raw_key) + b"\n")
+                        target.flush()
+                        os.fsync(target.fileno())
+                    os.replace(temporary, resolved)
+                finally:
+                    temporary.unlink(missing_ok=True)
+            configured = resolved.read_text(encoding="ascii").strip()
+            decoded = base64.b64decode(configured, validate=True)
+            if len(decoded) != KEY_BYTES:
+                raise ValueError(f"key must decode to {KEY_BYTES} bytes")
+            os.chmod(resolved, 0o600)
+            return configured
+    except (OSError, UnicodeError, ValueError) as error:
         raise BusinessException(
             ErrorCode.PROVIDER_CONFIG_READ_FAILED,
-            "APP_AI_CONFIG_ENCRYPTION_KEY 未配置，无法初始化 Provider API Key 加密",
-        )
-    if not settings.ai_config_allow_fallback_encryption_key:
-        raise BusinessException(
-            ErrorCode.PROVIDER_CONFIG_READ_FAILED,
-            "APP_AI_CONFIG_ENCRYPTION_KEY 未配置，且未显式允许 Provider API Key 开发 fallback",
-        )
-    return DEV_FALLBACK_KEY
+            f"无法读取或创建 Provider 加密密钥文件: {resolved}",
+        ) from error
 
 
 class ApiKeyEncryption:
@@ -92,5 +123,5 @@ class ApiKeyEncryption:
         except Exception as error:
             raise BusinessException(
                 ErrorCode.PROVIDER_CONFIG_READ_FAILED,
-                "解密 Provider API Key 失败，请检查 APP_AI_CONFIG_ENCRYPTION_KEY",
+                "解密 Provider API Key 失败，请检查加密主密钥或 provider_key 卷",
             ) from error

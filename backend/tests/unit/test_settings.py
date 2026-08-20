@@ -6,13 +6,16 @@ from pydantic import ValidationError
 from interview_guide.common.config.settings import Settings
 
 
-def test_missing_required_encryption_key_fails_startup() -> None:
-    with pytest.raises(ValidationError, match="APP_AI_CONFIG_ENCRYPTION_KEY"):
-        Settings(
-            _env_file=None,
-            APP_AI_CONFIG_ENCRYPTION_KEY=None,
-            APP_AI_CONFIG_REQUIRE_ENCRYPTION_KEY=True,
-        )
+def test_encryption_key_environment_override_is_optional(tmp_path) -> None:
+    key_file = tmp_path / "provider.key"
+    settings = Settings(
+        _env_file=None,
+        APP_AI_CONFIG_ENCRYPTION_KEY=None,
+        APP_AI_CONFIG_ENCRYPTION_KEY_FILE=key_file,
+    )
+
+    assert settings.ai_config_encryption_key is None
+    assert settings.ai_config_encryption_key_file == key_file
 
 
 def test_existing_environment_names_are_supported() -> None:
@@ -28,8 +31,6 @@ def test_existing_environment_names_are_supported() -> None:
     )
 
     assert settings.server_port == 28080
-    assert settings.ai_model == "qwen3.7-max"
-    assert settings.ai_embedding_model == "qwen3.7-text-embedding"
     assert settings.database_pool_size == 12
     assert settings.database_max_overflow == 3
     assert settings.postgres_db == "comparison"
@@ -44,12 +45,10 @@ def test_database_pool_limits_reject_invalid_values() -> None:
     with pytest.raises(ValidationError):
         Settings(
             _env_file=None,
-            APP_AI_CONFIG_ENCRYPTION_KEY="test-key",
             APP_DATABASE_POOL_SIZE=0,
         )
     with pytest.raises(ValidationError):
         Settings(
             _env_file=None,
-            APP_AI_CONFIG_ENCRYPTION_KEY="test-key",
             APP_DATABASE_MAX_OVERFLOW=-1,
         )

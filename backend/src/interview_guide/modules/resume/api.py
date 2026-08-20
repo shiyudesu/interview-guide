@@ -44,7 +44,7 @@ async def upload_resume(
         file.filename,
         file.content_type,
     )
-    return result_response(Result.ok(result))
+    return result_response(Result.ok(result), status_code=201)
 
 
 @router.get("/health")
@@ -52,8 +52,8 @@ async def resume_health() -> Response:
     return result_response(
         Result.ok(
             {
-                "status": "UP",
-                "service": "AI Interview Platform - Resume Service",
+                "status": "ok",
+                "service": "resume",
             }
         )
     )
