@@ -30,7 +30,11 @@ from interview_guide.common.redis.streams import (
     RedisStreamService,
     StreamMessage,
 )
-from interview_guide.modules.interview.models import InterviewQuestion, InterviewSessionDTO
+from interview_guide.modules.interview.models import (
+    InterviewChannel,
+    InterviewSessionDTO,
+    PlannedInterviewQuestion,
+)
 from interview_guide.modules.interview.service import InterviewService
 from interview_guide.modules.knowledge_base.question_models import (
     CategoryCount,
@@ -1087,31 +1091,27 @@ class KnowledgeBaseInterviewService:
                 difficulty,
                 category,
             )
-        candidates = [
-            (question, self._usable_follow_ups(question.follow_ups_json)) for question in raw
-        ]
-        candidates = [item for item in candidates if len(item[1]) >= request.follow_up_count]
-        if len(candidates) < request.main_question_count:
+        if len(raw) < request.main_question_count:
             direction = category or "全部方向"
             raise BusinessException(
                 ErrorCode.INTERVIEW_QUESTION_INSUFFICIENT,
                 f"需要 {request.main_question_count} 道主问题，"
-                f"但只有 {len(candidates)} 道同时满足："
-                f"方向={direction}、难度={difficulty}、每题至少 {request.follow_up_count} 个追问",
+                f"但只有 {len(raw)} 道满足：方向={direction}、难度={difficulty}",
             )
-        selected = list(candidates)
+        selected = list(raw)
         self._random.shuffle(selected)
-        questions = self._build_interview_questions(
-            selected[: request.main_question_count],
-            request.follow_up_count,
-        )
+        questions = self._build_interview_questions(selected[: request.main_question_count])
         return await self._interview.create_session_from_questions(
             questions,
-            request.llm_provider,
-            DEFAULT_SKILL_ID,
-            difficulty,
-            request.knowledge_base_id,
-            category,
+            channel=InterviewChannel.KNOWLEDGE_BASE,
+            max_follow_ups_per_main=request.follow_up_count,
+            llm_provider=request.llm_provider,
+            skill_id=DEFAULT_SKILL_ID,
+            difficulty=difficulty,
+            request_id=request.request_id,
+            knowledge_base_id=request.knowledge_base_id,
+            interview_category=category,
+            context={"knowledgeBaseId": request.knowledge_base_id},
         )
 
     async def capacity(
@@ -1132,16 +1132,13 @@ class KnowledgeBaseInterviewService:
                 normalized_difficulty,
                 None,
             )
-        sources = [
-            (question, self._usable_follow_ups(question.follow_ups_json)) for question in raw
-        ]
         scoped = [
-            item
-            for item in sources
-            if normalized_category is None or item[0].category == normalized_category
+            question
+            for question in raw
+            if normalized_category is None or question.category == normalized_category
         ]
         counts: dict[str, int] = {}
-        for question, _ in sources:
+        for question in raw:
             category_value = trim_to_none(question.category)
             if category_value is not None:
                 counts[category_value] = counts.get(category_value, 0) + 1
@@ -1157,7 +1154,7 @@ class KnowledgeBaseInterviewService:
         ]
         options = []
         for count in range(0, MAX_FOLLOW_UP_COUNT + 1):
-            available = sum(len(follow_ups) >= count for _, follow_ups in scoped)
+            available = len(scoped)
             options.append(
                 InterviewFollowUpCapacity(
                     follow_up_count=count,
@@ -1172,19 +1169,29 @@ class KnowledgeBaseInterviewService:
             main_question_count=main_question_count,
             categories=categories,
             follow_up_options=options,
+            reference_answer_coverage=sum(bool(item.reference_answer) for item in scoped),
+            key_points_coverage=sum(bool(item.key_points_json) for item in scoped),
+            scoring_rubric_coverage=sum(bool(item.scoring_rubric) for item in scoped),
         )
 
     def _build_interview_questions(
         self,
-        selected: Sequence[tuple[KnowledgeBaseQuestion, list[KnowledgeBaseQuestionFollowUp]]],
-        follow_up_count: int,
-    ) -> list[InterviewQuestion]:
-        result: list[InterviewQuestion] = []
-        for entity, follow_up_pool in selected:
-            main_index = len(result)
+        selected: Sequence[KnowledgeBaseQuestion],
+    ) -> list[PlannedInterviewQuestion]:
+        result: list[PlannedInterviewQuestion] = []
+        for entity in selected:
+            candidate_follow_ups = self._usable_follow_ups(entity.follow_ups_json)
+            source_context = entity.source_context or ""
+            if candidate_follow_ups:
+                source_context = (
+                    source_context
+                    + "\n\n候选追问素材："
+                    + compact_json_text(
+                        [item.model_dump(by_alias=True) for item in candidate_follow_ups]
+                    )
+                )
             result.append(
-                InterviewQuestion(
-                    question_index=main_index,
+                PlannedInterviewQuestion(
                     question=entity.question,
                     type=entity.type or "KNOWLEDGE_BASE",
                     category=entity.category or "知识库",
@@ -1192,29 +1199,10 @@ class KnowledgeBaseInterviewService:
                     reference_answer=entity.reference_answer,
                     key_points=parse_string_list(entity.key_points_json),
                     scoring_rubric=entity.scoring_rubric,
-                    source_context=entity.source_context,
+                    source_context=source_context or None,
+                    source_question_id=entity.id,
                 )
             )
-            for follow_up in self._pick_follow_ups(
-                follow_up_pool,
-                follow_up_count,
-            ):
-                assert follow_up.question is not None
-                result.append(
-                    InterviewQuestion(
-                        question_index=len(result),
-                        question=follow_up.question,
-                        type=entity.type or "KNOWLEDGE_BASE",
-                        category=entity.category or "知识库追问",
-                        topic_summary=entity.topic_summary,
-                        is_follow_up=True,
-                        parent_question_index=main_index,
-                        reference_answer=follow_up.reference_answer,
-                        key_points=sanitized_strings(follow_up.key_points),
-                        scoring_rubric=follow_up.scoring_rubric,
-                        source_context=entity.source_context,
-                    )
-                )
         return result
 
     def _pick_follow_ups(

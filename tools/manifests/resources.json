@@ -7,52 +7,52 @@
       "sha256": "558c62730844fe54ba220146ed62f859d4e2880188d92d985f8921c6e3743bc4"
     },
     {
-      "bytes": 436,
+      "bytes": 407,
       "category": "prompt",
-      "file": "backend/resources/prompts/interview-evaluation-summary-system.st",
-      "sha256": "7ddec414e0bf241850a1f9b600c91aeb8af3b1d543efb4d3c294cf1c0d6e024e"
+      "file": "backend/resources/prompts/interview-group-evaluation-system.st",
+      "sha256": "39a0bcf35c9151db35595de6f48dc6eac685329fae0da9e82922208a20e86351"
     },
     {
-      "bytes": 553,
+      "bytes": 149,
       "category": "prompt",
-      "file": "backend/resources/prompts/interview-evaluation-summary-user.st",
-      "sha256": "64e4ea70d1f615f6f93a053fdabcd8b56ed0909ba587579a1be63ae1cc9bdcd6"
+      "file": "backend/resources/prompts/interview-group-evaluation-user.st",
+      "sha256": "fccd48d4f49ba54eafb081264c03a1f8df038fa61d3df9a11aa6df921ea9d2a7"
     },
     {
-      "bytes": 2568,
-      "category": "prompt",
-      "file": "backend/resources/prompts/interview-evaluation-system.st",
-      "sha256": "a10475ace75340006316c4fe11ea49abccfe00f50e6bba2b55b4c42aab53dddf"
-    },
-    {
-      "bytes": 816,
-      "category": "prompt",
-      "file": "backend/resources/prompts/interview-evaluation-user.st",
-      "sha256": "cd32ac88cbfda6eb4dbda0771e9d963923891fc5c925e2f48d215ef5ba72a663"
-    },
-    {
-      "bytes": 1161,
+      "bytes": 1086,
       "category": "prompt",
       "file": "backend/resources/prompts/interview-question-resume-system.st",
-      "sha256": "27e00ef18ae90dd98636dbc767c29987563feed3cb66025442699b30a5a8329b"
+      "sha256": "89d26faf7514a343cc87c2c8de58e060423b4b0edb35cf2749f75025e6614780"
     },
     {
-      "bytes": 807,
+      "bytes": 811,
       "category": "prompt",
       "file": "backend/resources/prompts/interview-question-resume-user.st",
-      "sha256": "9a9becd81afbc334c7e27cfaec7c6320f25060b797d120ad618bf7a06179846b"
+      "sha256": "ca0bda2d7cc0e45bfc56ff7d32c267e0dabc08bee45c81b1597016be34079963"
     },
     {
-      "bytes": 1171,
+      "bytes": 1156,
       "category": "prompt",
       "file": "backend/resources/prompts/interview-question-skill-system.st",
-      "sha256": "1ba1b15d03bc67f4fea831305a3a55816c885849a9c0c03f87796918e8a5cd07"
+      "sha256": "43b52e9a5281d1881bfa38ab832ef73ca1a8033af1b5cc8a0d6b4dee7c658158"
     },
     {
-      "bytes": 910,
+      "bytes": 911,
       "category": "prompt",
       "file": "backend/resources/prompts/interview-question-skill-user.st",
-      "sha256": "bd1090706aeb3a40f712d84b967ad06262f00b964b1741c753b1f96654b39ce4"
+      "sha256": "e676e276b1249a12d1e003a9818e04691072d6aabf6899d7fbf9270b995358ac"
+    },
+    {
+      "bytes": 792,
+      "category": "prompt",
+      "file": "backend/resources/prompts/interview-turn-decision-system.st",
+      "sha256": "854b8685bf1a8925a9f1bab8a3a1232275647009c3f79bf33bae9410c812d80d"
+    },
+    {
+      "bytes": 279,
+      "category": "prompt",
+      "file": "backend/resources/prompts/interview-turn-decision-user.st",
+      "sha256": "a7aabc72dcea59cdcb494827baf15c6a03867a1972d1ec63f3fa7c7a3ad3d6fe"
     },
     {
       "bytes": 796,
@@ -101,12 +101,6 @@
       "category": "prompt",
       "file": "backend/resources/prompts/resume-analysis-user.st",
       "sha256": "decc88267b7a073d0ce489638d666eee8c912a7876c8d6f2ce4bba4f43ef6eb4"
-    },
-    {
-      "bytes": 406,
-      "category": "prompt",
-      "file": "backend/resources/prompts/voice-interview-context-summary.st",
-      "sha256": "7c727c3eb362260f436b1da01ba9c6c887866330563784febe2bbda600aff902"
     },
     {
       "bytes": 2565,
@@ -353,26 +347,19 @@
       "category": "skill",
       "file": "backend/resources/skills/test-development/skill.meta.yml",
       "sha256": "6acb09462313cd845e209b9645ab6ea490b7b48bab1d22096421e19da8a670ce"
-    },
-    {
-      "bytes": 3496,
-      "category": "voice-config",
-      "file": "backend/resources/voice-interview-opening.yml",
-      "sha256": "b2c99ad41456bd3d1270945b27597b6623512050119d2c252586e5a772e08580"
     }
   ],
   "schemaVersion": 1,
   "summary": {
     "disabledTestMarkerCount": 1,
-    "resourceCount": 60,
+    "resourceCount": 58,
     "resourceCountsByCategory": {
       "font": 1,
-      "prompt": 17,
+      "prompt": 16,
       "redis-script": 1,
-      "skill": 40,
-      "voice-config": 1
+      "skill": 40
     },
-    "testFileCount": 51
+    "testFileCount": 49
   },
   "tests": [
     {
@@ -383,7 +370,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_interview_integration.py",
-      "sha256": "e86f24f61e24f100561e1859cde2e08165a08db81a11564ccfb052afb321c3bd"
+      "sha256": "accf9472159f11ce23ab84141bcad8a1e017d21e02e301098c7c0840f52a2987"
     },
     {
       "disabledMarkers": 0,
@@ -398,7 +385,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_knowledge_base_interview_integration.py",
-      "sha256": "54298d31995eb7473e33a1c2ee908ce34fa3ecb490a3bf0ef71326852fee2b6c"
+      "sha256": "b7349165db09907ab15df4fefa1d207bfa01d20a7bf3aebea96da6935985dee7"
     },
     {
       "disabledMarkers": 0,
@@ -428,12 +415,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_voice_evaluation_worker_integration.py",
-      "sha256": "b0906564cd482016764c9e1210e7e8d332b67629abe67fcc62582f48aeecaff1"
-    },
-    {
-      "disabledMarkers": 0,
-      "file": "backend/tests/integration/test_voice_websocket_integration.py",
-      "sha256": "5e9e136436a57a30382ba67edcfde3612cf878a45396aabb41c4c0da9ec51b5f"
+      "sha256": "4c25e2b063d0e618b845d271cd160b22af33cc99aca519b8105c100744325ee8"
     },
     {
       "disabledMarkers": 0,
@@ -443,12 +425,12 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_api_foundation.py",
-      "sha256": "dfc7e999162b782690153a353707449fd244212e6187da2264b2afe9c81df80d"
+      "sha256": "3556db33c56b9a1b311b3eb2c42db031455dac0ff4ab830417dcf6e6bbd4d6a4"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_database_schema.py",
-      "sha256": "f166d9011e43620d8483e81b45de20b9c589cf911d604142f0bfb171917c708b"
+      "sha256": "db74a5aa5a624288ea6f1ca03dd96afe26c9853c5c2b654efcfa2be67ffc0eb1"
     },
     {
       "disabledMarkers": 0,
@@ -463,7 +445,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_module.py",
-      "sha256": "4b15671c348273c98ac487492bce71e28b205a05102d0e4d633adf1b63fea8a1"
+      "sha256": "9a41717f50796127785a87bbcc68da8406a6e7e91b16a70289d458ff06ed2db4"
     },
     {
       "disabledMarkers": 0,
@@ -578,17 +560,12 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_evaluation.py",
-      "sha256": "86d80e057752ef5a9ad75337b77d438cc74618434a507fa8fbddddc8b0a715cb"
-    },
-    {
-      "disabledMarkers": 0,
-      "file": "backend/tests/unit/test_voice_llm_streamer.py",
-      "sha256": "b260f200b37556f482df1e52e6469ebfb007258efe3a4cbac3500e40e89a0c9b"
+      "sha256": "82961a10d8323e8aede5128ae3ee8fe02a0d9df794f56819ff674e9e80651679"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_websocket_core.py",
-      "sha256": "ce94ad30686b9f3b7addc6ce45c25499b8639f7b398646e4fcdef9590b78d2c8"
+      "sha256": "99639616044b8aeb6491c9ac6fb8e26eb1ca55c838a6c6fb19a1eb86c534528e"
     },
     {
       "disabledMarkers": 1,
@@ -598,12 +575,12 @@
     {
       "disabledMarkers": 0,
       "file": "frontend/e2e/voice-interview.spec.ts",
-      "sha256": "2f63ede4e3536944ea9e69775a4dc37c384d3ccf6d2545338aed4e169f0132a2"
+      "sha256": "0edebc91dd56ab44459747814c499205d5556005976b96cff73da3bb132967fe"
     },
     {
       "disabledMarkers": 0,
       "file": "frontend/src/components/knowledgebaseInterview/interviewCapacity.test.ts",
-      "sha256": "c2087db5f5f739f0ee9fa8e8063dd033fd98c95ed7fcb220c5b4405f115e9b0c"
+      "sha256": "fbf8017e2105f1f8bd7c0623b820856a6e04fd00a1ee154d049bde823278c547"
     },
     {
       "disabledMarkers": 0,

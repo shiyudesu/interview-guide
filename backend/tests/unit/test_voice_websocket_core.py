@@ -3,8 +3,8 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import uuid
 from datetime import datetime
-from pathlib import Path
 from typing import Any, cast
 
 import pytest
@@ -14,17 +14,25 @@ from interview_guide.common.db.models import (
     VoiceInterviewMessage,
     VoiceInterviewSession,
 )
+from interview_guide.modules.interview.models import (
+    InterviewChannel,
+    InterviewProgressDTO,
+    InterviewQuestionDTO,
+    InterviewSessionDTO,
+    InterviewSessionStatus,
+    QuestionKind,
+    SubmitTurnResponse,
+    TurnAction,
+)
 from interview_guide.modules.voice_interview.dashscope import extract_asr_text
 from interview_guide.modules.voice_interview.fakes import (
     ExplicitFakeAsrProvider,
-    ExplicitFakeLlmStreamer,
     ExplicitFakeTtsSynthesizer,
 )
 from interview_guide.modules.voice_interview.protocols import VoiceAsrSession
 from interview_guide.modules.voice_interview.websocket import (
     ConcurrentWebSocket,
     VoiceConnection,
-    VoiceOpeningQuestions,
     VoiceSessionState,
     VoiceWebSocketConfig,
     VoiceWebSocketRuntime,
@@ -48,7 +56,7 @@ def voice_session(session_id: int = 1, status: str = "IN_PROGRESS") -> VoiceInte
 class FakeVoiceService:
     def __init__(self, session: VoiceInterviewSession) -> None:
         self.sessions = {session.id: session}
-        self.saved: list[tuple[int, str | None, str | None]] = []
+        self.saved: list[tuple[int, str | None, str | None, uuid.UUID | None]] = []
         self.phases: list[tuple[int, str | None]] = []
         self.pause_reasons: list[str] = []
         self.end_calls: list[bool] = []
@@ -78,8 +86,62 @@ class FakeVoiceService:
         session_id: int,
         user_text: str | None,
         ai_text: str | None,
+        interview_turn_id: uuid.UUID | None = None,
     ) -> None:
-        self.saved.append((session_id, user_text, ai_text))
+        self.saved.append((session_id, user_text, ai_text, interview_turn_id))
+
+    async def core_session(self, session_id: int) -> InterviewSessionDTO:
+        question = InterviewQuestionDTO(
+            question_id=uuid.uuid4(),
+            kind=QuestionKind.MAIN,
+            parent_question_id=None,
+            question="固定问题",
+            type="GENERAL",
+            category="综合",
+        )
+        return InterviewSessionDTO(
+            session_id=f"core-{session_id}",
+            channel=InterviewChannel.VOICE,
+            status=InterviewSessionStatus.IN_PROGRESS,
+            current_question=question,
+            turns=[],
+            progress=InterviewProgressDTO(
+                completed_main_questions=0,
+                planned_main_questions=2,
+                follow_ups_used_for_current_main=0,
+                max_follow_ups_per_main=1,
+            ),
+            knowledge_base_id=None,
+            interview_category=None,
+        )
+
+    async def submit_turn(
+        self,
+        session_id: int,
+        request_id: str,
+        answer: str,
+    ) -> SubmitTurnResponse:
+        del session_id, request_id, answer
+        return SubmitTurnResponse(
+            turn_id=uuid.uuid4(),
+            action=TurnAction.NEXT_MAIN,
+            acknowledgement="好的。",
+            next_question=InterviewQuestionDTO(
+                question_id=uuid.uuid4(),
+                kind=QuestionKind.MAIN,
+                parent_question_id=None,
+                question="下一题是什么？",
+                type="GENERAL",
+                category="综合",
+            ),
+            completed=False,
+            progress=InterviewProgressDTO(
+                completed_main_questions=1,
+                planned_main_questions=2,
+                follow_ups_used_for_current_main=0,
+                max_follow_ups_per_main=1,
+            ),
+        )
 
     async def start_phase(self, session_id: int, phase: str | None) -> None:
         self.phases.append((session_id, phase))
@@ -142,20 +204,10 @@ class RecordingWebSocket:
         self.closed = (code, reason)
 
 
-def opening() -> VoiceOpeningQuestions:
-    return VoiceOpeningQuestions(
-        skill_questions={"java-backend": "固定开场。"},
-        algorithm_skills=frozenset(),
-        algorithm_question="算法开场。",
-        backend_question="后端开场。",
-    )
-
-
 def runtime(
     service: FakeVoiceService,
     *,
     asr: ExplicitFakeAsrProvider | None = None,
-    llm: ExplicitFakeLlmStreamer | None = None,
     tts: ExplicitFakeTtsSynthesizer | None = None,
     clock: ManualClock | None = None,
     config: VoiceWebSocketConfig | None = None,
@@ -163,12 +215,38 @@ def runtime(
     return VoiceWebSocketRuntime(
         service,
         asr or ExplicitFakeAsrProvider(),
-        llm or ExplicitFakeLlmStreamer(("固定回复。",)),
         tts or ExplicitFakeTtsSynthesizer(),
-        opening(),
         clock=clock,
         config=config,
     )
+
+
+@pytest.mark.asyncio
+async def test_voice_turn_uses_shared_decision_and_emits_tts() -> None:
+    service = FakeVoiceService(voice_session())
+    voice_runtime = runtime(service)
+    raw = RecordingWebSocket()
+    socket = ConcurrentWebSocket(
+        cast(WebSocket, raw),
+        send_timeout_seconds=1,
+        send_buffer_limit_bytes=64 * 1024,
+    )
+    state = VoiceSessionState(tts_semaphore=asyncio.Semaphore(2))
+    await voice_runtime.connections.register(VoiceConnection(1, socket, state))
+
+    await voice_runtime._process_turn(1, state, "固定回答", "request_1234")
+
+    documents = [json.loads(item) for item in raw.sent]
+    assert any(
+        item.get("type") == "control" and item.get("action") == "turn_deciding"
+        for item in documents
+    )
+    assert any(
+        item.get("type") == "text" and item.get("content") == "好的。 下一题是什么？"
+        for item in documents
+    )
+    assert any(item.get("type") == "audio_chunk" for item in documents)
+    assert service.saved[0][1:3] == ("固定回答", "好的。 下一题是什么？")
 
 
 @pytest.mark.asyncio
@@ -281,7 +359,7 @@ async def test_injected_clock_warning_then_pause_cancels_session() -> None:
     assert raw.closed == (1001, "Going away")
     await voice.disconnect(session.id)
     assert session.status == "PAUSED"
-    assert service.end_calls == [True]
+    assert service.end_calls == []
 
 
 @pytest.mark.asyncio
@@ -379,12 +457,6 @@ def test_protocol_helpers_match_compatibility_shapes() -> None:
     assert int.from_bytes(wav[24:28], "little") == 24_000
     assert wav[44:] == b"\x01\x02"
     assert extract_asr_text({"text": "北京", "stash": "天气"}) == "北京天气"
-
-
-def test_opening_resource_is_loadable_and_skill_specific() -> None:
-    resource = Path(__file__).resolve().parents[2] / "resources" / "voice-interview-opening.yml"
-    questions = VoiceOpeningQuestions.load(resource)
-    assert "后端项目" in questions.question(voice_session())
 
 
 async def _no_result() -> None:

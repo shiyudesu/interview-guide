@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import field_validator, model_validator
 
-from interview_guide.common.api.models import CamelModel
+from interview_guide.common.api.models import CamelModel, normalize_request_id
 
 
 class KnowledgeBaseQuestionStatus(StrEnum):
@@ -169,6 +169,7 @@ class CreateKnowledgeBaseInterviewRequest(CamelModel):
     main_question_count: int = 0
     follow_up_count: int = 0
     llm_provider: str | None = None
+    request_id: str | None = None
 
     @model_validator(mode="after")
     def validate_request(self) -> CreateKnowledgeBaseInterviewRequest:
@@ -182,6 +183,7 @@ class CreateKnowledgeBaseInterviewRequest(CamelModel):
             raise ValueError("追问数量不能小于0")
         if self.follow_up_count > 5:
             raise ValueError("每题追问最多5个")
+        self.request_id = normalize_request_id(self.request_id)
         return self
 
 
@@ -203,6 +205,9 @@ class KnowledgeBaseInterviewCapacityResponse(CamelModel):
     main_question_count: int
     categories: list[InterviewCategoryCapacity]
     follow_up_options: list[InterviewFollowUpCapacity]
+    reference_answer_coverage: int
+    key_points_coverage: int
+    scoring_rubric_coverage: int
 
 
 class GeneratedQuestionFollowUp(CamelModel):

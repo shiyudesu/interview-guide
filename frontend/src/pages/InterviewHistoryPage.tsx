@@ -63,7 +63,7 @@ const ALL_DIRECTIONS_VALUE = '__all_directions__';
 interface UnifiedInterviewItem {
   id: string;
   type: 'text' | 'voice';
-  sourceType?: string | null;
+  channel?: 'TEXT' | 'KNOWLEDGE_BASE' | 'VOICE';
   title: string;
   sessionId: string;
   status: string;
@@ -169,7 +169,7 @@ function StatCard({
 }
 
 function TypeBadge({ item }: { item: UnifiedInterviewItem }) {
-  if (item.sourceType === 'KNOWLEDGE_BASE') {
+  if (item.channel === 'KNOWLEDGE_BASE') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-medium">
         <FileText className="w-3 h-3" />
@@ -260,7 +260,7 @@ export default function InterviewHistoryPage({
       const textInterviews = await loadTextInterviews(loadedSkills);
       const scopedTextInterviews = isKnowledgeBaseView
         ? textInterviews.filter(item => item.knowledgeBaseId === knowledgeBaseFilterId)
-        : textInterviews.filter(item => item.sourceType !== 'KNOWLEDGE_BASE');
+        : textInterviews.filter(item => item.channel !== 'KNOWLEDGE_BASE');
       const voiceSessions = isKnowledgeBaseView ? [] : await loadVoiceInterviews();
 
       const voiceWithNames = voiceSessions.map(item => {
@@ -288,11 +288,11 @@ export default function InterviewHistoryPage({
   async function loadTextInterviews(skills: SkillDTO[]): Promise<UnifiedInterviewItem[]> {
     try {
       const sessions = await interviewApi.listSessions();
-      return sessions.map((session: TextSessionMeta) => ({
+      return sessions.filter(session => session.channel !== 'VOICE').map((session: TextSessionMeta) => ({
         id: session.sessionId,
         type: 'text' as const,
-        sourceType: session.sourceType,
-        title: session.sourceType === 'KNOWLEDGE_BASE'
+        channel: session.channel,
+        title: session.channel === 'KNOWLEDGE_BASE'
           ? `${getTemplateName(session.skillId, skills)} · 知识库面试`
           : getTemplateName(session.skillId, skills),
         sessionId: session.sessionId,
@@ -300,7 +300,7 @@ export default function InterviewHistoryPage({
         evaluateStatus: session.evaluateStatus ?? undefined,
         evaluateError: session.evaluateError ?? undefined,
         overallScore: session.overallScore,
-        totalQuestions: session.totalQuestions,
+        totalQuestions: session.plannedMainQuestions,
         createdAt: session.createdAt,
         resumeId: session.resumeId ?? undefined,
         knowledgeBaseId: session.knowledgeBaseId ?? undefined,
@@ -324,7 +324,7 @@ export default function InterviewHistoryPage({
         evaluateStatus: session.evaluateStatus,
         evaluateError: session.evaluateError,
         evaluateStatusUpdatedAt: session.updatedAt,
-        overallScore: null,
+        overallScore: session.overallScore ?? null,
         actualDuration: session.actualDuration,
         createdAt: session.createdAt,
         voiceSessionId: session.sessionId,
@@ -798,7 +798,7 @@ export default function InterviewHistoryPage({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (item.sourceType === 'KNOWLEDGE_BASE') {
+                              if (item.channel === 'KNOWLEDGE_BASE') {
                                 navigate(`/knowledgebase-interview/${item.sessionId}`, {
                                   state: { knowledgeBaseId: item.knowledgeBaseId },
                                 });

@@ -71,6 +71,10 @@ docker compose logs -f app worker scheduler
 docker compose logs migrate
 ```
 
+首次升级到自适应面试 v2 前，必须备份数据并在 `.env` 中临时设置
+`ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`。该迁移会清空已有面试与语音会话数据；完成后请把
+开关恢复为 `0`。详细步骤见 `docs/OPERATIONS.md`。
+
 停止服务：
 
 ```bash

@@ -1,37 +1,55 @@
-// 面试相关类型定义
-
 import type { CategoryDTO } from '../api/skill';
+
+export type InterviewChannel = 'TEXT' | 'KNOWLEDGE_BASE' | 'VOICE';
+export type InterviewStatus = 'CREATED' | 'IN_PROGRESS' | 'COMPLETED' | 'EVALUATED';
+export type QuestionKind = 'MAIN' | 'FOLLOW_UP';
+export type TurnAction = 'FOLLOW_UP' | 'NEXT_MAIN' | 'COMPLETE';
+export type TurnDecisionStatus = 'PROCESSING' | 'COMPLETED' | 'FALLBACK' | 'FAILED';
+
+export interface InterviewQuestion {
+  questionId: string;
+  kind: QuestionKind;
+  parentQuestionId: string | null;
+  question: string;
+  type: string;
+  category: string | null;
+  topicSummary?: string | null;
+  phase?: string | null;
+}
+
+export interface InterviewTurn {
+  turnId: string;
+  questionId: string;
+  question: InterviewQuestion;
+  answer: string | null;
+  action: TurnAction | null;
+  acknowledgement: string | null;
+  nextQuestionId: string | null;
+  decisionStatus: TurnDecisionStatus;
+  answeredAt: string;
+  decidedAt: string | null;
+}
+
+export interface InterviewProgress {
+  completedMainQuestions: number;
+  plannedMainQuestions: number;
+  followUpsUsedForCurrentMain: number;
+  maxFollowUpsPerMain: number;
+}
 
 export interface InterviewSession {
   sessionId: string;
-  resumeText: string;
-  totalQuestions: number;
-  currentQuestionIndex: number;
-  questions: InterviewQuestion[];
-  status: 'CREATED' | 'IN_PROGRESS' | 'COMPLETED' | 'EVALUATED';
-  knowledgeBaseId?: number | null;
-  interviewCategory?: string | null;
-}
-
-export interface InterviewQuestion {
-  questionIndex: number;
-  question: string;
-  type: string;
-  category: string;
-  topicSummary?: string | null;
-  userAnswer: string | null;
-  score: number | null;
-  feedback: string | null;
-  isFollowUp?: boolean;
-  parentQuestionIndex?: number | null;
-  referenceAnswer?: string | null;
-  keyPoints?: string[];
-  scoringRubric?: string | null;
-  sourceContext?: string | null;
+  channel: InterviewChannel;
+  status: InterviewStatus;
+  currentQuestion: InterviewQuestion | null;
+  turns: InterviewTurn[];
+  progress: InterviewProgress;
+  knowledgeBaseId: number | null;
+  interviewCategory: string | null;
 }
 
 export interface CreateInterviewRequest {
-  resumeText: string;
+  resumeText?: string;
   questionCount: number;
   resumeId?: number;
   forceCreate?: boolean;
@@ -43,17 +61,20 @@ export interface CreateInterviewRequest {
   requestId?: string;
 }
 
-export interface SubmitAnswerRequest {
+export interface SubmitTurnRequest {
   sessionId: string;
-  questionIndex: number;
+  requestId: string;
+  questionId: string;
   answer: string;
 }
 
-export interface SubmitAnswerResponse {
-  hasNextQuestion: boolean;
+export interface SubmitTurnResponse {
+  turnId: string;
+  action: TurnAction;
+  acknowledgement: string;
   nextQuestion: InterviewQuestion | null;
-  currentIndex: number;
-  totalQuestions: number;
+  completed: boolean;
+  progress: InterviewProgress;
 }
 
 export interface CurrentQuestionResponse {
@@ -62,36 +83,38 @@ export interface CurrentQuestionResponse {
   message?: string;
 }
 
-export interface InterviewReport {
-  sessionId: string;
-  totalQuestions: number;
-  overallScore: number;
-  categoryScores: CategoryScore[];
-  questionDetails: QuestionEvaluation[];
-  overallFeedback: string;
-  strengths: string[];
-  improvements: string[];
-  referenceAnswers: ReferenceAnswer[];
-}
-
 export interface CategoryScore {
-  category: string;
+  category: string | null;
   score: number;
   questionCount: number;
 }
 
-export interface QuestionEvaluation {
-  questionIndex: number;
+export interface TurnEvaluation {
+  questionId: string;
   question: string;
-  category: string;
-  userAnswer: string;
+  answer: string | null;
   score: number;
   feedback: string;
+  referenceAnswer: string | null;
+  keyPoints: string[];
 }
 
-export interface ReferenceAnswer {
-  questionIndex: number;
-  question: string;
-  referenceAnswer: string;
-  keyPoints: string[];
+export interface QuestionGroupEvaluation {
+  mainQuestion: TurnEvaluation;
+  followUps: TurnEvaluation[];
+  groupScore: number;
+  groupFeedback: string;
+  category: string | null;
+}
+
+export interface InterviewReport {
+  sessionId: string;
+  plannedMainQuestions: number;
+  answeredMainQuestions: number;
+  overallScore: number;
+  categoryScores: CategoryScore[];
+  questionGroups: QuestionGroupEvaluation[];
+  overallFeedback: string;
+  strengths: string[];
+  improvements: string[];
 }

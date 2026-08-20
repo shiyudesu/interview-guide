@@ -129,6 +129,20 @@ APP_STORAGE_CONSOLE_PORT=19001
 
 容器内部端口不变。
 
+## 自适应面试破坏性升级
+
+`0004_contract_adaptive_interview` 会删除所有面试相关业务数据和旧问题数组结构。升级前：
+
+1. 备份 PostgreSQL，并确认不需要保留历史面试报告。
+2. 记录 `interview_sessions`、`interview_answers`、`voice_interview_sessions` 等表行数。
+3. 在迁移服务环境中设置 `ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`。
+4. 执行 `docker compose up -d --build --wait`，检查 migrate 日志中的清理行数。
+5. 迁移成功后把开关恢复为 `0`。
+
+旧 Redis 会话缓存不需要手工删除，`interview:v2:*` 和 `voice:v2:*` 使用新前缀，旧 key
+会按原 TTL 过期。不要删除 `interview:evaluate:stream` 或 `voice:evaluate:stream`；遗留语音
+消息会按 Pending/reclaim/ACK 顺序转投统一评估 Stream。
+
 ## PostgreSQL 密码不一致
 
 PostgreSQL 只在首次创建 volume 时使用 `POSTGRES_PASSWORD`。修改 `.env` 不会改变已有角色

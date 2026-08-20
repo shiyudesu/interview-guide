@@ -249,7 +249,7 @@ function InterviewItemCard({
           </span>
           <span className="flex items-center gap-1">
             <MessageSquare className="w-4 h-4" />
-            {interview.totalQuestions} 题
+            {interview.plannedMainQuestions} 道主问题
           </span>
         </div>
       </div>

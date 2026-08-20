@@ -9,6 +9,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[impo
 from interview_guide.common.config.settings import get_settings
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.logging.config import configure_logging
+from interview_guide.modules.interview.api import build_interview_service
+from interview_guide.modules.interview.repository import InterviewRepository
+from interview_guide.modules.interview.service import InterviewRecoveryService
 from interview_guide.modules.interview_schedule.service import (
     InterviewScheduleService,
     schedule_now,
@@ -19,10 +22,7 @@ from interview_guide.modules.knowledge_base.question_service import (
     QuestionGenStreamProducer,
 )
 from interview_guide.modules.voice_interview.repository import VoiceInterviewRepository
-from interview_guide.modules.voice_interview.service import (
-    VoiceEvaluationProducer,
-    VoiceInterviewService,
-)
+from interview_guide.modules.voice_interview.service import VoiceInterviewService
 from interview_guide.process import install_shutdown_handlers
 
 logger = logging.getLogger(__name__)
@@ -75,13 +75,28 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
             voice_service = VoiceInterviewService(
                 voice_repository,
                 infrastructure.redis.client,
-                VoiceEvaluationProducer(
-                    infrastructure.streams,
-                    voice_repository,
-                    infrastructure.redis.client,
-                ),
+                build_interview_service(infrastructure, settings),
                 now_factory,
             )
+
+            interview_recovery = InterviewRecoveryService(
+                InterviewRepository(
+                    infrastructure.database.sessions,
+                    now=now_factory,
+                ),
+                build_interview_service(infrastructure, settings),
+                infrastructure.streams,
+                now=now_factory,
+            )
+
+            async def recover_interview_turns() -> None:
+                turns, evaluations = await interview_recovery.recover()
+                if turns or evaluations:
+                    logger.info(
+                        "recovered adaptive interviews turns=%s evaluations=%s",
+                        turns,
+                        evaluations,
+                    )
 
             async def recover_voice_interviews() -> None:
                 cleaned = await voice_service.cleanup_stale_sessions()
@@ -113,6 +128,14 @@ async def run_scheduler(stop_event: asyncio.Event | None = None) -> None:
                 trigger="interval",
                 seconds=60,
                 id="voice-interview-recovery",
+                max_instances=1,
+                coalesce=False,
+            )
+            scheduler.add_job(
+                recover_interview_turns,
+                trigger="interval",
+                seconds=30,
+                id="adaptive-interview-recovery",
                 max_instances=1,
                 coalesce=False,
             )

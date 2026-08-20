@@ -18,10 +18,19 @@ docker-compose.dev.yml  本地基础设施
 
 ## 不能改变的行为
 
+自适应面试 v2 是一次已批准的破坏性升级，以下旧契约已删除：
+
+- 文字面试 `/answers`、`questionIndex`、`questions[]` 和 `questionsJson`。
+- `interview_answers`、旧问题数组推进字段和独立语音评估表。
+- 面试会话缓存切换为 `interview:v2:*` 和 `voice:v2:*`。
+
+新面试提交协议为 `POST /api/interview/sessions/{sessionId}/turns`，使用
+`requestId + questionId + answer`。除上述明确列出的面试契约外，以下行为仍不可改变：
+
 - 保持 REST 路径、HTTP 方法、参数、请求体、multipart 字段和响应头。
 - 保持响应字段、默认值、null、数组顺序、时间格式、错误码和错误文案。
 - 普通业务错误继续使用 HTTP 200；文件、SSE 和 WebSocket 保持特殊状态行为。
-- 保持 PostgreSQL 表、字段、约束、索引、事务结果和 `vector(1024)`。
+- 保持当前 PostgreSQL 表、字段、约束、索引、事务结果和 `vector(1024)`。
 - 保持 Redis key、TTL、Stream 字段、Pending、reclaim、重试和 ACK 顺序。
 - 保持 requestId 幂等锁、结果缓存和数据库唯一索引。
 - 保持 Prompt、Skill、Provider、Tool、JSON Schema、重试和回退顺序。
@@ -47,6 +56,8 @@ docker-compose.dev.yml  本地基础设施
 - SQLAlchemy 连接池默认 10 个常驻连接、0 overflow。
 - Redis Stream 使用 XGROUP、XREADGROUP、XAUTOCLAIM、XADD 和 XACK。
 - 五组 Stream 每组内部顺序消费，失败时先重投或写失败状态，再 ACK。
+- `voice:evaluate:stream` 只负责把遗留语音任务转投统一的
+  `interview:evaluate:stream`，不得重新引入独立语音评估实现。
 - 所有模型客户端由 `LlmProviderRegistry` 和统一 LLM Adapter 提供。
 - 关闭 SDK、LangChain 和 LangGraph 隐式重试。
 - Provider 配置以数据库为准，修改后通过 Redis 版本通知清理进程缓存。

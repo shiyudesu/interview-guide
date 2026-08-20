@@ -1,53 +1,51 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Request
 from starlette.responses import Response
 
 from interview_guide.common.api.responses import result_response
+from interview_guide.common.config.settings import Settings
 from interview_guide.common.infrastructure import RuntimeInfrastructure
+from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.result import Result
+from interview_guide.modules.interview.api import build_interview_service
 from interview_guide.modules.voice_interview.models import (
     CreateVoiceSessionRequest,
-    VoiceAnswerDetail,
-    VoiceEvaluationDetail,
     VoiceEvaluationStatusResponse,
 )
 from interview_guide.modules.voice_interview.repository import VoiceInterviewRepository
-from interview_guide.modules.voice_interview.service import (
-    VoiceEvaluationProducer,
-    VoiceInterviewService,
-)
+from interview_guide.modules.voice_interview.service import VoiceInterviewService
 
 router = APIRouter(prefix="/api/voice-interview")
 
 
 def build_service(
     infrastructure: RuntimeInfrastructure,
+    settings: Settings,
+    metrics: ApplicationMetrics | None = None,
 ) -> VoiceInterviewService:
     repository = VoiceInterviewRepository(
         infrastructure.database.sessions,
         datetime.now,
     )
-    producer = VoiceEvaluationProducer(
-        infrastructure.streams,
-        repository,
-        infrastructure.redis.client,
-    )
     return VoiceInterviewService(
         repository,
         infrastructure.redis.client,
-        producer,
+        build_interview_service(infrastructure, settings, metrics),
         datetime.now,
     )
 
 
 async def service_dependency(request: Request) -> VoiceInterviewService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    return build_service(infrastructure)
+    return build_service(
+        infrastructure,
+        request.app.state.settings,
+        request.app.state.metrics,
+    )
 
 
 Service = Annotated[VoiceInterviewService, Depends(service_dependency)]
@@ -113,44 +111,6 @@ async def messages(session_id: int, service: Service) -> Response:
     return result_response(Result.ok(await service.messages(session_id)))
 
 
-def evaluation_detail(entity: Any) -> VoiceEvaluationDetail:
-    raw_answers = json.loads(entity.question_evaluations_json or "[]")
-    raw_references = json.loads(entity.reference_answers_json or "[]")
-    references: dict[int, dict[str, Any]] = {}
-    for index, reference in enumerate(raw_references):
-        references.setdefault(
-            int(reference.get("questionIndex", index)),
-            reference,
-        )
-    return VoiceEvaluationDetail(
-        session_id=entity.session_id,
-        total_questions=len(raw_answers),
-        overall_score=entity.overall_score,
-        overall_feedback=entity.overall_feedback,
-        strengths=json.loads(entity.strengths_json or "[]"),
-        improvements=json.loads(entity.improvements_json or "[]"),
-        answers=[
-            VoiceAnswerDetail(
-                question_index=int(answer.get("questionIndex", index)),
-                question=str(answer.get("question", "")),
-                category=answer.get("category"),
-                user_answer=answer.get("userAnswer"),
-                score=int(answer.get("score", 0)),
-                feedback=answer.get("feedback"),
-                reference_answer=references.get(
-                    int(answer.get("questionIndex", index)),
-                    {},
-                ).get("referenceAnswer"),
-                key_points=references.get(
-                    int(answer.get("questionIndex", index)),
-                    {},
-                ).get("keyPoints"),
-            )
-            for index, answer in enumerate(raw_answers)
-        ],
-    )
-
-
 @router.get("/sessions/{session_id}/evaluation")
 async def get_evaluation(session_id: int, service: Service) -> Response:
     session = await service.get_session(session_id)
@@ -161,15 +121,12 @@ async def get_evaluation(session_id: int, service: Service) -> Response:
             ErrorCode.VOICE_SESSION_NOT_FOUND,
             f"会话不存在: {session_id}",
         )
-    evaluation = None
-    if session.evaluate_status == "COMPLETED":
-        entity = await service.repository.evaluation(session_id)
-        if entity is not None:
-            evaluation = evaluation_detail(entity)
+    evaluation = await service.evaluation_report(session_id)
+    status = "COMPLETED" if evaluation is not None else session.evaluate_status
     return result_response(
         Result.ok(
             VoiceEvaluationStatusResponse(
-                evaluate_status=session.evaluate_status,
+                evaluate_status=status,
                 evaluate_error=session.evaluate_error,
                 evaluate_status_updated_at=session.updated_at,
                 evaluation=evaluation,
@@ -188,14 +145,14 @@ async def generate_evaluation(session_id: int, service: Service) -> Response:
             ErrorCode.VOICE_SESSION_NOT_FOUND,
             f"会话不存在: {session_id}",
         )
-    if session.evaluate_status == "COMPLETED":
-        entity = await service.repository.evaluation(session_id)
+    evaluation = await service.evaluation_report(session_id)
+    if evaluation is not None:
         return result_response(
             Result.ok(
                 VoiceEvaluationStatusResponse(
                     evaluate_status="COMPLETED",
                     evaluate_status_updated_at=session.updated_at,
-                    evaluation=(evaluation_detail(entity) if entity is not None else None),
+                    evaluation=evaluation,
                 )
             )
         )

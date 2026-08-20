@@ -13,6 +13,7 @@ export default defineConfig({
     video: 'retain-on-failure',
     permissions: ['microphone'],
     launchOptions: {
+      executablePath: process.env.PLAYWRIGHT_CHROME_PATH,
       args: [
         '--use-fake-ui-for-media-stream',
         '--use-fake-device-for-media-stream',

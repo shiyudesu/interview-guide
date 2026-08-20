@@ -26,7 +26,7 @@ from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.interview.models import (
     CategoryRequest,
     HistoricalQuestion,
-    InterviewQuestion,
+    PlannedInterviewQuestion,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,6 @@ DEFAULT_SKILL_ID = "java-backend"
 DEFAULT_DIFFICULTY = "mid"
 DEFAULT_QUESTION_TYPE = "GENERAL"
 CUSTOM_SKILL_ID = "custom"
-MAX_FOLLOW_UP_COUNT = 2
 RESUME_QUESTION_RATIO = 0.6
 MAX_REFERENCE_SECTION_CHARS = 12_000
 MAX_EVALUATION_REFERENCE_SECTION_CHARS = 6_000
@@ -67,7 +66,6 @@ class QuestionOutput(BaseModel):
     type: str | None = None
     category: str | None = None
     topicSummary: str | None = None
-    followUps: list[str | None] | None = None
 
 
 class QuestionListOutput(BaseModel):
@@ -125,9 +123,9 @@ class QuestionGenerationState(TypedDict, total=False):
     historical_section: str
     resume_count: int
     direction_count: int
-    resume_questions: list[InterviewQuestion]
-    direction_questions: list[InterviewQuestion]
-    questions: list[InterviewQuestion]
+    resume_questions: list[PlannedInterviewQuestion]
+    direction_questions: list[PlannedInterviewQuestion]
+    questions: list[PlannedInterviewQuestion]
 
 
 QUESTION_OUTPUT_FORMAT = structured_output_format(
@@ -141,17 +139,12 @@ QUESTION_OUTPUT_FORMAT = structured_output_format(
                     "type": "object",
                     "properties": {
                         "category": {"type": "string"},
-                        "followUps": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                        },
                         "question": {"type": "string"},
                         "topicSummary": {"type": "string"},
                         "type": {"type": "string"},
                     },
                     "required": [
                         "category",
-                        "followUps",
                         "question",
                         "topicSummary",
                         "type",
@@ -483,15 +476,12 @@ class InterviewQuestionService:
         prompts: PromptRepository,
         sanitizer: PromptSanitizer,
         skills: InterviewSkillLibrary,
-        *,
-        follow_up_count: int = 1,
     ) -> None:
         self._registry = registry
         self._structured = structured
         self._prompts = prompts
         self._sanitizer = sanitizer
         self._skills = skills
-        self._follow_up_count = max(0, min(follow_up_count, MAX_FOLLOW_UP_COUNT))
         graph = StateGraph(QuestionGenerationState)
         graph.add_node("resolve_skill", self._resolve_skill_node)
         graph.add_node("allocate_question_counts", self._allocate_node)
@@ -515,7 +505,7 @@ class InterviewQuestionService:
         historical_questions: list[HistoricalQuestion],
         custom_categories: list[CategoryRequest] | None,
         jd_text: str | None,
-    ) -> list[InterviewQuestion]:
+    ) -> list[PlannedInterviewQuestion]:
         result = await self._graph.ainvoke(
             {
                 "generation_input": GenerationInput(
@@ -530,7 +520,17 @@ class InterviewQuestionService:
                 )
             }
         )
-        return cast(list[InterviewQuestion], result["questions"])
+        questions = cast(list[PlannedInterviewQuestion], result["questions"])
+        if len(questions) < question_count:
+            fallback = self._fallback_questions(
+                cast(ResolvedSkill, result["skill"]),
+                question_count,
+            )
+            seen = {item.question for item in questions}
+            questions.extend(
+                item for item in fallback if item.question not in seen
+            )
+        return questions[:question_count]
 
     async def _resolve_skill_node(
         self,
@@ -658,7 +658,7 @@ class InterviewQuestionService:
         skill: ResolvedSkill,
         difficulty_description: str,
         historical_section: str,
-    ) -> list[InterviewQuestion]:
+    ) -> list[PlannedInterviewQuestion]:
         system = (
             self._prompts.render("interview-question-resume-system.st")
             + self._persona_section(skill)
@@ -669,7 +669,6 @@ class InterviewQuestionService:
             "interview-question-resume-user.st",
             {
                 "questionCount": question_count,
-                "followUpCount": self._follow_up_count,
                 "skillName": skill.name,
                 "skillDescription": skill.description or "",
                 "difficultyDescription": difficulty_description,
@@ -694,7 +693,7 @@ class InterviewQuestionService:
         difficulty_description: str,
         question_count: int,
         historical_section: str,
-    ) -> list[InterviewQuestion]:
+    ) -> list[PlannedInterviewQuestion]:
         allocation = self._skills.allocation(skill.categories, question_count)
         try:
             system = (
@@ -707,7 +706,6 @@ class InterviewQuestionService:
                 "interview-question-skill-user.st",
                 {
                     "questionCount": question_count,
-                    "followUpCount": self._follow_up_count,
                     "difficultyDescription": difficulty_description,
                     "skillName": skill.name,
                     "skillDescription": skill.description or "",
@@ -732,7 +730,7 @@ class InterviewQuestionService:
                 "方向题生成失败：",
             )
             questions = self._convert(result)
-            if not any(not item.is_follow_up for item in questions):
+            if not questions:
                 return self._fallback_questions(skill, question_count)
             return self._cap(questions, question_count)
         except BusinessException:
@@ -741,8 +739,8 @@ class InterviewQuestionService:
             logger.exception("direction question generation failed; using fallback")
             return self._fallback_questions(skill, question_count)
 
-    def _convert(self, output: QuestionListOutput) -> list[InterviewQuestion]:
-        questions: list[InterviewQuestion] = []
+    def _convert(self, output: QuestionListOutput) -> list[PlannedInterviewQuestion]:
+        questions: list[PlannedInterviewQuestion] = []
         for item in output.questions or []:
             if item is None or item.question is None or not item.question.strip():
                 continue
@@ -751,58 +749,29 @@ class InterviewQuestionService:
                 if item.type is not None and item.type.strip()
                 else DEFAULT_QUESTION_TYPE
             )
-            main_index = len(questions)
             questions.append(
-                InterviewQuestion(
-                    question_index=main_index,
+                PlannedInterviewQuestion(
                     question=item.question,
                     type=question_type,
                     category=item.category,
                     topic_summary=item.topicSummary,
                 )
             )
-            follow_ups = [
-                value.strip()
-                for value in item.followUps or []
-                if value is not None and value.strip()
-            ][: self._follow_up_count]
-            for order, follow_up in enumerate(follow_ups, start=1):
-                questions.append(
-                    InterviewQuestion(
-                        question_index=len(questions),
-                        question=follow_up,
-                        type=question_type,
-                        category=self._follow_up_category(item.category, order),
-                        is_follow_up=True,
-                        parent_question_index=main_index,
-                    )
-                )
         return questions
 
     @staticmethod
     def _cap(
-        questions: list[InterviewQuestion],
+        questions: list[PlannedInterviewQuestion],
         max_main_count: int,
-    ) -> list[InterviewQuestion]:
-        current = sum(not item.is_follow_up for item in questions)
-        if current <= max_main_count:
-            return questions
-        capped: list[InterviewQuestion] = []
-        main_seen = 0
-        for question in questions:
-            if not question.is_follow_up:
-                main_seen += 1
-            if main_seen > max_main_count:
-                break
-            capped.append(question)
-        return capped
+    ) -> list[PlannedInterviewQuestion]:
+        return questions[:max_main_count]
 
     def _fallback_questions(
         self,
         skill: ResolvedSkill,
         count: int,
-    ) -> list[InterviewQuestion]:
-        questions: list[InterviewQuestion] = []
+    ) -> list[PlannedInterviewQuestion]:
+        questions: list[PlannedInterviewQuestion] = []
         if skill.categories:
             for generated in range(count):
                 category = skill.categories[generated % len(skill.categories)]
@@ -814,12 +783,17 @@ class InterviewQuestionService:
                     category.label,
                 )
             return questions
-        for question, question_type, category_label in GENERIC_FALLBACK_QUESTIONS[
-            : min(count, len(GENERIC_FALLBACK_QUESTIONS))
-        ]:
+        for index in range(count):
+            question, question_type, category_label = GENERIC_FALLBACK_QUESTIONS[
+                index % len(GENERIC_FALLBACK_QUESTIONS)
+            ]
             self._append_fallback(
                 questions,
-                question,
+                (
+                    question
+                    if index < len(GENERIC_FALLBACK_QUESTIONS)
+                    else f"{question} 请换一个案例说明。"
+                ),
                 question_type,
                 category_label,
             )
@@ -827,65 +801,29 @@ class InterviewQuestionService:
 
     def _append_fallback(
         self,
-        questions: list[InterviewQuestion],
+        questions: list[PlannedInterviewQuestion],
         question: str,
         question_type: str,
         category: str,
     ) -> None:
-        main_index = len(questions)
         questions.append(
-            InterviewQuestion(
-                question_index=main_index,
+            PlannedInterviewQuestion(
                 question=question,
                 type=question_type,
                 category=category,
             )
         )
-        for order in range(1, self._follow_up_count + 1):
-            follow_up = (
-                f'基于"{question}"，请结合你亲自做过的一个真实场景展开说明。'
-                if order == 1
-                else f'基于"{question}"，如果线上出现异常，你会如何定位并给出修复方案？'
-            )
-            questions.append(
-                InterviewQuestion(
-                    question_index=len(questions),
-                    question=follow_up,
-                    type=question_type,
-                    category=self._follow_up_category(category, order),
-                    is_follow_up=True,
-                    parent_question_index=main_index,
-                )
-            )
 
     @staticmethod
     def _merge(
-        first: list[InterviewQuestion],
-        second: list[InterviewQuestion],
-    ) -> list[InterviewQuestion]:
+        first: list[PlannedInterviewQuestion],
+        second: list[PlannedInterviewQuestion],
+    ) -> list[PlannedInterviewQuestion]:
         if not second:
             return first
         if not first:
             return second
-        offset = len(first)
-        merged = list(first)
-        for question in second:
-            merged.append(
-                InterviewQuestion(
-                    question_index=question.question_index + offset,
-                    question=question.question,
-                    type=question.type,
-                    category=question.category,
-                    topic_summary=question.topic_summary,
-                    is_follow_up=question.is_follow_up,
-                    parent_question_index=(
-                        question.parent_question_index + offset
-                        if question.parent_question_index is not None
-                        else None
-                    ),
-                )
-            )
-        return merged
+        return [*first, *second]
 
     def _historical_section(
         self,
@@ -930,11 +868,6 @@ class InterviewQuestionService:
                 skill.persona,
             )
         )
-
-    @staticmethod
-    def _follow_up_category(category: str | None, order: int) -> str:
-        return f"{category if category and category.strip() else '追问'}（追问{order}）"
-
 
 class JdParseService:
     def __init__(

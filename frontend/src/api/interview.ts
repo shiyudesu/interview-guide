@@ -4,8 +4,8 @@ import type {
   CurrentQuestionResponse,
   InterviewReport,
   InterviewSession,
-  SubmitAnswerRequest,
-  SubmitAnswerResponse
+  SubmitTurnRequest,
+  SubmitTurnResponse
 } from '../types/interview';
 
 export interface TextSessionMeta {
@@ -13,12 +13,13 @@ export interface TextSessionMeta {
   skillId: string;
   difficulty: string;
   resumeId: number | null;
-  totalQuestions: number;
+  channel: 'TEXT' | 'KNOWLEDGE_BASE' | 'VOICE';
+  plannedMainQuestions: number;
+  answeredMainQuestions: number;
   status: string;
   evaluateStatus: string | null;
   evaluateError: string | null;
   overallScore: number | null;
-  sourceType: string | null;
   knowledgeBaseId: number | null;
   interviewCategory?: string | null;
   createdAt: string;
@@ -59,10 +60,10 @@ export const interviewApi = {
   /**
    * 提交答案
    */
-  async submitAnswer(req: SubmitAnswerRequest): Promise<SubmitAnswerResponse> {
-    return request.post<SubmitAnswerResponse>(
-      `/api/interview/sessions/${req.sessionId}/answers`,
-      { questionIndex: req.questionIndex, answer: req.answer },
+  async submitTurn(req: SubmitTurnRequest): Promise<SubmitTurnResponse> {
+    return request.post<SubmitTurnResponse>(
+      `/api/interview/sessions/${req.sessionId}/turns`,
+      { requestId: req.requestId, questionId: req.questionId, answer: req.answer },
       {
         timeout: 180000, // 3分钟超时
       }
@@ -88,16 +89,6 @@ export const interviewApi = {
       // 如果没有未完成的会话，返回null
       return null;
     }
-  },
-
-  /**
-   * 暂存答案（不进入下一题）
-   */
-  async saveAnswer(req: SubmitAnswerRequest): Promise<void> {
-    return request.put<void>(
-      `/api/interview/sessions/${req.sessionId}/answers`,
-      { questionIndex: req.questionIndex, answer: req.answer }
-    );
   },
 
   /**

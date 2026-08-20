@@ -13,8 +13,8 @@ import {resolveInterviewEntry} from './interviewEntry';
 interface Message {
   type: 'interviewer' | 'user';
   content: string;
-  category?: string;
-  questionIndex?: number;
+  category?: string | null;
+  questionId?: string;
 }
 
 interface InterviewProps {
@@ -60,6 +60,11 @@ export default function Interview({
   const [isCreating, setIsCreating] = useState(false);
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
   const startedRef = useRef(false);
+  const pendingTurnRef = useRef<{
+    questionId: string;
+    answer: string;
+    requestId: string;
+  } | null>(null);
 
   const questionCount = initialConfig?.questionCount ?? 8;
   const llmProvider = initialConfig?.llmProvider ?? '';
@@ -118,11 +123,6 @@ export default function Interview({
       const existingSession = await interviewApi.getSession(sessionId);
       initSession(existingSession);
 
-      // 恢复已填写的答案
-      const currentQ = existingSession.questions[existingSession.currentQuestionIndex];
-      if (currentQ?.userAnswer) {
-        setAnswer(currentQ.userAnswer);
-      }
     } catch (err) {
       setError('恢复面试失败，请重试');
       console.error(err);
@@ -133,31 +133,34 @@ export default function Interview({
 
   const initSession = (s: InterviewSession) => {
     setSession(s);
-
-    if (s.questions.length > 0) {
-      const idx = Math.min(s.currentQuestionIndex, s.questions.length - 1);
-      const currentQ = s.questions[idx];
-      setCurrentQuestion(currentQ);
-
-      // 重建消息历史
-      const restoredMessages: Message[] = [];
-      for (let i = 0; i <= idx; i++) {
-        const q = s.questions[i];
-        restoredMessages.push({
-          type: 'interviewer',
-          content: q.question,
-          category: q.category,
-          questionIndex: i
-        });
-        if (q.userAnswer) {
-          restoredMessages.push({
-            type: 'user',
-            content: q.userAnswer
-          });
-        }
+    setCurrentQuestion(s.currentQuestion);
+    const restoredMessages: Message[] = [];
+    s.turns.forEach(turn => {
+      restoredMessages.push({
+        type: 'interviewer',
+        content: turn.question.question,
+        category: turn.question.category,
+        questionId: turn.questionId,
+      });
+      if (turn.answer) {
+        restoredMessages.push({type: 'user', content: turn.answer});
       }
-      setMessages(restoredMessages);
+      if (turn.acknowledgement) {
+        restoredMessages.push({type: 'interviewer', content: turn.acknowledgement});
+      }
+    });
+    if (
+      s.currentQuestion &&
+      !s.turns.some(turn => turn.questionId === s.currentQuestion?.questionId)
+    ) {
+      restoredMessages.push({
+        type: 'interviewer',
+        content: s.currentQuestion.question,
+        category: s.currentQuestion.category,
+        questionId: s.currentQuestion.questionId,
+      });
     }
+    setMessages(restoredMessages);
   };
 
   const handleSubmitAnswer = async () => {
@@ -165,28 +168,56 @@ export default function Interview({
 
     setIsSubmitting(true);
 
-    const userMessage: Message = {
-      type: 'user',
-      content: answer
-    };
-    setMessages(prev => [...prev, userMessage]);
+    const submittedAnswer = answer.trim();
+    const pending = pendingTurnRef.current;
+    const turnRequest =
+      pending &&
+      pending.questionId === currentQuestion.questionId &&
+      pending.answer === submittedAnswer
+        ? pending
+        : {
+            questionId: currentQuestion.questionId,
+            answer: submittedAnswer,
+            requestId: crypto.randomUUID(),
+          };
+    pendingTurnRef.current = turnRequest;
+    setMessages(prev => {
+      const last = prev[prev.length - 1];
+      return last?.type === 'user' && last.content === submittedAnswer
+        ? prev
+        : [...prev, {type: 'user', content: submittedAnswer}];
+    });
 
     try {
-      const response = await interviewApi.submitAnswer({
+      const response = await interviewApi.submitTurn({
         sessionId: session.sessionId,
-        questionIndex: currentQuestion.questionIndex,
-        answer: answer.trim()
+        requestId: turnRequest.requestId,
+        questionId: turnRequest.questionId,
+        answer: turnRequest.answer,
       });
 
+      pendingTurnRef.current = null;
       setAnswer('');
-
-      if (response.hasNextQuestion && response.nextQuestion) {
-        setCurrentQuestion(response.nextQuestion);
+      setSession(prev => prev ? {
+        ...prev,
+        currentQuestion: response.nextQuestion,
+        progress: response.progress,
+        status: response.completed ? 'COMPLETED' : 'IN_PROGRESS',
+      } : prev);
+      if (response.acknowledgement) {
         setMessages(prev => [...prev, {
           type: 'interviewer',
-          content: response.nextQuestion!.question,
-          category: response.nextQuestion!.category,
-          questionIndex: response.nextQuestion!.questionIndex
+          content: response.acknowledgement,
+        }]);
+      }
+      if (response.nextQuestion) {
+        const nextQuestion = response.nextQuestion;
+        setCurrentQuestion(nextQuestion);
+        setMessages(prev => [...prev, {
+          type: 'interviewer',
+          content: nextQuestion.question,
+          category: nextQuestion.category,
+          questionId: nextQuestion.questionId,
         }]);
       } else {
         onInterviewComplete();

@@ -336,8 +336,18 @@ def extract_database(root: Path) -> dict[str, Any]:
     indexes: list[dict[str, Any]] = []
     alterations: list[dict[str, Any]] = []
     sql_paths = sorted((root / "backend/alembic/sql").glob("*.sql"))
-    for path in sql_paths:
+    revision_paths = sorted((root / "backend/alembic/versions").glob("*.py"))
+    dropped_tables: set[str] = set()
+    dropped_columns: dict[str, set[str]] = {}
+    added_columns: dict[str, list[dict[str, str]]] = {}
+    for path in [*sql_paths, *revision_paths]:
         text = path.read_text(encoding="utf-8")
+        if path.suffix == ".py":
+            upgrade_start = text.find("def upgrade()")
+            downgrade_start = text.find("def downgrade()")
+            if upgrade_start < 0:
+                continue
+            text = text[upgrade_start : downgrade_start if downgrade_start >= 0 else None]
         source = relative(root, path)
         migrations.append(
             {
@@ -420,6 +430,62 @@ def extract_database(root: Path) -> dict[str, Any]:
                     "source": {"file": source, "line": source_line(text, match.start())},
                 }
             )
+        for match in re.finditer(
+            r"DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:\"([^\"]+)\"|(\w+))",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            dropped_tables.add(match.group(1) or match.group(2))
+        for match in re.finditer(
+            r"ALTER\s+TABLE\s+(?:\"([^\"]+)\"|(\w+))(?P<body>.+?);",
+            text,
+            flags=re.IGNORECASE | re.DOTALL,
+        ):
+            table_name = match.group(1) or match.group(2)
+            for definition in split_definitions(match.group("body")):
+                column = re.match(
+                    r"ADD\s+COLUMN\s+(?:IF\s+NOT\s+EXISTS\s+)?"
+                    r'(?:"([^"]+)"|(\w+))\s+(.+)',
+                    definition,
+                    flags=re.IGNORECASE | re.DOTALL,
+                )
+                if column is not None:
+                    added_columns.setdefault(table_name, []).append(
+                        {
+                            "definition": compact(column.group(3)),
+                            "name": column.group(1) or column.group(2),
+                        }
+                    )
+            for column in re.finditer(
+                r"DROP\s+COLUMN\s+(?:IF\s+EXISTS\s+)?(?:\"([^\"]+)\"|(\w+))",
+                match.group("body"),
+                flags=re.IGNORECASE,
+            ):
+                dropped_columns.setdefault(table_name, set()).add(
+                    column.group(1) or column.group(2)
+                )
+    tables = [table for table in tables if table["name"] not in dropped_tables]
+    for table in tables:
+        removed = dropped_columns.get(table["name"], set())
+        table["columns"] = [
+            column for column in table["columns"] if column["name"] not in removed
+        ]
+        existing_columns = {column["name"] for column in table["columns"]}
+        table["columns"].extend(
+            column
+            for column in added_columns.get(table["name"], [])
+            if column["name"] not in existing_columns and column["name"] not in removed
+        )
+    live_table_names = {table["name"] for table in tables}
+    indexes = [
+        index
+        for index in indexes
+        if not any(
+            re.search(rf"\bON\s+(?:public\.)?\"?{re.escape(table)}\"?\b", index["definition"], re.I)
+            for table in dropped_tables
+            if table not in live_table_names
+        )
+    ]
     return {
         "schemaVersion": SCHEMA_VERSION,
         "sourceOfTruth": "Alembic accepted production SQL and PostgreSQL catalog tests.",
@@ -663,7 +729,6 @@ def extract_resources(root: Path) -> dict[str, Any]:
         "prompt": "prompts/**/*",
         "redis-script": "scripts/**/*",
         "skill": "skills/**/*",
-        "voice-config": "voice-interview-opening.yml",
     }
     resources: list[dict[str, Any]] = []
     for category, pattern in patterns.items():
@@ -726,7 +791,8 @@ def main() -> None:
         "schemaVersion": SCHEMA_VERSION,
         "manifests": {name: value["summary"] for name, value in sorted(manifests.items())},
         "maintenance": [
-            "Keep production Compose, Python tests, repository manifests, and protected model checks green.",
+            "Keep production Compose, Python tests, repository manifests, "
+            "and protected model checks green.",
         ],
     }
     write_json(output, "summary.json", summary)

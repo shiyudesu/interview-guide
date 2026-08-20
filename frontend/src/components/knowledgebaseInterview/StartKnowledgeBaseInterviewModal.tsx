@@ -188,7 +188,7 @@ export default function StartKnowledgeBaseInterviewModal({
                     </select>
                   </label>
                   <label className="block">
-                    <span className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">每题追问</span>
+                    <span className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">每道主问题最多追问</span>
                     <select
                       value={followUpCount}
                       onChange={event => setFollowUpCount(parseInt(event.target.value, 10))}
@@ -197,8 +197,8 @@ export default function StartKnowledgeBaseInterviewModal({
                       {FOLLOW_UP_COUNT_OPTIONS.map(count => {
                         const optionCapacity = getSelectedCapacity(followUpOptions, count);
                         const label = optionCapacity
-                          ? `${count} 个（${optionCapacity.availableQuestionCount} 道题可用）`
-                          : `${count} 个`;
+                          ? `${count} 次（${optionCapacity.availableQuestionCount} 道主问题可用）`
+                          : `${count} 次`;
                         return (
                           <option
                             key={count}

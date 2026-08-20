@@ -17,20 +17,10 @@ export function getStrictCapacityMessage(
     return '暂时无法确认当前配置的可用题数，请稍后重试。';
   }
   if (selected.selectable) {
-    return `当前条件可用 ${selected.availableQuestionCount} 道主问题。`;
+    return `当前条件可用 ${selected.availableQuestionCount} 道主问题，每道最多动态追问 ${followUpCount} 次。`;
   }
-  const selectableOptions = options
-    .filter(option => option.availableQuestionCount >= mainQuestionCount);
-  if (selectableOptions.length === 0) {
-    return `当前仅有 ${selected.availableQuestionCount} 道题包含至少 ${followUpCount} 个追问，`
-      + `无法抽取 ${mainQuestionCount} 道主问题。`
-      + '当前题量下没有足够的已启用主问题，请减少主问题数或补充题库。';
-  }
-  const maximumStrictCount = selectableOptions
-    .reduce((maximum, option) => Math.max(maximum, option.followUpCount), 0);
-  return `当前仅有 ${selected.availableQuestionCount} 道题包含至少 ${followUpCount} 个追问，`
-    + `无法抽取 ${mainQuestionCount} 道主问题。`
-    + `在当前题量下，每题最多可严格保证 ${maximumStrictCount} 个追问。`;
+  return `当前仅有 ${selected.availableQuestionCount} 道可用主问题，`
+    + `无法抽取 ${mainQuestionCount} 道，请减少主问题数或补充题库。`;
 }
 
 export function getFollowUpQualityWarning(

@@ -197,11 +197,45 @@ class Settings(BaseSettings):
     )
     interview_follow_up_count: int = Field(
         default=1,
+        ge=0,
+        le=2,
         validation_alias="APP_INTERVIEW_FOLLOW_UP_COUNT",
     )
-    interview_evaluation_batch_size: int = Field(
-        default=8,
-        validation_alias="APP_INTERVIEW_EVALUATION_BATCH_SIZE",
+    interview_turn_confidence_threshold: float = Field(
+        default=0.65,
+        ge=0,
+        le=1,
+        validation_alias="APP_INTERVIEW_TURN_CONFIDENCE_THRESHOLD",
+    )
+    interview_turn_decision_timeout_seconds: float = Field(
+        default=20,
+        gt=0,
+        le=120,
+        validation_alias="APP_INTERVIEW_TURN_DECISION_TIMEOUT_SECONDS",
+    )
+    interview_turn_lease_seconds: int = Field(
+        default=30,
+        ge=5,
+        le=300,
+        validation_alias="APP_INTERVIEW_TURN_LEASE_SECONDS",
+    )
+    interview_turn_context_max_chars: int = Field(
+        default=12_000,
+        ge=2_000,
+        le=50_000,
+        validation_alias="APP_INTERVIEW_TURN_CONTEXT_MAX_CHARS",
+    )
+    interview_turn_recent_count: int = Field(
+        default=6,
+        ge=0,
+        le=20,
+        validation_alias="APP_INTERVIEW_TURN_RECENT_COUNT",
+    )
+    voice_turn_min_remaining_seconds: int = Field(
+        default=30,
+        ge=0,
+        le=300,
+        validation_alias="APP_VOICE_TURN_MIN_REMAINING_SECONDS",
     )
     provider_lmstudio_api_key: SecretStr = Field(
         default=SecretStr("lm-studio"),
@@ -322,16 +356,6 @@ class Settings(BaseSettings):
         ge=1,
         validation_alias="APP_VOICE_MAX_CONCURRENT_TTS_PER_SESSION",
     )
-    voice_llm_stream_push_interval_ms: int = Field(
-        default=180,
-        ge=80,
-        validation_alias="APP_VOICE_AI_STREAM_PUSH_INTERVAL_MS",
-    )
-    voice_llm_stream_min_chars_delta: int = Field(
-        default=12,
-        ge=4,
-        validation_alias="APP_VOICE_AI_STREAM_MIN_CHARS_DELTA",
-    )
     voice_ai_question_max_chars: int = Field(
         default=120,
         ge=80,
@@ -341,24 +365,6 @@ class Settings(BaseSettings):
         default=30,
         gt=0,
         validation_alias="APP_VOICE_TIMEOUT_CHECK_INTERVAL_SECONDS",
-    )
-    voice_context_compression_enabled: bool = Field(
-        default=False,
-        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_ENABLED",
-    )
-    voice_context_compression_mode: str = Field(
-        default="SUMMARY",
-        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_MODE",
-    )
-    voice_context_compression_window_size: int = Field(
-        default=20,
-        ge=1,
-        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_WINDOW_SIZE",
-    )
-    voice_context_compression_summary_batch_size: int = Field(
-        default=10,
-        ge=1,
-        validation_alias="APP_VOICE_CONTEXT_COMPRESSION_SUMMARY_BATCH_SIZE",
     )
 
     otel_enabled: bool = Field(default=True, validation_alias="OTEL_ENABLED")

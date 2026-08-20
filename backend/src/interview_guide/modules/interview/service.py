@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-import json
+import asyncio
+import hashlib
 import logging
 import uuid
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from uuid import UUID
 
 from interview_guide.common.ai.adapter import ProviderConfig
 from interview_guide.common.ai.providers import LlmProviderRegistry
-from interview_guide.common.db.models import InterviewAnswer
+from interview_guide.common.api.models import compact_json_text
+from interview_guide.common.db.models import InterviewQuestionRecord, InterviewTurnRecord
 from interview_guide.common.errors import BusinessException, ErrorCode
+from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.redis.streams import (
     FIELD_RETRY_COUNT,
     FIELD_SESSION_ID,
@@ -20,30 +23,41 @@ from interview_guide.common.redis.streams import (
     StreamMessage,
 )
 from interview_guide.common.runtime import BlockingExecutor
-from interview_guide.infrastructure.export.pdf import (
-    PdfDocumentBuilder,
-    pdf_download_headers,
+from interview_guide.infrastructure.export.pdf import PdfDocumentBuilder, pdf_download_headers
+from interview_guide.modules.interview.cache import InterviewSessionCache
+from interview_guide.modules.interview.evaluation import (
+    UnifiedEvaluationService,
+    parse_saved_list,
 )
-from interview_guide.modules.interview.cache import (
-    CachedSession,
-    InterviewSessionCache,
-)
-from interview_guide.modules.interview.evaluation import AnswerEvaluationService
 from interview_guide.modules.interview.models import (
     AnswerDetailDTO,
     CreateInterviewRequest,
+    HistoricalQuestion,
+    InterviewChannel,
     InterviewDetailDTO,
-    InterviewQuestion,
+    InterviewProgressDTO,
+    InterviewQuestionDTO,
     InterviewReportDTO,
     InterviewSessionDTO,
     InterviewSessionStatus,
+    InterviewTurnDTO,
+    PlannedInterviewQuestion,
+    QuestionKind,
     SessionListItemDTO,
-    SubmitAnswerResponse,
+    SubmitTurnRequest,
+    SubmitTurnResponse,
+    TurnAction,
+    TurnDecisionStatus,
 )
 from interview_guide.modules.interview.question import InterviewQuestionService
 from interview_guide.modules.interview.repository import (
+    FinalizeTurn,
     InterviewRepository,
-    SessionRecord,
+    SessionAggregate,
+)
+from interview_guide.modules.interview.turn import (
+    InterviewTurnDecisionService,
+    TurnDecisionResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,129 +70,150 @@ class InterviewService:
         cache: InterviewSessionCache,
         streams: RedisStreamService,
         questions: InterviewQuestionService,
-        evaluation: AnswerEvaluationService,
+        decisions: InterviewTurnDecisionService,
         registry: LlmProviderRegistry,
         blocking_executor: BlockingExecutor,
-        uuid_factory: Callable[[], uuid.UUID] = uuid.uuid4,
+        *,
+        follow_up_count: int,
+        turn_lease_seconds: int,
+        turn_wait_seconds: float,
+        metrics: ApplicationMetrics | None = None,
+        uuid_factory: Callable[[], UUID] = uuid.uuid4,
     ) -> None:
         self._repository = repository
         self._cache = cache
         self._streams = streams
         self._questions = questions
-        self._evaluation = evaluation
+        self._decisions = decisions
         self._registry = registry
         self._blocking_executor = blocking_executor
+        self._follow_up_count = follow_up_count
+        self._turn_lease_seconds = turn_lease_seconds
+        self._turn_wait_seconds = turn_wait_seconds
         self._uuid_factory = uuid_factory
+        self._metrics = metrics
+
+    @property
+    def follow_up_count(self) -> int:
+        return self._follow_up_count
 
     async def list_sessions(self) -> list[SessionListItemDTO]:
         return [
             SessionListItemDTO(
                 session_id=entity.session_id,
+                channel=InterviewChannel(entity.channel),
                 skill_id=entity.skill_id,
                 difficulty=entity.difficulty,
                 resume_id=entity.resume_id,
-                total_questions=entity.total_questions or 0,
+                planned_main_questions=entity.planned_main_question_count,
+                answered_main_questions=answered_main,
                 status=entity.status,
                 evaluate_status=entity.evaluate_status,
                 evaluate_error=entity.evaluate_error,
                 overall_score=entity.overall_score,
-                source_type=entity.source_type,
                 knowledge_base_id=entity.knowledge_base_id,
                 interview_category=entity.interview_category,
                 created_at=entity.created_at,
                 completed_at=entity.completed_at,
             )
-            for entity in await self._repository.list_sessions()
+            for entity, answered_main in await self._repository.list_sessions()
         ]
 
-    async def create_session(
-        self,
-        request: CreateInterviewRequest,
-    ) -> InterviewSessionDTO:
-        request_id = self._normalize_request_id(request.request_id)
-        if request_id is None:
+    async def create_session(self, request: CreateInterviewRequest) -> InterviewSessionDTO:
+        if request.request_id is None:
             return await self._create_session_internal(request, None)
 
         async def operation() -> InterviewSessionDTO:
-            return await self._create_idempotent(request, request_id)
+            return await self._create_idempotent(request, request.request_id or "")
 
-        return await self._cache.execute_create_locked(request_id, operation)
+        return await self._cache.execute_create_locked(request.request_id, operation)
+
+    async def generate_main_questions(
+        self,
+        *,
+        provider_id: str | None,
+        skill_id: str,
+        difficulty: str,
+        resume_id: int | None,
+        resume_text: str | None,
+        question_count: int,
+        jd_text: str | None,
+    ) -> list[PlannedInterviewQuestion]:
+        historical = [
+            HistoricalQuestion(question=item[0], type=item[1], topic_summary=item[2])
+            for item in await self._repository.historical_questions(skill_id, resume_id)
+        ]
+        effective_resume = (
+            resume_text
+            if resume_text is not None
+            else await self._repository.resume_text(resume_id)
+        )
+        return await self._questions.generate(
+            provider_id=provider_id,
+            skill_id=skill_id,
+            difficulty=difficulty,
+            resume_text=effective_resume,
+            question_count=question_count,
+            historical_questions=historical,
+            custom_categories=None,
+            jd_text=jd_text,
+        )
 
     async def create_session_from_questions(
         self,
-        questions: list[InterviewQuestion],
+        questions: list[PlannedInterviewQuestion],
+        *,
+        channel: InterviewChannel,
+        max_follow_ups_per_main: int,
         llm_provider: str | None,
         skill_id: str,
         difficulty: str,
-        knowledge_base_id: int,
-        interview_category: str | None,
+        request_id: str | None,
+        resume_id: int | None = None,
+        knowledge_base_id: int | None = None,
+        interview_category: str | None = None,
+        context: dict[str, object] | None = None,
     ) -> InterviewSessionDTO:
-        if not questions:
-            raise BusinessException(
-                ErrorCode.INTERVIEW_QUESTION_NOT_FOUND,
-                "面试题目不能为空",
+        if request_id is not None:
+            existing = await self._repository.find_by_request_id(request_id)
+            if existing is not None:
+                return self._session_dto(existing)
+        session_id = self._uuid_factory().hex[:16]
+        try:
+            aggregate = await self._repository.create_session(
+                session_id=session_id,
+                channel=channel,
+                resume_id=resume_id,
+                questions=questions,
+                max_follow_ups_per_main=max_follow_ups_per_main,
+                llm_provider=llm_provider,
+                skill_id=skill_id,
+                difficulty=difficulty,
+                request_id=request_id,
+                knowledge_base_id=knowledge_base_id,
+                interview_category=interview_category,
+                context_json=compact_json_text(context) if context is not None else None,
             )
-        session_id = str(self._uuid_factory()).replace("-", "")[:16]
-        await self._repository.create_session(
-            session_id=session_id,
-            resume_id=None,
-            questions=questions,
-            llm_provider=llm_provider,
-            skill_id=skill_id,
-            difficulty=difficulty,
-            request_id=None,
-            source_type="KNOWLEDGE_BASE",
-            knowledge_base_id=knowledge_base_id,
-            interview_category=interview_category,
-        )
-        await self._cache.save_session(
-            session_id,
-            "",
-            None,
-            knowledge_base_id,
-            interview_category,
-            questions,
-            0,
-            InterviewSessionStatus.CREATED,
-        )
-        return InterviewSessionDTO(
-            session_id=session_id,
-            resume_text="",
-            total_questions=len(questions),
-            current_question_index=0,
-            questions=questions,
-            status=InterviewSessionStatus.CREATED,
-            knowledge_base_id=knowledge_base_id,
-            interview_category=interview_category,
-        )
+        except Exception:
+            if request_id is not None:
+                existing = await self._repository.find_by_request_id(request_id)
+                if existing is not None:
+                    return self._session_dto(existing)
+            raise
+        if request_id is not None:
+            await self._cache.set_create_result(request_id, session_id)
+        return self._session_dto(aggregate)
 
     async def get_session(self, session_id: str) -> InterviewSessionDTO:
-        cached = await self._cache.get_session(session_id)
-        if cached is not None:
-            return self._to_session_dto(cached)
-        restored = await self._restore_from_database(session_id)
-        if restored is None:
-            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
-        return self._to_session_dto(restored)
+        return self._session_dto(await self._required(session_id))
 
-    async def find_unfinished_session(
-        self,
-        resume_id: int,
-    ) -> InterviewSessionDTO | None:
-        try:
-            cached_session_id = await self._cache.find_unfinished_session_id(resume_id)
-            if cached_session_id is not None:
-                cached = await self._cache.get_session(cached_session_id)
-                if cached is not None:
-                    return self._to_session_dto(cached)
-            record = await self._repository.find_unfinished(resume_id)
-            if record is None:
-                return None
-            restored = await self._restore_from_record(record)
-            return self._to_session_dto(restored) if restored is not None else None
-        except Exception:
-            logger.exception("failed to restore unfinished interview")
-            return None
+    async def find_unfinished_session(self, resume_id: int) -> InterviewSessionDTO | None:
+        aggregate = await self._repository.find_unfinished(resume_id)
+        return self._session_dto(aggregate) if aggregate is not None else None
+
+    async def find_by_request_id(self, request_id: str) -> InterviewSessionDTO | None:
+        aggregate = await self._repository.find_by_request_id(request_id)
+        return self._session_dto(aggregate) if aggregate is not None else None
 
     async def find_unfinished_or_throw(self, resume_id: int) -> InterviewSessionDTO:
         result = await self.find_unfinished_session(resume_id)
@@ -190,291 +225,240 @@ class InterviewService:
         return result
 
     async def current_question(self, session_id: str) -> dict[str, object]:
-        session = await self._get_or_restore(session_id)
-        questions = session.questions
-        if session.current_index >= len(questions):
+        aggregate = await self._required(session_id)
+        current = self._current_question(aggregate)
+        if current is None:
             return {"completed": True, "message": "所有问题已回答完毕"}
-        if session.status == InterviewSessionStatus.CREATED:
-            await self._cache.update_status(
-                session_id,
-                InterviewSessionStatus.IN_PROGRESS,
-            )
-            try:
-                await self._repository.update_session_status(
-                    session_id,
-                    InterviewSessionStatus.IN_PROGRESS.value,
-                )
-            except Exception:
-                logger.warning(
-                    "failed to persist interview in-progress status",
-                    exc_info=True,
-                )
-        return {"completed": False, "question": questions[session.current_index]}
+        return {"completed": False, "question": self._question_dto(current)}
 
-    async def submit_answer(
+    async def submit_turn(
         self,
         session_id: str,
-        question_index: int,
-        answer: str | None,
-    ) -> SubmitAnswerResponse:
-        cached = await self._get_or_restore(session_id)
-        questions = cached.questions
-        self._validate_question_index(question_index, questions)
-        original = questions[question_index]
-        questions[question_index] = original.with_answer(answer)
-        new_index = question_index + 1
-        has_next = new_index < len(questions)
-        next_question = questions[new_index] if has_next else None
-        new_status = (
-            InterviewSessionStatus.IN_PROGRESS if has_next else InterviewSessionStatus.COMPLETED
+        request: SubmitTurnRequest,
+        *,
+        remaining_seconds: int | None = None,
+    ) -> SubmitTurnResponse:
+        answer_hash = self._answer_hash(request.answer)
+        cached_turn_id = await self._cache.get_turn_result(session_id, request.request_id)
+        if cached_turn_id is not None:
+            cached_turn = await self._repository.turn(session_id, UUID(cached_turn_id))
+            if cached_turn is not None:
+                self._validate_replayed_turn(cached_turn, request, answer_hash)
+                if cached_turn.decision_status == TurnDecisionStatus.PROCESSING.value:
+                    cached_turn = await self._wait_for_turn(session_id, cached_turn.id)
+                if self._metrics is not None:
+                    aggregate = await self._required(session_id)
+                    self._metrics.interview_duplicate_requests.labels(
+                        channel=aggregate.session.channel
+                    ).inc()
+                    return self._turn_response(aggregate, cached_turn)
+                return self._turn_response(await self._required(session_id), cached_turn)
+        start = await self._repository.begin_turn(
+            session_id,
+            request.question_id,
+            request.request_id,
+            request.answer,
+            answer_hash,
+            datetime.now() + timedelta(seconds=self._turn_lease_seconds),
         )
+        turn = start.turn
+        if start.existing:
+            if self._metrics is not None:
+                self._metrics.interview_duplicate_requests.labels(
+                    channel=start.aggregate.session.channel
+                ).inc()
+            self._validate_replayed_turn(turn, request, answer_hash)
+            if turn.decision_status == TurnDecisionStatus.PROCESSING.value:
+                turn = await self._wait_for_turn(session_id, turn.id)
+            aggregate = await self._required(session_id)
+            response = self._turn_response(aggregate, turn)
+            await self._cache.set_turn_result(session_id, request.request_id, str(turn.id))
+            return response
         try:
-            await self._repository.save_answer(
-                session_id,
-                question_index,
-                original.question,
-                original.category,
-                answer,
-                0,
-                None,
+            provider = await self._provider(start.aggregate.session.llm_provider)
+            decision = await self._decisions.decide(
+                provider,
+                start.aggregate,
+                request.answer,
+                remaining_seconds=remaining_seconds,
             )
-            await self._repository.update_current_question_index(
-                session_id,
-                new_index,
-            )
-            await self._repository.update_session_status(
-                session_id,
-                new_status.value,
-            )
-        except BusinessException:
-            raise
         except Exception as error:
-            logger.exception("failed to save submitted interview answer")
-            raise BusinessException(
-                ErrorCode.INTERVIEW_ANSWER_SAVE_FAILED,
-                "保存答案失败，请稍后重试",
-            ) from error
-        await self._cache.update_questions(session_id, questions)
-        await self._cache.update_current_index(session_id, new_index)
-        if new_status == InterviewSessionStatus.COMPLETED:
-            await self._cache.update_status(session_id, new_status)
-            await self._repository.update_evaluate_status(
+            logger.exception(
+                "failed to resolve turn provider sessionId=%s turnId=%s",
                 session_id,
-                "PENDING",
-                None,
+                turn.id,
             )
+            decision = self._decisions.fallback_without_model(
+                start.aggregate,
+                reason_code="PROVIDER_UNAVAILABLE",
+                error=str(error),
+            )
+        finalized = await self._finalize(session_id, turn.id, decision)
+        self._record_decision(finalized, decision)
+        if finalized.evaluation_pending:
             await self._enqueue_evaluation(session_id)
-        return SubmitAnswerResponse(
-            has_next_question=has_next,
-            next_question=next_question,
-            current_index=new_index,
-            total_questions=len(questions),
-        )
-
-    async def save_answer(
-        self,
-        session_id: str,
-        question_index: int,
-        answer: str | None,
-    ) -> None:
-        cached = await self._get_or_restore(session_id)
-        questions = cached.questions
-        self._validate_question_index(question_index, questions)
-        original = questions[question_index]
-        questions[question_index] = original.with_answer(answer)
-        await self._cache.update_questions(session_id, questions)
-        if cached.status == InterviewSessionStatus.CREATED:
-            await self._cache.update_status(
-                session_id,
-                InterviewSessionStatus.IN_PROGRESS,
-            )
-        try:
-            await self._repository.save_answer(
-                session_id,
-                question_index,
-                original.question,
-                original.category,
-                answer,
-                0,
-                None,
-            )
-            await self._repository.update_session_status(
-                session_id,
-                InterviewSessionStatus.IN_PROGRESS.value,
-            )
-        except Exception:
-            logger.warning("failed to persist interview draft", exc_info=True)
+        await self._cache.set_turn_result(session_id, request.request_id, str(turn.id))
+        return self._turn_response(finalized.aggregate, finalized.turn)
 
     async def complete(self, session_id: str) -> None:
-        cached = await self._get_or_restore(session_id)
-        if cached.status in {
-            InterviewSessionStatus.COMPLETED,
-            InterviewSessionStatus.EVALUATED,
-        }:
-            raise BusinessException(ErrorCode.INTERVIEW_ALREADY_COMPLETED)
-        await self._cache.update_status(
-            session_id,
-            InterviewSessionStatus.COMPLETED,
+        aggregate = await self._required(session_id)
+        processing = next(
+            (
+                turn
+                for turn in aggregate.turns
+                if turn.decision_status == TurnDecisionStatus.PROCESSING.value
+            ),
+            None,
         )
-        try:
-            await self._repository.update_session_status(
-                session_id,
-                InterviewSessionStatus.COMPLETED.value,
-            )
-            await self._repository.update_evaluate_status(
-                session_id,
-                "PENDING",
-                None,
-            )
-        except Exception:
-            logger.warning("failed to persist interview completion", exc_info=True)
-        await self._enqueue_evaluation(session_id)
+        if processing is not None:
+            await self.recover_turn(session_id, processing.id)
+        if await self._repository.complete_session(session_id):
+            await self._enqueue_evaluation(session_id)
 
-    async def generate_report(self, session_id: str) -> InterviewReportDTO:
-        cached = await self._get_or_restore(session_id)
-        if cached.status not in {
-            InterviewSessionStatus.COMPLETED,
-            InterviewSessionStatus.EVALUATED,
-        }:
+    async def report(self, session_id: str) -> InterviewReportDTO:
+        report = await self._repository.saved_report(session_id)
+        if report is None:
+            aggregate = await self._required(session_id)
+            if aggregate.session.status not in {"COMPLETED", "EVALUATED"}:
+                raise BusinessException(ErrorCode.INTERVIEW_NOT_COMPLETED)
             raise BusinessException(
-                ErrorCode.INTERVIEW_NOT_COMPLETED,
-                "面试尚未完成，无法生成报告",
+                ErrorCode.INTERVIEW_EVALUATION_FAILED,
+                "面试报告尚未生成完成",
             )
-        record = await self._repository.find_session(session_id)
-        provider_id = record.session.llm_provider if record is not None else None
-        provider = await self._provider(provider_id)
-        report = await self._evaluation.evaluate(
-            provider,
-            session_id,
-            cached.resume_text,
-            cached.questions,
-            record.session.skill_id if record is not None else None,
-        )
-        await self._cache.update_status(
-            session_id,
-            InterviewSessionStatus.EVALUATED,
-        )
-        try:
-            await self._repository.save_report(session_id, report)
-        except Exception:
-            logger.warning("failed to persist interview report", exc_info=True)
         return report
 
+    async def regenerate_report(self, session_id: str) -> None:
+        aggregate = await self._required(session_id)
+        if aggregate.session.status not in {"COMPLETED", "EVALUATED"}:
+            raise BusinessException(ErrorCode.INTERVIEW_NOT_COMPLETED)
+        await self._repository.update_evaluate_status(session_id, "PENDING", None)
+        await self._enqueue_evaluation(session_id)
+
     async def detail(self, session_id: str) -> InterviewDetailDTO:
-        record = await self._repository.find_session(session_id)
-        if record is None:
-            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
-        entity = record.session
-        questions_document = self._parse_json(entity.questions_json)
-        all_questions = [
-            InterviewQuestion.model_validate(item) for item in questions_document or []
-        ]
-        answers = await self._repository.answers(session_id)
-        answer_by_index = {answer.question_index: answer for answer in answers}
-        answer_details: list[AnswerDetailDTO] = []
-        if all_questions:
-            for question in all_questions:
-                answer = answer_by_index.get(question.question_index)
-                if answer is None:
-                    answer_details.append(
-                        AnswerDetailDTO(
-                            question_index=question.question_index,
-                            question=question.question,
-                            category=question.category,
-                            user_answer=None,
-                            score=question.score or 0,
-                            feedback=question.feedback,
-                            reference_answer=None,
-                            key_points=None,
-                            answered_at=None,
-                        )
-                    )
-                else:
-                    answer_details.append(self._answer_detail(answer))
-        else:
-            answer_details = [self._answer_detail(answer) for answer in answers]
+        aggregate = await self._required(session_id)
+        turn_by_question = {turn.question_id: turn for turn in aggregate.turns}
+        report = await self._repository.saved_report(session_id)
+        evaluations = {
+            detail.question_id: detail
+            for group in (report.question_groups if report is not None else [])
+            for detail in (group.main_question, *group.follow_ups)
+        }
         return InterviewDetailDTO(
-            id=entity.id,
-            session_id=entity.session_id,
-            total_questions=entity.total_questions,
-            status=str(entity.status),
-            evaluate_status=entity.evaluate_status,
-            evaluate_error=entity.evaluate_error,
-            overall_score=entity.overall_score,
-            source_type=entity.source_type,
-            knowledge_base_id=entity.knowledge_base_id,
-            overall_feedback=entity.overall_feedback,
-            created_at=entity.created_at,
-            completed_at=entity.completed_at,
-            questions=questions_document,
-            strengths=self._parse_json(entity.strengths_json),
-            improvements=self._parse_json(entity.improvements_json),
-            reference_answers=self._parse_json(entity.reference_answers_json),
-            answers=answer_details,
+            id=aggregate.session.id,
+            session_id=session_id,
+            channel=InterviewChannel(aggregate.session.channel),
+            planned_main_questions=aggregate.session.planned_main_question_count,
+            status=str(aggregate.session.status),
+            evaluate_status=aggregate.session.evaluate_status,
+            evaluate_error=aggregate.session.evaluate_error,
+            overall_score=aggregate.session.overall_score,
+            knowledge_base_id=aggregate.session.knowledge_base_id,
+            overall_feedback=aggregate.session.overall_feedback,
+            created_at=aggregate.session.created_at,
+            completed_at=aggregate.session.completed_at,
+            strengths=parse_saved_list(aggregate.session.strengths_json),
+            improvements=parse_saved_list(aggregate.session.improvements_json),
+            answers=[
+                AnswerDetailDTO(
+                    question_id=question.id,
+                    parent_question_id=question.parent_question_id,
+                    kind=QuestionKind(question.kind),
+                    question=question.question,
+                    category=question.category,
+                    user_answer=(
+                        turn_by_question[question.id].answer
+                        if question.id in turn_by_question
+                        else None
+                    ),
+                    score=(
+                        evaluations[question.id].score if question.id in evaluations else 0
+                    ),
+                    feedback=(
+                        evaluations[question.id].feedback
+                        if question.id in evaluations
+                        else None
+                    ),
+                    reference_answer=(
+                        evaluations[question.id].reference_answer
+                        if question.id in evaluations
+                        else question.reference_answer
+                    ),
+                    key_points=(
+                        evaluations[question.id].key_points
+                        if question.id in evaluations
+                        else []
+                    ),
+                    answered_at=(
+                        turn_by_question[question.id].answered_at
+                        if question.id in turn_by_question
+                        else None
+                    ),
+                )
+                for question in aggregate.questions
+            ],
         )
 
     async def export_pdf(self, session_id: str) -> tuple[bytes, dict[str, str]]:
-        record = await self._repository.find_session(session_id)
-        if record is None:
-            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
-        answers = await self._repository.answers(session_id)
-        entity = record.session
+        aggregate = await self._required(session_id)
+        report = await self.report(session_id)
         font = Path(__file__).resolve().parents[4] / "resources/fonts/ZhuqueFangsong-Regular.ttf"
         sections: list[tuple[str, list[str]]] = [
             (
                 "面试信息",
                 [
-                    f"会话ID: {entity.session_id}",
-                    f"题目数量: {entity.total_questions}",
-                    f"面试状态: {self._status_text(str(entity.status))}",
-                    f"开始时间: {self._pdf_time(entity.created_at)}",
-                    *(
-                        [f"完成时间: {self._pdf_time(entity.completed_at)}"]
-                        if entity.completed_at is not None
-                        else []
-                    ),
+                    f"会话ID: {session_id}",
+                    f"主问题数量: {aggregate.session.planned_main_question_count}",
+                    f"面试状态: {aggregate.session.status}",
+                    f"开始时间: {aggregate.session.created_at:%Y-%m-%d %H:%M:%S}",
                 ],
-            )
+            ),
+            ("综合评分", [f"总分: {report.overall_score} / 100"]),
+            ("总体评价", [report.overall_feedback]),
+            ("表现优势", [f"• {item}" for item in report.strengths]),
+            ("改进建议", [f"• {item}" for item in report.improvements]),
         ]
-        if entity.overall_score is not None:
-            sections.append(("综合评分", [f"总分: {entity.overall_score} / 100"]))
-        if entity.overall_feedback is not None:
-            sections.append(("总体评价", [entity.overall_feedback]))
-        strengths = self._parse_json(entity.strengths_json)
-        if strengths:
-            sections.append(("表现优势", [f"• {item}" for item in strengths]))
-        improvements = self._parse_json(entity.improvements_json)
-        if improvements:
-            sections.append(("改进建议", [f"• {item}" for item in improvements]))
-        if answers:
-            paragraphs: list[str] = []
-            for answer in answers:
-                score = answer.score
-                paragraphs.extend(
+        details: list[str] = []
+        for index, group in enumerate(report.question_groups, start=1):
+            details.extend(
+                (
+                    f"主问题 {index} [{group.category or '综合'}]",
+                    f"Q: {group.main_question.question}",
+                    f"A: {group.main_question.answer or '未回答'}",
+                    f"问题组得分: {group.group_score}/100",
+                    f"评价: {group.group_feedback}",
+                )
+            )
+            for follow_up in group.follow_ups:
+                details.extend(
                     (
-                        f"问题 {(answer.question_index or 0) + 1} [{answer.category or '综合'}]",
-                        f"Q: {answer.question or ''}",
-                        f"A: {answer.user_answer if answer.user_answer is not None else '未回答'}",
-                        f"得分: {score}/100",
+                        f"追问: {follow_up.question}",
+                        f"回答: {follow_up.answer or '未回答'}",
+                        f"反馈: {follow_up.feedback}",
                     )
                 )
-                if answer.feedback is not None:
-                    paragraphs.append(f"评价: {answer.feedback}")
-                if answer.reference_answer is not None:
-                    paragraphs.append(f"参考答案: {answer.reference_answer}")
-            sections.append(("问答详情", paragraphs))
+        sections.append(("问答详情", details))
         pdf = await self._blocking_executor.run(
             PdfDocumentBuilder(font).build,
             "模拟面试报告",
             sections,
         )
-        return (
-            pdf,
-            pdf_download_headers(f"模拟面试报告_{session_id}.pdf"),
-        )
+        return pdf, pdf_download_headers(f"模拟面试报告_{session_id}.pdf")
 
     async def delete(self, session_id: str) -> None:
         await self._repository.delete_session(session_id)
+
+    async def recover_turn(self, session_id: str, turn_id: UUID) -> bool:
+        aggregate = await self._repository.find_session(session_id)
+        if aggregate is None:
+            return False
+        turn = next((item for item in aggregate.turns if item.id == turn_id), None)
+        if turn is None or turn.decision_status != TurnDecisionStatus.PROCESSING.value:
+            return False
+        decision = self._decisions.fallback_for_stale(aggregate)
+        finalized = await self._finalize(session_id, turn_id, decision)
+        if finalized.evaluation_pending:
+            await self._enqueue_evaluation(session_id)
+        return True
 
     async def _create_idempotent(
         self,
@@ -486,11 +470,8 @@ class InterviewService:
             return await self.get_session(cached_session_id)
         existing = await self._repository.find_by_request_id(request_id)
         if existing is not None:
-            await self._cache.set_create_result(
-                request_id,
-                existing.session.session_id,
-            )
-            return await self.get_session(existing.session.session_id)
+            await self._cache.set_create_result(request_id, existing.session.session_id)
+            return self._session_dto(existing)
         created = await self._create_session_internal(request, request_id)
         await self._cache.set_create_result(request_id, created.session_id)
         return created
@@ -504,143 +485,140 @@ class InterviewService:
             unfinished = await self.find_unfinished_session(request.resume_id)
             if unfinished is not None:
                 return unfinished
-        session_id = str(self._uuid_factory()).replace("-", "")[:16]
         skill_id = request.skill_id or "java-backend"
         difficulty = request.difficulty or "mid"
-        historical = await self._repository.historical_questions(
-            skill_id,
-            request.resume_id,
-        )
+        historical = [
+            HistoricalQuestion(question=item[0], type=item[1], topic_summary=item[2])
+            for item in await self._repository.historical_questions(
+                skill_id,
+                request.resume_id,
+            )
+        ]
+        resume_text = request.resume_text or await self._repository.resume_text(request.resume_id)
         questions = await self._questions.generate(
             provider_id=request.llm_provider,
             skill_id=skill_id,
             difficulty=difficulty,
-            resume_text=request.resume_text,
+            resume_text=resume_text,
             question_count=request.question_count,
             historical_questions=historical,
             custom_categories=request.custom_categories,
             jd_text=request.jd_text,
         )
-        if request_id is not None:
-            try:
-                await self._repository.create_session(
-                    session_id=session_id,
-                    resume_id=request.resume_id,
-                    questions=questions,
-                    llm_provider=request.llm_provider,
-                    skill_id=skill_id,
-                    difficulty=difficulty,
-                    request_id=request_id,
-                )
-            except Exception as error:
-                concurrently_created = await self._repository.find_by_request_id(request_id)
-                if concurrently_created is not None:
-                    return await self.get_session(concurrently_created.session.session_id)
-                raise BusinessException(
-                    ErrorCode.INTERNAL_ERROR,
-                    "创建面试会话失败，请重试",
-                ) from error
-        else:
-            try:
-                await self._repository.create_session(
-                    session_id=session_id,
-                    resume_id=request.resume_id,
-                    questions=questions,
-                    llm_provider=request.llm_provider,
-                    skill_id=skill_id,
-                    difficulty=difficulty,
-                    request_id=None,
-                )
-            except Exception:
-                logger.warning("failed to persist interview session", exc_info=True)
-        resume_text = request.resume_text or ""
-        await self._cache.save_session(
-            session_id,
-            resume_text,
-            request.resume_id,
-            None,
-            None,
+        return await self.create_session_from_questions(
             questions,
-            0,
-            InterviewSessionStatus.CREATED,
-        )
-        return InterviewSessionDTO(
-            session_id=session_id,
-            resume_text=resume_text,
-            total_questions=len(questions),
-            current_question_index=0,
-            questions=questions,
-            status=InterviewSessionStatus.CREATED,
-            knowledge_base_id=None,
-            interview_category=None,
+            channel=InterviewChannel.TEXT,
+            max_follow_ups_per_main=self._follow_up_count,
+            llm_provider=request.llm_provider,
+            skill_id=skill_id,
+            difficulty=difficulty,
+            request_id=request_id,
+            resume_id=request.resume_id,
+            context={"jdText": request.jd_text or ""},
         )
 
-    async def _get_or_restore(self, session_id: str) -> CachedSession:
-        cached = await self._cache.get_session(session_id)
-        if cached is not None:
-            await self._cache.refresh_session_ttl(session_id)
-            return cached
-        restored = await self._restore_from_database(session_id)
-        if restored is None:
-            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
-        return restored
+    async def _wait_for_turn(self, session_id: str, turn_id: UUID) -> InterviewTurnRecord:
+        deadline = asyncio.get_running_loop().time() + self._turn_wait_seconds
+        while asyncio.get_running_loop().time() < deadline:
+            turn = await self._repository.turn(session_id, turn_id)
+            if turn is None:
+                raise BusinessException(ErrorCode.INTERVIEW_QUESTION_NOT_FOUND)
+            if turn.decision_status != TurnDecisionStatus.PROCESSING.value:
+                return turn
+            if turn.lease_expires_at <= datetime.now():
+                await self.recover_turn(session_id, turn_id)
+            await asyncio.sleep(0.1)
+        raise BusinessException(
+            ErrorCode.INTERNAL_ERROR,
+            "本轮仍在处理中，请稍后重试",
+        )
 
-    async def _restore_from_database(
+    async def _finalize(
         self,
         session_id: str,
-    ) -> CachedSession | None:
-        try:
-            record = await self._repository.find_session(session_id)
-            return await self._restore_from_record(record) if record is not None else None
-        except Exception:
-            logger.exception("failed to restore interview session")
-            return None
-
-    async def _restore_from_record(
-        self,
-        record: SessionRecord,
-    ) -> CachedSession | None:
-        try:
-            entity = record.session
-            questions = [
-                InterviewQuestion.model_validate(item)
-                for item in json.loads(entity.questions_json or "[]")
-            ]
-            for answer in await self._repository.answers(entity.session_id):
-                index = answer.question_index
-                if index is not None and 0 <= index < len(questions):
-                    questions[index] = questions[index].with_answer(answer.user_answer)
-            status = InterviewSessionStatus(str(entity.status))
-            await self._cache.save_session(
-                entity.session_id,
-                record.resume_text,
-                entity.resume_id,
-                entity.knowledge_base_id,
-                entity.interview_category,
-                questions,
-                entity.current_question_index or 0,
-                status,
-            )
-            return await self._cache.get_session(entity.session_id)
-        except Exception:
-            logger.exception("failed to restore interview session record")
-            return None
+        turn_id: UUID,
+        decision: TurnDecisionResult,
+    ) -> FinalizeTurn:
+        return await self._repository.finalize_turn(
+            session_id,
+            turn_id,
+            action=decision.action,
+            acknowledgement=decision.acknowledgement,
+            follow_up_question=decision.follow_up_question,
+            decision_reason=decision.reason,
+            reason_code=decision.reason_code,
+            target_topic=decision.target_topic,
+            confidence=decision.confidence,
+            decision_status=decision.status,
+            provider_id=decision.provider_id,
+            model_name=decision.model_name,
+            prompt_tokens=decision.prompt_tokens,
+            completion_tokens=decision.completion_tokens,
+            total_tokens=decision.total_tokens,
+            duration_ms=decision.duration_ms,
+            error=decision.error,
+        )
 
     async def _enqueue_evaluation(self, session_id: str) -> None:
         try:
             await self._streams.add(
                 INTERVIEW_EVALUATE.key,
-                {
-                    FIELD_SESSION_ID: session_id,
-                    FIELD_RETRY_COUNT: "0",
-                },
+                {FIELD_SESSION_ID: session_id, FIELD_RETRY_COUNT: "0"},
             )
-        except Exception as error:
-            await self._repository.update_evaluate_status(
-                session_id,
-                "FAILED",
-                f"任务入队失败: {error}"[:500],
-            )
+        except Exception:
+            logger.exception("failed to queue interview evaluation sessionId=%s", session_id)
+
+    def _record_decision(
+        self,
+        finalized: FinalizeTurn,
+        decision: TurnDecisionResult,
+    ) -> None:
+        logger.info(
+            "interview turn decided sessionId=%s questionId=%s turnId=%s "
+            "channel=%s action=%s reasonCode=%s providerId=%s durationMs=%s fallback=%s",
+            finalized.aggregate.session.session_id,
+            finalized.turn.question_id,
+            finalized.turn.id,
+            finalized.aggregate.session.channel,
+            finalized.turn.action,
+            decision.reason_code,
+            decision.provider_id,
+            decision.duration_ms,
+            decision.status == TurnDecisionStatus.FALLBACK,
+        )
+        if self._metrics is None or finalized.turn.action is None:
+            return
+        channel = finalized.aggregate.session.channel
+        self._metrics.interview_turn_duration.labels(channel=channel).observe(
+            decision.duration_ms / 1000
+        )
+        self._metrics.interview_turn_decisions.labels(
+            channel=channel,
+            action=finalized.turn.action,
+        ).inc()
+        if finalized.turn.action == TurnAction.FOLLOW_UP.value:
+            self._metrics.interview_follow_ups.labels(channel=channel).inc()
+        if decision.status == TurnDecisionStatus.FALLBACK:
+            self._metrics.interview_turn_fallbacks.labels(
+                channel=channel,
+                reason=decision.reason_code,
+            ).inc()
+        if decision.prompt_tokens is not None:
+            self._metrics.interview_turn_tokens.labels(
+                channel=channel,
+                type="prompt",
+            ).inc(decision.prompt_tokens)
+        if decision.completion_tokens is not None:
+            self._metrics.interview_turn_tokens.labels(
+                channel=channel,
+                type="completion",
+            ).inc(decision.completion_tokens)
+
+    async def _required(self, session_id: str) -> SessionAggregate:
+        aggregate = await self._repository.find_session(session_id)
+        if aggregate is None:
+            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
+        return aggregate
 
     async def _provider(self, provider_id: str | None) -> ProviderConfig:
         return await self._registry.get_chat(
@@ -648,87 +626,139 @@ class InterviewService:
         )
 
     @staticmethod
-    def _normalize_request_id(value: str | None) -> str | None:
-        if value is None or not value.strip():
-            return None
-        normalized = value.strip()
-        if (
-            len(normalized) < 8
-            or len(normalized) > 64
-            or any(
-                not (character.isascii() and (character.isalnum() or character in "_-"))
-                for character in normalized
-            )
-        ):
+    def _validate_replayed_turn(
+        turn: InterviewTurnRecord,
+        request: SubmitTurnRequest,
+        answer_hash: str,
+    ) -> None:
+        if turn.question_id != request.question_id or turn.answer_hash != answer_hash:
             raise BusinessException(
                 ErrorCode.BAD_REQUEST,
-                "requestId 格式不正确",
-            )
-        return normalized
-
-    @staticmethod
-    def _validate_question_index(
-        question_index: int,
-        questions: list[InterviewQuestion],
-    ) -> None:
-        if question_index < 0 or question_index >= len(questions):
-            raise BusinessException(
-                ErrorCode.INTERVIEW_QUESTION_NOT_FOUND,
-                f"无效的问题索引: {question_index}",
+                "requestId已用于不同的面试回答",
             )
 
     @staticmethod
-    def _to_session_dto(cached: CachedSession) -> InterviewSessionDTO:
-        questions = cached.questions
+    def _answer_hash(answer: str | None) -> str:
+        return hashlib.sha256((answer or "").encode()).hexdigest()
+
+    @classmethod
+    def _session_dto(cls, aggregate: SessionAggregate) -> InterviewSessionDTO:
         return InterviewSessionDTO(
-            session_id=cached.session_id,
-            resume_text=cached.resume_text,
-            total_questions=len(questions),
-            current_question_index=cached.current_index,
-            questions=questions,
-            status=cached.status,
-            knowledge_base_id=cached.knowledge_base_id,
-            interview_category=cached.interview_category,
+            session_id=aggregate.session.session_id,
+            channel=InterviewChannel(aggregate.session.channel),
+            status=InterviewSessionStatus(str(aggregate.session.status)),
+            current_question=(
+                cls._question_dto(current)
+                if (current := cls._current_question(aggregate)) is not None
+                else None
+            ),
+            turns=[
+                cls._turn_dto(
+                    turn,
+                    next(
+                        question
+                        for question in aggregate.questions
+                        if question.id == turn.question_id
+                    ),
+                )
+                for turn in aggregate.turns
+            ],
+            progress=cls._progress(aggregate),
+            knowledge_base_id=aggregate.session.knowledge_base_id,
+            interview_category=aggregate.session.interview_category,
+        )
+
+    @classmethod
+    def _turn_response(
+        cls,
+        aggregate: SessionAggregate,
+        turn: InterviewTurnRecord,
+    ) -> SubmitTurnResponse:
+        action = TurnAction(str(turn.action))
+        next_question = next(
+            (
+                question
+                for question in aggregate.questions
+                if question.id == turn.next_question_id
+            ),
+            None,
+        )
+        return SubmitTurnResponse(
+            turn_id=turn.id,
+            action=action,
+            acknowledgement=turn.acknowledgement or "",
+            next_question=(cls._question_dto(next_question) if next_question is not None else None),
+            completed=action == TurnAction.COMPLETE,
+            progress=cls._progress(aggregate),
         )
 
     @staticmethod
-    def _parse_json(value: str | None) -> Any:
-        if value is None:
-            return None
-        try:
-            return json.loads(value)
-        except Exception:
-            logger.exception("failed to parse persisted interview JSON")
-            return None
-
-    @staticmethod
-    def _answer_detail(answer: InterviewAnswer) -> AnswerDetailDTO:
-        key_points_json = answer.key_points_json
-        key_points = json.loads(key_points_json) if key_points_json is not None else None
-        return AnswerDetailDTO(
-            question_index=answer.question_index,
-            question=answer.question,
-            category=answer.category,
-            user_answer=answer.user_answer,
-            score=answer.score or 0,
-            feedback=answer.feedback,
-            reference_answer=answer.reference_answer,
-            key_points=key_points,
-            answered_at=answer.answered_at,
+    def _question_dto(question: InterviewQuestionRecord) -> InterviewQuestionDTO:
+        return InterviewQuestionDTO(
+            question_id=question.id,
+            kind=QuestionKind(question.kind),
+            parent_question_id=question.parent_question_id,
+            question=question.question,
+            type=question.type,
+            category=question.category,
+            topic_summary=question.topic_summary,
+            phase=question.phase,
         )
 
     @staticmethod
-    def _status_text(status: str) -> str:
-        return {
-            "CREATED": "已创建",
-            "IN_PROGRESS": "进行中",
-            "COMPLETED": "已完成",
-            "EVALUATED": "已评估",
-        }[status]
+    def _turn_dto(
+        turn: InterviewTurnRecord,
+        question: InterviewQuestionRecord,
+    ) -> InterviewTurnDTO:
+        return InterviewTurnDTO(
+            turn_id=turn.id,
+            question_id=turn.question_id,
+            question=InterviewService._question_dto(question),
+            answer=turn.answer,
+            action=TurnAction(turn.action) if turn.action is not None else None,
+            acknowledgement=turn.acknowledgement,
+            next_question_id=turn.next_question_id,
+            decision_status=TurnDecisionStatus(turn.decision_status),
+            answered_at=turn.answered_at,
+            decided_at=turn.decided_at,
+        )
 
     @staticmethod
-    def _pdf_time(value: datetime) -> str:
-        return value.strftime("%Y-%m-%d %H:%M:%S")
+    def _current_question(aggregate: SessionAggregate) -> InterviewQuestionRecord | None:
+        return next(
+            (
+                question
+                for question in aggregate.questions
+                if question.id == aggregate.session.current_question_id
+            ),
+            None,
+        )
+
+    @classmethod
+    def _progress(cls, aggregate: SessionAggregate) -> InterviewProgressDTO:
+        question_by_id = {question.id: question for question in aggregate.questions}
+        completed_orders = {
+            question_by_id[turn.question_id].main_order
+            for turn in aggregate.turns
+            if turn.question_id in question_by_id
+            and turn.action in {TurnAction.NEXT_MAIN.value, TurnAction.COMPLETE.value}
+        }
+        current = cls._current_question(aggregate)
+        used = (
+            sum(
+                question.kind == QuestionKind.FOLLOW_UP.value
+                and question.main_order == current.main_order
+                for question in aggregate.questions
+            )
+            if current is not None
+            else 0
+        )
+        return InterviewProgressDTO(
+            completed_main_questions=len(completed_orders),
+            planned_main_questions=aggregate.session.planned_main_question_count,
+            follow_ups_used_for_current_main=used,
+            max_follow_ups_per_main=aggregate.session.max_follow_ups_per_main,
+        )
 
 
 class EvaluatePayload:
@@ -741,7 +771,7 @@ class InterviewEvaluateHandler:
         self,
         repository: InterviewRepository,
         streams: RedisStreamService,
-        evaluation: AnswerEvaluationService,
+        evaluation: UnifiedEvaluationService,
         registry: LlmProviderRegistry,
     ) -> None:
         self._repository = repository
@@ -754,73 +784,69 @@ class InterviewEvaluateHandler:
         return EvaluatePayload(session_id) if session_id is not None else None
 
     async def should_skip(self, payload: EvaluatePayload) -> bool:
-        record = await self._repository.find_session(payload.session_id)
-        return record is None or record.session.evaluate_status == "COMPLETED"
+        aggregate = await self._repository.find_session(payload.session_id)
+        return aggregate is None or aggregate.session.evaluate_status == "COMPLETED"
 
     async def try_mark_processing(self, payload: EvaluatePayload) -> bool:
-        await self._repository.update_evaluate_status(
+        return await self._repository.update_evaluate_status(
             payload.session_id,
             "PROCESSING",
             None,
         )
-        return True
 
     async def process(self, payload: EvaluatePayload) -> None:
-        record = await self._repository.find_session(payload.session_id)
-        if record is None:
+        aggregate = await self._repository.find_session(payload.session_id)
+        if aggregate is None:
             return
-        entity = record.session
-        questions = [
-            InterviewQuestion.model_validate(item)
-            for item in json.loads(entity.questions_json or "[]")
-        ]
-        for answer in await self._repository.answers(payload.session_id):
-            index = answer.question_index
-            if index is not None and 0 <= index < len(questions):
-                questions[index] = questions[index].with_answer(answer.user_answer)
         provider = await self._registry.get_chat(
-            None if entity.llm_provider in {None, "", "default"} else entity.llm_provider
+            None
+            if aggregate.session.llm_provider in {None, "", "default"}
+            else aggregate.session.llm_provider
         )
-        report = await self._evaluation.evaluate(
-            provider,
-            payload.session_id,
-            record.resume_text,
-            questions,
-            entity.skill_id,
-        )
+        report = await self._evaluation.evaluate(provider, aggregate)
         await self._repository.save_report(payload.session_id, report)
 
     async def mark_completed(self, payload: EvaluatePayload) -> None:
-        await self._repository.update_evaluate_status(
-            payload.session_id,
-            "COMPLETED",
-            None,
-        )
+        await self._repository.update_evaluate_status(payload.session_id, "COMPLETED", None)
 
     async def retry(self, payload: EvaluatePayload, retry_count: int) -> None:
-        try:
+        await self._repository.update_evaluate_status(payload.session_id, "PENDING", None)
+        await self._streams.add(
+            INTERVIEW_EVALUATE.key,
+            {
+                FIELD_SESSION_ID: payload.session_id,
+                FIELD_RETRY_COUNT: str(retry_count),
+            },
+        )
+
+    async def mark_failed(self, payload: EvaluatePayload, error: str) -> None:
+        await self._repository.update_evaluate_status(payload.session_id, "FAILED", error)
+
+
+class InterviewRecoveryService:
+    def __init__(
+        self,
+        repository: InterviewRepository,
+        service: InterviewService,
+        streams: RedisStreamService,
+        *,
+        now: Callable[[], datetime] = datetime.now,
+    ) -> None:
+        self._repository = repository
+        self._service = service
+        self._streams = streams
+        self._now = now
+
+    async def recover(self) -> tuple[int, int]:
+        recovered_turns = 0
+        for session_id, turn_id in await self._repository.stale_processing_turns(self._now()):
+            recovered_turns += int(await self._service.recover_turn(session_id, turn_id))
+        requeued = 0
+        threshold = self._now() - timedelta(seconds=30)
+        for session_id in await self._repository.pending_evaluations(threshold):
             await self._streams.add(
                 INTERVIEW_EVALUATE.key,
-                {
-                    FIELD_SESSION_ID: payload.session_id,
-                    FIELD_RETRY_COUNT: str(retry_count),
-                },
+                {FIELD_SESSION_ID: session_id, FIELD_RETRY_COUNT: "0"},
             )
-        except Exception as error:
-            await self._repository.update_evaluate_status(
-                payload.session_id,
-                "FAILED",
-                f"重试入队失败: {error}"[:500],
-            )
-            raise
-
-    async def mark_failed(
-        self,
-        payload: EvaluatePayload,
-        error: str,
-    ) -> None:
-        await self._repository.update_evaluate_status(
-            payload.session_id,
-            "FAILED",
-            error,
-        )
+            requeued += 1
+        return recovered_turns, requeued

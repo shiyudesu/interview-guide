@@ -7,41 +7,40 @@
       "backendEndpointCount": 94,
       "backendOnlyCount": 6,
       "controllerCount": 5,
-      "frontendCallCount": 89,
+      "frontendCallCount": 88,
       "frontendOnlyCount": 1,
       "sseEndpointCount": 2,
       "webSocketEndpointCount": 1
     },
     "configuration.json": {
-      "configurationValueCount": 143,
-      "envExampleCount": 47,
+      "configurationValueCount": 149,
+      "envExampleCount": 53,
       "envReferencedButUndocumentedCount": 0,
-      "propertyBindingCount": 91
+      "propertyBindingCount": 90
     },
     "database.json": {
-      "alterationCount": 5,
+      "alterationCount": 16,
       "extensionCount": 3,
-      "indexCount": 14,
-      "migrationCount": 1,
+      "indexCount": 19,
+      "migrationCount": 5,
       "tableCount": 17
     },
     "redis.json": {
-      "constantCount": 39,
+      "constantCount": 34,
       "rateLimitRuleCount": 4,
-      "scheduledMethodCount": 3,
+      "scheduledMethodCount": 4,
       "streamCount": 5
     },
     "resources.json": {
       "disabledTestMarkerCount": 1,
-      "resourceCount": 60,
+      "resourceCount": 58,
       "resourceCountsByCategory": {
         "font": 1,
-        "prompt": 17,
+        "prompt": 16,
         "redis-script": 1,
-        "skill": 40,
-        "voice-config": 1
+        "skill": 40
       },
-      "testFileCount": 51
+      "testFileCount": 49
     }
   },
   "schemaVersion": 1

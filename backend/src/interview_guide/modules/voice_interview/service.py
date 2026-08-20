@@ -5,17 +5,21 @@ import logging
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Any
+from uuid import UUID
 
 from redis.asyncio import Redis
 
 from interview_guide.common.db.models import VoiceInterviewMessage, VoiceInterviewSession
 from interview_guide.common.errors import BusinessException, ErrorCode
-from interview_guide.common.redis.streams import (
-    FIELD_RETRY_COUNT,
-    FIELD_VOICE_SESSION_ID,
-    VOICE_EVALUATE,
-    RedisStreamService,
+from interview_guide.modules.interview.models import (
+    InterviewChannel,
+    InterviewReportDTO,
+    InterviewSessionDTO,
+    PlannedInterviewQuestion,
+    SubmitTurnRequest,
+    SubmitTurnResponse,
 )
+from interview_guide.modules.interview.service import InterviewService
 from interview_guide.modules.voice_interview.models import (
     CreateVoiceSessionRequest,
     VoiceInterviewMessageResponse,
@@ -29,48 +33,12 @@ from interview_guide.modules.voice_interview.repository import (
 )
 
 logger = logging.getLogger(__name__)
-SESSION_CACHE_KEY_PREFIX = "voice:interview:session:"
+SESSION_CACHE_KEY_PREFIX = "voice:v2:interview:session:"
 SESSION_CACHE_TTL_SECONDS = 60 * 60
 DEFAULT_USER_ID = "default"
 DEFAULT_SKILL_ID = "java-backend"
 DEFAULT_DIFFICULTY = "mid"
 STALE_SESSION_AGE = timedelta(hours=2)
-PENDING_EVALUATION_REQUEUE_DELAY = timedelta(minutes=3)
-PROCESSING_EVALUATION_TIMEOUT = timedelta(minutes=30)
-
-
-class VoiceEvaluationProducer:
-    def __init__(
-        self,
-        streams: RedisStreamService,
-        repository: VoiceInterviewRepository,
-        cache_redis: Redis,
-    ) -> None:
-        self._streams = streams
-        self._repository = repository
-        self._cache_redis = cache_redis
-
-    async def send(self, session_id: int, retry_count: int = 0) -> bool:
-        try:
-            await self._streams.add(
-                VOICE_EVALUATE.key,
-                {
-                    FIELD_VOICE_SESSION_ID: str(session_id),
-                    FIELD_RETRY_COUNT: str(retry_count),
-                },
-            )
-            logger.info(
-                "voice evaluation task queued sessionId=%s retryCount=%s",
-                session_id,
-                retry_count,
-            )
-            return True
-        except Exception as error:
-            detail = f"任务入队失败: {error}"[:500]
-            logger.exception("failed to queue voice evaluation sessionId=%s", session_id)
-            await self._repository.update_evaluate_status(session_id, "FAILED", detail)
-            await self._cache_redis.delete(f"{SESSION_CACHE_KEY_PREFIX}{session_id}")
-            return False
 
 
 class VoiceInterviewService:
@@ -78,24 +46,58 @@ class VoiceInterviewService:
         self,
         repository: VoiceInterviewRepository,
         cache_redis: Redis,
-        producer: VoiceEvaluationProducer,
+        interview_service: InterviewService,
         now: Callable[[], datetime],
     ) -> None:
         self.repository = repository
         self._redis = cache_redis
-        self._producer = producer
+        self._interview = interview_service
         self._now = now
 
     async def create_session(
         self,
         request: CreateVoiceSessionRequest,
     ) -> VoiceSessionResponse:
+        if request.request_id is not None:
+            existing_core = await self._interview.find_by_request_id(request.request_id)
+            if existing_core is not None:
+                existing_voice = await self.repository.find_by_core_public_id(
+                    existing_core.session_id
+                )
+                if existing_voice is not None:
+                    return self._response(existing_voice, existing_core.session_id)
         skill_id = request.skill_id if request.skill_id is not None else DEFAULT_SKILL_ID
         llm_provider = (
             request.llm_provider
             if request.llm_provider is not None and request.llm_provider.strip()
             else None
         )
+        duration = request.planned_duration or 30
+        phases = self._question_phases(request, duration // 5)
+        questions = await self._voice_questions(
+            request,
+            phases,
+            skill_id,
+            llm_provider,
+        )
+        core = await self._interview.create_session_from_questions(
+            questions,
+            channel=InterviewChannel.VOICE,
+            max_follow_ups_per_main=self._interview.follow_up_count,
+            llm_provider=llm_provider,
+            skill_id=skill_id,
+            difficulty=request.difficulty or DEFAULT_DIFFICULTY,
+            request_id=request.request_id,
+            resume_id=request.resume_id,
+            context={
+                "customJdText": request.custom_jd_text or "",
+                "plannedDuration": duration,
+                "phases": phases,
+            },
+        )
+        existing_voice = await self.repository.find_by_core_public_id(core.session_id)
+        if existing_voice is not None:
+            return self._response(existing_voice, core.session_id)
         entity = await self.repository.create_session(
             role_type=skill_id,
             skill_id=skill_id,
@@ -109,11 +111,12 @@ class VoiceInterviewService:
             project_enabled=request.project_enabled,
             hr_enabled=request.hr_enabled,
             llm_provider=llm_provider,
-            planned_duration=request.planned_duration,
-            current_phase=self._first_phase(request),
+            planned_duration=duration,
+            current_phase=phases[0],
+            interview_session_public_id=core.session_id,
         )
         await self._cache_session(entity)
-        return self._response(entity)
+        return self._response(entity, core.session_id)
 
     async def get_session(self, session_id: int | None) -> VoiceInterviewSession | None:
         if session_id is None:
@@ -128,7 +131,10 @@ class VoiceInterviewService:
 
     async def get_session_response(self, session_id: int) -> VoiceSessionResponse | None:
         entity = await self.get_session(session_id)
-        return self._response(entity) if entity is not None else None
+        if entity is None:
+            return None
+        core_id = await self.repository.core_session_public_id(session_id)
+        return self._response(entity, core_id)
 
     async def list_sessions(
         self,
@@ -152,8 +158,9 @@ class VoiceInterviewService:
                 updated_at=row.session.updated_at,
                 actual_duration=row.session.actual_duration,
                 message_count=row.message_count,
-                evaluate_status=row.session.evaluate_status,
-                evaluate_error=row.session.evaluate_error,
+                evaluate_status=row.evaluate_status,
+                evaluate_error=row.evaluate_error,
+                overall_score=row.overall_score,
             )
             for row in rows
         ]
@@ -164,6 +171,7 @@ class VoiceInterviewService:
         *,
         only_if_in_progress: bool = False,
     ) -> bool:
+        core_id = await self.repository.core_session_public_id(session_id)
         entity = await self.repository.end_session(
             session_id,
             only_if_in_progress=only_if_in_progress,
@@ -171,7 +179,8 @@ class VoiceInterviewService:
         if entity is None:
             return False
         await self._invalidate_cache(session_id)
-        await self._producer.send(session_id)
+        if core_id is not None:
+            await self._interview.complete(core_id)
         return True
 
     async def pause_session(self, session_id: int, reason: str) -> None:
@@ -199,7 +208,10 @@ class VoiceInterviewService:
         resumed = await self.repository.resume_session(session_id)
         assert resumed is not None
         await self._cache_session(resumed)
-        return self._response(resumed)
+        return self._response(
+            resumed,
+            await self.repository.core_session_public_id(session_id),
+        )
 
     async def start_phase(self, session_id: int, phase: str | None) -> None:
         if phase is None:
@@ -224,20 +236,80 @@ class VoiceInterviewService:
         session_id: int,
         user_text: str | None,
         ai_text: str | None,
+        interview_turn_id: UUID | None = None,
     ) -> None:
-        await self.repository.save_message(session_id, user_text, ai_text)
+        await self.repository.save_message(
+            session_id,
+            user_text,
+            ai_text,
+            interview_turn_id,
+        )
+
+    async def core_session(self, session_id: int) -> InterviewSessionDTO:
+        core_id = await self.repository.core_session_public_id(session_id)
+        if core_id is None:
+            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
+        return await self._interview.get_session(core_id)
+
+    async def submit_turn(
+        self,
+        session_id: int,
+        request_id: str,
+        answer: str,
+    ) -> SubmitTurnResponse:
+        voice = await self.get_session(session_id)
+        if voice is None:
+            raise BusinessException(ErrorCode.VOICE_SESSION_NOT_FOUND)
+        core_id = await self.repository.core_session_public_id(session_id)
+        if core_id is None:
+            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
+        core = await self._interview.get_session(core_id)
+        if core.current_question is None:
+            raise BusinessException(ErrorCode.INTERVIEW_ALREADY_COMPLETED)
+        elapsed = int((self._now() - (voice.start_time or self._now())).total_seconds())
+        remaining = max(0, int((voice.planned_duration or 0) * 60) - elapsed)
+        response = await self._interview.submit_turn(
+            core_id,
+            SubmitTurnRequest(
+                request_id=request_id,
+                question_id=core.current_question.question_id,
+                answer=answer,
+            ),
+            remaining_seconds=remaining,
+        )
+        if response.next_question is not None and response.next_question.phase is not None:
+            await self.start_phase(session_id, response.next_question.phase)
+        if response.completed:
+            await self.repository.end_session(session_id, only_if_in_progress=False)
+            await self._invalidate_cache(session_id)
+        return response
+
+    async def evaluation_report(self, session_id: int) -> InterviewReportDTO | None:
+        core_id = await self.repository.core_session_public_id(session_id)
+        if core_id is None:
+            return None
+        try:
+            return await self._interview.report(core_id)
+        except BusinessException:
+            return None
 
     async def delete_session(self, session_id: int) -> None:
+        core_id = await self.repository.core_session_public_id(session_id)
         if not await self.repository.delete_session(session_id):
             raise BusinessException(
                 ErrorCode.VOICE_SESSION_NOT_FOUND,
                 f"会话不存在: {session_id}",
             )
         await self._invalidate_cache(session_id)
+        if core_id is not None:
+            await self._interview.delete(core_id)
 
     async def trigger_evaluation(self, session_id: int) -> None:
+        core_id = await self.repository.core_session_public_id(session_id)
+        if core_id is None:
+            raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
         await self.update_evaluate_status(session_id, "PENDING", None)
-        await self._producer.send(session_id)
+        await self._interview.regenerate_report(core_id)
 
     async def update_evaluate_status(
         self,
@@ -261,23 +333,6 @@ class VoiceInterviewService:
         for entity in await self.repository.stale_in_progress(now - STALE_SESSION_AGE):
             if await self.end_session(entity.id):
                 cleaned += 1
-        for entity in await self.repository.stale_evaluations(
-            "PENDING",
-            now - PENDING_EVALUATION_REQUEUE_DELAY,
-        ):
-            await self.update_evaluate_status(entity.id, "PENDING", None)
-            await self._producer.send(entity.id)
-            cleaned += 1
-        for entity in await self.repository.stale_evaluations(
-            "PROCESSING",
-            now - PROCESSING_EVALUATION_TIMEOUT,
-        ):
-            await self.update_evaluate_status(
-                entity.id,
-                "FAILED",
-                "评估超时，请重新触发",
-            )
-            cleaned += 1
         return cleaned
 
     async def _cache_session(self, entity: VoiceInterviewSession) -> None:
@@ -311,9 +366,13 @@ class VoiceInterviewService:
         return "COMPLETED"
 
     @staticmethod
-    def _response(entity: VoiceInterviewSession) -> VoiceSessionResponse:
+    def _response(
+        entity: VoiceInterviewSession,
+        core_session_id: str | None,
+    ) -> VoiceSessionResponse:
         return VoiceSessionResponse(
             session_id=entity.id,
+            interview_session_id=core_session_id,
             role_type=entity.role_type,
             current_phase=str(entity.current_phase),
             status=str(entity.status),
@@ -344,6 +403,7 @@ class VoiceInterviewService:
 
         return {
             "id": entity.id,
+            "interview_session_id": entity.interview_session_id,
             "actual_duration": entity.actual_duration,
             "created_at": timestamp(entity.created_at),
             "current_phase": entity.current_phase,
@@ -377,6 +437,7 @@ class VoiceInterviewService:
 
         return VoiceInterviewSession(
             id=int(document["id"]),
+            interview_session_id=int(document["interview_session_id"]),
             actual_duration=document.get("actual_duration"),
             created_at=timestamp("created_at"),
             current_phase=document.get("current_phase"),
@@ -401,3 +462,108 @@ class VoiceInterviewService:
             updated_at=timestamp("updated_at"),
             user_id=document.get("user_id"),
         )
+
+    @staticmethod
+    def _question_phases(
+        request: CreateVoiceSessionRequest,
+        main_count: int,
+    ) -> list[str]:
+        enabled = [
+            phase
+            for phase, active in (
+                ("INTRO", request.intro_enabled),
+                ("TECH", request.tech_enabled),
+                ("PROJECT", request.project_enabled),
+                ("HR", request.hr_enabled),
+            )
+            if active
+        ]
+        total = max(main_count, len(enabled))
+        allocations = {phase: 1 for phase in enabled}
+        remaining = total - len(enabled)
+        weighted = [phase for phase in ("TECH", "PROJECT", "HR") if phase in enabled]
+        if not weighted:
+            allocations[enabled[0]] += remaining
+        else:
+            weights = {"TECH": 5, "PROJECT": 3, "HR": 2}
+            for _ in range(remaining):
+                selected = min(
+                    weighted,
+                    key=lambda phase: allocations[phase] / weights[phase],
+                )
+                allocations[selected] += 1
+        return [
+            phase
+            for phase in ("INTRO", "TECH", "PROJECT", "HR")
+            for _ in range(allocations.get(phase, 0))
+        ]
+
+    async def _voice_questions(
+        self,
+        request: CreateVoiceSessionRequest,
+        phases: list[str],
+        skill_id: str,
+        provider_id: str | None,
+    ) -> list[PlannedInterviewQuestion]:
+        difficulty = request.difficulty or DEFAULT_DIFFICULTY
+        questions: list[PlannedInterviewQuestion] = []
+        intro_count = phases.count("INTRO")
+        intro_questions = (
+            "请用一分钟做一个与本岗位相关的自我介绍。",
+            "你希望面试官重点了解你哪一段经历？请说明原因。",
+            "请概括你目前最有代表性的能力和一个证明它的案例。",
+        )
+        questions.extend(
+            PlannedInterviewQuestion(
+                question=intro_questions[index % len(intro_questions)],
+                type="INTRO",
+                category="自我介绍",
+                topic_summary="岗位自我介绍",
+                phase="INTRO",
+            )
+            for index in range(intro_count)
+        )
+        tech_count = phases.count("TECH")
+        if tech_count:
+            technical = await self._interview.generate_main_questions(
+                provider_id=provider_id,
+                skill_id=skill_id,
+                difficulty=difficulty,
+                resume_id=request.resume_id,
+                resume_text="",
+                question_count=tech_count,
+                jd_text=request.custom_jd_text,
+            )
+            questions.extend(
+                question.model_copy(update={"phase": "TECH"}) for question in technical
+            )
+        project_count = phases.count("PROJECT")
+        if project_count:
+            project = await self._interview.generate_main_questions(
+                provider_id=provider_id,
+                skill_id=skill_id,
+                difficulty=difficulty,
+                resume_id=request.resume_id,
+                resume_text=None,
+                question_count=project_count,
+                jd_text=request.custom_jd_text,
+            )
+            questions.extend(
+                question.model_copy(update={"phase": "PROJECT"}) for question in project
+            )
+        hr_questions = (
+            "请分享一次你与团队成员产生分歧的经历，以及你是如何推动问题解决的？",
+            "你选择下一份工作时最看重哪些因素？为什么？",
+            "请介绍一次你面对高压力任务时进行优先级取舍的经历。",
+        )
+        for index in range(phases.count("HR")):
+            questions.append(
+                PlannedInterviewQuestion(
+                    question=hr_questions[index % len(hr_questions)],
+                    type="HR",
+                    category="HR问题",
+                    topic_summary="行为与职业动机",
+                    phase="HR",
+                )
+            )
+        return questions

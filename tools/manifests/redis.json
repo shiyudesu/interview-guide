@@ -185,42 +185,18 @@
       "valueExpression": "("
     },
     {
-      "name": "SESSION_KEY_PREFIX",
-      "source": {
-        "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 20
-      },
-      "valueExpression": "\"interview:session:\""
-    },
-    {
-      "name": "RESUME_SESSION_KEY_PREFIX",
-      "source": {
-        "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 21
-      },
-      "valueExpression": "\"interview:resume:\""
-    },
-    {
       "name": "CREATE_LOCK_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 22
+        "line": 13
       },
-      "valueExpression": "\"interview:create:\""
+      "valueExpression": "\"interview:v2:create:\""
     },
     {
-      "name": "SESSION_TTL_SECONDS",
+      "name": "RESULT_TTL_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 24
-      },
-      "valueExpression": "24 * 60 * 60"
-    },
-    {
-      "name": "CREATE_RESULT_TTL_SECONDS",
-      "source": {
-        "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 25
+        "line": 16
       },
       "valueExpression": "24 * 60 * 60"
     },
@@ -228,7 +204,7 @@
       "name": "CREATE_LOCK_WAIT_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 26
+        "line": 17
       },
       "valueExpression": "185"
     },
@@ -236,7 +212,7 @@
       "name": "CREATE_LOCK_LEASE_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 27
+        "line": 18
       },
       "valueExpression": "600"
     },
@@ -244,17 +220,9 @@
       "name": "LOCK_RELEASE_SCRIPT",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 28
+        "line": 19
       },
       "valueExpression": "\"\"\""
-    },
-    {
-      "name": "BATCH_OUTPUT_FORMAT",
-      "source": {
-        "file": "backend/src/interview_guide/modules/interview/evaluation.py",
-        "line": 30
-      },
-      "valueExpression": "structured_output_format("
     },
     {
       "name": "CODE_BLOCK",
@@ -292,25 +260,17 @@
       "name": "SESSION_CACHE_KEY_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 32
+        "line": 36
       },
-      "valueExpression": "\"voice:interview:session:\""
+      "valueExpression": "\"voice:v2:interview:session:\""
     },
     {
       "name": "SESSION_CACHE_TTL_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 33
+        "line": 37
       },
       "valueExpression": "60 * 60"
-    },
-    {
-      "name": "PENDING_EVALUATION_REQUEUE_DELAY",
-      "source": {
-        "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 38
-      },
-      "valueExpression": "timedelta(minutes=3)"
     }
   ],
   "keyLiterals": [
@@ -331,7 +291,7 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 407
+        "line": 413
       },
       "value": "{self.postgres_host}:{self.postgres_port}/{database}"
     },
@@ -401,30 +361,37 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 20
+        "line": 13
       },
-      "value": "interview:session:"
+      "value": "interview:v2:create:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 21
+        "line": 14
       },
-      "value": "interview:resume:"
+      "value": "interview:v2:create:result:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 22
+        "line": 15
       },
-      "value": "interview:create:"
+      "value": "interview:v2:turn:result:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 23
+        "line": 46
       },
-      "value": "interview:create:result:"
+      "value": "{TURN_RESULT_PREFIX}{session_id}:{request_id}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/interview/cache.py",
+        "line": 57
+      },
+      "value": "{TURN_RESULT_PREFIX}{session_id}:{request_id}"
     },
     {
       "source": {
@@ -443,42 +410,42 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 32
+        "line": 36
       },
-      "value": "voice:interview:session:"
+      "value": "voice:v2:interview:session:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 99
+        "line": 91
       },
       "value": "{RESUME_ANALYZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 111
+        "line": 103
       },
       "value": "{KB_VECTORIZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 133
+        "line": 125
       },
       "value": "{KB_QUESTION_GEN.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 159
+        "line": 148
       },
       "value": "{INTERVIEW_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 191
+        "line": 172
       },
       "value": "{VOICE_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     }
@@ -546,7 +513,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 92
+        "line": 103
       }
     },
     {
@@ -580,7 +547,7 @@
       "schedule": "cron",
       "source": {
         "file": "backend/src/interview_guide/scheduler.py",
-        "line": 94
+        "line": 109
       }
     },
     {
@@ -588,7 +555,7 @@
       "schedule": "interval",
       "source": {
         "file": "backend/src/interview_guide/scheduler.py",
-        "line": 103
+        "line": 118
       }
     },
     {
@@ -596,15 +563,23 @@
       "schedule": "interval",
       "source": {
         "file": "backend/src/interview_guide/scheduler.py",
-        "line": 111
+        "line": 126
+      }
+    },
+    {
+      "method": "recover_interview_turns",
+      "schedule": "interval",
+      "source": {
+        "file": "backend/src/interview_guide/scheduler.py",
+        "line": 134
       }
     }
   ],
   "schemaVersion": 1,
   "summary": {
-    "constantCount": 39,
+    "constantCount": 34,
     "rateLimitRuleCount": 4,
-    "scheduledMethodCount": 3,
+    "scheduledMethodCount": 4,
     "streamCount": 5
   }
 }

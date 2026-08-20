@@ -42,6 +42,10 @@ cd backend
 uv run --frozen interview-guide-migrate
 ```
 
+自适应面试 v2 的 `0004_contract_adaptive_interview` 是已批准的破坏性迁移。执行前必须备份
+面试数据并设置 `ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`；迁移完成后恢复为 `0`。该迁移不影响
+简历、知识库、题库、Provider 和日程数据。
+
 切换验收时已在既有 PostgreSQL schema 上完成 baseline 和重复执行检查，并验证第二次执行
 不产生额外 DDL。新环境直接升级到 Alembic head。
 

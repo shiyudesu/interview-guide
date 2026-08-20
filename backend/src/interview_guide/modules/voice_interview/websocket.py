@@ -6,25 +6,24 @@ import json
 import logging
 import re
 import time
+import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any, Protocol
 
-import yaml
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from interview_guide.common.db.models import (
     VoiceInterviewMessage,
     VoiceInterviewSession,
 )
+from interview_guide.modules.interview.models import InterviewSessionDTO, SubmitTurnResponse
 from interview_guide.modules.voice_interview.protocols import (
     AsrAppendError,
     AsrNotReadyError,
     VoiceAsrProvider,
     VoiceAsrSession,
     VoiceClock,
-    VoiceLlmStreamer,
     VoiceTtsSynthesizer,
 )
 
@@ -44,7 +43,17 @@ class VoiceInterviewServicePort(Protocol):
         session_id: int,
         user_text: str | None,
         ai_text: str | None,
+        interview_turn_id: uuid.UUID | None = None,
     ) -> None: ...
+
+    async def core_session(self, session_id: int) -> InterviewSessionDTO: ...
+
+    async def submit_turn(
+        self,
+        session_id: int,
+        request_id: str,
+        answer: str,
+    ) -> SubmitTurnResponse: ...
 
     async def start_phase(self, session_id: int, phase: str | None) -> None: ...
 
@@ -82,40 +91,7 @@ class VoiceWebSocketConfig:
     inactivity_warning_ms: int = 270_000
     inactivity_pause_ms: int = 300_000
     inactivity_check_seconds: float = 30
-    stream_push_interval_ms: int = 180
-    stream_min_chars_delta: int = 12
     ai_question_max_chars: int = 120
-
-
-@dataclass(frozen=True)
-class VoiceOpeningQuestions:
-    skill_questions: Mapping[str, str]
-    algorithm_skills: frozenset[str]
-    algorithm_question: str
-    backend_question: str
-
-    @classmethod
-    def load(cls, path: Path) -> VoiceOpeningQuestions:
-        document = yaml.safe_load(path.read_text(encoding="utf-8"))
-        raw = document["app"]["voice-interview"]["opening"]
-        return cls(
-            skill_questions={
-                str(key): str(value).strip()
-                for key, value in dict(raw.get("skill-questions", {})).items()
-            },
-            algorithm_skills=frozenset(str(value) for value in raw.get("algorithm-skills", ())),
-            algorithm_question=str(raw.get("algorithm-question", "")).strip(),
-            backend_question=str(raw.get("backend-question", "")).strip(),
-        )
-
-    def question(self, session: VoiceInterviewSession) -> str:
-        skill_id = session.skill_id or ""
-        configured = self.skill_questions.get(skill_id)
-        if configured:
-            return configured
-        if skill_id in self.algorithm_skills:
-            return self.algorithm_question
-        return self.backend_question
 
 
 class ConcurrentWebSocket:
@@ -190,6 +166,7 @@ class VoiceSessionState:
     asr: VoiceAsrSession | None = None
     tasks: set[asyncio.Task[Any]] = field(default_factory=set)
     tts_semaphore: asyncio.Semaphore | None = None
+    pending_request_id: str | None = None
 
     def append_final(self, text: str, now_ms: int) -> None:
         segment = text.strip()
@@ -260,18 +237,14 @@ class VoiceWebSocketRuntime:
         self,
         service: VoiceInterviewServicePort,
         asr_provider: VoiceAsrProvider,
-        llm: VoiceLlmStreamer,
         tts: VoiceTtsSynthesizer,
-        opening: VoiceOpeningQuestions,
         *,
         clock: VoiceClock | None = None,
         config: VoiceWebSocketConfig | None = None,
     ) -> None:
         self._service = service
         self._asr_provider = asr_provider
-        self._llm = llm
         self._tts = tts
-        self._opening = opening
         self._clock = clock or SystemVoiceClock()
         self._config = config or VoiceWebSocketConfig()
         self.connections = VoiceConnectionManager()
@@ -350,17 +323,9 @@ class VoiceWebSocketRuntime:
                 if connection.state.asr is not None:
                     await connection.state.asr.close()
         finally:
-            try:
-                await self._service.end_session(
-                    session_id,
-                    only_if_in_progress=True,
-                )
-            except Exception:
-                logger.warning(
-                    "failed to auto-end voice session sessionId=%s",
-                    session_id,
-                    exc_info=True,
-                )
+            # Keep the session resumable during the client's reconnect window. The
+            # explicit pause endpoint and stale-session scheduler own lifecycle changes.
+            pass
 
     async def close(self) -> None:
         for session_id in self.connections.session_ids():
@@ -474,6 +439,9 @@ class VoiceWebSocketRuntime:
                     current.state.merge_buffer = text.strip()
                     if current.state.merge_started_at_ms == 0:
                         current.state.merge_started_at_ms = self._clock.now_ms()
+                request_id = data.get("requestId")
+                if isinstance(request_id, str) and request_id.strip():
+                    current.state.pending_request_id = request_id.strip()
             await self._submit(session_id)
         elif action == "end_interview":
             await self._service.end_session(session_id)
@@ -500,9 +468,11 @@ class VoiceWebSocketRuntime:
         if not user_text:
             return
         state.processing = True
+        request_id = state.pending_request_id or uuid.uuid4().hex
+        state.pending_request_id = None
         self._track(
             state,
-            self._process_turn(session_id, state, user_text),
+            self._process_turn(session_id, state, user_text, request_id),
             "voice-turn",
         )
 
@@ -515,48 +485,47 @@ class VoiceWebSocketRuntime:
         session_id: int,
         state: VoiceSessionState,
         user_text: str,
+        request_id: str,
     ) -> None:
         state.ai_speaking = True
         tts_tasks: list[tuple[int, asyncio.Task[bytes]]] = []
         try:
-            session = await self._service.get_session(session_id)
             current = self.connections.current(session_id)
-            if session is None or current is None or not current.socket.open:
+            if current is None or not current.socket.open:
                 return
-            raw = ""
-            sentence_end = 0
-            last_push_at = self._clock.now_ms()
-            last_push_length = 0
-            async for token in self._llm.stream(session, user_text):
-                raw += token
-                normalized = normalize_realtime_text(raw)
-                sentence_end = self._start_complete_sentences(
-                    state,
-                    normalized,
-                    sentence_end,
-                    tts_tasks,
-                )
-                now = self._clock.now_ms()
-                if (
-                    now - last_push_at >= self._config.stream_push_interval_ms
-                    and len(normalized) - last_push_length >= self._config.stream_min_chars_delta
-                ):
-                    current = self.connections.current(session_id)
-                    if current is not None:
-                        await self._send_text(current.socket, normalized, False)
-                    last_push_at = now
-                    last_push_length = len(normalized)
-
-            normalized = normalize_realtime_text(raw)
+            await current.socket.send_json(
+                {
+                    "type": "control",
+                    "action": "turn_deciding",
+                    "message": "正在分析回答",
+                    "timestamp": self._clock.now_ms(),
+                }
+            )
+            response = await self._service.submit_turn(
+                session_id,
+                request_id,
+                user_text,
+            )
+            next_text = (
+                response.next_question.question
+                if response.next_question is not None
+                else ""
+            )
+            normalized = " ".join(
+                value.strip()
+                for value in (response.acknowledgement, next_text)
+                if value.strip()
+            )
+            sentence_end = self._start_complete_sentences(
+                state,
+                normalized,
+                0,
+                tts_tasks,
+            )
             if len(normalized) > sentence_end:
                 remaining = normalized[sentence_end:].strip()
                 if remaining:
-                    self._start_tts_task(
-                        state,
-                        len(tts_tasks),
-                        remaining,
-                        tts_tasks,
-                    )
+                    self._start_tts_task(state, len(tts_tasks), remaining, tts_tasks)
             ai_reply = optimize_for_voice(
                 normalized,
                 self._config.ai_question_max_chars,
@@ -567,7 +536,12 @@ class VoiceWebSocketRuntime:
             await self._send_text(current.socket, ai_reply, False)
             await self._send_subtitle(current.socket, user_text, True)
             await self._send_text(current.socket, ai_reply, True)
-            await self._service.save_message(session_id, user_text, ai_reply)
+            await self._service.save_message(
+                session_id,
+                user_text,
+                ai_reply,
+                response.turn_id,
+            )
             emitted = await self._emit_tts_chunks(session_id, tts_tasks)
             if emitted == 0 and tts_tasks:
                 fallback = await self._synthesize_with_timeout(ai_reply, state)
@@ -580,12 +554,24 @@ class VoiceWebSocketRuntime:
                             "text": ai_reply,
                         }
                     )
+            if response.completed:
+                current = self.connections.current(session_id)
+                if current is not None and current.socket.open:
+                    await current.socket.send_json(
+                        {
+                            "type": "control",
+                            "action": "interview_complete",
+                            "message": "面试已完成，正在生成报告",
+                            "timestamp": self._clock.now_ms(),
+                        }
+                    )
         except asyncio.CancelledError:
             raise
-        except Exception as error:
+        except Exception:
+            logger.exception("voice turn failed sessionId=%s", session_id)
             current = self.connections.current(session_id)
             if current is not None:
-                await self._send_error(current.socket, f"AI响应失败: {error}")
+                await self._send_error(current.socket, "AI响应失败，请稍后重试")
         finally:
             for _, task in tts_tasks:
                 if not task.done():
@@ -819,9 +805,10 @@ class VoiceWebSocketRuntime:
         history = await self._service.history(session.id)
         if history:
             return
-        question = self._opening.question(session)
-        if not question:
+        core = await self._service.core_session(session.id)
+        if core.current_question is None:
             return
+        question = f"你好，我是本场面试官。{core.current_question.question}"
         current = self.connections.current(session.id)
         if current is None or not current.socket.open:
             return

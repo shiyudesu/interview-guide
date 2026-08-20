@@ -151,6 +151,7 @@ export interface CreateKnowledgeBaseInterviewRequest {
   mainQuestionCount: number;
   followUpCount: number;
   llmProvider?: string;
+  requestId?: string;
 }
 
 export interface InterviewCategoryCapacity {
@@ -171,6 +172,9 @@ export interface KnowledgeBaseInterviewCapacityResponse {
   mainQuestionCount: number;
   categories: InterviewCategoryCapacity[];
   followUpOptions: InterviewFollowUpCapacity[];
+  referenceAnswerCoverage: number;
+  keyPointsCoverage: number;
+  scoringRubricCoverage: number;
 }
 
 export interface GetKnowledgeBaseInterviewCapacityParams {

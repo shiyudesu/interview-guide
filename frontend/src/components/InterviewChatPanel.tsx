@@ -8,8 +8,8 @@ import InterviewMessageBubble from './InterviewMessageBubble';
 interface Message {
   type: 'interviewer' | 'user';
   content: string;
-  category?: string;
-  questionIndex?: number;
+  category?: string | null;
+  questionId?: string;
 }
 
 interface InterviewChatPanelProps {
@@ -43,9 +43,12 @@ export default function InterviewChatPanel({
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const progress = useMemo(() => {
-    if (!session || !currentQuestion) return 0;
-    return ((currentQuestion.questionIndex + 1) / session.totalQuestions) * 100;
-  }, [session, currentQuestion]);
+    if (!session) return 0;
+    const {completedMainQuestions, plannedMainQuestions} = session.progress;
+    return plannedMainQuestions > 0
+      ? (completedMainQuestions / plannedMainQuestions) * 100
+      : 0;
+  }, [session]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -60,7 +63,8 @@ export default function InterviewChatPanel({
             className="bg-white dark:bg-slate-800 rounded-2xl p-6 mb-4 shadow-sm dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700">
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            题目 {currentQuestion ? currentQuestion.questionIndex + 1 : 0} / {session.totalQuestions}
+            主问题 {session.progress.completedMainQuestions} / {session.progress.plannedMainQuestions}
+            {currentQuestion?.kind === 'FOLLOW_UP' ? ' · 针对性追问' : ''}
           </span>
             <span className="text-sm text-slate-500 dark:text-slate-400">
             {Math.round(progress)}%
@@ -90,7 +94,7 @@ export default function InterviewChatPanel({
               <InterviewMessageBubble
                 role={msg.type === 'interviewer' ? 'interviewer' : 'user'}
                 text={msg.content}
-                category={msg.category}
+                category={msg.category ?? undefined}
               />
             </div>
           )}

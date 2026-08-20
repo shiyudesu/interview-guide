@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import json
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from interview_guide.common.ai.adapter import LlmAdapter, ProviderConfig
+from interview_guide.common.ai.adapter import ChatResult, LlmAdapter, ProviderConfig
 from interview_guide.common.ai.prompts import ANTI_INJECTION_INSTRUCTION
 from interview_guide.common.errors import BusinessException, ErrorCode
 
@@ -18,6 +19,12 @@ STRICT_JSON_INSTRUCTION = """请仅返回可被 JSON 解析器直接解析的 JS
 2) 不要输出任何解释文字、前后缀、注释。
 3) 所有字符串内引号必须正确转义。
 """
+
+
+@dataclass(frozen=True)
+class StructuredInvocation[T: BaseModel]:
+    value: T
+    response: ChatResult
 
 
 def render_schema_instance(value: object, indent: int = 0) -> str:
@@ -128,6 +135,28 @@ class StructuredOutputInvoker:
         *,
         tools: Sequence[dict[str, object]] | None = None,
     ) -> T:
+        invocation = await self.invoke_with_metadata(
+            provider,
+            system_prompt_with_format,
+            user_prompt,
+            output_type,
+            error_code,
+            error_prefix,
+            tools=tools,
+        )
+        return invocation.value
+
+    async def invoke_with_metadata(
+        self,
+        provider: ProviderConfig,
+        system_prompt_with_format: str,
+        user_prompt: str,
+        output_type: type[T],
+        error_code: ErrorCode,
+        error_prefix: str,
+        *,
+        tools: Sequence[dict[str, object]] | None = None,
+    ) -> StructuredInvocation[T]:
         secured_system_prompt = system_prompt_with_format.rstrip("\n") + ANTI_INJECTION_INSTRUCTION
         format_start = system_prompt_with_format.find(OUTPUT_FORMAT_PREFIX)
         formatted_user_prompt = (
@@ -152,7 +181,10 @@ class StructuredOutputInvoker:
                     if tools is not None
                     else await self._adapter.chat(provider, messages)
                 )
-                return self._convert(response.content or "", output_type)
+                return StructuredInvocation(
+                    value=self._convert(response.content or "", output_type),
+                    response=response,
+                )
             except Exception as error:
                 last_error = error
         detail = str(last_error) if last_error is not None else "unknown"

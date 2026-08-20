@@ -1,49 +1,34 @@
 from __future__ import annotations
 
-import re
 import uuid
+from datetime import datetime
 from pathlib import Path
-from typing import Any, cast
 
 import pytest
 
-from interview_guide.common.ai.adapter import ProviderConfig
-from interview_guide.common.ai.prompts import (
-    PromptRepository,
-    PromptSanitizer,
-)
+from interview_guide.common.ai.adapter import ChatResult, ProviderConfig
+from interview_guide.common.ai.prompts import PromptRepository, PromptSanitizer
 from interview_guide.common.ai.skills import SkillRepository
-from interview_guide.common.errors import BusinessException, ErrorCode
-from interview_guide.common.redis.streams import (
-    INTERVIEW_EVALUATE,
-    SequentialStreamConsumer,
-    StreamMessage,
-)
-from interview_guide.modules.interview.cache import (
-    CREATE_LOCK_LEASE_SECONDS,
-    CREATE_LOCK_WAIT_SECONDS,
-    CREATE_RESULT_TTL_SECONDS,
-)
-from interview_guide.modules.interview.evaluation import (
-    BatchReportOutput,
-    QaRecord,
-    QuestionEvaluationOutput,
-    SummaryOutput,
-    UnifiedEvaluationService,
+from interview_guide.common.ai.structured import StructuredInvocation
+from interview_guide.common.config.settings import Settings
+from interview_guide.common.db.models import (
+    InterviewQuestionRecord,
+    InterviewSession,
 )
 from interview_guide.modules.interview.models import (
+    CategoryScore,
     CreateInterviewRequest,
-    InterviewSessionStatus,
+    InterviewReportDTO,
+    QuestionGroupEvaluationDTO,
+    TurnAction,
+    TurnDecisionOutput,
+    TurnEvaluationDTO,
 )
-from interview_guide.modules.interview.question import (
-    InterviewQuestionService,
-    InterviewSkillLibrary,
-    JdCategoryListOutput,
-    JdCategoryOutput,
-    JdParseService,
-    QuestionListOutput,
-    QuestionOutput,
-)
+from interview_guide.modules.interview.question import InterviewSkillLibrary
+from interview_guide.modules.interview.repository import SessionAggregate
+from interview_guide.modules.interview.turn import InterviewTurnDecisionService
+from interview_guide.modules.voice_interview.models import CreateVoiceSessionRequest
+from interview_guide.modules.voice_interview.service import VoiceInterviewService
 
 RESOURCES = Path(__file__).resolve().parents[2] / "resources"
 PROVIDER = ProviderConfig(
@@ -54,324 +39,273 @@ PROVIDER = ProviderConfig(
 )
 
 
-class ExplicitFakeRegistry:
-    async def get_chat(self, provider_id: str | None = None) -> ProviderConfig:
-        del provider_id
-        return PROVIDER
+class ExplicitFakeStructured:
+    def __init__(self, output: TurnDecisionOutput) -> None:
+        self.output = output
+        self.calls = 0
 
-
-class ExplicitFakeQuestionStructured:
-    def __init__(
-        self,
-        *,
-        fail_resume: bool = False,
-        fail_direction: bool = False,
-    ) -> None:
-        self.fail_resume = fail_resume
-        self.fail_direction = fail_direction
-        self.calls: list[tuple[str, int]] = []
-
-    async def invoke(
-        self,
-        provider: ProviderConfig,
-        system_prompt_with_format: str,
-        user_prompt: str,
-        output_type: type[Any],
-        error_code: object,
-        error_prefix: str,
-        **kwargs: object,
-    ) -> Any:
-        del provider, system_prompt_with_format, output_type, error_code, kwargs
-        count_match = re.search(r"请生成共 (-?\d+) 个", user_prompt)
-        count = int(count_match.group(1)) if count_match else 0
-        self.calls.append((error_prefix, count))
-        if self.fail_resume and error_prefix.startswith("简历题"):
-            raise BusinessException(ErrorCode.INTERVIEW_QUESTION_GENERATION_FAILED)
-        if self.fail_direction and error_prefix.startswith("方向题"):
-            raise BusinessException(ErrorCode.INTERVIEW_QUESTION_GENERATION_FAILED)
-        return QuestionListOutput(
-            questions=[
-                QuestionOutput(
-                    question=f"主问题{i + 1}",
-                    type="java",
-                    category="Java",
-                    topicSummary=f"主题{i + 1}",
-                    followUps=["追问一", "追问二"],
-                )
-                for i in range(max(0, count))
-            ]
+    async def invoke_with_metadata(self, *args: object, **kwargs: object):
+        del args, kwargs
+        self.calls += 1
+        return StructuredInvocation(
+            value=self.output,
+            response=ChatResult(
+                content="{}",
+                message={},
+                usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+                raw={},
+            ),
         )
 
 
-class ExplicitFakeEvaluationStructured:
-    def __init__(self) -> None:
-        self.output_types: list[type[Any]] = []
-        self.batch_calls = 0
-
-    async def invoke(
-        self,
-        provider: ProviderConfig,
-        system_prompt_with_format: str,
-        user_prompt: str,
-        output_type: type[Any],
-        error_code: object,
-        error_prefix: str,
-        **kwargs: object,
-    ) -> Any:
-        del provider, system_prompt_with_format, user_prompt, error_code, error_prefix, kwargs
-        self.output_types.append(output_type)
-        if output_type is BatchReportOutput:
-            self.batch_calls += 1
-            if self.batch_calls == 2:
-                raise RuntimeError("explicit fake batch failure")
-            return BatchReportOutput(
-                overallScore=70,
-                overallFeedback="首批反馈",
-                strengths=["准确"],
-                improvements=["深入"],
-                questionEvaluations=[
-                    QuestionEvaluationOutput(
-                        questionIndex=0,
-                        score=80,
-                        feedback="好",
-                        referenceAnswer="参考一",
-                        keyPoints=["要点一"],
-                    ),
-                    QuestionEvaluationOutput(
-                        questionIndex=1,
-                        score=60,
-                        feedback="一般",
-                        referenceAnswer="参考二",
-                        keyPoints=["要点二"],
-                    ),
-                ],
-            )
-        if output_type is SummaryOutput:
-            raise RuntimeError("explicit fake summary failure")
-        raise AssertionError(output_type)
+def settings() -> Settings:
+    return Settings(
+        _env_file=None,
+        APP_AI_CONFIG_ENCRYPTION_KEY="unit-test-key",
+        APP_INTERVIEW_FOLLOW_UP_COUNT=1,
+        APP_INTERVIEW_TURN_CONFIDENCE_THRESHOLD=0.65,
+    )
 
 
-class ExplicitFakeJdStructured:
-    async def invoke(
-        self,
-        provider: ProviderConfig,
-        system_prompt_with_format: str,
-        user_prompt: str,
-        output_type: type[Any],
-        error_code: object,
-        error_prefix: str,
-        **kwargs: object,
-    ) -> Any:
-        del provider, system_prompt_with_format, user_prompt, error_code, error_prefix, kwargs
-        assert output_type is JdCategoryListOutput
-        return JdCategoryListOutput(
-            categories=[
-                JdCategoryOutput(
-                    key="JAVA",
-                    label="Java",
-                    priority="CORE",
-                    ref="java-core.md",
-                    shared=False,
-                )
-            ]
+def aggregate(*, follow_up_count: int = 0, max_follow_ups: int = 1) -> SessionAggregate:
+    now = datetime(2026, 8, 19, 12, 0)
+    session = InterviewSession(
+        id=1,
+        channel="TEXT",
+        completed_at=None,
+        context_json=None,
+        created_at=now,
+        current_question_id=uuid.uuid4(),
+        difficulty="mid",
+        evaluate_error=None,
+        evaluate_status=None,
+        improvements_json=None,
+        interview_category=None,
+        knowledge_base_id=None,
+        llm_provider="explicit-fake",
+        max_follow_ups_per_main=max_follow_ups,
+        overall_feedback=None,
+        overall_score=None,
+        planned_main_question_count=2,
+        reference_answers_json=None,
+        request_id=None,
+        resume_id=None,
+        session_id="session-1",
+        skill_id="java-backend",
+        status="IN_PROGRESS",
+        strengths_json=None,
+    )
+    main_id = session.current_question_id
+    assert main_id is not None
+    questions = [
+        InterviewQuestionRecord(
+            id=main_id,
+            interview_session_id=1,
+            kind="MAIN",
+            phase=None,
+            main_order=0,
+            follow_up_order=0,
+            parent_question_id=None,
+            question="Redis缓存穿透怎么处理？",
+            type="REDIS",
+            category="Redis",
+            topic_summary="缓存穿透",
+            reference_answer=None,
+            key_points_json=None,
+            scoring_rubric=None,
+            source_context=None,
+            source_question_id=None,
+            created_at=now,
+        ),
+        InterviewQuestionRecord(
+            id=uuid.uuid4(),
+            interview_session_id=1,
+            kind="MAIN",
+            phase=None,
+            main_order=1,
+            follow_up_order=0,
+            parent_question_id=None,
+            question="解释事务隔离级别。",
+            type="DATABASE",
+            category="数据库",
+            topic_summary="事务隔离",
+            reference_answer=None,
+            key_points_json=None,
+            scoring_rubric=None,
+            source_context=None,
+            source_question_id=None,
+            created_at=now,
+        ),
+    ]
+    for index in range(follow_up_count):
+        question = InterviewQuestionRecord(
+            id=uuid.uuid4(),
+            interview_session_id=1,
+            kind="FOLLOW_UP",
+            phase=None,
+            main_order=0,
+            follow_up_order=index + 1,
+            parent_question_id=main_id,
+            question="如何应对恶意请求不存在的key？",
+            type="REDIS",
+            category="Redis",
+            topic_summary="恶意空key",
+            reference_answer=None,
+            key_points_json=None,
+            scoring_rubric=None,
+            source_context=None,
+            source_question_id=None,
+            created_at=now,
         )
+        questions.append(question)
+    return SessionAggregate(session, "", questions, [])
 
 
-def question_service(
-    structured: ExplicitFakeQuestionStructured,
-) -> InterviewQuestionService:
-    return InterviewQuestionService(
-        cast(Any, ExplicitFakeRegistry()),
-        cast(Any, structured),
+def decision_service(structured: ExplicitFakeStructured) -> InterviewTurnDecisionService:
+    return InterviewTurnDecisionService(
+        structured,  # type: ignore[arg-type]
         PromptRepository(RESOURCES),
-        PromptSanitizer(uuid_factory=lambda: uuid.UUID(int=0)),
+        PromptSanitizer(),
         InterviewSkillLibrary(SkillRepository(RESOURCES), RESOURCES),
-        follow_up_count=1,
+        settings(),
     )
-
-
-def test_create_request_keeps_compatibility_controller_defaults_without_extra_validation() -> None:
-    request = CreateInterviewRequest.model_validate({})
-    assert request.question_count == 0
-    assert request.skill_id is None
-    assert request.resume_text is None
-    assert InterviewSessionStatus.CREATED.value == "CREATED"
-    assert CREATE_LOCK_WAIT_SECONDS == 185
-    assert CREATE_LOCK_LEASE_SECONDS == 600
-    assert CREATE_RESULT_TTL_SECONDS == 86_400
 
 
 @pytest.mark.asyncio
-async def test_explicit_fake_direction_generation_caps_followups_and_uppercases_type() -> None:
-    structured = ExplicitFakeQuestionStructured()
-    questions = await question_service(structured).generate(
-        provider_id=None,
-        skill_id="java-backend",
-        difficulty="mid",
-        resume_text="",
-        question_count=3,
-        historical_questions=[],
-        custom_categories=None,
-        jd_text=None,
-    )
-
-    assert len(questions) == 6
-    assert [item.question_index for item in questions] == list(range(6))
-    assert questions[0].type == "JAVA"
-    assert questions[1].is_follow_up is True
-    assert questions[1].parent_question_index == 0
-    assert structured.calls == [("方向题生成失败：", 3)]
-
-
-@pytest.mark.asyncio
-async def test_explicit_fake_resume_failure_regenerates_all_direction_questions() -> None:
-    structured = ExplicitFakeQuestionStructured(fail_resume=True)
-    questions = await question_service(structured).generate(
-        provider_id=None,
-        skill_id="java-backend",
-        difficulty="mid",
-        resume_text="有项目经历",
-        question_count=3,
-        historical_questions=[],
-        custom_categories=None,
-        jd_text=None,
-    )
-
-    assert sum(not item.is_follow_up for item in questions) == 3
-    assert ("简历题生成失败：", 2) in structured.calls
-    assert ("方向题生成失败：", 3) in structured.calls
-
-
-@pytest.mark.asyncio
-async def test_explicit_fake_direction_failure_returns_generated_resume_questions_only() -> None:
-    structured = ExplicitFakeQuestionStructured(fail_direction=True)
-    questions = await question_service(structured).generate(
-        provider_id=None,
-        skill_id="java-backend",
-        difficulty="mid",
-        resume_text="有项目经历",
-        question_count=3,
-        historical_questions=[],
-        custom_categories=None,
-        jd_text=None,
-    )
-
-    assert sum(not item.is_follow_up for item in questions) == 2
-    assert structured.calls.count(("简历题生成失败：", 2)) == 1
-    assert structured.calls.count(("方向题生成失败：", 1)) == 1
-
-
-@pytest.mark.asyncio
-async def test_explicit_fake_jd_parse_uses_unified_adapter_and_compatibility_length_rule() -> None:
-    skills = InterviewSkillLibrary(SkillRepository(RESOURCES), RESOURCES)
-    service = JdParseService(
-        cast(Any, ExplicitFakeRegistry()),
-        cast(Any, ExplicitFakeJdStructured()),
-        PromptRepository(RESOURCES),
-        PromptSanitizer(uuid_factory=lambda: uuid.UUID(int=0)),
-        skills,
-    )
-    with pytest.raises(BusinessException, match="JD 内容太少"):
-        await service.parse("太短")
-
-    categories = await service.parse("Java 后端工程师，要求熟悉 Spring、MySQL、Redis。" * 3)
-
-    assert [item.model_dump(by_alias=True) for item in categories] == [
-        {
-            "key": "JAVA",
-            "label": "Java",
-            "priority": "CORE",
-            "ref": "java-core.md",
-            "shared": False,
-        }
-    ]
-
-
-@pytest.mark.asyncio
-async def test_explicit_fake_evaluation_is_sequential_and_zero_fills_failed_batch() -> None:
-    structured = ExplicitFakeEvaluationStructured()
-    service = UnifiedEvaluationService(
-        cast(Any, structured),
-        PromptRepository(RESOURCES),
-        batch_size=2,
-    )
-    report = await service.evaluate(
-        PROVIDER,
-        "session-1",
-        [
-            QaRecord(0, "问题一", "A", "回答一"),
-            QaRecord(1, "问题二", "A", "回答二"),
-            QaRecord(2, "问题三", "B", "回答三"),
-        ],
-        "",
-        "",
-    )
-
-    assert structured.output_types == [
-        BatchReportOutput,
-        BatchReportOutput,
-        SummaryOutput,
-    ]
-    assert [item.score for item in report.question_details] == [80, 60, 0]
-    assert report.question_details[2].feedback == "该题未成功生成评估结果，系统按 0 分处理。"
-    assert report.overall_score == 46
-    assert report.overall_feedback == "首批反馈"
-    assert report.strengths == ["准确"]
-    assert report.improvements == ["深入"]
-
-
-class ExplicitFakeStreams:
-    def __init__(self) -> None:
-        self.acks: list[str] = []
-
-    async def ack(self, definition: object, *message_ids: str) -> int:
-        del definition
-        self.acks.extend(message_ids)
-        return len(message_ids)
-
-
-class ExplicitFailingRetryHandler:
-    async def parse(self, message: StreamMessage) -> str | None:
-        return message.data.get("sessionId")
-
-    async def should_skip(self, payload: str) -> bool:
-        del payload
-        return False
-
-    async def try_mark_processing(self, payload: str) -> bool:
-        del payload
-        return True
-
-    async def process(self, payload: str) -> None:
-        del payload
-        raise RuntimeError("explicit process failure")
-
-    async def mark_completed(self, payload: str) -> None:
-        raise AssertionError(payload)
-
-    async def retry(self, payload: str, retry_count: int) -> None:
-        del payload, retry_count
-        raise RuntimeError("explicit requeue failure")
-
-    async def mark_failed(self, payload: str, error: str) -> None:
-        raise AssertionError((payload, error))
-
-
-@pytest.mark.asyncio
-async def test_requeue_failure_preserves_original_pending_message() -> None:
-    streams = ExplicitFakeStreams()
-    consumer = SequentialStreamConsumer(
-        cast(Any, streams),
-        INTERVIEW_EVALUATE,
-        "evaluate-consumer-explicit-fake",
-        ExplicitFailingRetryHandler(),
-    )
-
-    await consumer.process_message(
-        StreamMessage(
-            message_id="1-0",
-            data={"sessionId": "session-1", "retryCount": "0"},
+async def test_follow_up_limit_skips_model_call() -> None:
+    structured = ExplicitFakeStructured(
+        TurnDecisionOutput(
+            action="FOLLOW_UP",
+            acknowledgement="需要继续深入。",
+            followUpQuestion="如何落地？",
+            reasonCode="MISSING_DETAIL",
+            reason="缺少细节",
+            targetTopic="落地",
+            confidence=0.9,
         )
     )
+    result = await decision_service(structured).decide(
+        PROVIDER,
+        aggregate(follow_up_count=1, max_follow_ups=1),
+        "可以用布隆过滤器。",
+    )
 
-    assert streams.acks == []
+    assert result.action == TurnAction.NEXT_MAIN
+    assert result.reason_code == "FOLLOW_UP_LIMIT_REACHED"
+    assert structured.calls == 0
+
+
+@pytest.mark.asyncio
+async def test_model_can_create_answer_specific_follow_up_once() -> None:
+    structured = ExplicitFakeStructured(
+        TurnDecisionOutput(
+            action="FOLLOW_UP",
+            acknowledgement="你提到了布隆过滤器。",
+            followUpQuestion="布隆过滤器误判时如何避免影响正常请求？",
+            reasonCode="MISSING_TRADEOFF",
+            reason="没有说明误判处理",
+            targetTopic="布隆过滤器误判",
+            confidence=0.92,
+        )
+    )
+    result = await decision_service(structured).decide(
+        PROVIDER,
+        aggregate(),
+        "我会使用布隆过滤器。",
+    )
+
+    assert result.action == TurnAction.FOLLOW_UP
+    assert result.follow_up_question == "布隆过滤器误判时如何避免影响正常请求？"
+    assert result.total_tokens == 15
+    assert structured.calls == 1
+
+
+@pytest.mark.asyncio
+async def test_low_confidence_follow_up_becomes_next_main() -> None:
+    structured = ExplicitFakeStructured(
+        TurnDecisionOutput(
+            action="FOLLOW_UP",
+            acknowledgement="好的。",
+            followUpQuestion="再说一点？",
+            reasonCode="UNCERTAIN",
+            reason="不确定",
+            targetTopic="其他",
+            confidence=0.2,
+        )
+    )
+    result = await decision_service(structured).decide(
+        PROVIDER,
+        aggregate(),
+        "完整回答",
+    )
+
+    assert result.action == TurnAction.NEXT_MAIN
+    assert result.follow_up_question is None
+    assert structured.calls == 1
+
+
+def test_request_and_voice_duration_validation() -> None:
+    request = CreateInterviewRequest(
+        questionCount=5,
+        skillId="java-backend",
+        requestId="request_1234",
+    )
+    assert request.request_id == "request_1234"
+    voice = CreateVoiceSessionRequest(
+        skillId="java-backend",
+        plannedDuration=30,
+        requestId="voice_123456",
+    )
+    assert voice.planned_duration == 30
+    with pytest.raises(ValueError, match="5的倍数"):
+        CreateVoiceSessionRequest(skillId="java-backend", plannedDuration=17)
+
+
+def test_voice_phase_allocation_is_duration_based_and_weighted() -> None:
+    phases = VoiceInterviewService._question_phases(
+        CreateVoiceSessionRequest(
+            skillId="java-backend",
+            plannedDuration=30,
+            introEnabled=False,
+            techEnabled=True,
+            projectEnabled=True,
+            hrEnabled=True,
+        ),
+        6,
+    )
+    assert phases == ["TECH", "TECH", "TECH", "PROJECT", "PROJECT", "HR"]
+
+
+def test_report_json_dump_serializes_question_uuids() -> None:
+    question_id = uuid.uuid4()
+    report = InterviewReportDTO(
+        session_id="session-1",
+        planned_main_questions=1,
+        answered_main_questions=1,
+        overall_score=80,
+        category_scores=[CategoryScore(category="Redis", score=80, question_count=1)],
+        question_groups=[
+            QuestionGroupEvaluationDTO(
+                main_question=TurnEvaluationDTO(
+                    question_id=question_id,
+                    question="如何治理缓存穿透？",
+                    answer="布隆过滤器和空值缓存。",
+                    score=80,
+                    feedback="回答完整。",
+                    reference_answer=None,
+                    key_points=[],
+                ),
+                follow_ups=[],
+                group_score=80,
+                group_feedback="具备落地思路。",
+                category="Redis",
+            )
+        ],
+        overall_feedback="整体表现良好。",
+        strengths=["方案完整"],
+        improvements=[],
+    )
+
+    document = report.model_dump(mode="json", by_alias=True)
+
+    assert document["questionGroups"][0]["mainQuestion"]["questionId"] == str(question_id)

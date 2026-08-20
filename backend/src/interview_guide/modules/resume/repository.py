@@ -3,12 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_guide.common.db.models import (
-    InterviewAnswer,
+    InterviewQuestionRecord,
     InterviewSession,
+    InterviewTurnRecord,
     Resume,
     ResumeAnalysis,
 )
@@ -105,7 +106,19 @@ class ResumeRepository:
     async def delete_graph(self, resume_id: int) -> None:
         session_ids = select(InterviewSession.id).where(InterviewSession.resume_id == resume_id)
         await self._session.execute(
-            delete(InterviewAnswer).where(InterviewAnswer.session_id.in_(session_ids))
+            update(InterviewSession)
+            .where(InterviewSession.resume_id == resume_id)
+            .values(current_question_id=None)
+        )
+        await self._session.execute(
+            delete(InterviewTurnRecord).where(
+                InterviewTurnRecord.interview_session_id.in_(session_ids)
+            )
+        )
+        await self._session.execute(
+            delete(InterviewQuestionRecord).where(
+                InterviewQuestionRecord.interview_session_id.in_(session_ids)
+            )
         )
         await self._session.execute(
             delete(InterviewSession).where(InterviewSession.resume_id == resume_id)

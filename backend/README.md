@@ -101,6 +101,10 @@ Alembic 是唯一升级入口：
 uv run --frozen interview-guide-migrate
 ```
 
+首次升级到自适应面试 v2 时，该命令要求
+`ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1`，并会清空已有面试与语音会话数据。升级前必须备份；
+迁移完成后恢复为 `0`。
+
 生产环境不要直接执行 SQL 文件，也不要让 API 在启动时修改 schema。
 
 ## 关键约束

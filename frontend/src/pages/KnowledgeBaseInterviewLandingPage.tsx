@@ -138,6 +138,7 @@ export default function KnowledgeBaseInterviewLandingPage() {
         difficulty: config.difficulty,
         mainQuestionCount: config.mainQuestionCount,
         followUpCount: config.followUpCount,
+        requestId: crypto.randomUUID(),
       });
       const kbId = startTarget.id;
       setStartTarget(null);

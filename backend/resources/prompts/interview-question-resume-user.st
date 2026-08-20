@@ -1,6 +1,6 @@
 # Input Data
 请生成共 {questionCount} 个针对项目经历的面试主问题。
-每个主问题必须额外生成 {followUpCount} 个追问。
+不要生成追问；追问将在候选人回答后动态决定。
 
 ## 面试方向
 {skillName}（{skillDescription}）

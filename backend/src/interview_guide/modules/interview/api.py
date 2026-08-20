@@ -6,7 +6,7 @@ import uuid
 from collections.abc import AsyncIterator
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from starlette.responses import Response
@@ -15,24 +15,23 @@ from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.api.responses import result_response
+from interview_guide.common.config.settings import Settings
 from interview_guide.common.infrastructure import RuntimeInfrastructure
+from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.redis.rate_limit import (
     RateLimitDimension,
     RateLimitRule,
 )
 from interview_guide.common.result import Result
 from interview_guide.modules.interview.cache import InterviewSessionCache
-from interview_guide.modules.interview.evaluation import (
-    AnswerEvaluationService,
-    UnifiedEvaluationService,
-)
-from interview_guide.modules.interview.models import CreateInterviewRequest
+from interview_guide.modules.interview.models import CreateInterviewRequest, SubmitTurnRequest
 from interview_guide.modules.interview.question import (
     InterviewQuestionService,
     InterviewSkillLibrary,
 )
 from interview_guide.modules.interview.repository import InterviewRepository
 from interview_guide.modules.interview.service import InterviewService
+from interview_guide.modules.interview.turn import InterviewTurnDecisionService
 from interview_guide.modules.knowledge_base.api import client_ip
 
 router = APIRouter(prefix="/api/interview/sessions")
@@ -43,9 +42,11 @@ SKILLS = InterviewSkillLibrary(SKILL_REPOSITORY, RESOURCES)
 logger = logging.getLogger(__name__)
 
 
-async def interview_service(request: Request) -> AsyncIterator[InterviewService]:
-    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    settings = request.app.state.settings
+def build_interview_service(
+    infrastructure: RuntimeInfrastructure,
+    settings: Settings,
+    metrics: ApplicationMetrics | None = None,
+) -> InterviewService:
     repository = InterviewRepository(
         infrastructure.database.sessions,
         now=datetime.now,
@@ -57,26 +58,36 @@ async def interview_service(request: Request) -> AsyncIterator[InterviewService]
         PROMPTS,
         infrastructure.prompt_sanitizer,
         SKILLS,
-        follow_up_count=settings.interview_follow_up_count,
     )
-    evaluation = AnswerEvaluationService(
-        UnifiedEvaluationService(
-            structured,
-            PROMPTS,
-            batch_size=settings.interview_evaluation_batch_size,
-            tools=(SKILLS.tool_definition(),),
-        ),
+    decisions = InterviewTurnDecisionService(
+        StructuredOutputInvoker(infrastructure.llm_adapter, max_attempts=1),
+        PROMPTS,
+        infrastructure.prompt_sanitizer,
         SKILLS,
+        settings,
     )
-    yield InterviewService(
+    return InterviewService(
         repository,
         InterviewSessionCache(infrastructure.redis.client),
         infrastructure.streams,
         questions,
-        evaluation,
+        decisions,
         infrastructure.provider_registry,
         infrastructure.blocking_executor,
+        follow_up_count=settings.interview_follow_up_count,
+        turn_lease_seconds=settings.interview_turn_lease_seconds,
+        turn_wait_seconds=settings.interview_turn_decision_timeout_seconds + 5,
+        metrics=metrics,
         uuid_factory=uuid.uuid4,
+    )
+
+
+async def interview_service(request: Request) -> AsyncIterator[InterviewService]:
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    yield build_interview_service(
+        infrastructure,
+        request.app.state.settings,
+        request.app.state.metrics,
     )
 
 
@@ -144,49 +155,19 @@ async def current_question(
     return result_response(Result.ok(await service.current_question(session_id)))
 
 
-@router.post("/{session_id}/answers")
-async def submit_answer(
+@router.post("/{session_id}/turns")
+async def submit_turn(
     request: Request,
     session_id: str,
-    body: dict[str, Any],
+    payload: SubmitTurnRequest,
     service: ServiceDependency,
 ) -> Response:
     await enforce_rate_limit(
         request,
-        "submitAnswer",
+        "submitTurn",
         (RateLimitRule(RateLimitDimension.GLOBAL, 10),),
     )
-    question_index = body.get("questionIndex")
-    answer = body.get("answer")
-    if not isinstance(question_index, int) or isinstance(question_index, bool):
-        raise TypeError("questionIndex must be Integer")
-    if answer is not None and not isinstance(answer, str):
-        raise TypeError("answer must be String")
-    return result_response(
-        Result.ok(
-            await service.submit_answer(
-                session_id,
-                question_index,
-                answer,
-            )
-        )
-    )
-
-
-@router.put("/{session_id}/answers")
-async def save_answer(
-    session_id: str,
-    body: dict[str, Any],
-    service: ServiceDependency,
-) -> Response:
-    question_index = body.get("questionIndex")
-    answer = body.get("answer")
-    if not isinstance(question_index, int) or isinstance(question_index, bool):
-        raise TypeError("questionIndex must be Integer")
-    if answer is not None and not isinstance(answer, str):
-        raise TypeError("answer must be String")
-    await service.save_answer(session_id, question_index, answer)
-    return result_response(Result.ok())
+    return result_response(Result.ok(await service.submit_turn(session_id, payload)))
 
 
 @router.post("/{session_id}/complete")
@@ -203,7 +184,16 @@ async def report(
     session_id: str,
     service: ServiceDependency,
 ) -> Response:
-    return result_response(Result.ok(await service.generate_report(session_id)))
+    return result_response(Result.ok(await service.report(session_id)))
+
+
+@router.post("/{session_id}/report")
+async def regenerate_report(
+    session_id: str,
+    service: ServiceDependency,
+) -> Response:
+    await service.regenerate_report(session_id)
+    return result_response(Result.ok())
 
 
 @router.get("/{session_id}/details")

@@ -34,6 +34,83 @@
         "file": "backend/alembic/sql/0001_initial_schema.sql",
         "line": 391
       }
+    },
+    {
+      "definition": "ALTER TABLE interview_sessions ADD COLUMN channel VARCHAR(32), ADD COLUMN context_json TEXT, ADD COLUMN current_question_id UUID, ADD COLUMN planned_main_question_count INTEGER, ADD COLUMN max_follow_ups_per_main INTEGER;",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 4
+      }
+    },
+    {
+      "definition": "ALTER TABLE interview_sessions ADD CONSTRAINT interview_sessions_channel_check CHECK (channel IN ('TEXT', 'KNOWLEDGE_BASE', 'VOICE'));",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 11
+      }
+    },
+    {
+      "definition": "ALTER TABLE interview_sessions ADD CONSTRAINT fk_interview_sessions_current_question FOREIGN KEY (current_question_id) REFERENCES interview_questions(id);",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 54
+      }
+    },
+    {
+      "definition": "ALTER TABLE voice_interview_sessions ADD COLUMN interview_session_id BIGINT;",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 110
+      }
+    },
+    {
+      "definition": "ALTER TABLE voice_interview_sessions ADD CONSTRAINT fk_voice_interview_sessions_interview FOREIGN KEY (interview_session_id) REFERENCES interview_sessions(id) ON DELETE CASCADE;",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 112
+      }
+    },
+    {
+      "definition": "ALTER TABLE voice_interview_messages ADD COLUMN interview_turn_id UUID;",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 119
+      }
+    },
+    {
+      "definition": "ALTER TABLE voice_interview_messages ADD CONSTRAINT fk_voice_interview_messages_session FOREIGN KEY (session_id) REFERENCES voice_interview_sessions(id) ON DELETE CASCADE;",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 121
+      }
+    },
+    {
+      "definition": "ALTER TABLE voice_interview_messages ADD CONSTRAINT fk_voice_interview_messages_turn FOREIGN KEY (interview_turn_id) REFERENCES interview_turns(id) ON DELETE SET NULL;",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 125
+      }
+    },
+    {
+      "definition": "ALTER TABLE interview_sessions DROP COLUMN current_question_index, DROP COLUMN questions_json, DROP COLUMN source_type, DROP COLUMN total_questions;",
+      "source": {
+        "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
+        "line": 26
+      }
+    },
+    {
+      "definition": "ALTER TABLE interview_sessions ALTER COLUMN channel SET NOT NULL, ALTER COLUMN planned_main_question_count SET NOT NULL, ALTER COLUMN max_follow_ups_per_main SET NOT NULL;",
+      "source": {
+        "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
+        "line": 32
+      }
+    },
+    {
+      "definition": "ALTER TABLE voice_interview_sessions ALTER COLUMN interview_session_id SET NOT NULL;",
+      "source": {
+        "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
+        "line": 37
+      }
     }
   ],
   "extensions": [
@@ -60,15 +137,6 @@
     }
   ],
   "indexes": [
-    {
-      "definition": "CREATE INDEX idx_interview_answer_session_question ON interview_answers (session_id, question_index);",
-      "name": "idx_interview_answer_session_question",
-      "source": {
-        "file": "backend/alembic/sql/0001_initial_schema.sql",
-        "line": 286
-      },
-      "unique": false
-    },
     {
       "definition": "CREATE INDEX idx_interview_session_resume_created ON interview_sessions (resume_id, created_at);",
       "name": "idx_interview_session_resume_created",
@@ -185,6 +253,60 @@
         "line": 394
       },
       "unique": true
+    },
+    {
+      "definition": "CREATE INDEX vector_store_embedding_hnsw_idx ON vector_store USING hnsw (embedding public.vector_cosine_ops);",
+      "name": "vector_store_embedding_hnsw_idx",
+      "source": {
+        "file": "backend/alembic/versions/0002_rename_vector_index.py",
+        "line": 26
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_interview_questions_session_order ON interview_questions(interview_session_id, main_order, follow_up_order);",
+      "name": "idx_interview_questions_session_order",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 51
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_interview_turns_session_answered ON interview_turns(interview_session_id, answered_at);",
+      "name": "idx_interview_turns_session_answered",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 105
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE INDEX idx_interview_turns_processing_lease ON interview_turns(decision_status, lease_expires_at);",
+      "name": "idx_interview_turns_processing_lease",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 107
+      },
+      "unique": false
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uk_voice_interview_sessions_interview ON voice_interview_sessions(interview_session_id);",
+      "name": "uk_voice_interview_sessions_interview",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 116
+      },
+      "unique": true
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uk_voice_interview_messages_turn ON voice_interview_messages(interview_turn_id);",
+      "name": "uk_voice_interview_messages_turn",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 129
+      },
+      "unique": true
     }
   ],
   "migrations": [
@@ -192,15 +314,35 @@
       "file": "backend/alembic/sql/0001_initial_schema.sql",
       "sha256": "639877f22379732b99ece43e7f410ec9c6c169b337c92acae2f962a9ef2249e7",
       "statementTerminatorCount": 53
+    },
+    {
+      "file": "backend/alembic/versions/0001_initial_schema.py",
+      "sha256": "f4b1c69fbb804cd893b2838033fc20afe28fd90a984b925b50b202e53d79c1ec",
+      "statementTerminatorCount": 0
+    },
+    {
+      "file": "backend/alembic/versions/0002_rename_vector_index.py",
+      "sha256": "ec6316ebe8a7c01a8b8a46970af2c98bfbdddbbbd05a81f8a6bfc011db912499",
+      "statementTerminatorCount": 7
+    },
+    {
+      "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+      "sha256": "b63dcceda9899a4af77a992490e293f1436448a6857e06d573d6929ad4648d9d",
+      "statementTerminatorCount": 15
+    },
+    {
+      "file": "backend/alembic/versions/0004_contract_adaptive_interview.py",
+      "sha256": "05dd0a4bfc066015dbde7602f9e1e23dcd20a0fd5a872ca4b62ba38e7b1ec699",
+      "statementTerminatorCount": 13
     }
   ],
   "schemaVersion": 1,
   "sourceOfTruth": "Alembic accepted production SQL and PostgreSQL catalog tests.",
   "summary": {
-    "alterationCount": 5,
+    "alterationCount": 16,
     "extensionCount": 3,
-    "indexCount": 14,
-    "migrationCount": 1,
+    "indexCount": 19,
+    "migrationCount": 5,
     "tableCount": 17
   },
   "tables": [
@@ -404,10 +546,6 @@
           "name": "created_at"
         },
         {
-          "definition": "INTEGER",
-          "name": "current_question_index"
-        },
-        {
           "definition": "VARCHAR(16)",
           "name": "difficulty"
         },
@@ -445,10 +583,6 @@
         },
         {
           "definition": "TEXT",
-          "name": "questions_json"
-        },
-        {
-          "definition": "TEXT",
           "name": "reference_answers_json"
         },
         {
@@ -464,10 +598,6 @@
           "name": "skill_id"
         },
         {
-          "definition": "VARCHAR(32)",
-          "name": "source_type"
-        },
-        {
           "definition": "VARCHAR(20)",
           "name": "status"
         },
@@ -476,8 +606,28 @@
           "name": "strengths_json"
         },
         {
+          "definition": "VARCHAR(64)",
+          "name": "request_id"
+        },
+        {
+          "definition": "VARCHAR(32)",
+          "name": "channel"
+        },
+        {
+          "definition": "TEXT",
+          "name": "context_json"
+        },
+        {
+          "definition": "UUID",
+          "name": "current_question_id"
+        },
+        {
           "definition": "INTEGER",
-          "name": "total_questions"
+          "name": "planned_main_question_count"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "max_follow_ups_per_main"
         }
       ],
       "constraints": [
@@ -490,63 +640,6 @@
       "source": {
         "file": "backend/alembic/sql/0001_initial_schema.sql",
         "line": 61
-      }
-    },
-    {
-      "columns": [
-        {
-          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
-          "name": "id"
-        },
-        {
-          "definition": "TIMESTAMP(6) NOT NULL",
-          "name": "answered_at"
-        },
-        {
-          "definition": "VARCHAR(255)",
-          "name": "category"
-        },
-        {
-          "definition": "TEXT",
-          "name": "feedback"
-        },
-        {
-          "definition": "TEXT",
-          "name": "key_points_json"
-        },
-        {
-          "definition": "TEXT",
-          "name": "question"
-        },
-        {
-          "definition": "INTEGER",
-          "name": "question_index"
-        },
-        {
-          "definition": "TEXT",
-          "name": "reference_answer"
-        },
-        {
-          "definition": "INTEGER",
-          "name": "score"
-        },
-        {
-          "definition": "TEXT",
-          "name": "user_answer"
-        },
-        {
-          "definition": "BIGINT NOT NULL",
-          "name": "session_id"
-        }
-      ],
-      "constraints": [
-        "CONSTRAINT uk_interview_answer_session_question UNIQUE (session_id, question_index)",
-        "CONSTRAINT fkjeqvvamvdarrcbswn6kkiuym9 FOREIGN KEY (session_id) REFERENCES interview_sessions(id)"
-      ],
-      "name": "interview_answers",
-      "source": {
-        "file": "backend/alembic/sql/0001_initial_schema.sql",
-        "line": 93
       }
     },
     {
@@ -614,6 +707,38 @@
         {
           "definition": "VARCHAR(20)",
           "name": "vector_status"
+        },
+        {
+          "definition": "VARCHAR(20) NOT NULL DEFAULT 'NONE'",
+          "name": "question_gen_status"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "question_gen_error"
+        },
+        {
+          "definition": "VARCHAR(36)",
+          "name": "question_gen_task_id"
+        },
+        {
+          "definition": "TEXT",
+          "name": "question_gen_config"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "question_gen_message"
+        },
+        {
+          "definition": "INTEGER NOT NULL DEFAULT 0",
+          "name": "question_gen_saved_count"
+        },
+        {
+          "definition": "INTEGER NOT NULL DEFAULT 0",
+          "name": "question_gen_skipped_count"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "question_gen_updated_at"
         }
       ],
       "constraints": [
@@ -939,62 +1064,6 @@
           "name": "id"
         },
         {
-          "definition": "TIMESTAMP(6)",
-          "name": "created_at"
-        },
-        {
-          "definition": "TEXT",
-          "name": "improvements_json"
-        },
-        {
-          "definition": "TIMESTAMP(6)",
-          "name": "interview_date"
-        },
-        {
-          "definition": "VARCHAR(255)",
-          "name": "interviewer_role"
-        },
-        {
-          "definition": "TEXT",
-          "name": "overall_feedback"
-        },
-        {
-          "definition": "INTEGER",
-          "name": "overall_score"
-        },
-        {
-          "definition": "TEXT",
-          "name": "question_evaluations_json"
-        },
-        {
-          "definition": "TEXT",
-          "name": "reference_answers_json"
-        },
-        {
-          "definition": "BIGINT",
-          "name": "session_id"
-        },
-        {
-          "definition": "TEXT",
-          "name": "strengths_json"
-        }
-      ],
-      "constraints": [
-        "CONSTRAINT ukijx8aelak8vqf9n4to88qqrna UNIQUE (session_id)"
-      ],
-      "name": "voice_interview_evaluations",
-      "source": {
-        "file": "backend/alembic/sql/0001_initial_schema.sql",
-        "line": 224
-      }
-    },
-    {
-      "columns": [
-        {
-          "definition": "BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY",
-          "name": "id"
-        },
-        {
           "definition": "TEXT",
           "name": "ai_generated_text"
         },
@@ -1025,6 +1094,10 @@
         {
           "definition": "TEXT",
           "name": "user_recognized_text"
+        },
+        {
+          "definition": "UUID",
+          "name": "interview_turn_id"
         }
       ],
       "constraints": [
@@ -1133,6 +1206,10 @@
         {
           "definition": "VARCHAR(255)",
           "name": "user_id"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "interview_session_id"
         }
       ],
       "constraints": [
@@ -1170,6 +1247,216 @@
       "source": {
         "file": "backend/alembic/sql/0001_initial_schema.sql",
         "line": 351
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "UUID PRIMARY KEY DEFAULT public.uuid_generate_v4()",
+          "name": "id"
+        },
+        {
+          "definition": "BIGINT NOT NULL",
+          "name": "interview_session_id"
+        },
+        {
+          "definition": "VARCHAR(16) NOT NULL",
+          "name": "kind"
+        },
+        {
+          "definition": "VARCHAR(16)",
+          "name": "phase"
+        },
+        {
+          "definition": "INTEGER NOT NULL",
+          "name": "main_order"
+        },
+        {
+          "definition": "INTEGER NOT NULL",
+          "name": "follow_up_order"
+        },
+        {
+          "definition": "UUID",
+          "name": "parent_question_id"
+        },
+        {
+          "definition": "TEXT NOT NULL",
+          "name": "question"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "type"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "category"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "topic_summary"
+        },
+        {
+          "definition": "TEXT",
+          "name": "reference_answer"
+        },
+        {
+          "definition": "TEXT",
+          "name": "key_points_json"
+        },
+        {
+          "definition": "TEXT",
+          "name": "scoring_rubric"
+        },
+        {
+          "definition": "TEXT",
+          "name": "source_context"
+        },
+        {
+          "definition": "BIGINT",
+          "name": "source_question_id"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "created_at"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT fk_interview_questions_session FOREIGN KEY (interview_session_id) REFERENCES interview_sessions(id) ON DELETE CASCADE",
+        "CONSTRAINT uk_interview_question_order UNIQUE (interview_session_id, main_order, follow_up_order)",
+        "CONSTRAINT uk_interview_question_id_session UNIQUE (id, interview_session_id)",
+        "CONSTRAINT fk_interview_question_parent_session FOREIGN KEY (parent_question_id, interview_session_id) REFERENCES interview_questions(id, interview_session_id) DEFERRABLE INITIALLY DEFERRED",
+        "CONSTRAINT interview_questions_kind_check CHECK ( (kind = 'MAIN' AND parent_question_id IS NULL AND follow_up_order = 0) OR (kind = 'FOLLOW_UP' AND parent_question_id IS NOT NULL AND follow_up_order >= 1) )"
+      ],
+      "name": "interview_questions",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 15
+      }
+    },
+    {
+      "columns": [
+        {
+          "definition": "UUID PRIMARY KEY DEFAULT public.uuid_generate_v4()",
+          "name": "id"
+        },
+        {
+          "definition": "BIGINT NOT NULL",
+          "name": "interview_session_id"
+        },
+        {
+          "definition": "UUID NOT NULL",
+          "name": "question_id"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "request_id"
+        },
+        {
+          "definition": "TEXT",
+          "name": "answer"
+        },
+        {
+          "definition": "VARCHAR(64) NOT NULL",
+          "name": "answer_hash"
+        },
+        {
+          "definition": "VARCHAR(16)",
+          "name": "action"
+        },
+        {
+          "definition": "VARCHAR(200)",
+          "name": "acknowledgement"
+        },
+        {
+          "definition": "UUID",
+          "name": "next_question_id"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "decision_reason"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "reason_code"
+        },
+        {
+          "definition": "VARCHAR(128)",
+          "name": "target_topic"
+        },
+        {
+          "definition": "DOUBLE PRECISION",
+          "name": "confidence"
+        },
+        {
+          "definition": "VARCHAR(16) NOT NULL",
+          "name": "decision_status"
+        },
+        {
+          "definition": "VARCHAR(64)",
+          "name": "provider_id"
+        },
+        {
+          "definition": "VARCHAR(255)",
+          "name": "model_name"
+        },
+        {
+          "definition": "VARCHAR(32)",
+          "name": "prompt_version"
+        },
+        {
+          "definition": "VARCHAR(32)",
+          "name": "schema_version"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "prompt_tokens"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "completion_tokens"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "total_tokens"
+        },
+        {
+          "definition": "INTEGER",
+          "name": "decision_duration_ms"
+        },
+        {
+          "definition": "VARCHAR(500)",
+          "name": "error"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "processing_started_at"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "lease_expires_at"
+        },
+        {
+          "definition": "TIMESTAMP(6) NOT NULL",
+          "name": "answered_at"
+        },
+        {
+          "definition": "TIMESTAMP(6)",
+          "name": "decided_at"
+        }
+      ],
+      "constraints": [
+        "CONSTRAINT fk_interview_turns_session FOREIGN KEY (interview_session_id) REFERENCES interview_sessions(id) ON DELETE CASCADE",
+        "CONSTRAINT fk_interview_turns_question FOREIGN KEY (question_id) REFERENCES interview_questions(id)",
+        "CONSTRAINT fk_interview_turns_next_question FOREIGN KEY (next_question_id) REFERENCES interview_questions(id)",
+        "CONSTRAINT uk_interview_turn_request UNIQUE (interview_session_id, request_id)",
+        "CONSTRAINT uk_interview_turn_question UNIQUE (interview_session_id, question_id)",
+        "CONSTRAINT interview_turns_status_check CHECK ( decision_status IN ('PROCESSING', 'COMPLETED', 'FALLBACK', 'FAILED') )",
+        "CONSTRAINT interview_turns_action_check CHECK ( action IS NULL OR action IN ('FOLLOW_UP', 'NEXT_MAIN', 'COMPLETE') )"
+      ],
+      "name": "interview_turns",
+      "source": {
+        "file": "backend/alembic/versions/0003_expand_adaptive_interview.py",
+        "line": 58
       }
     }
   ]

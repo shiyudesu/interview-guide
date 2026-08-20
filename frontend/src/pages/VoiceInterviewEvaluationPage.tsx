@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
-import { EvaluationStatusResponse, VoiceEvaluationDetail, voiceInterviewApi } from '../api/voiceInterview';
+import { EvaluationStatusResponse, voiceInterviewApi } from '../api/voiceInterview';
 import InterviewDetailPanel from '../components/InterviewDetailPanel';
 import type { InterviewDetail } from '../api/history';
 import { getVoiceEvaluationPresentation } from './voiceEvaluationStatus.ts';
+import type { InterviewReport } from '../types/interview';
 
 export default function VoiceInterviewEvaluationPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const [evaluation, setEvaluation] = useState<VoiceEvaluationDetail | null>(null);
+  const [evaluation, setEvaluation] = useState<InterviewReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [evaluateStatus, setEvaluateStatus] = useState<string | null>(null);
   const [evaluateStatusUpdatedAt, setEvaluateStatusUpdatedAt] = useState<string | null>(null);
@@ -122,23 +123,38 @@ export default function VoiceInterviewEvaluationPage() {
     return {
       id: 0,
       sessionId: sessionId!,
-      totalQuestions: evaluation.totalQuestions,
+      channel: 'VOICE',
+      plannedMainQuestions: evaluation.plannedMainQuestions,
       status: 'COMPLETED',
+      evaluateStatus: 'COMPLETED',
+      evaluateError: undefined,
       overallScore: evaluation.overallScore,
       overallFeedback: evaluation.overallFeedback,
       createdAt: '',
       completedAt: '',
       strengths: evaluation.strengths,
       improvements: evaluation.improvements,
-      answers: evaluation.answers.map(a => ({
-        questionIndex: a.questionIndex,
+      answers: evaluation.questionGroups.flatMap(group => [
+        group.mainQuestion,
+        ...group.followUps,
+      ]).map((a, index) => ({
+        questionId: a.questionId,
+        parentQuestionId: index === 0 ? null : evaluation.questionGroups
+          .find(group => group.followUps.some(item => item.questionId === a.questionId))
+          ?.mainQuestion.questionId ?? null,
+        kind: evaluation.questionGroups.some(group => group.mainQuestion.questionId === a.questionId)
+          ? 'MAIN' as const
+          : 'FOLLOW_UP' as const,
         question: a.question,
-        category: a.category,
-        userAnswer: a.userAnswer,
+        category: evaluation.questionGroups.find(group =>
+          group.mainQuestion.questionId === a.questionId ||
+          group.followUps.some(item => item.questionId === a.questionId)
+        )?.category ?? '综合',
+        userAnswer: a.answer,
         score: a.score,
         feedback: a.feedback,
         referenceAnswer: a.referenceAnswer ?? undefined,
-        keyPoints: a.keyPoints ?? undefined,
+        keyPoints: a.keyPoints,
         answeredAt: '',
       })),
     };

@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import asyncio
 from collections import deque
-from collections.abc import AsyncIterator, Iterable
+from collections.abc import Iterable
 
-from interview_guide.common.db.models import VoiceInterviewSession
 from interview_guide.modules.voice_interview.protocols import (
     AsrAppendError,
     AsrErrorCallback,
@@ -114,33 +113,6 @@ class ExplicitFakeAsrProvider(VoiceAsrProvider):
         self.sessions.append(session)
         session.start()
         return session
-
-
-class ExplicitFakeLlmStreamer:
-    def __init__(
-        self,
-        tokens: Iterable[str],
-        *,
-        delay_seconds: float = 0,
-    ) -> None:
-        self._tokens = tuple(tokens)
-        self._delay_seconds = delay_seconds
-        self.calls: list[tuple[int, str]] = []
-        self.cancelled = False
-
-    async def stream(
-        self,
-        session: VoiceInterviewSession,
-        user_input: str,
-    ) -> AsyncIterator[str]:
-        self.calls.append((session.id, user_input))
-        try:
-            for token in self._tokens:
-                await asyncio.sleep(self._delay_seconds)
-                yield token
-        except asyncio.CancelledError:
-            self.cancelled = True
-            raise
 
 
 class ExplicitFakeTtsSynthesizer:

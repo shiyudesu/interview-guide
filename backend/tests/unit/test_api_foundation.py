@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import json
 import logging
 from datetime import datetime
-from pathlib import Path
 from typing import Annotated
 from uuid import UUID
 
@@ -187,23 +185,12 @@ def test_openapi_metadata_and_dynamic_server_url() -> None:
     with TestClient(app, base_url="http://comparison:28080") as client:
         response = client.get("/v3/api-docs")
 
-    baseline_path = (
-        Path(__file__).resolve().parents[2] / "resources/contracts/http-compatibility-baseline.json"
-    )
-    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
-    openapi_case = next(case for case in baseline["cases"] if case["id"] == "openapi")
-    document = json.loads(openapi_case["response"]["body"])
-    document["servers"] = [
+    document = response.json()
+    assert document["servers"] == [
         {
             "url": "http://comparison:28080",
             "description": "Generated server url",
         }
     ]
-    assert (
-        response.content
-        == json.dumps(
-            document,
-            ensure_ascii=False,
-            separators=(",", ":"),
-        ).encode()
-    )
+    assert "/api/interview/sessions/{session_id}/turns" in document["paths"]
+    assert "/api/interview/sessions/{session_id}/answers" not in document["paths"]

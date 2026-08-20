@@ -55,7 +55,7 @@ class GenerateManifestsTest(unittest.TestCase):
     def test_resource_inventory_records_prompts_and_disabled_tests(self) -> None:
         resources = GENERATOR.extract_resources(REPOSITORY_ROOT)
 
-        self.assertEqual(17, resources["summary"]["resourceCountsByCategory"]["prompt"])
+        self.assertEqual(16, resources["summary"]["resourceCountsByCategory"]["prompt"])
         self.assertGreaterEqual(resources["summary"]["disabledTestMarkerCount"], 1)
 
     def test_generation_is_deterministic(self) -> None:

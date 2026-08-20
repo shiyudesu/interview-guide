@@ -10,6 +10,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     ForeignKey,
+    ForeignKeyConstraint,
     Identity,
     Index,
     Integer,
@@ -122,6 +123,10 @@ class InterviewSession(Base):
             "status IN ('CREATED', 'IN_PROGRESS', 'COMPLETED', 'EVALUATED')",
             name="interview_sessions_status_check",
         ),
+        CheckConstraint(
+            "channel IN ('TEXT', 'KNOWLEDGE_BASE', 'VOICE')",
+            name="interview_sessions_channel_check",
+        ),
         UniqueConstraint("session_id", name="uk42bhenf7mu90ochoc1efpg3xa"),
         Index(
             "idx_interview_session_resume_created",
@@ -153,7 +158,16 @@ class InterviewSession(Base):
     )
     completed_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
-    current_question_index: Mapped[int | None] = mapped_column(Integer)
+    channel: Mapped[str] = mapped_column(String(32), nullable=False)
+    context_json: Mapped[str | None] = mapped_column(Text)
+    current_question_id: Mapped[PythonUUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "interview_questions.id",
+            name="fk_interview_sessions_current_question",
+            use_alter=True,
+        ),
+    )
     difficulty: Mapped[str | None] = mapped_column(String(16))
     evaluate_error: Mapped[str | None] = mapped_column(String(500))
     evaluate_status: Mapped[str | None] = mapped_column(String(20))
@@ -166,7 +180,8 @@ class InterviewSession(Base):
     llm_provider: Mapped[str | None] = mapped_column(String(50))
     overall_feedback: Mapped[str | None] = mapped_column(Text)
     overall_score: Mapped[int | None] = mapped_column(Integer)
-    questions_json: Mapped[str | None] = mapped_column(Text)
+    max_follow_ups_per_main: Mapped[int] = mapped_column(Integer, nullable=False)
+    planned_main_question_count: Mapped[int] = mapped_column(Integer, nullable=False)
     reference_answers_json: Mapped[str | None] = mapped_column(Text)
     request_id: Mapped[str | None] = mapped_column(String(64))
     resume_id: Mapped[int | None] = mapped_column(
@@ -178,49 +193,161 @@ class InterviewSession(Base):
     )
     session_id: Mapped[str] = mapped_column(String(36), nullable=False)
     skill_id: Mapped[str | None] = mapped_column(String(64))
-    source_type: Mapped[str | None] = mapped_column(String(32))
     status: Mapped[str | None] = mapped_column(String(20))
     strengths_json: Mapped[str | None] = mapped_column(Text)
-    total_questions: Mapped[int | None] = mapped_column(Integer)
 
 
-class InterviewAnswer(Base):
-    __tablename__ = "interview_answers"
+class InterviewQuestionRecord(Base):
+    __tablename__ = "interview_questions"
     __table_args__ = (
         UniqueConstraint(
-            "session_id",
-            "question_index",
-            name="uk_interview_answer_session_question",
+            "interview_session_id",
+            "main_order",
+            "follow_up_order",
+            name="uk_interview_question_order",
+        ),
+        UniqueConstraint(
+            "id",
+            "interview_session_id",
+            name="uk_interview_question_id_session",
+        ),
+        ForeignKeyConstraint(
+            ("parent_question_id", "interview_session_id"),
+            ("interview_questions.id", "interview_questions.interview_session_id"),
+            name="fk_interview_question_parent_session",
+            deferrable=True,
+            initially="DEFERRED",
+        ),
+        CheckConstraint(
+            "(kind = 'MAIN' AND parent_question_id IS NULL AND follow_up_order = 0) "
+            "OR (kind = 'FOLLOW_UP' AND parent_question_id IS NOT NULL "
+            "AND follow_up_order >= 1)",
+            name="interview_questions_kind_check",
         ),
         Index(
-            "idx_interview_answer_session_question",
-            "session_id",
-            "question_index",
+            "idx_interview_questions_session_order",
+            "interview_session_id",
+            "main_order",
+            "follow_up_order",
         ),
     )
 
-    id: Mapped[int] = mapped_column(
-        BigInteger,
-        Identity(always=False),
+    id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        server_default=text("public.uuid_generate_v4()"),
         primary_key=True,
     )
-    answered_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
-    category: Mapped[str | None] = mapped_column(String(255))
-    feedback: Mapped[str | None] = mapped_column(Text)
-    key_points_json: Mapped[str | None] = mapped_column(Text)
-    question: Mapped[str | None] = mapped_column(Text)
-    question_index: Mapped[int | None] = mapped_column(Integer)
-    reference_answer: Mapped[str | None] = mapped_column(Text)
-    score: Mapped[int | None] = mapped_column(Integer)
-    user_answer: Mapped[str | None] = mapped_column(Text)
-    session_id: Mapped[int] = mapped_column(
+    interview_session_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey(
             "interview_sessions.id",
-            name="fkjeqvvamvdarrcbswn6kkiuym9",
+            name="fk_interview_questions_session",
+            ondelete="CASCADE",
         ),
         nullable=False,
     )
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    phase: Mapped[str | None] = mapped_column(String(16))
+    main_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    follow_up_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    parent_question_id: Mapped[PythonUUID | None] = mapped_column(UUID(as_uuid=True))
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    category: Mapped[str | None] = mapped_column(String(255))
+    topic_summary: Mapped[str | None] = mapped_column(String(500))
+    reference_answer: Mapped[str | None] = mapped_column(Text)
+    key_points_json: Mapped[str | None] = mapped_column(Text)
+    scoring_rubric: Mapped[str | None] = mapped_column(Text)
+    source_context: Mapped[str | None] = mapped_column(Text)
+    source_question_id: Mapped[int | None] = mapped_column(BigInteger)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+
+
+class InterviewTurnRecord(Base):
+    __tablename__ = "interview_turns"
+    __table_args__ = (
+        UniqueConstraint(
+            "interview_session_id",
+            "request_id",
+            name="uk_interview_turn_request",
+        ),
+        UniqueConstraint(
+            "interview_session_id",
+            "question_id",
+            name="uk_interview_turn_question",
+        ),
+        CheckConstraint(
+            "decision_status IN ('PROCESSING', 'COMPLETED', 'FALLBACK', 'FAILED')",
+            name="interview_turns_status_check",
+        ),
+        CheckConstraint(
+            "action IS NULL OR action IN ('FOLLOW_UP', 'NEXT_MAIN', 'COMPLETE')",
+            name="interview_turns_action_check",
+        ),
+        Index(
+            "idx_interview_turns_session_answered",
+            "interview_session_id",
+            "answered_at",
+        ),
+        Index(
+            "idx_interview_turns_processing_lease",
+            "decision_status",
+            "lease_expires_at",
+        ),
+    )
+
+    id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        server_default=text("public.uuid_generate_v4()"),
+        primary_key=True,
+    )
+    interview_session_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "interview_sessions.id",
+            name="fk_interview_turns_session",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+    question_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "interview_questions.id",
+            name="fk_interview_turns_question",
+        ),
+        nullable=False,
+    )
+    request_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    answer: Mapped[str | None] = mapped_column(Text)
+    answer_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    action: Mapped[str | None] = mapped_column(String(16))
+    acknowledgement: Mapped[str | None] = mapped_column(String(200))
+    next_question_id: Mapped[PythonUUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "interview_questions.id",
+            name="fk_interview_turns_next_question",
+        ),
+    )
+    decision_reason: Mapped[str | None] = mapped_column(String(500))
+    reason_code: Mapped[str | None] = mapped_column(String(64))
+    target_topic: Mapped[str | None] = mapped_column(String(128))
+    confidence: Mapped[float | None] = mapped_column(DOUBLE_PRECISION)
+    decision_status: Mapped[str] = mapped_column(String(16), nullable=False)
+    provider_id: Mapped[str | None] = mapped_column(String(64))
+    model_name: Mapped[str | None] = mapped_column(String(255))
+    prompt_version: Mapped[str | None] = mapped_column(String(32))
+    schema_version: Mapped[str | None] = mapped_column(String(32))
+    prompt_tokens: Mapped[int | None] = mapped_column(Integer)
+    completion_tokens: Mapped[int | None] = mapped_column(Integer)
+    total_tokens: Mapped[int | None] = mapped_column(Integer)
+    decision_duration_ms: Mapped[int | None] = mapped_column(Integer)
+    error: Mapped[str | None] = mapped_column(String(500))
+    processing_started_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    lease_expires_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    answered_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    decided_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
 
 
 class KnowledgeBase(Base):
@@ -473,27 +600,6 @@ class VectorStore(Base):
     embedding: Mapped[list[float] | None] = mapped_column(Vector(1024))
 
 
-class VoiceInterviewEvaluation(Base):
-    __tablename__ = "voice_interview_evaluations"
-    __table_args__ = (UniqueConstraint("session_id", name="ukijx8aelak8vqf9n4to88qqrna"),)
-
-    id: Mapped[int] = mapped_column(
-        BigInteger,
-        Identity(always=False),
-        primary_key=True,
-    )
-    created_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
-    improvements_json: Mapped[str | None] = mapped_column(Text)
-    interview_date: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
-    interviewer_role: Mapped[str | None] = mapped_column(String(255))
-    overall_feedback: Mapped[str | None] = mapped_column(Text)
-    overall_score: Mapped[int | None] = mapped_column(Integer)
-    question_evaluations_json: Mapped[str | None] = mapped_column(Text)
-    reference_answers_json: Mapped[str | None] = mapped_column(Text)
-    session_id: Mapped[int | None] = mapped_column(BigInteger)
-    strengths_json: Mapped[str | None] = mapped_column(Text)
-
-
 class VoiceInterviewMessage(Base):
     __tablename__ = "voice_interview_messages"
     __table_args__ = (
@@ -508,12 +614,28 @@ class VoiceInterviewMessage(Base):
         Identity(always=False),
         primary_key=True,
     )
+    interview_turn_id: Mapped[PythonUUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "interview_turns.id",
+            name="fk_voice_interview_messages_turn",
+            ondelete="SET NULL",
+        ),
+        unique=True,
+    )
     ai_generated_text: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
     message_type: Mapped[str] = mapped_column(String(255), nullable=False)
     phase: Mapped[str | None] = mapped_column(String(255))
     sequence_num: Mapped[int | None] = mapped_column(Integer)
-    session_id: Mapped[int | None] = mapped_column(BigInteger)
+    session_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "voice_interview_sessions.id",
+            name="fk_voice_interview_messages_session",
+            ondelete="CASCADE",
+        ),
+    )
     timestamp: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
     user_recognized_text: Mapped[str | None] = mapped_column(Text)
 
@@ -539,6 +661,16 @@ class VoiceInterviewSession(Base):
         BigInteger,
         Identity(always=False),
         primary_key=True,
+    )
+    interview_session_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "interview_sessions.id",
+            name="fk_voice_interview_sessions_interview",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        unique=True,
     )
     actual_duration: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)

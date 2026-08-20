@@ -7,7 +7,6 @@ from datetime import datetime
 from pathlib import Path
 
 from interview_guide.common.ai.prompts import PromptRepository
-from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.config.settings import get_settings
 from interview_guide.common.infrastructure import RuntimeInfrastructure
@@ -24,11 +23,8 @@ from interview_guide.common.redis.streams import (
     SequentialStreamConsumer,
     run_stream_consumers,
 )
-from interview_guide.modules.interview.evaluation import (
-    AnswerEvaluationService,
-    UnifiedEvaluationService,
-)
-from interview_guide.modules.interview.question import InterviewSkillLibrary
+from interview_guide.modules.interview.api import build_interview_service
+from interview_guide.modules.interview.evaluation import UnifiedEvaluationService
 from interview_guide.modules.interview.repository import InterviewRepository
 from interview_guide.modules.interview.service import InterviewEvaluateHandler
 from interview_guide.modules.knowledge_base.question_service import (
@@ -48,13 +44,9 @@ from interview_guide.modules.resume.analysis import (
 )
 from interview_guide.modules.voice_interview.evaluation import (
     VoiceEvaluateStreamHandler,
-    VoiceInterviewEvaluationService,
 )
 from interview_guide.modules.voice_interview.repository import VoiceInterviewRepository
-from interview_guide.modules.voice_interview.service import (
-    VoiceEvaluationProducer,
-    VoiceInterviewService,
-)
+from interview_guide.modules.voice_interview.service import VoiceInterviewService
 from interview_guide.process import install_shutdown_handlers
 
 logger = logging.getLogger(__name__)
@@ -146,12 +138,9 @@ async def run_worker(
                     ),
                 ),
             )
-            skills = InterviewSkillLibrary(SkillRepository(resources), resources)
             unified_evaluation = UnifiedEvaluationService(
                 StructuredOutputInvoker(infrastructure.llm_adapter),
                 PromptRepository(resources),
-                batch_size=settings.interview_evaluation_batch_size,
-                tools=(skills.tool_definition(),),
             )
             interview_consumer = SequentialStreamConsumer(
                 streams,
@@ -163,10 +152,7 @@ async def run_worker(
                         now=now_factory,
                     ),
                     streams,
-                    AnswerEvaluationService(
-                        unified_evaluation,
-                        skills,
-                    ),
+                    unified_evaluation,
                     infrastructure.provider_registry,
                 ),
             )
@@ -174,15 +160,10 @@ async def run_worker(
                 infrastructure.database.sessions,
                 now_factory,
             )
-            voice_producer = VoiceEvaluationProducer(
-                streams,
-                voice_repository,
-                infrastructure.redis.client,
-            )
             voice_service = VoiceInterviewService(
                 voice_repository,
                 infrastructure.redis.client,
-                voice_producer,
+                build_interview_service(infrastructure, settings),
                 now_factory,
             )
             voice_consumer = SequentialStreamConsumer(
@@ -192,13 +173,6 @@ async def run_worker(
                 VoiceEvaluateStreamHandler(
                     voice_repository,
                     streams,
-                    VoiceInterviewEvaluationService(
-                        voice_repository,
-                        unified_evaluation,
-                        infrastructure.provider_registry,
-                        skills,
-                        now_factory,
-                    ),
                     voice_service,
                 ),
             )

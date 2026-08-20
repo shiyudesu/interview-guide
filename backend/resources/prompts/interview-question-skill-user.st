@@ -1,6 +1,6 @@
 # Input Data
 请生成共 {questionCount} 个主问题。
-每个主问题都必须额外生成 {followUpCount} 个追问。
+不要生成追问；追问将在候选人回答后动态决定。
 
 ## 难度级别
 {difficultyDescription}

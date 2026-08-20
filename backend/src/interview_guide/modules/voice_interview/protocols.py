@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import Awaitable, Callable
 from typing import Protocol
-
-from interview_guide.common.db.models import VoiceInterviewSession
 
 AsrReadyCallback = Callable[[], Awaitable[None]]
 AsrTextCallback = Callable[[str], Awaitable[None]]
@@ -39,14 +37,6 @@ class VoiceAsrProvider(Protocol):
         on_final: AsrTextCallback,
         on_error: AsrErrorCallback,
     ) -> VoiceAsrSession: ...
-
-
-class VoiceLlmStreamer(Protocol):
-    def stream(
-        self,
-        session: VoiceInterviewSession,
-        user_input: str,
-    ) -> AsyncIterator[str]: ...
 
 
 class VoiceTtsSynthesizer(Protocol):

@@ -52,7 +52,11 @@ test.describe('语音面试', () => {
             this.receive({ type: 'subtitle', text: '我负责订单系统的幂等设计。', isFinal: false });
           }
           if (message.type === 'control' && message.action === 'submit') {
-            this.receive({ type: 'audio', data: '', text: '请具体说明你如何处理重复提交。' });
+            this.receive({ type: 'control', action: 'turn_deciding', message: '正在分析回答' });
+            this.receive({ type: 'text', content: '请具体说明你如何处理重复提交。', final: true });
+            window.setTimeout(() => {
+              this.receive({ type: 'control', action: 'audio_complete' });
+            }, 1000);
           }
         }
 
@@ -163,9 +167,15 @@ test.describe('语音面试', () => {
 
     await expect.poll(async () => page.evaluate((nextText) =>
       (window as Window & {
-        __voiceTestSentMessages?: { type: string; action?: string; data?: { text?: string } }[];
+        __voiceTestSentMessages?: {
+          type: string;
+          action?: string;
+          data?: { text?: string; requestId?: string };
+        }[];
       }).__voiceTestSentMessages?.some(message =>
-        message.type === 'control' && message.action === 'submit' && message.data?.text === nextText
+        message.type === 'control' && message.action === 'submit'
+          && message.data?.text === nextText
+          && typeof message.data?.requestId === 'string'
       ) ?? false,
     NEXT_USER_SUBTITLE)).toBe(true);
   });

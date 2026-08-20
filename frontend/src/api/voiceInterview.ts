@@ -1,4 +1,5 @@
 import { request } from './request';
+import type { InterviewReport } from '../types/interview';
 
 // ========== 类型定义 ==========
 
@@ -14,10 +15,12 @@ export interface CreateSessionRequest {
   hrEnabled?: boolean;
   plannedDuration?: number;
   llmProvider?: string;
+  requestId?: string;
 }
 
 export interface SessionResponse {
   sessionId: number;
+  interviewSessionId?: string | null;
   roleType: string;
   currentPhase: string;
   status: string;
@@ -37,27 +40,6 @@ export interface InterviewMessage {
   sequenceNum: number;
 }
 
-export interface VoiceAnswerDetail {
-  questionIndex: number;
-  question: string;
-  category: string;
-  userAnswer: string;
-  score: number;
-  feedback: string;
-  referenceAnswer?: string | null;
-  keyPoints?: string[] | null;
-}
-
-export interface VoiceEvaluationDetail {
-  sessionId: number;
-  totalQuestions: number;
-  overallScore: number | null;
-  overallFeedback: string;
-  strengths: string[];
-  improvements: string[];
-  answers: VoiceAnswerDetail[];
-}
-
 /**
  * Evaluation status response from GET/POST evaluation endpoints
  */
@@ -65,7 +47,7 @@ export interface EvaluationStatusResponse {
   evaluateStatus: string | null;  // PENDING | PROCESSING | COMPLETED | FAILED
   evaluateError?: string | null;
   evaluateStatusUpdatedAt?: string | null;
-  evaluation?: VoiceEvaluationDetail | null;
+  evaluation?: InterviewReport | null;
 }
 
 /**
@@ -82,6 +64,7 @@ export interface SessionMeta {
   messageCount: number;
   evaluateStatus?: string;
   evaluateError?: string;
+  overallScore?: number | null;
 }
 
 // WebSocket 消息类型

@@ -3,7 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from enum import StrEnum
 
-from interview_guide.common.api.models import CamelModel
+from pydantic import model_validator
+
+from interview_guide.common.api.models import CamelModel, normalize_request_id
+from interview_guide.modules.interview.models import InterviewReportDTO
 
 
 class VoiceSessionStatus(StrEnum):
@@ -40,10 +43,29 @@ class CreateVoiceSessionRequest(CamelModel):
     hr_enabled: bool | None = True
     planned_duration: int | None = 30
     llm_provider: str | None = None
+    request_id: str | None = None
+
+    @model_validator(mode="after")
+    def validate_request(self) -> CreateVoiceSessionRequest:
+        duration = self.planned_duration or 30
+        if duration < 15 or duration > 60 or duration % 5 != 0:
+            raise ValueError("计划面试时长必须是15到60分钟且为5的倍数")
+        if not any(
+            (
+                self.intro_enabled,
+                self.tech_enabled,
+                self.project_enabled,
+                self.hr_enabled,
+            )
+        ):
+            raise ValueError("至少启用一个面试阶段")
+        self.request_id = normalize_request_id(self.request_id)
+        return self
 
 
 class VoiceSessionResponse(CamelModel):
     session_id: int
+    interview_session_id: str | None = None
     role_type: str
     current_phase: str
     status: str
@@ -63,6 +85,7 @@ class VoiceSessionMeta(CamelModel):
     message_count: int
     evaluate_status: str | None
     evaluate_error: str | None
+    overall_score: int | None
 
 
 class VoiceInterviewMessageResponse(CamelModel):
@@ -101,4 +124,4 @@ class VoiceEvaluationStatusResponse(CamelModel):
     evaluate_status: str | None
     evaluate_error: str | None = None
     evaluate_status_updated_at: datetime | None = None
-    evaluation: VoiceEvaluationDetail | None = None
+    evaluation: InterviewReportDTO | None = None

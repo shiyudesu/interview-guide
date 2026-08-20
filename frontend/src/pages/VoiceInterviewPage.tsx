@@ -79,6 +79,7 @@ export default function VoiceInterviewPage() {
   const isSubmittingRef = useRef(false);
   const aiAudioPendingRef = useRef(false);
   const lastAiCommittedTextRef = useRef('');
+  const pendingTurnRef = useRef<{text: string; requestId: string} | null>(null);
   const pendingAiTextCommitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioPlaybackWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Chunked audio playback refs
@@ -361,12 +362,15 @@ export default function VoiceInterviewPage() {
     setIsRecording(false);
     setSubmitting(true);
     const text = userText.trim();
+    const pending = pendingTurnRef.current;
+    const requestId = pending?.text === text ? pending.requestId : crypto.randomUUID();
+    pendingTurnRef.current = {text, requestId};
     setMessages(prev => [
       ...prev,
       { role: 'user', text, id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` }
     ]);
     setUserText('');
-    wsRef.current.sendControl('submit', { text });
+    wsRef.current.sendControl('submit', { text, requestId });
   }, [userText, isSubmitting, setSubmitting]);
 
   const createWebSocketHandlers = useCallback(() => ({
@@ -484,7 +488,21 @@ export default function VoiceInterviewPage() {
         return;
       }
       if (action === 'audio_complete') {
+        pendingTurnRef.current = null;
         scheduleChunkDrainCompletion();
+        return;
+      }
+      if (action === 'turn_deciding') {
+        setAiText(message || '正在分析回答...');
+        return;
+      }
+      if (action === 'interview_complete') {
+        pendingTurnRef.current = null;
+        endedByUserRef.current = true;
+        setSubmitting(false);
+        if (sessionId) {
+          navigate(`/voice-interview/${sessionId}/evaluation`);
+        }
         return;
       }
       if (action === 'pause_timeout_warning' && message) {
@@ -513,6 +531,8 @@ export default function VoiceInterviewPage() {
     scheduleChunkDrainCompletion,
     setAiSpeaking,
     setSubmitting,
+    navigate,
+    sessionId,
   ]);
 
   const connectWithHandlers = useCallback((sessionId: number, wsUrl: string) => {
@@ -553,6 +573,7 @@ export default function VoiceInterviewPage() {
         plannedDuration: config.plannedDuration,
         resumeId: config.resumeId,
         llmProvider: config.llmProvider,
+        requestId: crypto.randomUUID(),
       });
 
       setSessionId(session.sessionId);

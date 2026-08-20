@@ -40,7 +40,8 @@ export interface AnalysisItem {
 export interface InterviewItem {
   id: number;
   sessionId: string;
-  totalQuestions: number;
+  channel: 'TEXT' | 'KNOWLEDGE_BASE' | 'VOICE';
+  plannedMainQuestions: number;
   status: string;
   evaluateStatus?: EvaluateStatus;
   evaluateError?: string;
@@ -48,22 +49,22 @@ export interface InterviewItem {
   overallFeedback: string | null;
   createdAt: string;
   completedAt: string | null;
-  questions?: unknown[];
   strengths?: string[];
   improvements?: string[];
-  referenceAnswers?: unknown[];
 }
 
 export interface AnswerItem {
-  questionIndex: number;
+  questionId: string;
+  parentQuestionId: string | null;
+  kind: 'MAIN' | 'FOLLOW_UP';
   question: string;
   category: string;
-  userAnswer: string;
+  userAnswer: string | null;
   score: number;
   feedback: string;
   referenceAnswer?: string;
   keyPoints?: string[];
-  answeredAt: string;
+  answeredAt: string | null;
 }
 
 export interface ResumeDetail {

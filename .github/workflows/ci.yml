@@ -196,6 +196,7 @@ jobs:
     env:
       AI_BAILIAN_API_KEY: ci-placeholder
       APP_AI_CONFIG_ENCRYPTION_KEY: ci-compose-encryption-key
+      ALLOW_DESTRUCTIVE_INTERVIEW_RESET: "1"
       CORS_ALLOWED_ORIGINS: http://localhost,http://127.0.0.1:4173
       INTEGRATION_DATABASE: interview_guide_integration
       TEST_S3_BUCKET: interview-guide-integration-${{ github.run_id }}
@@ -240,6 +241,7 @@ jobs:
           POSTGRES_DB="$INTEGRATION_DATABASE" \
           POSTGRES_USER=postgres \
           POSTGRES_PASSWORD=password \
+          ALLOW_DESTRUCTIVE_INTERVIEW_RESET=1 \
           uv run --frozen interview-guide-migrate
       - name: Run infrastructure integration tests
         working-directory: backend
