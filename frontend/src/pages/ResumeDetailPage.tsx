@@ -61,7 +61,7 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
     const isProcessing = resume && (
       resume.analyzeStatus === 'PENDING' ||
       resume.analyzeStatus === 'PROCESSING' ||
-      (resume.analyzeStatus === undefined && (!resume.analyses || resume.analyses.length === 0))
+      (resume.analyzeStatus == null && (!resume.analyses || resume.analyses.length === 0))
     );
 
     if (isProcessing && !loading) {

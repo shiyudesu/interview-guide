@@ -28,8 +28,11 @@ from interview_guide.infrastructure.file.validation import (
     validate_file,
 )
 from interview_guide.infrastructure.storage.s3 import S3Storage
+from interview_guide.modules.interview.evaluation import parse_saved_list
 from interview_guide.modules.resume.models import (
+    ResumeAnalysisHistoryResponse,
     ResumeDetailResponse,
+    ResumeInterviewResponse,
     ResumeListResponse,
 )
 from interview_guide.modules.resume.repository import ResumeRepository
@@ -85,6 +88,7 @@ class ResumeService:
     async def detail(self, resume_id: int) -> ResumeDetailResponse:
         resume = await self._required(resume_id)
         analyses = await self._repository.analyses(resume_id)
+        interviews = await self._repository.interviews(resume_id)
         return ResumeDetailResponse(
             id=resume.id,
             filename=resume.original_filename,
@@ -97,22 +101,39 @@ class ResumeService:
             analyze_status=resume.analyze_status,
             analyze_error=resume.analyze_error,
             analyses=[
-                {
-                    "id": analysis.id,
-                    "overallScore": analysis.overall_score,
-                    "contentScore": analysis.content_score,
-                    "structureScore": analysis.structure_score,
-                    "skillMatchScore": analysis.skill_match_score,
-                    "expressionScore": analysis.expression_score,
-                    "projectScore": analysis.project_score,
-                    "summary": analysis.summary,
-                    "analyzedAt": analysis.analyzed_at,
-                    "strengths": json.loads(analysis.strengths_json or "[]"),
-                    "suggestions": json.loads(analysis.suggestions_json or "[]"),
-                }
+                ResumeAnalysisHistoryResponse(
+                    id=analysis.id,
+                    overall_score=analysis.overall_score,
+                    content_score=analysis.content_score,
+                    structure_score=analysis.structure_score,
+                    skill_match_score=analysis.skill_match_score,
+                    expression_score=analysis.expression_score,
+                    project_score=analysis.project_score,
+                    summary=analysis.summary,
+                    analyzed_at=analysis.analyzed_at,
+                    strengths=parse_saved_list(analysis.strengths_json),
+                    suggestions=json.loads(analysis.suggestions_json or "[]"),
+                )
                 for analysis in analyses
             ],
-            interviews=[],
+            interviews=[
+                ResumeInterviewResponse(
+                    id=interview.id,
+                    session_id=interview.session_id,
+                    channel=interview.channel,
+                    planned_main_questions=interview.planned_main_question_count,
+                    status=interview.status,
+                    evaluate_status=interview.evaluate_status,
+                    evaluate_error=interview.evaluate_error,
+                    overall_score=interview.overall_score,
+                    overall_feedback=interview.overall_feedback,
+                    created_at=interview.created_at,
+                    completed_at=interview.completed_at,
+                    strengths=parse_saved_list(interview.strengths_json),
+                    improvements=parse_saved_list(interview.improvements_json),
+                )
+                for interview in interviews
+            ],
         )
 
     async def delete(self, resume_id: int) -> None:

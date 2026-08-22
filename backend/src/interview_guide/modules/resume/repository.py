@@ -105,6 +105,14 @@ class ResumeRepository:
         )
         return list(result)
 
+    async def interviews(self, resume_id: int) -> list[InterviewSession]:
+        result = await self._session.scalars(
+            select(InterviewSession)
+            .where(InterviewSession.resume_id == resume_id)
+            .order_by(InterviewSession.created_at.desc())
+        )
+        return list(result)
+
     async def latest_analysis(
         self,
         resume_id: int,

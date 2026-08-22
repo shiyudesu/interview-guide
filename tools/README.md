@@ -35,6 +35,10 @@ python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
 `python3 -m unittest discover -s tools/tests -p 'test_*.py' -v` 单独运行。修改路由、配置、
 Alembic、Redis 常量、资源或测试后需要更新清单。
 
+API 清单把 REST 路径和 HTTP 方法作为完整契约。前端存在调用而后端没有对应方法时，
+`frontendOnlyCount` 会大于零并导致工具测试失败；健康检查等后端专用端点可以保留为
+`backendOnly`。
+
 ## 模型诊断代理
 
 代理会转发 HTTP 和 WebSocket 请求，并把脱敏后的请求、响应、计时和流式消息写为 JSONL。

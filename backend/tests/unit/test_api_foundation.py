@@ -268,6 +268,13 @@ def test_native_openapi_and_docs_paths() -> None:
     }
     delete = document["paths"]["/api/interview/sessions/{session_id}"]["delete"]
     assert set(delete["responses"]) >= {"204", "404"}
+    resume_detail = document["components"]["schemas"]["ResumeDetailResponse"]
+    assert resume_detail["properties"]["analyses"]["items"] == {
+        "$ref": "#/components/schemas/ResumeAnalysisHistoryResponse"
+    }
+    assert resume_detail["properties"]["interviews"]["items"] == {
+        "$ref": "#/components/schemas/ResumeInterviewResponse"
+    }
     create_schema = document["components"]["schemas"][
         "interview_guide__modules__interview__models__CreateInterviewRequest"
     ]

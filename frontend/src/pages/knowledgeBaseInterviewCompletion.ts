@@ -6,7 +6,7 @@ export type KnowledgeBaseInterviewCompletion =
   | { kind: 'failed' };
 
 export function resolveKnowledgeBaseInterviewCompletion(
-  evaluateStatus: EvaluateStatus | undefined,
+  evaluateStatus: EvaluateStatus | null | undefined,
   knowledgeBaseId: number,
   sessionId: string,
 ): KnowledgeBaseInterviewCompletion {

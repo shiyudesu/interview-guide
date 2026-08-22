@@ -241,7 +241,10 @@ docker-compose.dev.yml  本地基础设施
 - `CI` 先按变更路径分类。文档提交只运行轻量策略和链接检查；后端、前端、模型代理与生产
   Compose 集成仅在对应代码或部署文件变化时运行。
 - 完整运行包含后端 lint/mypy/pytest、前端测试和构建、模型代理、隔离的
-  PostgreSQL/Redis/S3 集成测试、生产 Compose 及前端真实后端 E2E。
+  PostgreSQL/Redis/S3 集成测试、前端无真实后端依赖的 Playwright、生产 Compose 及前端真实
+  后端 E2E。
+- API 仓库清单按 REST 路径和 HTTP 方法核对前后端调用；出现前端调用但后端无对应接口时 CI
+  直接失败。
 - `CI gate` 汇总必需 Job，允许未命中的检查安全跳过。
 - 每日定时和手动触发始终执行全量 CI。
 - `Real model production checks`：使用 `real-model` 环境中的受保护 Secret

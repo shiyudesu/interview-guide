@@ -116,6 +116,9 @@ docker compose logs migrate app worker scheduler
 - 不提交 API Key、Token、数据库密码或用户文件。
 - `ci.yml` 必须验证生产 Compose 和 Python-only 镜像。
 - CI 使用 `tools/scripts/detect_ci_changes.py` 选择必要 Job；工作流或分类脚本变化必须全量运行。
+- 前端 CI 必须运行不依赖真实后端的 Playwright；生产 Compose 集成运行标记为
+  `@real-backend` 的浏览器用例。
+- API 清单必须按 REST 路径和 HTTP 方法匹配，不能保留未明确修复的 frontend-only 调用。
 - 文档提交只运行轻量文档检查和统一 `CI gate`，不能启动完整 Compose。
 - `real-model.yml` 只在受保护环境中运行。
 - 修改运行命令、Compose、CI 或技术方案时同步更新 README、AGENTS 和相关文档。

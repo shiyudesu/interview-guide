@@ -8,8 +8,8 @@ import type {AnalyzeStatus} from '../api/history';
 
 interface AnalysisPanelProps {
   analysis: any;
-  analyzeStatus?: AnalyzeStatus;
-  analyzeError?: string;
+  analyzeStatus?: AnalyzeStatus | null;
+  analyzeError?: string | null;
   onExport: () => void;
   exporting: boolean;
   onReanalyze?: () => void;
@@ -139,7 +139,7 @@ export default function AnalysisPanel({
   // 判断是否为"分析中"状态
   const isProcessing = analyzeStatus === 'PENDING' ||
     analyzeStatus === 'PROCESSING' ||
-    (analyzeStatus === undefined && !analysis);
+    (analyzeStatus == null && !analysis);
 
   // 处理分析中状态
   if (isProcessing) {

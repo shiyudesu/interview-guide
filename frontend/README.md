@@ -56,7 +56,8 @@ pnpm run test:e2e
 ```
 
 Playwright 默认启动 `127.0.0.1:4173` 的 Vite 服务。CI 中的 `@real-backend` 用例会把
-`REAL_BACKEND_URL` 指向生产 Compose API。
+`REAL_BACKEND_URL` 指向生产 Compose API。前端 CI Job 运行其余使用浏览器路由 mock 的用例，
+生产 Compose 集成只运行 `@real-backend` 用例。
 
 这台开发机需要人工浏览器验收时，使用 Windows Chrome：
 
@@ -77,4 +78,4 @@ nginx.conf        生产静态文件与反向代理配置
 ```
 
 前端通过相对 `/api` 路径调用后端。新增接口时应同步更新 API 类型，并为状态转换或边界逻辑
-增加测试。
+增加测试。仓库 API 清单按路径和 HTTP 方法校验调用，frontend-only 契约会使 CI 失败。

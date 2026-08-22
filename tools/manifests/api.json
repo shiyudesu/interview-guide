@@ -13,15 +13,6 @@
             "file": "frontend/src/api/interviewSchedule.ts",
             "line": 31
           }
-        },
-        {
-          "canonicalPath": "/api/interview-schedule",
-          "httpMethod": "POST",
-          "path": "/api/interview-schedule",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 19
-          }
         }
       ],
       "handler": "list_schedules",
@@ -57,15 +48,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/interview-schedule",
-          "httpMethod": "GET",
-          "path": "/api/interview-schedule",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 31
-          }
-        },
         {
           "canonicalPath": "/api/interview-schedule",
           "httpMethod": "POST",
@@ -144,24 +126,6 @@
             "file": "frontend/src/api/interviewSchedule.ts",
             "line": 39
           }
-        },
-        {
-          "canonicalPath": "/api/interview-schedule/{}",
-          "httpMethod": "GET",
-          "path": "/api/interview-schedule/${id}",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 23
-          }
-        },
-        {
-          "canonicalPath": "/api/interview-schedule/{}",
-          "httpMethod": "PUT",
-          "path": "/api/interview-schedule/${id}",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 35
-          }
         }
       ],
       "handler": "delete_schedule",
@@ -191,29 +155,11 @@
       "frontendUsages": [
         {
           "canonicalPath": "/api/interview-schedule/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/interview-schedule/${id}",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 39
-          }
-        },
-        {
-          "canonicalPath": "/api/interview-schedule/{}",
           "httpMethod": "GET",
           "path": "/api/interview-schedule/${id}",
           "source": {
             "file": "frontend/src/api/interviewSchedule.ts",
             "line": 23
-          }
-        },
-        {
-          "canonicalPath": "/api/interview-schedule/{}",
-          "httpMethod": "PUT",
-          "path": "/api/interview-schedule/${id}",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 35
           }
         }
       ],
@@ -242,24 +188,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/interview-schedule/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/interview-schedule/${id}",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 39
-          }
-        },
-        {
-          "canonicalPath": "/api/interview-schedule/{}",
-          "httpMethod": "GET",
-          "path": "/api/interview-schedule/${id}",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 23
-          }
-        },
         {
           "canonicalPath": "/api/interview-schedule/{}",
           "httpMethod": "PUT",
@@ -337,17 +265,7 @@
       "canonicalPath": "/api/interview-schedule/{}/status",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [
-        {
-          "canonicalPath": "/api/interview-schedule/{}/status",
-          "httpMethod": "PATCH",
-          "path": "/api/interview-schedule/${id}/status",
-          "source": {
-            "file": "frontend/src/api/interviewSchedule.ts",
-            "line": 43
-          }
-        }
-      ],
+      "frontendUsages": [],
       "handler": "put_schedule_status",
       "httpMethod": "PUT",
       "parameters": [
@@ -385,15 +303,6 @@
             "file": "frontend/src/api/interview.ts",
             "line": 42
           }
-        },
-        {
-          "canonicalPath": "/api/interview/sessions",
-          "httpMethod": "POST",
-          "path": "/api/interview/sessions",
-          "source": {
-            "file": "frontend/src/api/interview.ts",
-            "line": 49
-          }
         }
       ],
       "handler": "list_sessions",
@@ -429,15 +338,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/interview/sessions",
-          "httpMethod": "GET",
-          "path": "/api/interview/sessions",
-          "source": {
-            "file": "frontend/src/api/interview.ts",
-            "line": 42
-          }
-        },
         {
           "canonicalPath": "/api/interview/sessions",
           "httpMethod": "POST",
@@ -518,16 +418,7 @@
           "path": "/api/interview/sessions/${sessionId}",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 146
-          }
-        },
-        {
-          "canonicalPath": "/api/interview/sessions/{}",
-          "httpMethod": "GET",
-          "path": "/api/interview/sessions/${sessionId}",
-          "source": {
-            "file": "frontend/src/api/interview.ts",
-            "line": 58
+            "line": 142
           }
         }
       ],
@@ -556,15 +447,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/interview/sessions/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/interview/sessions/${sessionId}",
-          "source": {
-            "file": "frontend/src/api/history.ts",
-            "line": 146
-          }
-        },
         {
           "canonicalPath": "/api/interview/sessions/{}",
           "httpMethod": "GET",
@@ -641,7 +523,7 @@
           "path": "/api/interview/sessions/${sessionId}/details",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 118
+            "line": 114
           }
         }
       ],
@@ -676,7 +558,7 @@
           "path": "/api/interview/sessions/${sessionId}/export",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 132
+            "line": 128
           }
         }
       ],
@@ -774,17 +656,7 @@
       "canonicalPath": "/api/interview/sessions/{}/report",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [
-        {
-          "canonicalPath": "/api/interview/sessions/{}/report",
-          "httpMethod": "GET",
-          "path": "/api/interview/sessions/${sessionId}/report",
-          "source": {
-            "file": "frontend/src/api/interview.ts",
-            "line": 85
-          }
-        }
-      ],
+      "frontendUsages": [],
       "handler": "regenerate_report",
       "httpMethod": "POST",
       "parameters": [
@@ -1187,15 +1059,6 @@
             "file": "frontend/src/api/knowledgebase.ts",
             "line": 369
           }
-        },
-        {
-          "canonicalPath": "/api/knowledgebase/questions/{}",
-          "httpMethod": "PUT",
-          "path": "/api/knowledgebase/questions/${id}",
-          "source": {
-            "file": "frontend/src/api/knowledgebase.ts",
-            "line": 358
-          }
         }
       ],
       "handler": "delete_question",
@@ -1223,15 +1086,6 @@
       "consumes": null,
       "controller": "interview_api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/knowledgebase/questions/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/knowledgebase/questions/${id}",
-          "source": {
-            "file": "frontend/src/api/knowledgebase.ts",
-            "line": 369
-          }
-        },
         {
           "canonicalPath": "/api/knowledgebase/questions/{}",
           "httpMethod": "PUT",
@@ -1458,15 +1312,6 @@
             "file": "frontend/src/api/knowledgebase.ts",
             "line": 249
           }
-        },
-        {
-          "canonicalPath": "/api/knowledgebase/{}",
-          "httpMethod": "GET",
-          "path": "/api/knowledgebase/${id}",
-          "source": {
-            "file": "frontend/src/api/knowledgebase.ts",
-            "line": 242
-          }
         }
       ],
       "handler": "delete_knowledge_base",
@@ -1494,15 +1339,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/knowledgebase/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/knowledgebase/${id}",
-          "source": {
-            "file": "frontend/src/api/knowledgebase.ts",
-            "line": 249
-          }
-        },
         {
           "canonicalPath": "/api/knowledgebase/{}",
           "httpMethod": "GET",
@@ -1665,15 +1501,6 @@
       "frontendUsages": [
         {
           "canonicalPath": "/api/knowledgebase/{}/questions",
-          "httpMethod": "POST",
-          "path": "/api/knowledgebase/${id}/questions",
-          "source": {
-            "file": "frontend/src/api/knowledgebase.ts",
-            "line": 351
-          }
-        },
-        {
-          "canonicalPath": "/api/knowledgebase/{}/questions",
           "httpMethod": "GET",
           "path": "/api/knowledgebase/${id}/questions${query}",
           "source": {
@@ -1730,15 +1557,6 @@
           "source": {
             "file": "frontend/src/api/knowledgebase.ts",
             "line": 351
-          }
-        },
-        {
-          "canonicalPath": "/api/knowledgebase/{}/questions",
-          "httpMethod": "GET",
-          "path": "/api/knowledgebase/${id}/questions${query}",
-          "source": {
-            "file": "frontend/src/api/knowledgebase.ts",
-            "line": 340
           }
         }
       ],
@@ -1997,15 +1815,6 @@
             "file": "frontend/src/api/llmProvider.ts",
             "line": 40
           }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/default-provider",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/default-provider",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 43
-          }
         }
       ],
       "handler": "get_default_provider",
@@ -2029,15 +1838,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/llm-provider/default-provider",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/default-provider",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 40
-          }
-        },
         {
           "canonicalPath": "/api/llm-provider/default-provider",
           "httpMethod": "PUT",
@@ -2178,15 +1978,6 @@
             "file": "frontend/src/api/llmProvider.ts",
             "line": 50
           }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/voice/asr",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/voice/asr",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 53
-          }
         }
       ],
       "handler": "get_asr_config",
@@ -2210,15 +2001,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/llm-provider/voice/asr",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/voice/asr",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 50
-          }
-        },
         {
           "canonicalPath": "/api/llm-provider/voice/asr",
           "httpMethod": "PUT",
@@ -2293,15 +2075,6 @@
             "file": "frontend/src/api/llmProvider.ts",
             "line": 56
           }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/voice/tts",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/voice/tts",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 59
-          }
         }
       ],
       "handler": "get_tts_config",
@@ -2325,15 +2098,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/llm-provider/voice/tts",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/voice/tts",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 56
-          }
-        },
         {
           "canonicalPath": "/api/llm-provider/voice/tts",
           "httpMethod": "PUT",
@@ -2377,24 +2141,6 @@
             "file": "frontend/src/api/llmProvider.ts",
             "line": 28
           }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/{}",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/${id}",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 19
-          }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/{}",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/${id}",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 25
-          }
         }
       ],
       "handler": "delete_provider",
@@ -2424,29 +2170,11 @@
       "frontendUsages": [
         {
           "canonicalPath": "/api/llm-provider/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/llm-provider/${id}",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 28
-          }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/{}",
           "httpMethod": "GET",
           "path": "/api/llm-provider/${id}",
           "source": {
             "file": "frontend/src/api/llmProvider.ts",
             "line": 19
-          }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/{}",
-          "httpMethod": "PUT",
-          "path": "/api/llm-provider/${id}",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 25
           }
         }
       ],
@@ -2475,24 +2203,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/llm-provider/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/llm-provider/${id}",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 28
-          }
-        },
-        {
-          "canonicalPath": "/api/llm-provider/{}",
-          "httpMethod": "GET",
-          "path": "/api/llm-provider/${id}",
-          "source": {
-            "file": "frontend/src/api/llmProvider.ts",
-            "line": 19
-          }
-        },
         {
           "canonicalPath": "/api/llm-provider/{}",
           "httpMethod": "PUT",
@@ -2575,15 +2285,6 @@
             "file": "frontend/src/api/ragChat.ts",
             "line": 67
           }
-        },
-        {
-          "canonicalPath": "/api/rag-chat/sessions",
-          "httpMethod": "POST",
-          "path": "/api/rag-chat/sessions",
-          "source": {
-            "file": "frontend/src/api/ragChat.ts",
-            "line": 57
-          }
         }
       ],
       "handler": "list_sessions",
@@ -2615,15 +2316,6 @@
       "consumes": null,
       "controller": "rag_chat_api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/rag-chat/sessions",
-          "httpMethod": "GET",
-          "path": "/api/rag-chat/sessions",
-          "source": {
-            "file": "frontend/src/api/ragChat.ts",
-            "line": 67
-          }
-        },
         {
           "canonicalPath": "/api/rag-chat/sessions",
           "httpMethod": "POST",
@@ -2667,15 +2359,6 @@
             "file": "frontend/src/api/ragChat.ts",
             "line": 104
           }
-        },
-        {
-          "canonicalPath": "/api/rag-chat/sessions/{}",
-          "httpMethod": "GET",
-          "path": "/api/rag-chat/sessions/${sessionId}",
-          "source": {
-            "file": "frontend/src/api/ragChat.ts",
-            "line": 74
-          }
         }
       ],
       "handler": "delete_session",
@@ -2703,15 +2386,6 @@
       "consumes": null,
       "controller": "rag_chat_api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/rag-chat/sessions/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/rag-chat/sessions/${sessionId}",
-          "source": {
-            "file": "frontend/src/api/ragChat.ts",
-            "line": 104
-          }
-        },
         {
           "canonicalPath": "/api/rag-chat/sessions/{}",
           "httpMethod": "GET",
@@ -2788,7 +2462,7 @@
       "frontendUsages": [
         {
           "canonicalPath": "/api/rag-chat/sessions/{}/messages/stream",
-          "httpMethod": "DELETE",
+          "httpMethod": "POST",
           "path": "/api/rag-chat/sessions/${sessionId}/messages/stream",
           "source": {
             "file": "frontend/src/api/ragChat.ts",
@@ -2905,7 +2579,7 @@
           "path": "/api/resumes",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 104
+            "line": 100
           }
         }
       ],
@@ -3009,7 +2683,7 @@
           "path": "/api/resumes/${id}",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 139
+            "line": 135
           }
         }
       ],
@@ -3044,7 +2718,7 @@
           "path": "/api/resumes/${id}/detail",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 111
+            "line": 107
           }
         }
       ],
@@ -3079,7 +2753,7 @@
           "path": "/api/resumes/${resumeId}/export",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 125
+            "line": 121
           }
         }
       ],
@@ -3114,7 +2788,7 @@
           "path": "/api/resumes/${id}/reanalyze",
           "source": {
             "file": "frontend/src/api/history.ts",
-            "line": 160
+            "line": 149
           }
         }
       ],
@@ -3143,15 +2817,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/voice-interview/sessions",
-          "httpMethod": "POST",
-          "path": "/api/voice-interview/sessions",
-          "source": {
-            "file": "frontend/src/api/voiceInterview.ts",
-            "line": 149
-          }
-        },
         {
           "canonicalPath": "/api/voice-interview/sessions",
           "httpMethod": "GET",
@@ -3211,15 +2876,6 @@
             "file": "frontend/src/api/voiceInterview.ts",
             "line": 149
           }
-        },
-        {
-          "canonicalPath": "/api/voice-interview/sessions",
-          "httpMethod": "GET",
-          "path": "/api/voice-interview/sessions?${params.toString()}",
-          "source": {
-            "file": "frontend/src/api/voiceInterview.ts",
-            "line": 228
-          }
         }
       ],
       "handler": "create_session",
@@ -3255,15 +2911,6 @@
             "file": "frontend/src/api/voiceInterview.ts",
             "line": 236
           }
-        },
-        {
-          "canonicalPath": "/api/voice-interview/sessions/{}",
-          "httpMethod": "GET",
-          "path": "/api/voice-interview/sessions/${sessionId}",
-          "source": {
-            "file": "frontend/src/api/voiceInterview.ts",
-            "line": 156
-          }
         }
       ],
       "handler": "delete_session",
@@ -3291,15 +2938,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/voice-interview/sessions/{}",
-          "httpMethod": "DELETE",
-          "path": "/api/voice-interview/sessions/${sessionId}",
-          "source": {
-            "file": "frontend/src/api/voiceInterview.ts",
-            "line": 236
-          }
-        },
         {
           "canonicalPath": "/api/voice-interview/sessions/{}",
           "httpMethod": "GET",
@@ -3378,15 +3016,6 @@
             "file": "frontend/src/api/voiceInterview.ts",
             "line": 180
           }
-        },
-        {
-          "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
-          "httpMethod": "POST",
-          "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
-          "source": {
-            "file": "frontend/src/api/voiceInterview.ts",
-            "line": 189
-          }
         }
       ],
       "handler": "get_evaluation",
@@ -3414,15 +3043,6 @@
       "consumes": null,
       "controller": "api",
       "frontendUsages": [
-        {
-          "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
-          "httpMethod": "GET",
-          "path": "/api/voice-interview/sessions/${sessionId}/evaluation",
-          "source": {
-            "file": "frontend/src/api/voiceInterview.ts",
-            "line": 180
-          }
-        },
         {
           "canonicalPath": "/api/voice-interview/sessions/{}/evaluation",
           "httpMethod": "POST",
@@ -3617,7 +3237,7 @@
       "frontendUsages": [
         {
           "canonicalPath": "/ws/voice-interview/{}",
-          "httpMethod": "UNKNOWN",
+          "httpMethod": "WEBSOCKET",
           "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
           "source": {
             "file": "frontend/src/pages/VoiceInterviewPage.tsx",
@@ -3626,7 +3246,7 @@
         },
         {
           "canonicalPath": "/ws/voice-interview/{}",
-          "httpMethod": "UNKNOWN",
+          "httpMethod": "WEBSOCKET",
           "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
           "source": {
             "file": "frontend/src/pages/VoiceInterviewPage.tsx",
@@ -3752,7 +3372,7 @@
       "path": "/api/interview/sessions/${sessionId}",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 146
+        "line": 142
       }
     },
     {
@@ -3779,7 +3399,7 @@
       "path": "/api/interview/sessions/${sessionId}/details",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 118
+        "line": 114
       }
     },
     {
@@ -3788,7 +3408,7 @@
       "path": "/api/interview/sessions/${sessionId}/export",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 132
+        "line": 128
       }
     },
     {
@@ -4252,7 +3872,7 @@
     },
     {
       "canonicalPath": "/api/rag-chat/sessions/{}/messages/stream",
-      "httpMethod": "DELETE",
+      "httpMethod": "POST",
       "path": "/api/rag-chat/sessions/${sessionId}/messages/stream",
       "source": {
         "file": "frontend/src/api/ragChat.ts",
@@ -4283,7 +3903,7 @@
       "path": "/api/resumes",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 104
+        "line": 100
       }
     },
     {
@@ -4292,7 +3912,7 @@
       "path": "/api/resumes/${id}",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 139
+        "line": 135
       }
     },
     {
@@ -4301,7 +3921,7 @@
       "path": "/api/resumes/${id}/detail",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 111
+        "line": 107
       }
     },
     {
@@ -4310,7 +3930,7 @@
       "path": "/api/resumes/${id}/reanalyze",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 160
+        "line": 149
       }
     },
     {
@@ -4319,7 +3939,7 @@
       "path": "/api/resumes/${resumeId}/export",
       "source": {
         "file": "frontend/src/api/history.ts",
-        "line": 125
+        "line": 121
       }
     },
     {
@@ -4329,15 +3949,6 @@
       "source": {
         "file": "frontend/src/api/resume.ts",
         "line": 18
-      }
-    },
-    {
-      "canonicalPath": "/api/resumes/statistics",
-      "httpMethod": "GET",
-      "path": "/api/resumes/statistics",
-      "source": {
-        "file": "frontend/src/api/history.ts",
-        "line": 153
       }
     },
     {
@@ -4441,7 +4052,7 @@
     },
     {
       "canonicalPath": "/ws/voice-interview/{}",
-      "httpMethod": "UNKNOWN",
+      "httpMethod": "WEBSOCKET",
       "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
       "source": {
         "file": "frontend/src/pages/VoiceInterviewPage.tsx",
@@ -4450,7 +4061,7 @@
     },
     {
       "canonicalPath": "/ws/voice-interview/{}",
-      "httpMethod": "UNKNOWN",
+      "httpMethod": "WEBSOCKET",
       "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
       "source": {
         "file": "frontend/src/pages/VoiceInterviewPage.tsx",
@@ -4465,15 +4076,31 @@
   ],
   "summary": {
     "backendEndpointCount": 92,
-    "backendOnlyCount": 3,
+    "backendOnlyCount": 5,
     "controllerCount": 5,
-    "frontendCallCount": 89,
-    "frontendOnlyCount": 1,
+    "frontendCallCount": 88,
+    "frontendOnlyCount": 0,
     "sseEndpointCount": 2,
     "webSocketEndpointCount": 1
   },
   "unmatched": {
     "backendOnly": [
+      {
+        "httpMethod": "PUT",
+        "path": "/api/interview-schedule/{schedule_id}/status",
+        "source": {
+          "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
+          "line": 172
+        }
+      },
+      {
+        "httpMethod": "POST",
+        "path": "/api/interview/sessions/{session_id}/report",
+        "source": {
+          "file": "backend/src/interview_guide/modules/interview/api.py",
+          "line": 215
+        }
+      },
       {
         "httpMethod": "GET",
         "path": "/health",
@@ -4499,16 +4126,6 @@
         }
       }
     ],
-    "frontendOnly": [
-      {
-        "canonicalPath": "/api/resumes/statistics",
-        "httpMethod": "GET",
-        "path": "/api/resumes/statistics",
-        "source": {
-          "file": "frontend/src/api/history.ts",
-          "line": 153
-        }
-      }
-    ]
+    "frontendOnly": []
   }
 }

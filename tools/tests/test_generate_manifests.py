@@ -16,16 +16,16 @@ SPEC.loader.exec_module(GENERATOR)
 
 
 class GenerateManifestsTest(unittest.TestCase):
-    def test_api_inventory_preserves_known_frontend_only_endpoint(self) -> None:
+    def test_api_inventory_rejects_frontend_only_contracts(self) -> None:
         manifest = GENERATOR.build_api_manifest(REPOSITORY_ROOT)
 
-        frontend_only_paths = {
-            item["canonicalPath"] for item in manifest["unmatched"]["frontendOnly"]
-        }
+        self.assertEqual([], manifest["unmatched"]["frontendOnly"])
+        self.assertEqual(0, manifest["summary"]["frontendOnlyCount"])
         backend_only_paths = {item["path"] for item in manifest["unmatched"]["backendOnly"]}
-        self.assertEqual({"/api/resumes/statistics"}, frontend_only_paths)
         self.assertEqual(
             {
+                "/api/interview-schedule/{schedule_id}/status",
+                "/api/interview/sessions/{session_id}/report",
                 "/health",
                 "/info",
                 "/metrics",
@@ -35,6 +35,30 @@ class GenerateManifestsTest(unittest.TestCase):
         self.assertGreaterEqual(manifest["summary"]["backendEndpointCount"], 80)
         self.assertEqual(manifest["summary"]["webSocketEndpointCount"], 1)
         self.assertGreaterEqual(manifest["summary"]["sseEndpointCount"], 2)
+
+    def test_api_inventory_matches_http_method_as_part_of_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            backend = root / "backend/src/interview_guide/example"
+            frontend = root / "frontend/src/api"
+            backend.mkdir(parents=True)
+            frontend.mkdir(parents=True)
+            (backend / "api.py").write_text(
+                'router = APIRouter(prefix="/api/example")\n'
+                '@router.get("")\n'
+                'async def get_example():\n'
+                '    return {}\n',
+                encoding="utf-8",
+            )
+            (frontend / "example.ts").write_text(
+                "request.post('/api/example');\n",
+                encoding="utf-8",
+            )
+
+            manifest = GENERATOR.build_api_manifest(root)
+
+        self.assertEqual(1, manifest["summary"]["frontendOnlyCount"])
+        self.assertEqual("POST", manifest["unmatched"]["frontendOnly"][0]["httpMethod"])
 
     def test_database_and_redis_inventories_capture_required_baselines(self) -> None:
         database = GENERATOR.extract_database(REPOSITORY_ROOT)

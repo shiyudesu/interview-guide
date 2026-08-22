@@ -184,13 +184,21 @@ def extract_python_api(root: Path) -> list[dict[str, Any]]:
 
 
 def infer_frontend_method(text: str, offset: int) -> str:
-    context = text[max(0, offset - 500) : offset]
-    request_methods = re.findall(r"request\.(get|post|put|patch|delete|upload|download)\b", context)
-    if request_methods:
-        method = request_methods[-1]
-        return {"upload": "POST", "download": "GET"}.get(method, method.upper())
-    explicit = re.findall(r"\bmethod\s*:\s*['\"]([A-Z]+)['\"]", context)
-    return explicit[-1] if explicit else "UNKNOWN"
+    window_start = max(0, offset - 500)
+    window_end = min(len(text), offset + 500)
+    context = text[window_start:window_end]
+    relative_offset = offset - window_start
+    candidates: list[tuple[int, str]] = []
+    for match in re.finditer(
+        r"request\.(get|post|put|patch|delete|upload|download)\b",
+        context,
+    ):
+        method = match.group(1)
+        resolved = {"upload": "POST", "download": "GET"}.get(method, method.upper())
+        candidates.append((abs(match.start() - relative_offset), resolved))
+    for match in re.finditer(r"\bmethod\s*:\s*['\"]([A-Z]+)['\"]", context):
+        candidates.append((abs(match.start() - relative_offset), match.group(1)))
+    return min(candidates, default=(0, "UNKNOWN"), key=lambda item: item[0])[1]
 
 
 def extract_frontend_api(root: Path) -> list[dict[str, Any]]:
@@ -210,10 +218,15 @@ def extract_frontend_api(root: Path) -> list[dict[str, Any]]:
                 hostname = urlsplit(raw_path).hostname
                 if hostname not in {"localhost", "127.0.0.1"}:
                     continue
+            canonical = canonical_path(raw_path)
+            method = "WEBSOCKET" if canonical.startswith("/ws/") else infer_frontend_method(
+                text,
+                match.start(),
+            )
             calls.append(
                 {
-                    "canonicalPath": canonical_path(raw_path),
-                    "httpMethod": infer_frontend_method(text, match.start()),
+                    "canonicalPath": canonical,
+                    "httpMethod": method,
                     "path": raw_path,
                     "source": {
                         "file": relative(root, path),
@@ -244,13 +257,21 @@ def extract_frontend_api(root: Path) -> list[dict[str, Any]]:
 def build_api_manifest(root: Path) -> dict[str, Any]:
     endpoints = extract_python_api(root)
     frontend_calls = extract_frontend_api(root)
-    calls_by_path: dict[str, list[dict[str, Any]]] = {}
+    calls_by_contract: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for call in frontend_calls:
-        calls_by_path.setdefault(call["canonicalPath"], []).append(call)
-    backend_paths = {endpoint["canonicalPath"] for endpoint in endpoints}
+        contract = (call["canonicalPath"], call["httpMethod"])
+        calls_by_contract.setdefault(contract, []).append(call)
+    backend_contracts = {
+        (endpoint["canonicalPath"], endpoint["httpMethod"]) for endpoint in endpoints
+    }
     for endpoint in endpoints:
-        endpoint["frontendUsages"] = calls_by_path.get(endpoint["canonicalPath"], [])
-    frontend_only = [call for call in frontend_calls if call["canonicalPath"] not in backend_paths]
+        contract = (endpoint["canonicalPath"], endpoint["httpMethod"])
+        endpoint["frontendUsages"] = calls_by_contract.get(contract, [])
+    frontend_only = [
+        call
+        for call in frontend_calls
+        if (call["canonicalPath"], call["httpMethod"]) not in backend_contracts
+    ]
     backend_only = [
         {
             "httpMethod": endpoint["httpMethod"],

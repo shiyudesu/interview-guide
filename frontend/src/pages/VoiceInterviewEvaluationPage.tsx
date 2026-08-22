@@ -129,7 +129,7 @@ export default function VoiceInterviewEvaluationPage() {
       plannedMainQuestions: evaluation.plannedMainQuestions,
       status: 'COMPLETED',
       evaluateStatus: 'COMPLETED',
-      evaluateError: undefined,
+      evaluateError: null,
       overallScore: evaluation.overallScore,
       overallFeedback: evaluation.overallFeedback,
       createdAt: '',

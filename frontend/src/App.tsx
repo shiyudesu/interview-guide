@@ -10,7 +10,7 @@ import { ROUTE_PATTERNS, ROUTES } from './constants/routes';
 
 // Lazy load components
 const UploadPage = lazy(() => import('./pages/UploadPage'));
-const HistoryList = lazy(() => import('./pages/HistoryPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
 const ResumeDetailPage = lazy(() => import('./pages/ResumeDetailPage'));
 const Interview = lazy(() => import('./pages/InterviewPage'));
 const InterviewHistoryPage = lazy(() => import('./pages/InterviewHistoryPage'));
@@ -54,7 +54,7 @@ function HistoryListWrapper() {
     navigate(`/history/${id}`);
   };
 
-  return <HistoryList onSelectResume={handleSelectResume} />;
+  return <HistoryPage onSelectResume={handleSelectResume} />;
 }
 
 // 简历详情包装器
@@ -122,7 +122,7 @@ function InterviewWrapper() {
       // 如果没有，从API获取简历详情
       historyApi.getResumeDetail(effectiveResumeId)
         .then(resume => {
-          setResumeText(resume.resumeText);
+          setResumeText(resume.resumeText ?? '');
           setLoading(false);
         })
         .catch(err => {

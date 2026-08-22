@@ -266,9 +266,14 @@ docker compose down -v
 | 仅 Markdown 文档 | 文档、提交规范、工具测试、`CI gate` |
 | 后端单元测试 | 后端检查、仓库清单、`CI gate` |
 | 后端运行代码或集成测试 | 后端检查、生产 Compose 集成、`CI gate` |
-| 前端运行代码 | 前端测试和构建、生产 Compose 集成、`CI gate` |
+| 前端运行代码 | 前端 lint、单元测试、无真实后端 Playwright、构建、生产 Compose 集成、`CI gate` |
 | 模型诊断代理 | Model Proxy 测试、`CI gate` |
 | Compose、Docker、锁文件或工作流 | 全量 CI |
 
 工作流文件和变更分类脚本本身的修改始终强制全量运行。需要手动完整验收时，在 GitHub
 Actions 中运行 `CI` 的 `workflow_dispatch`。仓库还会每天定时执行一次全量 CI。
+
+前端 Job 会启动 Vite 并执行不依赖真实后端的 Playwright 用例；生产 Compose 集成只执行
+`@real-backend` 用例。浏览器失败时会上传 `frontend-browser-tests`，其中包含 Playwright 报告、
+截图、视频和 trace。仓库 API 清单同时比较 REST 路径和 HTTP 方法，任何 frontend-only 调用都会
+使仓库工具测试失败。

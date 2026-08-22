@@ -10,35 +10,33 @@ export interface ResumeListOptions extends PageOptions {
 export interface ResumeListItem {
   id: number;
   filename: string;
-  fileSize: number;
+  fileSize: number | null;
   uploadedAt: string;
-  accessCount: number;
-  latestScore?: number;
-  lastAnalyzedAt?: string;
+  accessCount: number | null;
+  latestScore: number | null;
+  lastAnalyzedAt: string | null;
   interviewCount: number;
-  analyzeStatus?: AnalyzeStatus;
-  analyzeError?: string;
-  storageUrl?: string;
-}
-
-export interface ResumeStats {
-  totalCount: number;
-  totalInterviewCount: number;
-  totalAccessCount: number;
+  analyzeStatus: AnalyzeStatus | null;
+  analyzeError: string | null;
 }
 
 export interface AnalysisItem {
   id: number;
-  overallScore: number;
-  contentScore: number;
-  structureScore: number;
-  skillMatchScore: number;
-  expressionScore: number;
-  projectScore: number;
-  summary: string;
+  overallScore: number | null;
+  contentScore: number | null;
+  structureScore: number | null;
+  skillMatchScore: number | null;
+  expressionScore: number | null;
+  projectScore: number | null;
+  summary: string | null;
   analyzedAt: string;
   strengths: string[];
-  suggestions: unknown[];
+  suggestions: Array<{
+    category: string;
+    priority: string;
+    issue: string;
+    recommendation: string;
+  }>;
 }
 
 export interface InterviewItem {
@@ -46,15 +44,15 @@ export interface InterviewItem {
   sessionId: string;
   channel: 'TEXT' | 'KNOWLEDGE_BASE' | 'VOICE';
   plannedMainQuestions: number;
-  status: string;
-  evaluateStatus?: EvaluateStatus;
-  evaluateError?: string;
+  status: string | null;
+  evaluateStatus: EvaluateStatus | null;
+  evaluateError: string | null;
   overallScore: number | null;
   overallFeedback: string | null;
   createdAt: string;
   completedAt: string | null;
-  strengths?: string[];
-  improvements?: string[];
+  strengths: string[];
+  improvements: string[];
 }
 
 export interface AnswerItem {
@@ -74,21 +72,19 @@ export interface AnswerItem {
 export interface ResumeDetail {
   id: number;
   filename: string;
-  fileSize: number;
-  contentType: string;
-  storageUrl: string;
+  fileSize: number | null;
+  contentType: string | null;
+  storageUrl: string | null;
   uploadedAt: string;
-  accessCount: number;
-  resumeText: string;
-  analyzeStatus?: AnalyzeStatus;
-  analyzeError?: string;
+  accessCount: number | null;
+  resumeText: string | null;
+  analyzeStatus: AnalyzeStatus | null;
+  analyzeError: string | null;
   analyses: AnalysisItem[];
   interviews: InterviewItem[];
 }
 
 export interface InterviewDetail extends InterviewItem {
-  evaluateStatus?: EvaluateStatus;
-  evaluateError?: string;
   answers: AnswerItem[];
 }
 
@@ -144,13 +140,6 @@ export const historyApi = {
    */
   async deleteInterview(sessionId: string): Promise<void> {
     return request.delete(`/api/interview/sessions/${sessionId}`);
-  },
-
-  /**
-   * 获取简历统计信息
-   */
-  async getStatistics(): Promise<ResumeStats> {
-    return request.get<ResumeStats>('/api/resumes/statistics');
   },
 
   /**

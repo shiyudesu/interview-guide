@@ -12,18 +12,18 @@ interface HistoryListProps {
   onSelectResume: (id: number) => void;
 }
 
-function isAnalyzing(status?: string): boolean {
+function isAnalyzing(status?: string | null): boolean {
   return status === 'PENDING' || status === 'PROCESSING';
 }
 
-function AnalyzeStatusIcon({status}: { status?: string }) {
+function AnalyzeStatusIcon({status}: { status?: string | null }) {
   if (status === 'FAILED') return <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400"/>;
   if (isAnalyzing(status)) return <RefreshCw className="w-4 h-4 text-blue-500 dark:text-blue-400 animate-spin"/>;
   if (status === 'COMPLETED') return <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400"/>;
   return <Clock className="w-4 h-4 text-yellow-500 dark:text-yellow-400"/>;
 }
 
-function getAnalyzeStatusText(status?: string): string {
+function getAnalyzeStatusText(status?: string | null): string {
   if (status === 'FAILED') return '分析失败';
   if (status === 'PROCESSING') return '分析中';
   if (status === 'PENDING') return '等待分析';
@@ -247,7 +247,7 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    {resume.analyzeStatus === 'COMPLETED' && resume.latestScore !== undefined ? (
+                    {resume.analyzeStatus === 'COMPLETED' && resume.latestScore !== null ? (
                       <div className="flex items-center gap-3">
                         <div
                           className="w-20 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -264,7 +264,7 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
                       <span className="text-blue-500 dark:text-blue-400 text-sm">生成中...</span>
                     ) : resume.analyzeStatus === 'FAILED' ? (
                       <span className="text-red-500 dark:text-red-400 text-sm"
-                            title={resume.analyzeError}>失败</span>
+                            title={resume.analyzeError ?? undefined}>失败</span>
                     ) : (
                       <span className="text-slate-400 dark:text-slate-500">-</span>
                     )}
