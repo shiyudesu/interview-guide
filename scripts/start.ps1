@@ -215,6 +215,37 @@ function Show-ComposePortFailure {
     Show-PortGuidance $PortMatches
 }
 
+function Show-ComposeRegistryFailure {
+    param([string]$LogFile)
+    $Content = Get-Content $LogFile -Raw
+    $RegistryPattern = @(
+        'registry-1\.docker\.io|auth\.docker\.io'
+        'production\.cloudflare\.docker\.com|docker\.io/'
+        'failed to resolve source metadata|failed to fetch anonymous token'
+    ) -join '|'
+    $NetworkPattern = @(
+        'lookup |no such host|server misbehaving|temporary failure in name resolution'
+        'dial tcp|connectex|i/o timeout|TLS handshake timeout'
+        'context deadline exceeded|network is unreachable|connection refused'
+        'connection reset|failed to do request|unexpected EOF'
+    ) -join '|'
+    if ($Content -notmatch $RegistryPattern -or $Content -notmatch $NetworkPattern) {
+        return
+    }
+    Write-Host ""
+    Write-Host "Docker registry networking or DNS resolution failed." -ForegroundColor Yellow
+    Write-Host "- Docker Desktop: configure a working proxy in Settings > Resources > Proxies,"
+    Write-Host "  then restart Docker Desktop."
+    Write-Host "- Linux Docker Engine: configure a daemon proxy or a trusted Docker Hub"
+    Write-Host "  registry mirror, then restart Docker."
+    Write-Host "- If you already have a trusted Docker Hub pull-through cache, set this in .env:"
+    Write-Host "    INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=mirror.example.com"
+    Write-Host "  Use only a host name and optional path, without https://, and do not use an untrusted public mirror."
+    Write-Host "After fixing daemon networking, verify it with 'docker pull docker.io/library/redis:7.4.2-alpine'."
+    Write-Host "When using the .env registry override, run 'docker compose config --images' to confirm the image URLs."
+    Write-Host "See 'Docker Hub image pull failures' in docs/OPERATIONS.md for details."
+}
+
 Write-Host "Checking local prerequisites..."
 
 if (-not (Test-DockerCommand)) {
@@ -259,6 +290,7 @@ try {
     & docker compose up -d --build --wait 2>&1 | Tee-Object -FilePath $StartupLog
     $ComposeExitCode = $LASTEXITCODE
     if ($ComposeExitCode -ne 0) {
+        Show-ComposeRegistryFailure $StartupLog
         Show-ComposePortFailure $StartupLog
         Show-Diagnostics
         Stop-WithMessage "Compose did not start successfully. Review the diagnostics above and retry."

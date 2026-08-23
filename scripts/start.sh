@@ -308,6 +308,21 @@ show_port_guidance() {
   echo "如果修改 FRONTEND_PORT，例如 FRONTEND_PORT=5174，请访问 http://localhost:5174。"
 }
 
+show_registry_guidance() {
+  echo
+  echo "检测到 Docker 镜像仓库网络或 DNS 解析失败。"
+  echo "- Docker Desktop：在 Settings > Resources > Proxies 配置可用代理，"
+  echo "  然后重启 Docker Desktop。"
+  echo "- Linux Docker Engine：为 docker daemon 配置代理，或配置可信的 Docker Hub"
+  echo "  registry mirror 后重启 Docker。"
+  echo "- 如果已有可信的 Docker Hub pull-through cache，也可以在 .env 中设置："
+  echo "    INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=mirror.example.com"
+  echo "  只填写主机名和可选路径，不要包含 https://；不要使用来源不明的公共镜像站。"
+  echo "修复 daemon 网络后可运行 'docker pull docker.io/library/redis:7.4.2-alpine' 验证。"
+  echo "使用 .env 来源覆盖时，运行 'docker compose config --images' 确认镜像地址。"
+  echo "详细配置见 docs/OPERATIONS.md 的“Docker Hub 镜像拉取失败”章节。"
+}
+
 check_port_conflicts() {
   if [[ -n "$(docker_cli compose ps -q 2>/dev/null || true)" ]]; then
     return
@@ -348,23 +363,35 @@ check_port_conflicts() {
 
 diagnose_compose_failure() {
   local log_file="$1"
-  if ! grep -Eqi 'port is already allocated|address already in use|failed to bind host port|bind for .* failed' "$log_file"; then
-    return
+  local registry_pattern network_pattern
+  registry_pattern='registry-1\.docker\.io|auth\.docker\.io'
+  registry_pattern+='|production\.cloudflare\.docker\.com|docker\.io/'
+  registry_pattern+='|failed to resolve source metadata|failed to fetch anonymous token'
+  network_pattern='lookup |no such host|server misbehaving|temporary failure in name resolution'
+  network_pattern+='|dial tcp|connectex|i/o timeout|TLS handshake timeout'
+  network_pattern+='|context deadline exceeded|network is unreachable|connection refused'
+  network_pattern+='|connection reset|failed to do request|unexpected EOF'
+  if grep -Eqi "$registry_pattern" "$log_file" \
+    && grep -Eqi "$network_pattern" "$log_file"; then
+    show_registry_guidance
   fi
-  local -a matches=()
-  local record name port label
-  while IFS= read -r record; do
-    IFS='|' read -r name port label <<<"$record"
-    if grep -Eq "[:.]${port}([^0-9]|$)" "$log_file"; then
-      matches+=("$record")
-    fi
-  done < <(port_records)
-  if (( ${#matches[@]} == 0 )); then
+
+  if grep -Eqi 'port is already allocated|address already in use|failed to bind host port|bind for .* failed' "$log_file"; then
+    local -a matches=()
+    local record name port label
     while IFS= read -r record; do
-      matches+=("$record")
+      IFS='|' read -r name port label <<<"$record"
+      if grep -Eq "[:.]${port}([^0-9]|$)" "$log_file"; then
+        matches+=("$record")
+      fi
     done < <(port_records)
+    if (( ${#matches[@]} == 0 )); then
+      while IFS= read -r record; do
+        matches+=("$record")
+      done < <(port_records)
+    fi
+    show_port_guidance "${matches[@]}"
   fi
-  show_port_guidance "${matches[@]}"
 }
 
 open_frontend() {

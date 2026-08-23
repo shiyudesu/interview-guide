@@ -45,8 +45,10 @@ Linux、macOS 或 WSL：
 
 脚本会自动创建 `.env`、校验 Compose、构建并等待所有服务就绪；失败时会输出容器状态和关键
 日志。启动前还会检查 5173、8080、5432、6379、9000、9001 等映射端口；如有占用，会指出
-占用进程，并给出应修改的 `.env` 变量和建议端口。成功后会打开前端。服务器或不希望自动打开
-浏览器时使用：
+占用进程，并给出应修改的 `.env` 变量和建议端口。遇到 Docker Hub DNS、超时或代理错误时，
+脚本会单独提示 Docker daemon 的代理/镜像配置；已有可信 Docker Hub 缓存时，也可以在 `.env`
+设置 `INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=mirror.example.com`，值中不要包含 `https://`。成功后会
+打开前端。服务器或不希望自动打开浏览器时使用：
 
 ```bash
 ./scripts/start.sh --no-open

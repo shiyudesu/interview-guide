@@ -64,6 +64,74 @@ APP_STORAGE_CONSOLE_PORT=19001
 只修改宿主机映射变量即可，不要修改容器内部端口。修改 `FRONTEND_PORT` 后，访问地址也要带上
 新端口，例如 <http://localhost:5174>。
 
+## Docker Hub 镜像拉取失败
+
+首次启动需要从 Docker Hub 拉取 PostgreSQL/pgvector、Redis、MinIO、Python、Node 和 Nginx
+等镜像。出现以下错误通常是 Docker daemon 无法解析或连接 Docker Hub，而不是 Compose 服务
+本身启动失败：
+
+```text
+lookup registry-1.docker.io: no such host
+failed to fetch anonymous token
+failed to resolve source metadata
+dial tcp ...:443: i/o timeout
+TLS handshake timeout
+```
+
+先用一个小镜像验证 daemon 的拉取链路：
+
+```bash
+docker pull docker.io/library/redis:7.4.2-alpine
+```
+
+浏览器或当前 shell 能访问 Docker Hub，不代表 Docker daemon 已经使用同一个代理。Docker
+Desktop 应在 `Settings > Resources > Proxies` 中配置代理并重启；不要用容器内 DNS 设置修复
+daemon 的镜像拉取。Linux Docker Engine 可以按 Docker 官方
+[daemon 代理说明](https://docs.docker.com/engine/daemon/proxy/)为 systemd 服务配置代理，例如
+新建 `/etc/systemd/system/docker.service.d/http-proxy.conf`：
+
+```ini
+[Service]
+Environment="HTTP_PROXY=http://proxy.example.com:3128"
+Environment="HTTPS_PROXY=http://proxy.example.com:3128"
+Environment="NO_PROXY=localhost,127.0.0.1"
+```
+
+然后执行：
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo systemctl show --property=Environment docker
+```
+
+另一种方式是按 Docker 官方
+[registry mirror 说明](https://docs.docker.com/docker-hub/image-library/mirror/)配置自建或可信的
+Docker Hub 缓存。修改 `/etc/docker/daemon.json` 时必须合并已有配置，不要直接覆盖：
+
+```json
+{
+  "registry-mirrors": ["https://mirror.example.com"]
+}
+```
+
+如果已有支持 Docker Hub 路径布局的可信 pull-through cache，也可以只对本项目覆盖镜像来源，
+无需改 daemon：
+
+```env
+INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=mirror.example.com
+```
+
+该值不要包含 `https://`。修改后可先确认所有外部镜像都已切换，再启动：
+
+```bash
+docker compose config --images
+docker compose up -d --build --wait
+```
+
+启动脚本会识别常见的 Docker Hub/DNS/超时错误并显示以上入口，但不会自动修改 DNS、代理或
+Docker daemon，也不会默认使用来源不明的公共镜像站。
+
 健康检查：
 
 ```bash

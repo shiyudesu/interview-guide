@@ -5,7 +5,7 @@
 
 services:
   postgres:
-    image: pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782
     platform: linux/amd64
     container_name: interview-postgres
     environment:
@@ -24,7 +24,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
     platform: linux/amd64
     command: ["redis-server", "--appendonly", "yes"]
     container_name: interview-redis
@@ -39,7 +39,7 @@ services:
       retries: 5
 
   rustfs:
-    image: rustfs/rustfs@sha256:41fe89380f4120a337790c02af192c3fe7bb55c3edc2e6e9357b487b47c6ab21
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/rustfs/rustfs@sha256:41fe89380f4120a337790c02af192c3fe7bb55c3edc2e6e9357b487b47c6ab21
     platform: linux/amd64
     container_name: interview-rustfs
     command: ["/data"]

@@ -79,6 +79,9 @@ docker-compose.dev.yml  本地基础设施
 组件，不得绕过 UAC、sudo 或 Docker Desktop 的许可提示。
 启动脚本必须在构建前检查常用宿主机端口，并在 Compose 绑定失败时给出对应 `.env` 变量、建议
 端口和占用进程；不得要求用户修改容器内部端口。
+Docker Hub 镜像必须统一支持 `INTERVIEW_GUIDE_DOCKERHUB_REGISTRY` 来源覆盖；默认仍使用
+`docker.io`，启动脚本只提供 DNS、代理和可信 mirror 的诊断，不得自动修改 daemon 或写入
+来源不明的公共镜像站。
 关闭服务优先使用 `scripts/stop.sh` 或 `stop.cmd`，只能执行非破坏性的 Compose down 并保留
 数据卷；不得在一键关闭入口中提供或隐式调用 `down -v`。
 

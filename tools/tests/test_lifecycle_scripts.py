@@ -55,6 +55,34 @@ class LifecycleScriptsTest(unittest.TestCase):
         self.assertIn("configured_port FRONTEND_PORT 5173", bash)
         self.assertIn('Get-ConfiguredPort "FRONTEND_PORT" 5173', powershell)
 
+    def test_dockerhub_registry_override_covers_runtime_and_build_images(self) -> None:
+        variable = "INTERVIEW_GUIDE_DOCKERHUB_REGISTRY"
+        for relative in ("docker-compose.yml", "docker-compose.dev.yml"):
+            with self.subTest(relative=relative):
+                content = (REPOSITORY_ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(f"${{{variable}:-docker.io}}", content)
+
+        for relative in ("backend/Dockerfile", "frontend/Dockerfile"):
+            with self.subTest(relative=relative):
+                content = (REPOSITORY_ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(f"ARG {variable}=docker.io", content)
+                from_lines = [
+                    line for line in content.splitlines() if line.startswith("FROM ")
+                ]
+                self.assertTrue(from_lines)
+                self.assertTrue(
+                    all(f"${{{variable}}}/library/" in line for line in from_lines)
+                )
+
+        backend = (REPOSITORY_ROOT / "backend/Dockerfile").read_text(encoding="utf-8")
+        self.assertNotIn("# syntax=docker/dockerfile", backend)
+
+        for relative in ("scripts/start.sh", "scripts/start.ps1"):
+            with self.subTest(relative=relative):
+                content = (REPOSITORY_ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(variable, content)
+                self.assertIn("registry", content.lower())
+
 
 if __name__ == "__main__":
     unittest.main()

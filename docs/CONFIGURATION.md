@@ -10,6 +10,23 @@ cp .env.example .env
 
 `.env` 不应提交。生产环境也可以直接注入同名环境变量。
 
+## Docker Hub 镜像来源
+
+Compose、后端 Dockerfile 和前端 Dockerfile 默认从 `docker.io` 拉取镜像。Docker Hub 在当前
+网络不可达，且已经有可信的 Docker Hub pull-through cache 时，可以设置：
+
+```env
+INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=mirror.example.com
+```
+
+该值只填写 registry 主机名和可选路径，例如 `mirror.example.com/dockerhub`，不要包含
+`http://` 或 `https://`。生产 Compose、本地开发 Compose、Python、Node 和 Nginx 基础镜像会
+统一使用该来源；未设置时仍使用官方 `docker.io`。项目不会自动选择或写入第三方公共镜像站，
+也不会修改宿主机 DNS、Docker daemon 或 Docker Desktop 设置。
+
+如果使用的是普通 HTTP/HTTPS 代理，应配置 Docker daemon 或 Docker Desktop，而不是把代理
+地址填入该变量。具体排障方式见 [运行与排障](OPERATIONS.md#docker-hub-镜像拉取失败)。
+
 ## 零配置启动
 
 AI Provider 不需要任何环境变量即可启动。首次运行时：

@@ -1,6 +1,8 @@
 x-backend-build: &backend-build
   context: .
   dockerfile: backend/Dockerfile
+  args:
+    INTERVIEW_GUIDE_DOCKERHUB_REGISTRY: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}
 
 x-backend-environment: &backend-environment
   POSTGRES_HOST: postgres
@@ -49,7 +51,7 @@ x-backend-service: &backend-service
 
 services:
   postgres:
-    image: pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782
     platform: linux/amd64
     container_name: interview-postgres
     environment:
@@ -71,7 +73,7 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
     platform: linux/amd64
     container_name: interview-redis
     command: ["redis-server", "--appendonly", "yes"]
@@ -87,7 +89,7 @@ services:
     restart: unless-stopped
 
   minio:
-    image: minio/minio:RELEASE.2024-12-18T13-15-44Z@sha256:34c8e2f52a5984492555427fee07254c80036bdb7079bb91679232abd7a4fa20
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/minio/minio:RELEASE.2024-12-18T13-15-44Z@sha256:34c8e2f52a5984492555427fee07254c80036bdb7079bb91679232abd7a4fa20
     platform: linux/amd64
     container_name: interview-minio
     command: ["server", "/data", "--console-address", ":9001"]
@@ -107,7 +109,7 @@ services:
     restart: unless-stopped
 
   createbuckets:
-    image: minio/mc:RELEASE.2024-11-21T17-21-54Z@sha256:771f5ad7925a6b5e069786d8e847a292de320f1e3e3203647e29f47ec9b3d93b
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/minio/mc:RELEASE.2024-11-21T17-21-54Z@sha256:771f5ad7925a6b5e069786d8e847a292de320f1e3e3203647e29f47ec9b3d93b
     platform: linux/amd64
     depends_on:
       minio:
@@ -191,6 +193,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        INTERVIEW_GUIDE_DOCKERHUB_REGISTRY: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}
     image: interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-local}
     container_name: interview-frontend
     depends_on:

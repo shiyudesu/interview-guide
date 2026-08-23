@@ -2,7 +2,8 @@
 # 第一阶段：构建环境 (Builder Stage)
 # 作用：使用 Node.js 环境来安装依赖并编译前端代码
 # ==============================================================================
-FROM node:24-alpine AS builder
+ARG INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=docker.io
+FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/node:24-alpine AS builder
 WORKDIR /app
 
 # 1. 优先复制依赖定义文件
@@ -25,7 +26,7 @@ RUN pnpm run build
 # 作用：使用 Nginx 来托管构建好的静态文件 (HTML/CSS/JS)
 # 后端由独立 Python 容器运行，前端镜像只包含 Nginx 和静态文件
 # ==============================================================================
-FROM nginx:1.27.4-alpine
+FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/nginx:1.27.4-alpine
 
 # 从第一阶段 (builder) 复制构建产物 (dist 目录) 到 Nginx 的默认服务目录
 COPY --from=builder /app/dist /usr/share/nginx/html
