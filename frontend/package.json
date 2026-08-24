@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:unit": "node --test src/pages/interviewHistoryStats.test.ts src/pages/questionGenerationStatus.test.ts src/components/knowledgebaseInterview/interviewCapacity.test.ts src/pages/interviewEntry.test.ts src/pages/knowledgeBaseInterviewCompletion.test.ts src/pages/voiceEvaluationStatus.test.ts src/api/voiceReconnect.test.ts",
+    "test:unit": "node --test src/pages/interviewHistoryStats.test.ts src/pages/questionGenerationStatus.test.ts src/components/knowledgebaseInterview/interviewCapacity.test.ts src/pages/interviewEntry.test.ts src/pages/knowledgeBaseInterviewCompletion.test.ts src/pages/voiceEvaluationStatus.test.ts src/api/voiceReconnect.test.ts src/api/voiceWebSocketUrl.test.ts",
     "test:e2e": "playwright test",
     "test:interview-history": "node --test src/pages/interviewHistoryStats.test.ts",
     "test:question-generation": "node --test src/pages/questionGenerationStatus.test.ts",

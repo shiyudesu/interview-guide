@@ -73,12 +73,29 @@ jobs:
         if: needs.changes.outputs.deployment == 'true'
         run: |
           bash -n scripts/start.sh
+          bash -n scripts/start-http.sh
           bash -n scripts/stop.sh
+          bash -n scripts/stop-http.sh
+          bash -n deploy/install.sh
+          bash -n deploy/lib.sh
+          bash -n deploy/refresh.sh
+          bash -n deploy/rollback.sh
+          bash -n deploy/status.sh
+          bash -n deploy/stop.sh
+          bash -n deploy/update.sh
           pwsh -NoProfile -Command '$tokens = $null; $errors = $null; [System.Management.Automation.Language.Parser]::ParseFile("scripts/start.ps1", [ref]$tokens, [ref]$errors) | Out-Null; if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }'
           pwsh -NoProfile -Command '$tokens = $null; $errors = $null; [System.Management.Automation.Language.Parser]::ParseFile("scripts/stop.ps1", [ref]$tokens, [ref]$errors) | Out-Null; if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }'
       - name: Validate production Compose
         if: needs.changes.outputs.deployment == 'true'
-        run: docker compose config --quiet
+        env:
+          APP_STORAGE_ACCESS_KEY: ci-storage
+          APP_STORAGE_SECRET_KEY: ci-storage-secret
+          POSTGRES_PASSWORD: ci-postgres-secret
+        run: |
+          docker compose config --quiet
+          docker compose -f docker-compose.yml -f docker-compose.test.yml config --quiet
+          INTERVIEW_GUIDE_IMAGE_NAMESPACE=example \
+            docker compose --env-file deploy/.env.example -f deploy/compose.yml config --quiet
 
   backend:
     name: Backend checks
@@ -88,7 +105,7 @@ jobs:
     timeout-minutes: 30
     services:
       redis:
-        image: redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
+        image: redis:7.4.2-alpine@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952
         ports: ["6379:6379"]
         options: >-
           --health-cmd "redis-cli ping"
@@ -216,8 +233,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
+      APP_STORAGE_ACCESS_KEY: minioadmin
+      APP_STORAGE_SECRET_KEY: minioadmin
+      COMPOSE_FILE: docker-compose.yml:docker-compose.test.yml
       CORS_ALLOWED_ORIGINS: http://localhost,http://127.0.0.1:4173
       INTEGRATION_DATABASE: interview_guide_integration
+      POSTGRES_PASSWORD: password
       TEST_S3_BUCKET: interview-guide-integration-${{ github.run_id }}
     steps:
       - uses: actions/checkout@v7
@@ -281,7 +302,9 @@ jobs:
         run: |
           docker compose up -d --force-recreate --no-deps --wait app
           curl --fail --retry 10 --retry-delay 1 http://127.0.0.1:5173/health
-          test "$(docker inspect -f '{{.State.Health.Status}}' interview-frontend)" = healthy
+          frontend_id="$(docker compose ps -q frontend)"
+          test -n "$frontend_id"
+          test "$(docker inspect -f '{{.State.Health.Status}}' "$frontend_id")" = healthy
       - name: Capture Compose logs
         if: failure()
         run: |

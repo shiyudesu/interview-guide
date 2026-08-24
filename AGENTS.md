@@ -13,8 +13,11 @@ frontend/               React 前端
 tools/                  仓库清单、模型诊断和生产验收工具
 scripts/                跨平台一键启动和仓库辅助脚本
 docs/                   配置、运维和架构说明
+deploy/                 GHCR 纯镜像清单、主动拉取、systemd 和回滚脚本
 docker-compose.yml      生产 Compose
 docker-compose.dev.yml  本地基础设施
+docker-compose.test.yml CI/集成测试回环端口覆盖
+.env.http.example       NAT 高端口临时 HTTP 验收配置模板
 ```
 
 ## 不能改变的行为
@@ -77,13 +80,29 @@ docker-compose.dev.yml  本地基础设施
 合作开发者优先使用 `scripts/start.sh` 或 Windows 根目录 `start.cmd`。启动脚本必须保持非破坏性，
 不得覆盖已有 `.env` 或删除数据卷；只允许在用户确认或显式 `--yes`/`-Yes` 后安装 Docker 官方
 组件，不得绕过 UAC、sudo 或 Docker Desktop 的许可提示。
-启动脚本必须在构建前检查常用宿主机端口，并在 Compose 绑定失败时给出对应 `.env` 变量、建议
-端口和占用进程；不得要求用户修改容器内部端口。
+启动脚本必须在构建前检查实际发布的宿主机端口，并在 Compose 绑定失败时给出对应 `.env` 变量、
+建议端口和占用进程；不得要求用户修改容器内部端口。生产 Compose 只能发布前端入口，API、
+PostgreSQL、Redis 和对象存储不得映射宿主机端口；集成测试只能通过 `docker-compose.test.yml`
+临时绑定到 `127.0.0.1`。
 Docker Hub 镜像必须统一支持 `INTERVIEW_GUIDE_DOCKERHUB_REGISTRY` 来源覆盖；默认仍使用
 `docker.io`，启动脚本只提供 DNS、代理和可信 mirror 的诊断，不得自动修改 daemon 或写入
 来源不明的公共镜像站。
 关闭服务优先使用 `scripts/stop.sh` 或 `stop.cmd`，只能执行非破坏性的 Compose down 并保留
 数据卷；不得在一键关闭入口中提供或隐式调用 `down -v`。
+NAT 高端口临时验收使用 `scripts/start-http.sh` 和 `scripts/stop-http.sh`；必须使用单独的
+`.env.http`、Compose 项目名和数据卷，只公开前端入口，其他服务不得发布宿主机端口。该模式
+不能宣称绕过备案或替代 HTTPS，公网 HTTP 下必须明确提示麦克风不可用。
+
+Compose 和 Dockerfile 不得固定 `linux/amd64` 或声明全局 `container_name`。所有固定 digest 必须
+指向同时包含 `linux/amd64`、`linux/arm64` 的 manifest list；启动脚本应拒绝完整栈不支持的其他
+架构。生产基础设施密码必须由启动脚本生成或由部署者显式提供，不能回退到仓库内置弱密码。
+
+服务器正式分发使用 `.github/workflows/publish-ghcr.yml` 和 `deploy/`。只有 `CI` 对当前 `main`
+commit 成功后才能推进 GHCR `main` 部署通道；backend、frontend 必须先发布同一 revision 的
+不可变 `sha-<commit>` 多架构镜像，deployment bundle 最后发布。服务器必须主动拉取，GitHub
+Actions 不持有服务器 SSH Key；更新过程必须校验镜像 revision、先执行 Alembic、等待健康检查、
+记录当前及上一成功 tag，并保留数据卷。部署包变化也必须通过 GHCR 通道下发，服务器不得依赖
+完整 Git 仓库。
 
 同一镜像启动：
 

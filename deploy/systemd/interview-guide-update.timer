@@ -1,0 +1,12 @@
+[Unit]
+Description=Check GHCR for InterviewGuide updates
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Persistent=true
+Unit=interview-guide-update.service
+
+[Install]
+WantedBy=timers.target

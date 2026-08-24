@@ -5,31 +5,26 @@
 
 services:
   postgres:
-    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/pgvector/pgvector:0.8.1-pg16@sha256:16e62164a405447dca191079a924ee5b8a9dbf04fe53128701ffbea857b37782
-    platform: linux/amd64
-    container_name: interview-postgres
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
       POSTGRES_DB: ${POSTGRES_DB:-interview_guide}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "${DEV_INFRASTRUCTURE_BIND_ADDRESS:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-interview_guide}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
-    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/redis:7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
-    platform: linux/amd64
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/redis:7.4.2-alpine@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952
     command: ["redis-server", "--appendonly", "yes"]
-    container_name: interview-redis
     ports:
-      - "6379:6379"
+      - "${DEV_INFRASTRUCTURE_BIND_ADDRESS:-127.0.0.1}:${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -39,17 +34,15 @@ services:
       retries: 5
 
   rustfs:
-    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/rustfs/rustfs@sha256:41fe89380f4120a337790c02af192c3fe7bb55c3edc2e6e9357b487b47c6ab21
-    platform: linux/amd64
-    container_name: interview-rustfs
+    image: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/rustfs/rustfs:latest@sha256:41fe89380f4120a337790c02af192c3fe7bb55c3edc2e6e9357b487b47c6ab21
     command: ["/data"]
     environment:
       RUSTFS_ACCESS_KEY: ${APP_STORAGE_ACCESS_KEY:-minioadmin}
       RUSTFS_SECRET_KEY: ${APP_STORAGE_SECRET_KEY:-minioadmin}
       RUSTFS_CONSOLE_ENABLE: "true"
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${DEV_INFRASTRUCTURE_BIND_ADDRESS:-127.0.0.1}:${APP_STORAGE_PORT:-9000}:9000"
+      - "${DEV_INFRASTRUCTURE_BIND_ADDRESS:-127.0.0.1}:${APP_STORAGE_CONSOLE_PORT:-9001}:9001"
     volumes:
       - rustfs_data:/data
     healthcheck:

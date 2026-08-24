@@ -26,6 +26,52 @@ fail() {
   exit 1
 }
 
+random_secret() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex 24
+    return
+  fi
+  od -An -N24 -tx1 /dev/urandom | tr -d ' \n'
+  printf '\n'
+}
+
+replace_generated_secret() {
+  local name="$1"
+  local value temporary_file
+  if ! grep -Eq "^${name}=(GENERATE_ON_FIRST_START)?$" .env; then
+    return
+  fi
+  value="$(random_secret)"
+  temporary_file="$(mktemp)"
+  awk \
+    -v empty_target="${name}=" \
+    -v legacy_target="${name}=GENERATE_ON_FIRST_START" \
+    -v replacement="${name}=${value}" \
+    '$0 == empty_target || $0 == legacy_target { print replacement; next } { print }' \
+    .env >"$temporary_file"
+  mv "$temporary_file" .env
+}
+
+ensure_environment_file() {
+  if [[ ! -f .env ]]; then
+    cp .env.example .env
+    echo "已根据 .env.example 创建 .env。"
+  fi
+  replace_generated_secret POSTGRES_PASSWORD
+  replace_generated_secret APP_STORAGE_SECRET_KEY
+  chmod 600 .env
+}
+
+validate_docker_architecture() {
+  local architecture
+  architecture="$(docker_cli info --format '{{.Architecture}}' 2>/dev/null || true)"
+  case "$architecture" in
+    amd64|x86_64|arm64|aarch64) ;;
+    "") fail "无法读取 Docker daemon 架构。" ;;
+    *) fail "当前 Docker 架构 ${architecture} 不受生产镜像支持；支持 linux/amd64 和 linux/arm64。" ;;
+  esac
+}
+
 show_diagnostics() {
   echo
   echo "容器状态:"
@@ -235,11 +281,6 @@ suggested_port() {
   local suggestion
   case "$name" in
     FRONTEND_PORT) suggestion=5174 ;;
-    SERVER_PORT) suggestion=18080 ;;
-    POSTGRES_PORT) suggestion=15432 ;;
-    REDIS_PORT) suggestion=16379 ;;
-    APP_STORAGE_PORT) suggestion=19000 ;;
-    APP_STORAGE_CONSOLE_PORT) suggestion=19001 ;;
     *) suggestion=$((current + 10000)) ;;
   esac
   if (( suggestion == current )); then
@@ -285,12 +326,7 @@ show_port_owner() {
 
 port_records() {
   printf '%s\n' \
-    "FRONTEND_PORT|$(configured_port FRONTEND_PORT 5173)|前端" \
-    "SERVER_PORT|$(configured_port SERVER_PORT 8080)|API" \
-    "POSTGRES_PORT|$(configured_port POSTGRES_PORT 5432)|PostgreSQL" \
-    "REDIS_PORT|$(configured_port REDIS_PORT 6379)|Redis" \
-    "APP_STORAGE_PORT|$(configured_port APP_STORAGE_PORT 9000)|MinIO API" \
-    "APP_STORAGE_CONSOLE_PORT|$(configured_port APP_STORAGE_CONSOLE_PORT 9001)|MinIO Console"
+    "FRONTEND_PORT|$(configured_port FRONTEND_PORT 5173)|前端"
 }
 
 show_port_guidance() {
@@ -425,17 +461,14 @@ if ! docker_cli info >/dev/null 2>&1; then
   wait_for_docker
 fi
 
-if [[ ! -f .env ]]; then
-  cp .env.example .env
-  echo "已根据 .env.example 创建 .env。"
-fi
+ensure_environment_file
+validate_docker_architecture
 
 if ! docker_cli compose config --quiet; then
   fail "Compose 配置无效，请检查 .env。"
 fi
 
 frontend_port="$(configured_port FRONTEND_PORT 5173)"
-server_port="$(configured_port SERVER_PORT 8080)"
 if [[ "$frontend_port" == "80" ]]; then
   frontend_url="http://localhost"
 else
@@ -461,7 +494,8 @@ docker_cli compose ps
 echo
 echo "前端:   ${frontend_url}"
 echo "设置页: ${frontend_url}/settings"
-echo "API:    http://localhost:${server_port}"
+echo "API 文档: ${frontend_url}/docs"
+echo "OpenAPI:  ${frontend_url}/openapi.json"
 echo
 echo "首次使用请在设置页编辑 dashscope，并录入百炼 API Key。"
 echo "停止服务: ./scripts/stop.sh"

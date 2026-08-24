@@ -43,9 +43,9 @@ Linux、macOS 或 WSL：
 ./scripts/start.sh
 ```
 
-脚本会自动创建 `.env`、校验 Compose、构建并等待所有服务就绪；失败时会输出容器状态和关键
-日志。启动前还会检查 5173、8080、5432、6379、9000、9001 等映射端口；如有占用，会指出
-占用进程，并给出应修改的 `.env` 变量和建议端口。遇到 Docker Hub DNS、超时或代理错误时，
+脚本会自动创建 `.env`、生成 PostgreSQL 和对象存储随机密码、校验 Compose、构建并等待所有
+服务就绪；失败时会输出容器状态和关键日志。生产 Compose 只有前端映射到宿主机，因此启动前
+只检查 `FRONTEND_PORT`；如有占用，会指出占用进程并给出建议端口。遇到 Docker Hub DNS、超时或代理错误时，
 脚本会单独提示 Docker daemon 的代理/镜像配置；已有可信 Docker Hub 缓存时，也可以在 `.env`
 设置 `INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=mirror.example.com`，值中不要包含 `https://`。成功后会
 打开前端。服务器或不希望自动打开浏览器时使用：
@@ -61,14 +61,14 @@ Linux、macOS 或 WSL：
 ```
 
 AI 配置无需写入 `.env`。首次启动会自动生成 Provider 加密主密钥，并只创建一个不带 API Key
-的百炼 Provider；启动后在设置页录入百炼 API Key 即可。`.env` 主要用于端口和基础设施配置。
-
-对外部署前还要修改 PostgreSQL 和对象存储的默认密码。
+的百炼 Provider；启动后在设置页录入百炼 API Key 即可。数据库和对象存储密码不会使用仓库
+内置默认值。
 
 需要手工启动时，等价命令为：
 
 ```bash
 cp .env.example .env
+# 先填写 POSTGRES_PASSWORD 和 APP_STORAGE_SECRET_KEY
 docker compose up -d --build --wait
 docker compose ps
 ```
@@ -78,10 +78,9 @@ docker compose ps
 | 服务 | 地址 |
 | --- | --- |
 | 前端 | <http://localhost:5173> |
-| API | <http://localhost:8080> |
-| Swagger UI | <http://localhost:8080/docs> |
-| OpenAPI | <http://localhost:8080/openapi.json> |
-| MinIO Console | <http://localhost:9001> |
+| API | 前端同源路径 `/api/` |
+| Swagger UI | <http://localhost:5173/docs> |
+| OpenAPI | <http://localhost:5173/openapi.json> |
 
 查看日志：
 
@@ -104,6 +103,45 @@ docker compose logs migrate
 `docker compose down -v` 会删除 PostgreSQL、Redis 和对象存储数据，只能在确认不再需要本地
 数据时使用。
 
+## 服务器 GHCR 主动拉取部署
+
+服务器部署不需要克隆仓库。`main` 分支 CI 成功后，GitHub Actions 会发布 backend、frontend 和
+deployment bundle 三个 GHCR 多架构镜像；服务器的 systemd timer 每 5 分钟主动检查部署通道，
+并按不可变的 `sha-<commit>` tag 完成迁移和更新。
+
+服务器只保存 `.env`、纯镜像 Compose、更新脚本和版本状态，不需要 Git、Node.js、Python、pnpm
+或 uv。首次安装、private GHCR 登录、NAT 配置、日志和回滚命令见
+[GHCR 主动拉取部署](docs/DEPLOYMENT.md)。
+
+## 临时 HTTP 验收部署
+
+NAT 服务器没有可用的 80/443，或宿主机已有多个服务时，可以启动隔离的 HTTP 验收实例：
+
+```bash
+./scripts/start-http.sh
+```
+
+脚本首次运行会创建权限为 `600` 的 `.env.http`，为 PostgreSQL 和 MinIO 生成随机密码，并使用
+独立的 Compose 项目和数据卷。默认只有一个宿主机端口：
+
+| 用途 | 宿主机地址 |
+| --- | --- |
+| 唯一公网入口 | `0.0.0.0:18073` |
+
+API、PostgreSQL、Redis 和 MinIO 只存在于 Compose 网络，不发布任何宿主机端口。
+
+只需配置一条 NAT TCP 映射，例如“公网 `28080` → 服务器 `18073`”，然后访问
+`http://公网IP或域名:28080`。公网端口不必与 `FRONTEND_PORT` 相同。端口冲突时编辑
+`.env.http`，不要修改容器内部端口。
+
+```bash
+./scripts/stop-http.sh
+```
+
+停止脚本保留 HTTP 验收实例的数据卷。该模式是临时、明文的验收入口，不代替服务器所在地要求的
+备案或安全合规；非本机 HTTP 页面也无法获得浏览器麦克风权限，因此公网语音录制验收仍需 HTTPS。
+详细说明见 [运行与排障](docs/OPERATIONS.md#临时-http-验收部署)。
+
 ## 运行架构
 
 生产 Compose 使用同一个 Python 镜像启动四类进程：
@@ -115,9 +153,14 @@ docker compose logs migrate
 4. `interview-guide-scheduler` 处理日程过期、题目生成恢复和语音会话恢复。
 
 API、Worker 和 Scheduler 会等 Migrate 成功后再启动。前端由 Nginx 提供静态文件，并把
-`/api/` 和 `/ws/` 转发到 API。
+`/api/`、`/ws/`、`/docs` 和 `/openapi.json` 转发到 API。镜像使用多架构 manifest digest，
+Docker 会按宿主机自动选择 `linux/amd64` 或 `linux/arm64`，Compose 不再强制模拟 amd64。
 
 ## 本地开发
+
+如果尚未通过一键启动脚本生成 `.env`，先复制 `.env.example`，并为
+`POSTGRES_PASSWORD`、`APP_STORAGE_SECRET_KEY` 填写随机值。开发 Compose 和直接运行的 Python
+后端必须读取同一组凭据。
 
 先启动 PostgreSQL、Redis 和 RustFS：
 
@@ -155,7 +198,7 @@ pnpm install --frozen-lockfile
 pnpm run dev
 ```
 
-Vite 默认监听 <http://localhost:5173>，并把 `/api` 转发到
+Vite 默认监听 <http://localhost:5173>，并把 `/api` 和 `/ws` 转发到
 `VITE_API_PROXY_TARGET`，默认值为 `http://localhost:8080`。
 
 REST API 成功时直接返回业务 JSON；无响应体操作返回 HTTP 204。错误使用标准 4xx/5xx

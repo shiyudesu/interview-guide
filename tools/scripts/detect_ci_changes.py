@@ -79,6 +79,10 @@ def classify_paths(paths: Iterable[str], *, force_full: bool = False) -> ChangeA
     manifests = any(
         path in {
             ".env.example",
+            ".env.http.example",
+            "docker-compose.dev.yml",
+            "docker-compose.test.yml",
+            "docker-compose.yml",
             "tools/scripts/check-manifests.sh",
             "tools/scripts/generate-manifests.sh",
             "tools/scripts/generate_manifests.py",
@@ -92,6 +96,7 @@ def classify_paths(paths: Iterable[str], *, force_full: bool = False) -> ChangeA
                 "backend/alembic/",
                 "backend/resources/",
                 "backend/tests/",
+                "deploy/",
                 "frontend/src/",
                 "frontend/e2e/",
             ),
@@ -101,23 +106,28 @@ def classify_paths(paths: Iterable[str], *, force_full: bool = False) -> ChangeA
     deployment = any(
         path in {
             ".env.example",
+            ".env.http.example",
             "backend/Dockerfile",
             "backend/pyproject.toml",
             "backend/uv.lock",
             "docker-compose.yml",
             "docker-compose.dev.yml",
+            "docker-compose.test.yml",
             "frontend/Dockerfile",
             "frontend/nginx.conf",
             "frontend/package.json",
             "frontend/pnpm-lock.yaml",
             "scripts/start.ps1",
+            "scripts/start-http.sh",
             "scripts/start.sh",
             "scripts/stop.ps1",
+            "scripts/stop-http.sh",
             "scripts/stop.sh",
             "start.cmd",
             "stop.cmd",
         }
         or path.startswith("docker/")
+        or path.startswith("deploy/")
         or path.startswith(".github/workflows/")
         for path in normalized
     )

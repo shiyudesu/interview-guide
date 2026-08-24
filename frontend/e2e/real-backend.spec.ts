@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const runRealBackend = process.env.RUN_REAL_BACKEND_E2E === 'true';
-const backendUrl = process.env.REAL_BACKEND_URL ?? 'http://127.0.0.1:28080';
+const backendUrl = process.env.REAL_BACKEND_URL ?? 'http://127.0.0.1:8080';
 
 test.describe('真实 Python 后端 @real-backend', () => {
   test.skip(!runRealBackend, 'RUN_REAL_BACKEND_E2E is not enabled');

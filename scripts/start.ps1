@@ -14,6 +14,50 @@ function Stop-WithMessage {
     exit 1
 }
 
+function New-RandomSecret {
+    $Bytes = New-Object byte[] 24
+    $Generator = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    try {
+        $Generator.GetBytes($Bytes)
+    }
+    finally {
+        $Generator.Dispose()
+    }
+    return -join ($Bytes | ForEach-Object { $_.ToString("x2") })
+}
+
+function Set-GeneratedSecret {
+    param([string]$Name)
+    $Targets = @("$Name=", "$Name=GENERATE_ON_FIRST_START")
+    $Lines = [System.IO.File]::ReadAllLines((Join-Path $RepositoryRoot ".env"))
+    if (-not ($Lines | Where-Object { $_ -in $Targets })) {
+        return
+    }
+    $Replacement = "$Name=$(New-RandomSecret)"
+    $Updated = $Lines | ForEach-Object { if ($_ -in $Targets) { $Replacement } else { $_ } }
+    $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllLines((Join-Path $RepositoryRoot ".env"), $Updated, $Utf8NoBom)
+}
+
+function Initialize-EnvironmentFile {
+    if (-not (Test-Path ".env")) {
+        Copy-Item ".env.example" ".env"
+        Write-Host "Created .env from .env.example."
+    }
+    Set-GeneratedSecret "POSTGRES_PASSWORD"
+    Set-GeneratedSecret "APP_STORAGE_SECRET_KEY"
+}
+
+function Test-SupportedDockerArchitecture {
+    $Architecture = (& docker info --format '{{.Architecture}}' 2>$null).Trim()
+    if ($LASTEXITCODE -ne 0 -or -not $Architecture) {
+        Stop-WithMessage "Could not determine the Docker daemon architecture."
+    }
+    if ($Architecture -notin @("amd64", "x86_64", "arm64", "aarch64")) {
+        Stop-WithMessage "Docker architecture $Architecture is unsupported. Production images support linux/amd64 and linux/arm64."
+    }
+}
+
 function Show-Diagnostics {
     Write-Host ""
     Write-Host "Container status:"
@@ -125,11 +169,6 @@ function Get-SuggestedPort {
     )
     $Suggestion = switch ($Name) {
         "FRONTEND_PORT" { 5174 }
-        "SERVER_PORT" { 18080 }
-        "POSTGRES_PORT" { 15432 }
-        "REDIS_PORT" { 16379 }
-        "APP_STORAGE_PORT" { 19000 }
-        "APP_STORAGE_CONSOLE_PORT" { 19001 }
         default { $Current + 10000 }
     }
     if ($Suggestion -eq $Current) {
@@ -150,11 +189,6 @@ function Get-SuggestedPort {
 function Get-PortDefinitions {
     return @(
         [pscustomobject]@{ Name = "FRONTEND_PORT"; Port = Get-ConfiguredPort "FRONTEND_PORT" 5173; Label = "Frontend" }
-        [pscustomobject]@{ Name = "SERVER_PORT"; Port = Get-ConfiguredPort "SERVER_PORT" 8080; Label = "API" }
-        [pscustomobject]@{ Name = "POSTGRES_PORT"; Port = Get-ConfiguredPort "POSTGRES_PORT" 5432; Label = "PostgreSQL" }
-        [pscustomobject]@{ Name = "REDIS_PORT"; Port = Get-ConfiguredPort "REDIS_PORT" 6379; Label = "Redis" }
-        [pscustomobject]@{ Name = "APP_STORAGE_PORT"; Port = Get-ConfiguredPort "APP_STORAGE_PORT" 9000; Label = "MinIO API" }
-        [pscustomobject]@{ Name = "APP_STORAGE_CONSOLE_PORT"; Port = Get-ConfiguredPort "APP_STORAGE_CONSOLE_PORT" 9001; Label = "MinIO Console" }
     )
 }
 
@@ -268,10 +302,8 @@ if (-not (Test-DockerDaemon)) {
     Wait-ForDocker
 }
 
-if (-not (Test-Path ".env")) {
-    Copy-Item ".env.example" ".env"
-    Write-Host "Created .env from .env.example."
-}
+Initialize-EnvironmentFile
+Test-SupportedDockerArchitecture
 
 & docker compose config --quiet
 if ($LASTEXITCODE -ne 0) {
@@ -279,7 +311,6 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $FrontendPort = Get-ConfiguredPort "FRONTEND_PORT" 5173
-$ServerPort = Get-ConfiguredPort "SERVER_PORT" 8080
 $FrontendUrl = if ($FrontendPort -eq 80) { "http://localhost" } else { "http://localhost:$FrontendPort" }
 
 Test-ConfiguredPorts
@@ -306,7 +337,8 @@ Write-Host "Startup completed." -ForegroundColor Green
 Write-Host ""
 Write-Host "Frontend: $FrontendUrl"
 Write-Host "Settings: $FrontendUrl/settings"
-Write-Host "API:    http://localhost:$ServerPort"
+Write-Host "API docs: $FrontendUrl/docs"
+Write-Host "OpenAPI:  $FrontendUrl/openapi.json"
 Write-Host ""
 Write-Host "First-time setup: edit dashscope on the Settings page and enter the Bailian API Key."
 Write-Host "Stop services: stop.cmd or scripts\stop.ps1"

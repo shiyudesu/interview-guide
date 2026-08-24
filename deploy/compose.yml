@@ -1,9 +1,3 @@
-x-backend-build: &backend-build
-  context: .
-  dockerfile: backend/Dockerfile
-  args:
-    INTERVIEW_GUIDE_DOCKERHUB_REGISTRY: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}
-
 x-backend-environment: &backend-environment
   POSTGRES_HOST: postgres
   POSTGRES_PORT: 5432
@@ -37,13 +31,12 @@ x-backend-environment: &backend-environment
   APP_INTERVIEW_TURN_CONTEXT_MAX_CHARS: ${APP_INTERVIEW_TURN_CONTEXT_MAX_CHARS:-12000}
   APP_INTERVIEW_TURN_RECENT_COUNT: ${APP_INTERVIEW_TURN_RECENT_COUNT:-6}
   APP_VOICE_TURN_MIN_REMAINING_SECONDS: ${APP_VOICE_TURN_MIN_REMAINING_SECONDS:-30}
-  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174}
+  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
   LOG_LEVEL: ${LOG_LEVEL:-INFO}
   TZ: ${TZ:-Asia/Shanghai}
 
 x-backend-service: &backend-service
-  image: interview-guide-python:${INTERVIEW_GUIDE_IMAGE_TAG:-local}
-  build: *backend-build
+  image: "${INTERVIEW_GUIDE_IMAGE_REGISTRY:-ghcr.io}/${INTERVIEW_GUIDE_IMAGE_NAMESPACE:?set INTERVIEW_GUIDE_IMAGE_NAMESPACE}/interview-guide-backend:${INTERVIEW_GUIDE_IMAGE_TAG:-main}"
   environment: *backend-environment
   volumes:
     - provider_key:/var/lib/interview-guide
@@ -169,12 +162,7 @@ services:
         condition: service_healthy
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        INTERVIEW_GUIDE_DOCKERHUB_REGISTRY: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}
-    image: interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-local}
+    image: "${INTERVIEW_GUIDE_IMAGE_REGISTRY:-ghcr.io}/${INTERVIEW_GUIDE_IMAGE_NAMESPACE:?set INTERVIEW_GUIDE_IMAGE_NAMESPACE}/interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-main}"
     depends_on:
       app:
         condition: service_healthy

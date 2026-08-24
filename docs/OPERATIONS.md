@@ -1,10 +1,14 @@
 # 运行与排障
 
+无源码服务器部署、GHCR 登录、systemd 主动更新和回滚见
+[GHCR 主动拉取部署](DEPLOYMENT.md)。本页中的 `scripts/start.sh` 和 `scripts/start-http.sh` 主要用于
+本地开发、源码构建或临时人工部署。
+
 ## 启动和检查
 
 推荐使用一键启动脚本。脚本会检查 Docker、Compose 和 Docker daemon；Windows、macOS、
-Ubuntu、Debian 和 WSL 缺少 Docker 时，可以在确认后自动安装。脚本还会自动创建 `.env`，并在
-失败时输出关键日志：
+Ubuntu、Debian 和 WSL 缺少 Docker 时，可以在确认后自动安装。脚本还会自动创建 `.env`、生成
+PostgreSQL 和对象存储随机密码，并在失败时输出关键日志：
 
 ```bash
 ./scripts/start.sh
@@ -22,6 +26,7 @@ sudo 密码或要求完成 Docker Desktop 的首次许可提示；脚本不会�
 手工启动命令：
 
 ```bash
+# 先在 .env 中填写 POSTGRES_PASSWORD 和 APP_STORAGE_SECRET_KEY
 docker compose up -d --build --wait
 docker compose ps -a
 ```
@@ -47,22 +52,71 @@ powershell -ExecutionPolicy Bypass -File .\scripts\stop.ps1
 - `app`、`postgres`、`redis`、`minio` 为 healthy
 - `worker`、`scheduler`、`frontend` 为 running
 
+## 临时 HTTP 验收部署
+
+该入口用于 NAT 服务器、高端口和多项目共存时的短期部署验收，不修改普通 `.env` 或默认 Compose
+项目。运行：
+
+```bash
+./scripts/start-http.sh
+```
+
+首次运行会创建 `.env.http`、生成随机 PostgreSQL/MinIO 密码，并启动 Compose 项目
+`interview-guide-http`。默认只有前端 `18073` 监听全部接口；API、PostgreSQL、Redis 和 MinIO
+只连接 Compose 网络，不发布宿主机端口。
+
+NAT 示例：
+
+```text
+公网 TCP 28080  ->  服务器 TCP 18073
+访问地址         ->  http://example.com:28080
+```
+
+DNS 不记录 HTTP 端口，因此公网映射不是 80 时，访问地址必须显式携带公网端口。API、
+PostgreSQL、Redis 和 MinIO 没有可供 NAT 转发的宿主机端口。若服务器端口冲突，只需编辑
+`.env.http` 中的 `FRONTEND_PORT`；脚本会在构建前检查该入口端口。
+
+检查和查看日志：
+
+```bash
+docker compose --project-name interview-guide-http --env-file .env.http -f docker-compose.yml ps
+docker compose --project-name interview-guide-http --env-file .env.http -f docker-compose.yml logs -f frontend app worker scheduler
+```
+
+关闭并保留数据卷：
+
+```bash
+./scripts/stop-http.sh
+```
+
+HTTP 验收实例和普通 Compose 项目使用不同的项目名及数据卷，容器名由 Compose 自动按项目作用域
+生成；两套实例仍共享宿主机 CPU、内存和磁盘。该入口传输明文，不应长期公开，也不能代替服务器所在地要求的备案或安全合规。
+浏览器只允许安全上下文访问麦克风，所以通过公网普通 HTTP 可以验收文字面试、管理、文件和
+WebSocket 路由，不能完成真实麦克风录音验收；该项必须改用 HTTPS。
+
 ## 端口占用
 
-启动脚本会在构建前检查端口，并在 Compose 仍因端口竞争失败时再次解析错误。提示会直接列出
-占用进程和建议修改项，例如：
+生产 Compose 只发布前端入口，所以启动脚本只检查一个端口，并在 Compose 仍因端口竞争失败时
+再次解析错误。提示会直接列出占用进程和建议修改项，例如：
 
 ```env
 FRONTEND_PORT=5174
-SERVER_PORT=18080
-POSTGRES_PORT=15432
-REDIS_PORT=16379
-APP_STORAGE_PORT=19000
-APP_STORAGE_CONSOLE_PORT=19001
 ```
 
 只修改宿主机映射变量即可，不要修改容器内部端口。修改 `FRONTEND_PORT` 后，访问地址也要带上
 新端口，例如 <http://localhost:5174>。
+
+## 宿主机架构
+
+生产镜像不再固定 `linux/amd64`。先查看 Docker daemon 架构：
+
+```bash
+docker info --format '{{.Architecture}}'
+```
+
+完整栈支持 `amd64` 和 `arm64`。镜像引用固定到多架构 manifest digest，Docker 会从同一个 digest
+自动选择本机镜像；不会在 ARM 服务器上静默启用 amd64 模拟。启动脚本遇到其他架构会在构建前
+明确退出。
 
 ## Docker Hub 镜像拉取失败
 
@@ -236,25 +290,25 @@ env | grep '^APP_AI_CONFIG_ENCRYPTION_KEY='
 
 ## 端口被占用
 
-检查端口：
+生产部署只需要检查前端入口：
 
 ```bash
-ss -ltnp | grep -E ':(5173|5432|6379|8080|9000|9001)\b'
+ss -ltnp | grep -E ':5173\b'
 docker ps --format 'table {{.Names}}\t{{.Ports}}'
 ```
 
-可以在 `.env` 中修改宿主机映射端口：
+可以在 `.env` 中修改前端宿主机映射：
 
 ```env
-SERVER_PORT=18080
 FRONTEND_PORT=5174
-POSTGRES_PORT=15432
-REDIS_PORT=16379
-APP_STORAGE_PORT=19000
-APP_STORAGE_CONSOLE_PORT=19001
 ```
 
-容器内部端口不变。
+API、PostgreSQL、Redis 和 MinIO 只使用 Compose 内部网络。需要从宿主机运行集成测试时，显式
+叠加 `docker-compose.test.yml`；该文件只绑定 `127.0.0.1`，不得用于公网部署：
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build --wait
+```
 
 生产前端通过 Docker DNS 动态解析 `app`，后端容器重建后不需要重启前端。前端健康检查会经由
 Nginx 请求 `/health`；若前端显示正常但 API 返回 502，检查 `frontend` 和 `app` 是否在

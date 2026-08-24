@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 50
+    "testFileCount": 51
   },
   "tests": [
     {
@@ -596,7 +596,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_interview_module.py",
-      "sha256": "70fe87790a8163bb455667938b1e972d26e546b5f52ba5611158eb94d8741c80"
+      "sha256": "9668b83481aabf0f2d3d8cb86defba1238ccc8b6e62e58c8a1e0da39526aaf9e"
     },
     {
       "disabledMarkers": 0,
@@ -721,7 +721,7 @@
     {
       "disabledMarkers": 1,
       "file": "frontend/e2e/real-backend.spec.ts",
-      "sha256": "18fa9258830ab9faa82502a1699a2acbe8bc6be530606a18c253f3f621575d92"
+      "sha256": "f2d4cb042bb5d1a14ba1cd530ba6236a3859197aa5188c5dcb3423a0d915974e"
     },
     {
       "disabledMarkers": 0,
@@ -737,6 +737,11 @@
       "disabledMarkers": 0,
       "file": "frontend/src/api/voiceReconnect.test.ts",
       "sha256": "b7bba260f135d70658164b7432d9407a1b4e1dbc11d6524dd1d2f056e9579437"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/api/voiceWebSocketUrl.test.ts",
+      "sha256": "da2fdcfe36cbf046c9e922dbacc8b72aa520dc4c259ed08a31fc9ea791f192db"
     },
     {
       "disabledMarkers": 0,

@@ -78,11 +78,25 @@ class DetectCiChangesTest(unittest.TestCase):
         self.assertTrue(areas.deployment)
         self.assertTrue(areas.production)
 
+        for path in (
+            ".env.http.example",
+            "docker-compose.test.yml",
+            "deploy/compose.yml",
+            "deploy/update.sh",
+        ):
+            with self.subTest(path=path):
+                areas = classify_paths([path])
+                self.assertTrue(areas.deployment)
+                self.assertTrue(areas.production)
+                self.assertTrue(areas.manifests)
+
     def test_startup_script_change_runs_deployment_validation(self) -> None:
         for path in (
             "scripts/start.sh",
+            "scripts/start-http.sh",
             "scripts/start.ps1",
             "scripts/stop.sh",
+            "scripts/stop-http.sh",
             "scripts/stop.ps1",
             "start.cmd",
             "stop.cmd",

@@ -385,7 +385,7 @@ class VoiceInterviewService:
             status=str(entity.status),
             start_time=entity.start_time,
             planned_duration=entity.planned_duration,
-            web_socket_url=(f"ws://localhost:8080/ws/voice-interview/{entity.id}"),
+            web_socket_url=f"/ws/voice-interview/{entity.id}",
         )
 
     @staticmethod

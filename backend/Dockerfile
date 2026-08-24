@@ -1,6 +1,6 @@
 ARG INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=docker.io
 
-FROM --platform=linux/amd64 ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/python:3.13.13-slim-bookworm@sha256:f576b530293e74140ea91d262232648d5c4f45640a95ec447757701bfcacf034 AS builder
+FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/python:3.13.13-slim-bookworm@sha256:355bfa66770995d7e9a0da4b3473b44d0cb451f6b56f5615ad9c39e3c4eca03f AS builder
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -16,7 +16,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY backend/ ./
 RUN uv sync --frozen --no-dev
 
-FROM --platform=linux/amd64 ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/python:3.13.13-slim-bookworm@sha256:f576b530293e74140ea91d262232648d5c4f45640a95ec447757701bfcacf034 AS runtime
+FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/python:3.13.13-slim-bookworm@sha256:355bfa66770995d7e9a0da4b3473b44d0cb451f6b56f5615ad9c39e3c4eca03f AS runtime
 
 ENV PATH=/opt/venv/bin:$PATH \
     PYTHONPATH=/app/src \

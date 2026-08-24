@@ -7,7 +7,7 @@ from pathlib import Path
 
 LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 ENVIRONMENT_VARIABLE = re.compile(
-    r"\b(?:AI|APP|CORS|FRONTEND|INTERVIEW_GUIDE|LOG|OTEL|POSTGRES|PROVIDER|"
+    r"\b(?:AI|APP|CORS|DEV|FRONTEND|INTERVIEW_GUIDE|LOG|OTEL|POSTGRES|PROVIDER|"
     r"REAL_BACKEND|REDIS|RUN_REAL_BACKEND|SERVER|TEST|TZ|VITE)_[A-Z0-9_]+\b"
 )
 IGNORED_PARTS = {".git", ".venv", "node_modules"}
@@ -61,6 +61,8 @@ def documented_environment_variables(root: Path) -> set[str]:
     paths.extend(sorted((root / "docs").glob("*.md")))
     paths.extend(sorted((root / "tools").glob("**/*.md")))
     paths.append(root / ".env.example")
+    paths.append(root / ".env.http.example")
+    paths.append(root / "deploy/.env.example")
     values: set[str] = set()
     for path in paths:
         if path.is_file():
@@ -73,6 +75,10 @@ def source_environment_variables(root: Path) -> set[str]:
         root / "backend/src/interview_guide/common/config/settings.py",
         root / "docker-compose.yml",
         root / "docker-compose.dev.yml",
+        root / "docker-compose.test.yml",
+        root / ".env.http.example",
+        root / "deploy/compose.yml",
+        root / "deploy/.env.example",
         root / "frontend/vite.config.ts",
         root / "frontend/src/api/request.ts",
         root / ".github/workflows/ci.yml",

@@ -1,7 +1,7 @@
 # InterviewGuide 前端
 
 前端使用 React 18、TypeScript、Vite、Tailwind CSS 和 React Router。生产构建由 Nginx
-提供，`/api/` 与 `/ws/` 转发到 Compose 中的 `app:8080`。
+提供，`/api/`、`/ws/`、`/docs` 与 `/openapi.json` 转发到 Compose 中的 `app:8080`。
 
 ## 安装和启动
 
@@ -15,7 +15,7 @@ pnpm run dev
 
 开发服务器默认地址是 <http://localhost:5173>。
 
-Vite 默认把 `/api` 转发到 `http://localhost:8080`。后端地址不同时可覆盖：
+Vite 默认把 `/api` 和 `/ws` 转发到 `http://localhost:8080`。后端地址不同时可覆盖：
 
 ```bash
 VITE_API_PROXY_TARGET=http://127.0.0.1:8080 pnpm run dev

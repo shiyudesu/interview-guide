@@ -672,29 +672,40 @@ def yaml_values(root: Path, path: Path) -> list[dict[str, Any]]:
 
 
 def extract_configuration(root: Path) -> dict[str, Any]:
-    yaml_paths = [root / "docker-compose.dev.yml", root / "docker-compose.yml"]
+    yaml_paths = [
+        root / "docker-compose.dev.yml",
+        root / "docker-compose.test.yml",
+        root / "docker-compose.yml",
+        root / "deploy/compose.yml",
+    ]
     values = [value for path in yaml_paths if path.exists() for value in yaml_values(root, path)]
     env_example: list[dict[str, Any]] = []
-    env_path = root / ".env.example"
-    for line_number, line in enumerate(env_path.read_text(encoding="utf-8").splitlines(), start=1):
-        match = re.match(r"^([A-Z][A-Z0-9_]*)=(.*)$", line)
-        if match:
-            env_example.append(
-                {
-                    "default": match.group(2),
-                    "name": match.group(1),
-                    "sensitive": bool(
-                        re.search(
-                            r"(?:KEY|PASSWORD|SECRET|TOKEN|CREDENTIAL)",
-                            match.group(1),
-                        )
-                    ),
-                    "source": {
-                        "file": relative(root, env_path),
-                        "line": line_number,
-                    },
-                }
-            )
+    for env_path in (
+        root / ".env.example",
+        root / ".env.http.example",
+        root / "deploy/.env.example",
+    ):
+        for line_number, line in enumerate(
+            env_path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            match = re.match(r"^([A-Z][A-Z0-9_]*)=(.*)$", line)
+            if match:
+                env_example.append(
+                    {
+                        "default": match.group(2),
+                        "name": match.group(1),
+                        "sensitive": bool(
+                            re.search(
+                                r"(?:KEY|PASSWORD|SECRET|TOKEN|CREDENTIAL)",
+                                match.group(1),
+                            )
+                        ),
+                        "source": {
+                            "file": relative(root, env_path),
+                            "line": line_number,
+                        },
+                    }
+                )
     property_bindings: list[dict[str, Any]] = []
     value_injections: list[dict[str, Any]] = []
     for path in sorted((root / "backend/src/interview_guide").glob("**/*.py")):

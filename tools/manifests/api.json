@@ -3238,19 +3238,10 @@
         {
           "canonicalPath": "/ws/voice-interview/{}",
           "httpMethod": "WEBSOCKET",
-          "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
+          "path": "/ws/voice-interview/${sessionId}",
           "source": {
-            "file": "frontend/src/pages/VoiceInterviewPage.tsx",
-            "line": 588
-          }
-        },
-        {
-          "canonicalPath": "/ws/voice-interview/{}",
-          "httpMethod": "WEBSOCKET",
-          "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
-          "source": {
-            "file": "frontend/src/pages/VoiceInterviewPage.tsx",
-            "line": 649
+            "file": "frontend/src/api/voiceWebSocketUrl.ts",
+            "line": 12
           }
         }
       ],
@@ -4053,19 +4044,10 @@
     {
       "canonicalPath": "/ws/voice-interview/{}",
       "httpMethod": "WEBSOCKET",
-      "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
+      "path": "/ws/voice-interview/${sessionId}",
       "source": {
-        "file": "frontend/src/pages/VoiceInterviewPage.tsx",
-        "line": 588
-      }
-    },
-    {
-      "canonicalPath": "/ws/voice-interview/{}",
-      "httpMethod": "WEBSOCKET",
-      "path": "ws://localhost:8080/ws/voice-interview/${session.sessionId}",
-      "source": {
-        "file": "frontend/src/pages/VoiceInterviewPage.tsx",
-        "line": 649
+        "file": "frontend/src/api/voiceWebSocketUrl.ts",
+        "line": 12
       }
     }
   ],
@@ -4078,7 +4060,7 @@
     "backendEndpointCount": 92,
     "backendOnlyCount": 5,
     "controllerCount": 5,
-    "frontendCallCount": 88,
+    "frontendCallCount": 87,
     "frontendOnlyCount": 0,
     "sseEndpointCount": 2,
     "webSocketEndpointCount": 1

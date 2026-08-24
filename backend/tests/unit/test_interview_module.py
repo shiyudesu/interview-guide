@@ -14,6 +14,7 @@ from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.models import (
     InterviewQuestionRecord,
     InterviewSession,
+    VoiceInterviewSession,
 )
 from interview_guide.modules.interview.models import (
     CategoryScore,
@@ -260,6 +261,23 @@ def test_request_and_voice_duration_validation() -> None:
     assert voice.planned_duration == 30
     with pytest.raises(ValueError, match="5的倍数"):
         CreateVoiceSessionRequest(skillId="java-backend", plannedDuration=17)
+
+
+def test_voice_session_response_uses_deployment_neutral_websocket_path() -> None:
+    response = VoiceInterviewService._response(
+        VoiceInterviewSession(
+            id=42,
+            interview_session_id=1,
+            role_type="backend",
+            current_phase="TECH",
+            status="IN_PROGRESS",
+            start_time=None,
+            planned_duration=30,
+        ),
+        "session-1",
+    )
+
+    assert response.web_socket_url == "/ws/voice-interview/42"
 
 
 def test_voice_phase_allocation_is_duration_based_and_weighted() -> None:

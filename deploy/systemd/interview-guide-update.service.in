@@ -1,0 +1,14 @@
+[Unit]
+Description=Pull and deploy the latest approved InterviewGuide release
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=@DEPLOY_ROOT@
+ExecStart=@DEPLOY_ROOT@/bundle/refresh.sh --root @DEPLOY_ROOT@
+TimeoutStartSec=45min
+
+[Install]
+WantedBy=multi-user.target

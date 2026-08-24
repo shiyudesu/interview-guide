@@ -1,0 +1,155 @@
+name: Publish GHCR deployment
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-ghcr-main
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    name: Select approved revision
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      namespace: ${{ steps.release.outputs.namespace }}
+      publish: ${{ steps.release.outputs.publish }}
+      source_sha: ${{ steps.release.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Resolve release revision
+        id: release
+        env:
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          namespace="${GITHUB_REPOSITORY_OWNER,,}"
+          latest_main="$(git rev-parse HEAD)"
+          source_sha="$WORKFLOW_RUN_SHA"
+          publish=true
+          if [[ "$source_sha" != "$latest_main" ]]; then
+            echo "Skip stale CI revision $source_sha; main is $latest_main."
+            publish=false
+          fi
+          echo "namespace=$namespace" >>"$GITHUB_OUTPUT"
+          echo "publish=$publish" >>"$GITHUB_OUTPUT"
+          echo "source_sha=$source_sha" >>"$GITHUB_OUTPUT"
+
+  backend:
+    name: Publish backend image
+    needs: prepare
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.source_sha }}
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - name: Build and push backend
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: backend/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ needs.prepare.outputs.namespace }}/interview-guide-backend:main
+            ghcr.io/${{ needs.prepare.outputs.namespace }}/interview-guide-backend:sha-${{ needs.prepare.outputs.source_sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ needs.prepare.outputs.source_sha }}
+            org.opencontainers.image.version=sha-${{ needs.prepare.outputs.source_sha }}
+          build-args: |
+            INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=docker.io
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+          provenance: mode=max
+          sbom: true
+
+  frontend:
+    name: Publish frontend image
+    needs: prepare
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.source_sha }}
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - name: Build and push frontend
+        uses: docker/build-push-action@v7
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ needs.prepare.outputs.namespace }}/interview-guide-frontend:main
+            ghcr.io/${{ needs.prepare.outputs.namespace }}/interview-guide-frontend:sha-${{ needs.prepare.outputs.source_sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ needs.prepare.outputs.source_sha }}
+            org.opencontainers.image.version=sha-${{ needs.prepare.outputs.source_sha }}
+          build-args: |
+            INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=docker.io
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+          provenance: mode=max
+          sbom: true
+
+  deployment-bundle:
+    name: Publish deployment channel
+    needs: [prepare, backend, frontend]
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.source_sha }}
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - name: Build and push deployment bundle
+        uses: docker/build-push-action@v7
+        with:
+          context: ./deploy
+          file: deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ needs.prepare.outputs.namespace }}/interview-guide-deploy:main
+            ghcr.io/${{ needs.prepare.outputs.namespace }}/interview-guide-deploy:sha-${{ needs.prepare.outputs.source_sha }}
+          build-args: |
+            SOURCE_REPOSITORY=${{ github.server_url }}/${{ github.repository }}
+            SOURCE_REVISION=${{ needs.prepare.outputs.source_sha }}
+          cache-from: type=gha,scope=deployment-bundle
+          cache-to: type=gha,mode=max,scope=deployment-bundle
+          provenance: mode=max
+          sbom: true

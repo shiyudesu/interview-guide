@@ -1,0 +1,20 @@
+# 仅供 CI/集成测试从宿主机访问生产 Compose 内部服务。
+# 正常部署不要叠加此文件，生产入口只有 frontend。
+
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+
+  redis:
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+
+  minio:
+    ports:
+      - "127.0.0.1:${APP_STORAGE_PORT:-9000}:9000"
+      - "127.0.0.1:${APP_STORAGE_CONSOLE_PORT:-9001}:9001"
+
+  app:
+    ports:
+      - "127.0.0.1:${SERVER_PORT:-8080}:8080"

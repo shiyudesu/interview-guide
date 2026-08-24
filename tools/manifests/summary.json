@@ -7,14 +7,14 @@
       "backendEndpointCount": 92,
       "backendOnlyCount": 5,
       "controllerCount": 5,
-      "frontendCallCount": 88,
+      "frontendCallCount": 87,
       "frontendOnlyCount": 0,
       "sseEndpointCount": 2,
       "webSocketEndpointCount": 1
     },
     "configuration.json": {
-      "configurationValueCount": 144,
-      "envExampleCount": 42,
+      "configurationValueCount": 221,
+      "envExampleCount": 80,
       "envReferencedButUndocumentedCount": 0,
       "propertyBindingCount": 75
     },
@@ -40,7 +40,7 @@
         "redis-script": 1,
         "skill": 66
       },
-      "testFileCount": 50
+      "testFileCount": 51
     }
   },
   "schemaVersion": 1

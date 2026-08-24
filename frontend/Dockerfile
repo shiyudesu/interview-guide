@@ -3,7 +3,7 @@
 # 作用：使用 Node.js 环境来安装依赖并编译前端代码
 # ==============================================================================
 ARG INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=docker.io
-FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/node:24-alpine AS builder
+FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS builder
 WORKDIR /app
 
 # 1. 优先复制依赖定义文件
@@ -26,7 +26,7 @@ RUN pnpm run build
 # 作用：使用 Nginx 来托管构建好的静态文件 (HTML/CSS/JS)
 # 后端由独立 Python 容器运行，前端镜像只包含 Nginx 和静态文件
 # ==============================================================================
-FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/nginx:1.27.4-alpine
+FROM ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY}/library/nginx:1.27.4-alpine@sha256:4ff102c5d78d254a6f0da062b3cf39eaf07f01eec0927fd21e219d0af8bc0591
 
 # 从第一阶段 (builder) 复制构建产物 (dist 目录) 到 Nginx 的默认服务目录
 COPY --from=builder /app/dist /usr/share/nginx/html

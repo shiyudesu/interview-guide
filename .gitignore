@@ -8,6 +8,7 @@ build
 /app/bin
 # Environment variables
 .env
+.env.http
 test-output.txt
 # IDEA code analysis
 qodana.yaml

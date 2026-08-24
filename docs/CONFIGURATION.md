@@ -8,7 +8,45 @@
 cp .env.example .env
 ```
 
-`.env` 不应提交。生产环境也可以直接注入同名环境变量。
+`.env` 不应提交。`scripts/start.sh` 和 Windows 启动脚本会为留空的基础设施密码生成随机值；
+手工运行 Compose 时必须先填写这些值。生产环境也可以直接注入同名环境变量。
+
+无源码服务器部署读取 `/opt/interview-guide/.env`，模板位于 `deploy/.env.example`。除业务配置外，
+它还包含：
+
+```env
+INTERVIEW_GUIDE_IMAGE_REGISTRY=ghcr.io
+INTERVIEW_GUIDE_IMAGE_NAMESPACE=shiyudesu
+INTERVIEW_GUIDE_IMAGE_TAG=main
+INTERVIEW_GUIDE_UPDATE_CHANNEL=main
+INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=docker.io
+COMPOSE_PROJECT_NAME=interview-guide
+```
+
+主动更新时 `INTERVIEW_GUIDE_IMAGE_TAG` 会由已验证的 `sha-<commit>` 临时覆盖；当前和上一成功版本
+记录在部署目录的 `state/` 中。完整流程见 [GHCR 主动拉取部署](DEPLOYMENT.md)。
+
+NAT 高端口的临时 HTTP 验收实例使用单独的 `.env.http`：
+
+```bash
+./scripts/start-http.sh
+```
+
+脚本只在文件不存在时根据 `.env.http.example` 创建 `.env.http`，不会覆盖已有配置，并会为留空的
+`POSTGRES_PASSWORD` 和 `APP_STORAGE_SECRET_KEY` 生成随机值。`.env.http` 已加入 `.gitignore`，
+应继续作为服务器本地配置保存。
+
+Compose 的宿主机绑定通过以下变量控制：
+
+```env
+FRONTEND_BIND_ADDRESS=127.0.0.1
+DEV_INFRASTRUCTURE_BIND_ADDRESS=127.0.0.1
+```
+
+生产 Compose 只发布前端端口，默认绑定 `127.0.0.1`；服务器需要直接接收 NAT 或公网流量时，
+显式设置 `FRONTEND_BIND_ADDRESS=0.0.0.0`。API、PostgreSQL、Redis 和 MinIO 不发布宿主机端口。
+本地开发 Compose 的三组基础设施端口默认也只绑定回环地址。Compose 使用项目作用域自动生成
+容器名和数据卷名，不再声明全局固定容器名。
 
 ## Docker Hub 镜像来源
 
@@ -23,6 +61,9 @@ INTERVIEW_GUIDE_DOCKERHUB_REGISTRY=mirror.example.com
 `http://` 或 `https://`。生产 Compose、本地开发 Compose、Python、Node 和 Nginx 基础镜像会
 统一使用该来源；未设置时仍使用官方 `docker.io`。项目不会自动选择或写入第三方公共镜像站，
 也不会修改宿主机 DNS、Docker daemon 或 Docker Desktop 设置。
+
+所有生产和开发镜像使用多架构 manifest digest，而不是 amd64 单架构 digest。当前完整栈支持
+`linux/amd64` 和 `linux/arm64`，Docker 会选择本机架构，不需要 `platform: linux/amd64`。
 
 如果使用的是普通 HTTP/HTTPS 代理，应配置 Docker daemon 或 Docker Desktop，而不是把代理
 地址填入该变量。具体排障方式见 [运行与排障](OPERATIONS.md#docker-hub-镜像拉取失败)。
@@ -130,7 +171,7 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=interview_guide
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=password
+POSTGRES_PASSWORD=
 APP_DATABASE_POOL_SIZE=10
 APP_DATABASE_MAX_OVERFLOW=0
 
@@ -139,8 +180,8 @@ REDIS_PORT=6379
 REDIS_DB=0
 
 APP_STORAGE_ENDPOINT=http://localhost:9000
-APP_STORAGE_ACCESS_KEY=minioadmin
-APP_STORAGE_SECRET_KEY=minioadmin
+APP_STORAGE_ACCESS_KEY=interview-guide
+APP_STORAGE_SECRET_KEY=
 APP_STORAGE_BUCKET=interview-guide
 APP_STORAGE_REGION=us-east-1
 ```
@@ -148,7 +189,9 @@ APP_STORAGE_REGION=us-east-1
 完整生产 Compose 使用 MinIO；`docker-compose.dev.yml` 使用 RustFS。两者都提供 S3 兼容
 接口，默认 API 端口 9000、控制台端口 9001。
 
-示例密码只适合本地开发。对外部署前必须修改 PostgreSQL 和对象存储凭据。
+一键启动脚本会为留空密码生成随机值。手工运行生产 Compose 前必须显式填写两项密码；生产
+Compose 对空值直接报错，不再回退到仓库内置弱密码。`docker-compose.dev.yml` 仍允许使用本地
+开发默认值，但端口只绑定 `127.0.0.1`。
 
 已有 PostgreSQL volume 不会因修改 `.env` 自动更新数据库用户密码。若密码发生变化，需要
 在数据库中同步修改角色密码，或明确删除本地 volume 后重建。
@@ -158,10 +201,15 @@ APP_STORAGE_REGION=us-east-1
 ```env
 SERVER_PORT=8080
 FRONTEND_PORT=5173
+FRONTEND_BIND_ADDRESS=127.0.0.1
 CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
 LOG_LEVEL=INFO
 TZ=Asia/Shanghai
 ```
+
+前端生产 Nginx 将 `/api/`、`/ws/`、`/docs` 和 `/openapi.json` 转发到同一 Compose 网络内的 API。通过同一个 HTTP 域名、
+IP 和端口访问时属于同源请求，因此 NAT 的公网地址不需要写进 `CORS_ALLOWED_ORIGINS`。只有将
+浏览器前端和 API 拆成不同 origin 时，才需要加入实际的外部 origin。
 
 前端开发变量应放在 `frontend/.env.local`，也可以在命令前临时导出：
 
