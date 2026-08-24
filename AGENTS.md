@@ -104,6 +104,9 @@ Actions 不持有服务器 SSH Key；更新过程必须校验镜像 revision、�
 记录当前及上一成功 tag，并保留数据卷。部署包变化也必须通过 GHCR 通道下发，服务器不得依赖
 完整 Git 仓库。
 
+生产后端镜像必须保留 `.doc`、`.rtf` 的 LibreOffice 转换能力，但使用 nogui 包，并将大型系统
+依赖和 Python site-packages 拆分成有界 layer，避免弱网络因单个超大 blob 无法完成拉取。
+
 同一镜像启动：
 
 1. Migrate：Alembic，成功后其他服务才能启动。

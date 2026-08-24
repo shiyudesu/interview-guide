@@ -12,6 +12,9 @@ ghcr.io/<namespace>/interview-guide-deploy:main
 已经通过 CI 的更新通道。服务器每 5 分钟主动拉取部署包，从 OCI revision 标签解析目标 commit，
 再部署对应的两个 `sha-<commit>` 镜像，不直接运行移动的应用 `main` tag。
 
+后端镜像保留 LibreOffice 文档转换能力，但只安装无图形界面组件。系统包和 Python
+site-packages 分成多个较小 layer，以降低弱网络下载单个大 blob 时超时后整体失败的概率。
+
 ## 发布端准备
 
 工作流位于 `.github/workflows/publish-ghcr.yml`，使用仓库自带的 `GITHUB_TOKEN` 发布 GHCR，

@@ -113,6 +113,9 @@ deployment bundle 三个 GHCR 多架构镜像；服务器的 systemd timer 每 5
 或 uv。首次安装、private GHCR 登录、NAT 配置、日志和回滚命令见
 [GHCR 主动拉取部署](docs/DEPLOYMENT.md)。
 
+后端生产镜像使用无图形界面的 LibreOffice 组件，并将系统依赖和 Python 依赖拆成较小的 OCI
+layer；`.doc`、`.rtf` 文件转换能力保持不变，同时降低弱网络拉取单个大 layer 超时的概率。
+
 ## 临时 HTTP 验收部署
 
 NAT 服务器没有可用的 80/443，或宿主机已有多个服务时，可以启动隔离的 HTTP 验收实例：

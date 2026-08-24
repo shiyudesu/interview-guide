@@ -142,6 +142,22 @@ jobs:
         run: >-
           docker run --rm interview-guide-python:ci
           sh -c 'test ! -e /usr/bin/java && ! command -v java'
+      - name: Verify headless document conversion
+        run: |
+          docker run --rm --entrypoint sh interview-guide-python:ci -ec '
+            dpkg-query -W libreoffice-core-nogui libreoffice-writer-nogui
+            ! dpkg-query -W libreoffice-core 2>/dev/null
+            ! dpkg-query -W libreoffice-writer 2>/dev/null
+          '
+          docker run --rm --entrypoint sh interview-guide-python:ci -ec '
+            workdir="$(mktemp -d)"
+            printf "%s" "{\\rtf1\\ansi Interview Guide}" >"$workdir/sample.rtf"
+            libreoffice --headless \
+              --convert-to docx \
+              --outdir "$workdir" \
+              "$workdir/sample.rtf"
+            test -s "$workdir/sample.docx"
+          '
 
   frontend:
     name: Frontend tests and build

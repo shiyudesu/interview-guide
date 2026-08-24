@@ -223,6 +223,19 @@ class LifecycleScriptsTest(unittest.TestCase):
                 self.assertIn(variable, content)
                 self.assertIn("registry", content.lower())
 
+    def test_backend_image_uses_headless_office_and_bounded_dependency_layers(self) -> None:
+        dockerfile = (REPOSITORY_ROOT / "backend/Dockerfile").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("libreoffice-core-nogui", dockerfile)
+        self.assertIn("libreoffice-writer-nogui", dockerfile)
+        self.assertNotIn("libreoffice-core=", dockerfile)
+        self.assertNotIn("libreoffice-writer=", dockerfile)
+        self.assertEqual(
+            dockerfile.count("COPY --from=builder /opt/venv-layers/"),
+            5,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
