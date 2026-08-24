@@ -145,9 +145,10 @@ jobs:
       - name: Verify headless document conversion
         run: |
           docker run --rm --entrypoint sh interview-guide-python:ci -ec '
-            dpkg-query -W libreoffice-core-nogui libreoffice-writer-nogui
-            ! dpkg-query -W libreoffice-core 2>/dev/null
-            ! dpkg-query -W libreoffice-writer 2>/dev/null
+            test "$(dpkg-query -W -f=\${db:Status-Status} libreoffice-core-nogui)" = installed
+            test "$(dpkg-query -W -f=\${db:Status-Status} libreoffice-writer-nogui)" = installed
+            test "$(dpkg-query -W -f=\${db:Status-Status} libreoffice-core 2>/dev/null || true)" != installed
+            test "$(dpkg-query -W -f=\${db:Status-Status} libreoffice-writer 2>/dev/null || true)" != installed
           '
           docker run --rm --entrypoint sh interview-guide-python:ci -ec '
             workdir="$(mktemp -d)"
