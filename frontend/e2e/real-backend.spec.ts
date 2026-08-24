@@ -7,11 +7,14 @@ test.describe('真实 Python 后端 @real-backend', () => {
   test.skip(!runRealBackend, 'RUN_REAL_BACKEND_E2E is not enabled');
 
   test('面试日程真实 API 数据会显示在现有页面', async ({ page, request }) => {
+    const interviewTime = new Date(Date.now() + 48 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 19);
     const created = await request.post(`${backendUrl}/api/interview-schedule`, {
       data: {
         companyName: 'Playwright Real Backend Corp',
         position: 'Backend Engineer',
-        interviewTime: '2026-08-17T10:30:00',
+        interviewTime,
         interviewType: 'VIDEO',
         roundNumber: 1,
         notes: 'real-backend-e2e',
@@ -26,6 +29,7 @@ test.describe('真实 Python 后端 @real-backend', () => {
 
     try {
       await page.goto('/interview-schedule');
+      await page.getByRole('button', { name: '列表', exact: true }).click();
 
       await expect(page.getByText('Playwright Real Backend Corp').first()).toBeVisible();
       await expect(page.getByText('Backend Engineer').first()).toBeVisible();
