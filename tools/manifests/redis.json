@@ -268,7 +268,7 @@
       "name": "SESSION_CACHE_KEY_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 36
+        "line": 40
       },
       "valueExpression": "\"voice:interview:session:\""
     },
@@ -276,7 +276,7 @@
       "name": "SESSION_CACHE_TTL_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 37
+        "line": 41
       },
       "valueExpression": "60 * 60"
     }
@@ -299,7 +299,7 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 360
+        "line": 396
       },
       "value": "{self.postgres_host}:{self.postgres_port}/{database}"
     },
@@ -358,6 +358,20 @@
         "line": 55
       },
       "value": "knowledgebase:question-gen:stream"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/session.py",
+        "line": 116
+      },
+      "value": "auth:session:{session_id}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/session.py",
+        "line": 120
+      },
+      "value": "auth:user-sessions:{user_id}"
     },
     {
       "source": {
@@ -488,7 +502,7 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 36
+        "line": 40
       },
       "value": "voice:interview:session:"
     },

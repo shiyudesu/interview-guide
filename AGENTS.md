@@ -5,10 +5,10 @@
 生产后端为 Python/FastAPI。当前行为由后端测试、仓库清单、生产 Compose 集成和受保护
 真实模型工作流验证。
 
-多租户账号和用户自带 API Key 尚未实现，目标架构、迁移边界和发布门禁见
-`docs/MULTI_TENANT_BYOK_PLAN.md`。该文档描述规划行为，不改变本文件记录的当前生产约束；开始
-实施时必须通过 Alembic 和同一组代码、测试、README、AGENTS、配置及运维文档变更，把完成迁移
-后的多租户约束更新为新的受保护行为。
+多租户账号和用户自带 API Key 正在按 `docs/MULTI_TENANT_BYOK_PLAN.md` 分阶段实施。当前已经具备
+Provider 出站防护、用户/密码凭据表、Redis Session、CSRF、默认拒绝认证、管理员 CLI 和
+`legacy-owner` 兼容迁移；资源级 Repository 授权、用户级 Provider、前端登录和开放注册仍未完成。
+`APP_AUTH_REGISTRATION_ENABLED` 必须保持关闭，直到计划中的全部双用户隔离门禁通过。
 
 目录：
 

@@ -5,6 +5,7 @@ description = "FastAPI backend for InterviewGuide"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "alembic==1.19.1",
+    "argon2-cffi==25.1.0",
     "apscheduler==3.11.3",
     "boto3==1.43.72",
     "cryptography==50.0.0",
@@ -39,6 +40,8 @@ dependencies = [
 
 [project.scripts]
 interview-guide-api = "interview_guide.main:run"
+interview-guide-claim-legacy-data = "interview_guide.modules.auth.cli:claim_legacy_data_main"
+interview-guide-create-admin = "interview_guide.modules.auth.cli:create_admin_main"
 interview-guide-migrate = "interview_guide.migrate:main"
 interview-guide-scheduler = "interview_guide.scheduler:main"
 interview-guide-worker = "interview_guide.worker:main"

@@ -9,7 +9,11 @@ from uuid import UUID
 
 from redis.asyncio import Redis
 
-from interview_guide.common.db.models import VoiceInterviewMessage, VoiceInterviewSession
+from interview_guide.common.db.models import (
+    LEGACY_OWNER_ID,
+    VoiceInterviewMessage,
+    VoiceInterviewSession,
+)
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.interview.models import (
     InterviewChannel,
@@ -35,7 +39,7 @@ from interview_guide.modules.voice_interview.repository import (
 logger = logging.getLogger(__name__)
 SESSION_CACHE_KEY_PREFIX = "voice:interview:session:"
 SESSION_CACHE_TTL_SECONDS = 60 * 60
-DEFAULT_USER_ID = "default"
+DEFAULT_USER_ID = LEGACY_OWNER_ID
 DEFAULT_SKILL_ID = "java-backend"
 DEFAULT_DIFFICULTY = "mid"
 STALE_SESSION_AGE = timedelta(hours=2)
@@ -138,7 +142,7 @@ class VoiceInterviewService:
 
     async def list_sessions(
         self,
-        user_id: str | None,
+        user_id: UUID | None,
         status: str | None,
         *,
         session_ids: list[int] | None = None,
@@ -433,7 +437,7 @@ class VoiceInterviewService:
             "status": entity.status,
             "tech_enabled": entity.tech_enabled,
             "updated_at": timestamp(entity.updated_at),
-            "user_id": entity.user_id,
+            "user_id": str(entity.user_id),
         }
 
     @staticmethod
@@ -467,7 +471,7 @@ class VoiceInterviewService:
             status=document.get("status"),
             tech_enabled=document.get("tech_enabled"),
             updated_at=timestamp("updated_at"),
-            user_id=document.get("user_id"),
+            user_id=UUID(str(document.get("user_id", LEGACY_OWNER_ID))),
         )
 
     @staticmethod

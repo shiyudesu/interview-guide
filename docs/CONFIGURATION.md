@@ -180,6 +180,31 @@ API Key 后即可自动拉取。API Key 只发送给本系统后端，不会由�
 `qwen3.7-text-embedding` 是有效的 Embedding 模型。不要把聊天模型名填到
 `embeddingModel`。
 
+## 账号与 Session
+
+正式 Compose 通过以下配置启用账号底座，注册默认关闭：
+
+```env
+APP_AUTH_ENABLED=true
+APP_AUTH_REGISTRATION_ENABLED=false
+APP_AUTH_COOKIE_SECURE=true
+APP_AUTH_SESSION_IDLE_SECONDS=86400
+APP_AUTH_SESSION_ABSOLUTE_SECONDS=604800
+APP_AUTH_LOGIN_IP_LIMIT_PER_MINUTE=20
+APP_AUTH_LOGIN_ACCOUNT_LIMIT_PER_MINUTE=8
+APP_AUTH_REGISTRATION_IP_LIMIT_PER_HOUR=5
+```
+
+- Session 保存在 Redis，浏览器只保存 `HttpOnly + Secure + SameSite=Lax` Cookie。
+- 登录响应和 `/api/auth/me` 返回 CSRF Token；所有已登录状态变更请求必须发送
+  `X-CSRF-Token`，并通过同源 Origin 校验。
+- 密码使用 Argon2id 哈希，哈希操作进入受限线程池。
+- 登录同时按客户端 IP 和不可逆邮箱摘要限流，日志和 Redis key 不保存邮箱明文。
+- `APP_AUTH_ENABLED` 对已有未配置部署默认保持关闭，避免自动更新后无管理员可登录；新安装模板会
+  显式设为 `true`。
+- `APP_AUTH_REGISTRATION_ENABLED` 在业务资源和 Provider 完成多租户隔离前必须保持 `false`。
+- `.env.http` 明确设置 `APP_AUTH_ENABLED=false`，临时公网 HTTP 不承载正式账号或 BYOK。
+
 当前固定模型默认值和可配置语音默认值：
 
 ```env

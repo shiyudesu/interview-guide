@@ -64,6 +64,13 @@ class ErrorCode(Enum):
     VOICE_CONFIG_TEST_FAILED = (11011, "语音服务连通性测试失败")
     PROVIDER_OUTBOUND_REJECTED = (11012, "Provider 出站地址被安全策略拒绝")
 
+    AUTH_INVALID_CREDENTIALS = (12001, "邮箱或密码错误")
+    USER_ALREADY_EXISTS = (12002, "用户已存在")
+    USER_DISABLED = (12003, "用户已被禁用")
+    AUTH_SESSION_INVALID = (12004, "登录状态已失效")
+    AUTH_CSRF_INVALID = (12005, "请求安全校验失败")
+    AUTH_REGISTRATION_DISABLED = (12006, "当前未开放注册")
+
     def __init__(self, code: int, message: str) -> None:
         self.code = code
         self.message = message

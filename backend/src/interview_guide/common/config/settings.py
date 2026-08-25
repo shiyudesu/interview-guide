@@ -34,6 +34,44 @@ class Settings(BaseSettings):
         default=50 * 1024 * 1024,
         validation_alias="APP_MULTIPART_MAX_BYTES",
     )
+    auth_enabled: bool = Field(default=False, validation_alias="APP_AUTH_ENABLED")
+    auth_registration_enabled: bool = Field(
+        default=False,
+        validation_alias="APP_AUTH_REGISTRATION_ENABLED",
+    )
+    auth_cookie_name: str = Field(
+        default="interview_guide_session",
+        validation_alias="APP_AUTH_COOKIE_NAME",
+    )
+    auth_cookie_secure: bool = Field(
+        default=True,
+        validation_alias="APP_AUTH_COOKIE_SECURE",
+    )
+    auth_session_idle_seconds: int = Field(
+        default=24 * 60 * 60,
+        ge=300,
+        validation_alias="APP_AUTH_SESSION_IDLE_SECONDS",
+    )
+    auth_session_absolute_seconds: int = Field(
+        default=7 * 24 * 60 * 60,
+        ge=900,
+        validation_alias="APP_AUTH_SESSION_ABSOLUTE_SECONDS",
+    )
+    auth_login_ip_limit_per_minute: int = Field(
+        default=20,
+        ge=1,
+        validation_alias="APP_AUTH_LOGIN_IP_LIMIT_PER_MINUTE",
+    )
+    auth_login_account_limit_per_minute: int = Field(
+        default=8,
+        ge=1,
+        validation_alias="APP_AUTH_LOGIN_ACCOUNT_LIMIT_PER_MINUTE",
+    )
+    auth_registration_ip_limit_per_hour: int = Field(
+        default=5,
+        ge=1,
+        validation_alias="APP_AUTH_REGISTRATION_IP_LIMIT_PER_HOUR",
+    )
     blocking_worker_count: int = Field(
         default=8,
         ge=1,
@@ -337,9 +375,7 @@ class Settings(BaseSettings):
     @property
     def provider_outbound_allowed_host_list(self) -> tuple[str, ...]:
         return tuple(
-            host.strip()
-            for host in self.provider_outbound_allowed_hosts.split(",")
-            if host.strip()
+            host.strip() for host in self.provider_outbound_allowed_hosts.split(",") if host.strip()
         )
 
     @property

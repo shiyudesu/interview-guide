@@ -22,6 +22,7 @@ from interview_guide.common.redis.streams import RedisStreamService
 from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.infrastructure.file.document import create_document_parser
 from interview_guide.infrastructure.storage.s3 import S3Storage
+from interview_guide.modules.auth.runtime import AuthRuntime
 from interview_guide.modules.llm_provider.voice import VoiceConfigService
 
 
@@ -42,6 +43,13 @@ class RuntimeInfrastructure:
         self.rate_limiter = RateLimiter(
             self.redis.client,
             resources / "scripts/rate_limit_single.lua",
+        )
+        self.auth_runtime = AuthRuntime(
+            self.database.sessions,
+            self.redis.client,
+            self.rate_limiter,
+            self.blocking_executor,
+            settings,
         )
         encryption = ApiKeyEncryption(resolve_configured_key(settings))
         repository = ProviderRepository(self.database.sessions)

@@ -1,6 +1,184 @@
 {
   "backendEndpoints": [
     {
+      "canonicalPath": "/api/auth/login",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [],
+      "handler": "login",
+      "httpMethod": "POST",
+      "parameters": [
+        {
+          "annotation": "LoginRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
+      "path": "/api/auth/login",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/api.py",
+        "line": 62
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/auth/logout",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [],
+      "handler": "logout",
+      "httpMethod": "POST",
+      "parameters": [
+        {
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        },
+        {
+          "annotation": "ActorDependency",
+          "name": "actor"
+        }
+      ],
+      "path": "/api/auth/logout",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/api.py",
+        "line": 73
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/auth/me",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [],
+      "handler": "me",
+      "httpMethod": "GET",
+      "parameters": [
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        },
+        {
+          "annotation": "ActorDependency",
+          "name": "actor"
+        },
+        {
+          "annotation": "SessionDependency",
+          "name": "session"
+        }
+      ],
+      "path": "/api/auth/me",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/api.py",
+        "line": 85
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/auth/password/change",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [],
+      "handler": "change_password",
+      "httpMethod": "POST",
+      "parameters": [
+        {
+          "annotation": "ChangePasswordRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        },
+        {
+          "annotation": "ActorDependency",
+          "name": "actor"
+        }
+      ],
+      "path": "/api/auth/password/change",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/api.py",
+        "line": 94
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/auth/register",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [],
+      "handler": "register",
+      "httpMethod": "POST",
+      "parameters": [
+        {
+          "annotation": "RegisterRequest",
+          "name": "payload"
+        },
+        {
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        }
+      ],
+      "path": "/api/auth/register",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/api.py",
+        "line": 51
+      },
+      "transport": "rest"
+    },
+    {
+      "canonicalPath": "/api/auth/sessions/revoke",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [],
+      "handler": "revoke_sessions",
+      "httpMethod": "POST",
+      "parameters": [
+        {
+          "annotation": "Request",
+          "name": "request"
+        },
+        {
+          "annotation": "ServiceDependency",
+          "name": "service"
+        },
+        {
+          "annotation": "ActorDependency",
+          "name": "actor"
+        }
+      ],
+      "path": "/api/auth/sessions/revoke",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/api.py",
+        "line": 107
+      },
+      "transport": "rest"
+    },
+    {
       "canonicalPath": "/api/interview-schedule",
       "consumes": null,
       "controller": "api",
@@ -2859,7 +3037,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 104
+        "line": 105
       },
       "transport": "rest"
     },
@@ -2894,7 +3072,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 58
+        "line": 59
       },
       "transport": "rest"
     },
@@ -2929,7 +3107,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 126
+        "line": 131
       },
       "transport": "rest"
     },
@@ -2964,7 +3142,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 69
+        "line": 70
       },
       "transport": "rest"
     },
@@ -2999,7 +3177,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 80
+        "line": 81
       },
       "transport": "rest"
     },
@@ -3034,7 +3212,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 140
+        "line": 145
       },
       "transport": "rest"
     },
@@ -3069,7 +3247,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 167
+        "line": 172
       },
       "transport": "rest"
     },
@@ -3104,7 +3282,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 132
+        "line": 137
       },
       "transport": "rest"
     },
@@ -3143,7 +3321,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 86
+        "line": 87
       },
       "transport": "rest"
     },
@@ -3178,7 +3356,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/api.py",
-        "line": 99
+        "line": 100
       },
       "transport": "rest"
     },
@@ -3194,7 +3372,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 125
+        "line": 132
       },
       "transport": "rest"
     },
@@ -3210,7 +3388,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 129
+        "line": 136
       },
       "transport": "rest"
     },
@@ -3226,7 +3404,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/main.py",
-        "line": 133
+        "line": 140
       },
       "transport": "rest"
     },
@@ -4057,8 +4235,8 @@
     "frontend/src URL literals"
   ],
   "summary": {
-    "backendEndpointCount": 92,
-    "backendOnlyCount": 5,
+    "backendEndpointCount": 98,
+    "backendOnlyCount": 11,
     "controllerCount": 5,
     "frontendCallCount": 87,
     "frontendOnlyCount": 0,
@@ -4067,6 +4245,54 @@
   },
   "unmatched": {
     "backendOnly": [
+      {
+        "httpMethod": "POST",
+        "path": "/api/auth/login",
+        "source": {
+          "file": "backend/src/interview_guide/modules/auth/api.py",
+          "line": 62
+        }
+      },
+      {
+        "httpMethod": "POST",
+        "path": "/api/auth/logout",
+        "source": {
+          "file": "backend/src/interview_guide/modules/auth/api.py",
+          "line": 73
+        }
+      },
+      {
+        "httpMethod": "GET",
+        "path": "/api/auth/me",
+        "source": {
+          "file": "backend/src/interview_guide/modules/auth/api.py",
+          "line": 85
+        }
+      },
+      {
+        "httpMethod": "POST",
+        "path": "/api/auth/password/change",
+        "source": {
+          "file": "backend/src/interview_guide/modules/auth/api.py",
+          "line": 94
+        }
+      },
+      {
+        "httpMethod": "POST",
+        "path": "/api/auth/register",
+        "source": {
+          "file": "backend/src/interview_guide/modules/auth/api.py",
+          "line": 51
+        }
+      },
+      {
+        "httpMethod": "POST",
+        "path": "/api/auth/sessions/revoke",
+        "source": {
+          "file": "backend/src/interview_guide/modules/auth/api.py",
+          "line": 107
+        }
+      },
       {
         "httpMethod": "PUT",
         "path": "/api/interview-schedule/{schedule_id}/status",
@@ -4088,7 +4314,7 @@
         "path": "/health",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 125
+          "line": 132
         }
       },
       {
@@ -4096,7 +4322,7 @@
         "path": "/info",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 129
+          "line": 136
         }
       },
       {
@@ -4104,7 +4330,7 @@
         "path": "/metrics",
         "source": {
           "file": "backend/src/interview_guide/main.py",
-          "line": 133
+          "line": 140
         }
       }
     ],

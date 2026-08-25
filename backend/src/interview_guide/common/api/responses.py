@@ -10,7 +10,7 @@ from interview_guide.common.api.models import ApiProblem
 from interview_guide.common.result import Result
 
 NOT_FOUND_CODES = {2001, 2008, 3001, 3003, 6001, 9001, 10001, 10006, 11001, 11008}
-CONFLICT_CODES = {2004, 3004, 3007, 11002, 11007}
+CONFLICT_CODES = {2004, 3004, 3007, 11002, 11007, 12002}
 UNPROCESSABLE_CODES = {2002, 2006, 3009, 6002}
 SERVICE_UNAVAILABLE_CODES = {2007, 3005, 3006, 6004, 6006, 7001, 7003, 11006, 11011}
 INTERNAL_CODES = {2003, 3008, 4001, 4002, 4003, 5001, 6005, 11004, 11005, 11009, 11010}
@@ -37,6 +37,10 @@ def http_status_for_code(code: int) -> int:
         return 503
     if code == 7004:
         return 401
+    if code in {12001, 12004}:
+        return 401
+    if code in {12003, 12005, 12006}:
+        return 403
     if code in {7005, 8001}:
         return 429
     if code in INTERNAL_CODES:

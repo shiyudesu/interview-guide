@@ -18,6 +18,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    func,
     text,
 )
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION, JSON, TIMESTAMP, UUID
@@ -26,6 +27,44 @@ from sqlalchemy.orm import Mapped, mapped_column
 from interview_guide.common.db.base import Base
 
 TIMESTAMP_6 = TIMESTAMP(timezone=False, precision=6)
+LEGACY_OWNER_ID = PythonUUID("00000000-0000-0000-0000-000000000001")
+
+
+class UserAccount(Base):
+    __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint("kind IN ('HUMAN', 'SYSTEM')", name="users_kind_check"),
+        CheckConstraint("role IN ('USER', 'ADMIN')", name="users_role_check"),
+        CheckConstraint(
+            "status IN ('PENDING', 'ACTIVE', 'DISABLED')",
+            name="users_status_check",
+        ),
+        Index("uq_users_normalized_email", func.lower(text("email")), unique=True),
+    )
+
+    id: Mapped[PythonUUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    email: Mapped[str] = mapped_column(String(320), nullable=False)
+    display_name: Mapped[str | None] = mapped_column(String(100))
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    email_verified_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+
+
+class UserPasswordCredential(Base):
+    __tablename__ = "user_password_credentials"
+
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_user_password_credentials_user", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    password_hash: Mapped[str] = mapped_column(String(512), nullable=False)
+    password_changed_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
 
 
 class InterviewSchedule(Base):
@@ -35,6 +74,7 @@ class InterviewSchedule(Base):
             "status IN ('PENDING', 'COMPLETED', 'CANCELLED', 'RESCHEDULED')",
             name="interview_schedule_status_check",
         ),
+        Index("idx_interview_schedule_user_id", "user_id"),
     )
 
     id: Mapped[int] = mapped_column(
@@ -53,6 +93,12 @@ class InterviewSchedule(Base):
     round_number: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(255), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_interview_schedule_user"),
+        nullable=False,
+        server_default=text("'00000000-0000-0000-0000-000000000001'::uuid"),
+    )
 
 
 class Resume(Base):
@@ -63,6 +109,7 @@ class Resume(Base):
             name="resumes_analyze_status_check",
         ),
         UniqueConstraint("file_hash", name="idx_resume_hash"),
+        Index("idx_resumes_user_id", "user_id"),
     )
 
     id: Mapped[int] = mapped_column(
@@ -82,6 +129,12 @@ class Resume(Base):
     storage_key: Mapped[str | None] = mapped_column(String(500))
     storage_url: Mapped[str | None] = mapped_column(String(1000))
     uploaded_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_resumes_user"),
+        nullable=False,
+        server_default=text("'00000000-0000-0000-0000-000000000001'::uuid"),
+    )
 
 
 class ResumeAnalysis(Base):
@@ -149,6 +202,7 @@ class InterviewSession(Base):
             "request_id",
             unique=True,
         ),
+        Index("idx_interview_sessions_user_id", "user_id"),
     )
 
     id: Mapped[int] = mapped_column(
@@ -195,6 +249,12 @@ class InterviewSession(Base):
     skill_id: Mapped[str | None] = mapped_column(String(64))
     status: Mapped[str | None] = mapped_column(String(20))
     strengths_json: Mapped[str | None] = mapped_column(Text)
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_interview_sessions_user"),
+        nullable=False,
+        server_default=text("'00000000-0000-0000-0000-000000000001'::uuid"),
+    )
 
 
 class InterviewQuestionRecord(Base):
@@ -368,6 +428,7 @@ class KnowledgeBase(Base):
             "question_gen_status",
             "question_gen_updated_at",
         ),
+        Index("idx_knowledge_bases_user_id", "user_id"),
     )
 
     id: Mapped[int] = mapped_column(
@@ -410,6 +471,12 @@ class KnowledgeBase(Base):
     uploaded_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
     vector_error: Mapped[str | None] = mapped_column(String(500))
     vector_status: Mapped[str | None] = mapped_column(String(20))
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_knowledge_bases_user"),
+        nullable=False,
+        server_default=text("'00000000-0000-0000-0000-000000000001'::uuid"),
+    )
 
 
 class KnowledgeBaseQuestion(Base):
@@ -546,6 +613,7 @@ class RagChatSession(Base):
             name="rag_chat_sessions_status_check",
         ),
         Index("idx_rag_session_updated", "updated_at"),
+        Index("idx_rag_chat_sessions_user_id", "user_id"),
     )
 
     id: Mapped[int] = mapped_column(
@@ -562,6 +630,12 @@ class RagChatSession(Base):
     status: Mapped[str | None] = mapped_column(String(20))
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_rag_chat_sessions_user"),
+        nullable=False,
+        server_default=text("'00000000-0000-0000-0000-000000000001'::uuid"),
+    )
 
 
 class RagChatMessage(Base):
@@ -699,6 +773,7 @@ class VoiceInterviewSession(Base):
             "status IN ('IN_PROGRESS', 'PAUSED', 'COMPLETED', 'FAILED')",
             name="voice_interview_sessions_status_check",
         ),
+        Index("idx_voice_interview_sessions_user_id", "user_id"),
     )
 
     id: Mapped[int] = mapped_column(
@@ -738,4 +813,9 @@ class VoiceInterviewSession(Base):
     status: Mapped[str | None] = mapped_column(String(255))
     tech_enabled: Mapped[bool | None] = mapped_column(Boolean)
     updated_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
-    user_id: Mapped[str | None] = mapped_column(String(255))
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_voice_interview_sessions_user"),
+        nullable=False,
+        server_default=text("'00000000-0000-0000-0000-000000000001'::uuid"),
+    )

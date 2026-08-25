@@ -148,6 +148,27 @@ docker compose exec gateway caddy list-modules >/dev/null
 docker compose restart gateway
 ```
 
+## 管理员创建与登录状态
+
+账号启用但尚未创建管理员时，健康检查仍可访问，所有业务 API 返回 HTTP 401。管理员必须通过镜像
+内的 `interview-guide-create-admin` 命令创建，密码从 TTY 交互读取。完整命令见
+[GHCR 主动拉取部署](DEPLOYMENT.md#首次安装)。
+
+排查 Redis Session：
+
+```bash
+docker compose exec redis redis-cli --scan --pattern 'auth:session:*'
+docker compose exec redis redis-cli --scan --pattern 'auth:user-sessions:*'
+```
+
+不要输出 Session key 的值。退出、修改密码、用户禁用或显式撤销会删除对应 Session。出现 403
+且错误为“请求安全校验失败”时，检查：
+
+1. 前端是否先调用 `/api/auth/me` 获得当前 CSRF Token。
+2. 状态变更请求是否发送 `X-CSRF-Token`。
+3. `Origin`、`Host`、`X-Forwarded-Host` 和 `X-Forwarded-Proto` 是否对应同一个 HTTPS 域名。
+4. Caddy 和前端 Nginx 是否仍保持同源代理，不要把 API 暴露为另一个域名。
+
 ## 宿主机架构
 
 生产镜像不再固定 `linux/amd64`。先查看 Docker daemon 架构：

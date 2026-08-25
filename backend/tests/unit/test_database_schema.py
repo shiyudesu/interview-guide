@@ -61,6 +61,8 @@ def test_sqlalchemy_metadata_contains_all_business_tables() -> None:
         "voice_model_config",
         "voice_interview_messages",
         "voice_interview_sessions",
+        "users",
+        "user_password_credentials",
     }
 
 

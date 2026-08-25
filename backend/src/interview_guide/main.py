@@ -19,6 +19,8 @@ from interview_guide.common.logging.config import configure_logging
 from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.common.telemetry import configure_tracing
+from interview_guide.modules.auth.api import router as auth_router
+from interview_guide.modules.auth.middleware import AuthenticationMiddleware
 from interview_guide.modules.interview.api import router as interview_router
 from interview_guide.modules.interview_schedule.api import (
     router as interview_schedule_router,
@@ -96,6 +98,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.blocking_executor = blocking_executor
 
     install_exception_handlers(app)
+    app.include_router(auth_router)
     app.include_router(interview_schedule_router)
     app.include_router(interview_router)
     app.include_router(interview_skill_router)
@@ -120,6 +123,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(
         MultipartSizeLimitMiddleware,
         max_bytes=resolved_settings.multipart_max_bytes,
+    )
+    app.add_middleware(
+        AuthenticationMiddleware,
+        settings=resolved_settings,
     )
 
     @app.get("/health", include_in_schema=False)

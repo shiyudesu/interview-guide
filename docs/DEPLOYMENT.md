@@ -103,6 +103,31 @@ sudo rm -rf -- "$DEPLOY_TMP"
 - 等待 Let's Encrypt 证书签发并通过真实 HTTPS `/health` 检查
 - 安装并启动 `interview-guide-update.timer`
 
+首次迁移会创建不可登录的 `legacy-owner`，用于安全承接升级前的存量资源。安装完成后创建管理员并
+认领数据，密码只从交互式 TTY 读取，不写入命令参数或 `.env`：
+
+```bash
+cd /opt/interview-guide
+TAG="$(sudo cat state/current-tag)"
+
+sudo env INTERVIEW_GUIDE_IMAGE_TAG="$TAG" docker compose \
+  --project-name interview-guide \
+  --project-directory /opt/interview-guide \
+  --env-file /opt/interview-guide/.env \
+  -f /opt/interview-guide/bundle/compose.yml \
+  run --rm app interview-guide-create-admin --email admin@example.com
+
+sudo env INTERVIEW_GUIDE_IMAGE_TAG="$TAG" docker compose \
+  --project-name interview-guide \
+  --project-directory /opt/interview-guide \
+  --env-file /opt/interview-guide/.env \
+  -f /opt/interview-guide/bundle/compose.yml \
+  run --rm app interview-guide-claim-legacy-data \
+  --admin-email admin@example.com --yes
+```
+
+认领命令只更新资源所有者，不删除数据。注册在完整多租户隔离门禁通过前保持关闭。
+
 服务器保存的只有：
 
 ```text

@@ -515,13 +515,18 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 52
+    "testFileCount": 54
   },
   "tests": [
     {
       "disabledMarkers": 0,
       "file": "backend/tests/conftest.py",
       "sha256": "fdc64e80bf8e63c5f3f79f4b79040f7f89d764c42f9f3236b09a446817e96f72"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/integration/test_auth_integration.py",
+      "sha256": "22df14943c16d24ff283d0b2ce27fc8fbc2eea20c7889b977671cfd96dc96457"
     },
     {
       "disabledMarkers": 0,
@@ -580,8 +585,13 @@
     },
     {
       "disabledMarkers": 0,
+      "file": "backend/tests/unit/test_auth.py",
+      "sha256": "a8ca5d25a3c1b1b0246ae414e747ec903e9dc168bacddf89d0c9f4e637bac3d4"
+    },
+    {
+      "disabledMarkers": 0,
       "file": "backend/tests/unit/test_database_schema.py",
-      "sha256": "481daa6920b42a05af6d82fc140b447ba5fbb97669656c7d8f71d48fa2f985f4"
+      "sha256": "0dda62af60d858879fa2f9291389cfd240cb6c042f7a45fbcc0931c61bdf9b30"
     },
     {
       "disabledMarkers": 0,
@@ -651,7 +661,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_provider_outbound.py",
-      "sha256": "13e948da74c0391b7c1b1e5903482a519871f20157d68ed2b9f170316b62045d"
+      "sha256": "f47bab569bb5ba8c81638bfd62f78729f749de306a850670b495220d9f457dd8"
     },
     {
       "disabledMarkers": 0,

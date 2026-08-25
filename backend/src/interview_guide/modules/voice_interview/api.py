@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, Query, Request
 from starlette.responses import Response
@@ -110,10 +111,14 @@ async def list_sessions(
     limit: Annotated[int | None, Query(ge=1, le=200)] = None,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> Response:
+    try:
+        resolved_user_id = UUID(userId) if userId is not None else None
+    except ValueError as error:
+        raise BusinessException(ErrorCode.BAD_REQUEST, "userId 必须是 UUID") from error
     return result_response(
         Result.ok(
             await service.list_sessions(
-                userId,
+                resolved_user_id,
                 status,
                 session_ids=sessionIds,
                 limit=limit,

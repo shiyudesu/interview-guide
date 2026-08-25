@@ -84,9 +84,7 @@ async def test_private_and_metadata_addresses_are_rejected(address: str) -> None
 
 @pytest.mark.asyncio
 async def test_any_private_dns_answer_rejects_the_whole_host() -> None:
-    policy = ProviderOutboundPolicy(
-        StaticResolver(("93.184.216.34", "169.254.169.254"))
-    )
+    policy = ProviderOutboundPolicy(StaticResolver(("93.184.216.34", "169.254.169.254")))
 
     with pytest.raises(BusinessException, match="禁止访问的网络"):
         await policy.validate_http_url("https://provider.example/v1")

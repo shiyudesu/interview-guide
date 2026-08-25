@@ -10,6 +10,7 @@ from sqlalchemy import and_, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from interview_guide.common.db.models import (
+    LEGACY_OWNER_ID,
     InterviewSession,
     Resume,
     VoiceInterviewMessage,
@@ -94,7 +95,7 @@ class VoiceInterviewRepository:
                 status="IN_PROGRESS",
                 tech_enabled=tech_enabled,
                 updated_at=timestamp,
-                user_id="default",
+                user_id=LEGACY_OWNER_ID,
             )
             session.add(entity)
             await session.flush()
@@ -155,7 +156,7 @@ class VoiceInterviewRepository:
 
     async def list_sessions(
         self,
-        user_id: str,
+        user_id: UUID,
         status: str | None,
         *,
         session_ids: list[int] | None = None,
