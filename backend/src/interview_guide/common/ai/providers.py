@@ -36,6 +36,10 @@ DASHSCOPE_EMBEDDING_DIMENSIONS = 1024
 
 
 class ProviderRegistry(Protocol):
+    async def default_chat_alias(self) -> str: ...
+
+    async def default_embedding_alias(self) -> str: ...
+
     async def get_chat(self, provider_id: str | None = None) -> ProviderConfig: ...
 
     async def get_embedding(
@@ -487,6 +491,14 @@ class LlmProviderRegistry:
     async def get_chat(self, provider_id: str | None = None) -> ProviderConfig:
         await self._refresh_if_stale()
         return self._get(provider_id or self._default_chat)
+
+    async def default_chat_alias(self) -> str:
+        await self._refresh_if_stale()
+        return self._default_chat
+
+    async def default_embedding_alias(self) -> str:
+        await self._refresh_if_stale()
+        return self._default_embedding
 
     async def get_embedding(
         self,

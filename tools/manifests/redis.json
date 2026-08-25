@@ -180,7 +180,7 @@
       "name": "CREATE_LOCK_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 13
+        "line": 14
       },
       "valueExpression": "\"interview:create:lock:\""
     },
@@ -188,7 +188,7 @@
       "name": "RESULT_TTL_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 16
+        "line": 17
       },
       "valueExpression": "24 * 60 * 60"
     },
@@ -196,7 +196,7 @@
       "name": "CREATE_LOCK_WAIT_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 17
+        "line": 18
       },
       "valueExpression": "185"
     },
@@ -204,7 +204,7 @@
       "name": "CREATE_LOCK_LEASE_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 18
+        "line": 19
       },
       "valueExpression": "600"
     },
@@ -212,7 +212,7 @@
       "name": "LOCK_RELEASE_SCRIPT",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 19
+        "line": 20
       },
       "valueExpression": "\"\"\""
     },
@@ -299,14 +299,14 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/user_providers.py",
-        "line": 321
+        "line": 327
       },
       "value": "{user_id}:{version}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/user_providers.py",
-        "line": 420
+        "line": 426
       },
       "value": "provider-key:v{version}:{user_id}:{provider_id}"
     },
@@ -390,91 +390,112 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 154
+        "line": 156
       },
       "value": "interview:create"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 199
+        "line": 202
       },
       "value": "interview:submit-turn"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 13
+        "line": 14
       },
       "value": "interview:create:lock:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 14
+        "line": 15
       },
       "value": "interview:create:result:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 15
+        "line": 16
       },
       "value": "interview:turn:result:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 45
+        "line": 36
       },
-      "value": "{TURN_RESULT_PREFIX}{session_id}:{request_id}"
+      "value": "{CREATE_RESULT_PREFIX}{self._scope}:{request_id}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
-        "line": 55
+        "line": 41
       },
-      "value": "{TURN_RESULT_PREFIX}{session_id}:{request_id}"
+      "value": "{CREATE_RESULT_PREFIX}{self._scope}:{request_id}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/interview/cache.py",
+        "line": 48
+      },
+      "value": "{TURN_RESULT_PREFIX}{self._scope}:{session_id}:{request_id}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/interview/cache.py",
+        "line": 59
+      },
+      "value": "{TURN_RESULT_PREFIX}{self._scope}:{session_id}:{request_id}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/interview/cache.py",
+        "line": 70
+      },
+      "value": "{CREATE_LOCK_PREFIX}{self._scope}:{request_id}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview_skill/api.py",
-        "line": 63
+        "line": 65
       },
       "value": "interview-skill:parse-jd"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 121
+        "line": 127
       },
       "value": "data:{line}\\n"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 163
+        "line": 169
       },
       "value": "knowledge-base:query"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 174
+        "line": 180
       },
       "value": "knowledge-base:query-stream"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
-        "line": 78
+        "line": 81
       },
       "value": "knowledge-base:generate-questions"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/vectorization.py",
-        "line": 151
+        "line": 156
       },
       "value": "pending:{knowledge_base_id}:{job_id}"
     },
@@ -530,28 +551,28 @@
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 84
+        "line": 81
       },
       "value": "{RESUME_ANALYZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 96
+        "line": 97
       },
       "value": "{KB_VECTORIZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 118
+        "line": 119
       },
       "value": "{KB_QUESTION_GEN.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 141
+        "line": 142
       },
       "value": "{INTERVIEW_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     }
@@ -615,35 +636,35 @@
   ],
   "rateLimits": [
     {
-      "arguments": "scope=scope, rules=rules, client_ip=client_ip(request), now_ms=time.time_ns() // 1_000_000,",
+      "arguments": "scope=scope, rules=rules, client_ip=client_ip(request), user_id=str(actor.user_id), now_ms=time.time_ns() // 1_000_000,",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 120
+        "line": 121
       }
     },
     {
-      "arguments": "scope=\"interview-skill:parse-jd\", rules=(RateLimitRule(RateLimitDimension.IP, 5),), client_ip=client_ip(request), now_ms=time.time_ns() // 1_000_000,",
+      "arguments": "scope=\"interview-skill:parse-jd\", rules=( RateLimitRule(RateLimitDimension.IP, 5), RateLimitRule(RateLimitDimension.USER, 5),",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_skill/api.py",
-        "line": 62
+        "line": 64
       }
     },
     {
-      "arguments": "scope=scope, rules=( RateLimitRule(RateLimitDimension.GLOBAL, float(count)), RateLimitRule(RateLimitDimension.IP, float(count)),",
+      "arguments": "scope=scope, rules=( RateLimitRule(RateLimitDimension.GLOBAL, float(count)), RateLimitRule(RateLimitDimension.IP, float(count)), RateLimitRule(RateLimitDimension.USER, float(count)),",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 108
+        "line": 112
       }
     },
     {
-      "arguments": "scope=\"knowledge-base:generate-questions\", rules=( RateLimitRule(RateLimitDimension.GLOBAL, 2), RateLimitRule(RateLimitDimension.IP, 2),",
+      "arguments": "scope=\"knowledge-base:generate-questions\", rules=( RateLimitRule(RateLimitDimension.GLOBAL, 2), RateLimitRule(RateLimitDimension.IP, 2), RateLimitRule(RateLimitDimension.USER, 2),",
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/interview_api.py",
-        "line": 77
+        "line": 80
       }
     }
   ],

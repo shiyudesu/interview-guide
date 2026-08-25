@@ -5,6 +5,7 @@ import time
 import uuid
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
+from uuid import UUID
 
 from redis.asyncio import Redis
 
@@ -27,22 +28,25 @@ T = TypeVar("T")
 
 
 class InterviewSessionCache:
-    def __init__(self, redis: Redis) -> None:
+    def __init__(self, redis: Redis, user_id: UUID | None = None) -> None:
         self._redis = redis
+        self._scope = str(user_id or "internal")
 
     async def get_create_result(self, request_id: str) -> str | None:
-        value = await self._redis.get(f"{CREATE_RESULT_PREFIX}{request_id}")
+        value = await self._redis.get(f"{CREATE_RESULT_PREFIX}{self._scope}:{request_id}")
         return str(value) if value is not None else None
 
     async def set_create_result(self, request_id: str, session_id: str) -> None:
         await self._redis.set(
-            f"{CREATE_RESULT_PREFIX}{request_id}",
+            f"{CREATE_RESULT_PREFIX}{self._scope}:{request_id}",
             session_id,
             ex=RESULT_TTL_SECONDS,
         )
 
     async def get_turn_result(self, session_id: str, request_id: str) -> str | None:
-        value = await self._redis.get(f"{TURN_RESULT_PREFIX}{session_id}:{request_id}")
+        value = await self._redis.get(
+            f"{TURN_RESULT_PREFIX}{self._scope}:{session_id}:{request_id}"
+        )
         return str(value) if value is not None else None
 
     async def set_turn_result(
@@ -52,7 +56,7 @@ class InterviewSessionCache:
         turn_id: str,
     ) -> None:
         await self._redis.set(
-            f"{TURN_RESULT_PREFIX}{session_id}:{request_id}",
+            f"{TURN_RESULT_PREFIX}{self._scope}:{session_id}:{request_id}",
             turn_id,
             ex=RESULT_TTL_SECONDS,
         )
@@ -63,7 +67,7 @@ class InterviewSessionCache:
         operation: Callable[[], Awaitable[T]],
     ) -> T:
         return await self._execute_locked(
-            f"{CREATE_LOCK_PREFIX}{request_id}",
+            f"{CREATE_LOCK_PREFIX}{self._scope}:{request_id}",
             CREATE_LOCK_WAIT_SECONDS,
             CREATE_LOCK_LEASE_SECONDS,
             operation,

@@ -207,6 +207,17 @@ APP_AUTH_REGISTRATION_IP_LIMIT_PER_HOUR=5
 - `APP_AUTH_REGISTRATION_ENABLED` 在业务资源和 Provider 完成多租户隔离前必须保持 `false`。
 - `.env.http` 明确设置 `APP_AUTH_ENABLED=false`，临时公网 HTTP 不承载正式账号或 BYOK。
 
+## 多租户文件和异步任务
+
+- 简历和知识库只在同一用户内按 SHA-256 去重，数据库唯一约束为 `(user_id, file_hash)`。
+- 新对象 key 使用 `users/{userId}/resumes/...` 和 `users/{userId}/knowledgebases/...`。
+- S3 Bucket 保持私有，原文件和报告必须通过完成所有权校验的 API 下载。
+- 旧对象不会在迁移时批量移动，数据库中已有 key 继续由原所有者通过 API 读取。
+- 简历分析、知识库向量化、知识库出题和面试评估在任务创建时保存 Provider alias；Worker 根据
+  资源所有者创建用户作用域 Provider Resolver，不读取平台或 legacy Key。
+- Redis Stream 字段、Pending、XAUTOCLAIM、重试和 ACK 顺序保持不变，明文 API Key 不进入
+  Stream、任务表或日志。
+
 当前固定模型默认值和可配置语音默认值：
 
 ```env

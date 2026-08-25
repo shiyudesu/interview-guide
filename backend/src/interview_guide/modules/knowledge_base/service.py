@@ -101,6 +101,8 @@ class KnowledgeBaseService:
         parser: KnowledgeBaseDocumentParser,
         now: Callable[[], datetime] = datetime.now,
         user_id: UUID | None = None,
+        embedding_provider_alias: str = "dashscope",
+        question_provider_alias: str = "dashscope",
     ) -> None:
         self._session = session
         self._sessions = sessions
@@ -110,6 +112,8 @@ class KnowledgeBaseService:
         self._streams = streams
         self._parser = parser
         self._now = now
+        self._embedding_provider_alias = embedding_provider_alias
+        self._question_provider_alias = question_provider_alias
 
     async def list_items(
         self,
@@ -237,7 +241,7 @@ class KnowledgeBaseService:
             data,
             filename,
             upload_content_type,
-            "knowledgebases",
+            f"users/{self._user_id}/knowledgebases",
         )
         file_url = self._storage.object_url(file_key)
         uploaded_at = self._now()
@@ -258,12 +262,14 @@ class KnowledgeBaseService:
                     else None,
                     chunk_count=0,
                     content_type=upload_content_type,
+                    embedding_provider_alias=self._embedding_provider_alias,
                     file_hash=file_hash,
                     file_size=len(data),
                     last_accessed_at=uploaded_at,
                     name=knowledge_name,
                     original_filename=resolved_filename,
                     question_count=0,
+                    question_provider_alias=self._question_provider_alias,
                     storage_key=file_key,
                     storage_url=file_url,
                     uploaded_at=uploaded_at,

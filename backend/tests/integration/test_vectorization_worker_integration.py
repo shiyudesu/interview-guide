@@ -143,7 +143,7 @@ class FakeEmbeddingProviderRegistry:
         self,
         provider_id: str | None = None,
     ) -> ProviderConfig:
-        assert provider_id is None
+        assert provider_id == "dashscope"
         self.calls += 1
         return ProviderConfig(
             provider_id="fake-integration-embedding",
@@ -182,7 +182,7 @@ def build_consumer(
     repository = KnowledgeBaseVectorRepository(database.sessions)
     vectorization = KnowledgeBaseVectorizationService(
         repository,
-        registry,
+        lambda user_id: registry,
         adapter,
         job_id_factory=lambda: "integration-job-success",
         chunk_size=1,
@@ -293,7 +293,7 @@ async def test_fake_embedding_vector_worker_retries_cleans_and_finally_fails(
     )
     vectorization = KnowledgeBaseVectorizationService(
         repository,
-        registry,
+        lambda user_id: registry,
         adapter,
         job_id_factory=lambda: next(job_ids),
         chunk_size=1,

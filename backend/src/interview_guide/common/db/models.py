@@ -108,7 +108,7 @@ class Resume(Base):
             "analyze_status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED')",
             name="resumes_analyze_status_check",
         ),
-        UniqueConstraint("file_hash", name="idx_resume_hash"),
+        UniqueConstraint("user_id", "file_hash", name="uq_resumes_user_hash"),
         Index("idx_resumes_user_id", "user_id"),
     )
 
@@ -120,6 +120,11 @@ class Resume(Base):
     access_count: Mapped[int | None] = mapped_column(Integer)
     analyze_error: Mapped[str | None] = mapped_column(String(500))
     analyze_status: Mapped[str | None] = mapped_column(String(20))
+    analysis_provider_alias: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        server_default=text("'dashscope'"),
+    )
     content_type: Mapped[str | None] = mapped_column(String(255))
     file_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     file_size: Mapped[int | None] = mapped_column(BigInteger)
@@ -199,6 +204,7 @@ class InterviewSession(Base):
         ),
         Index(
             "uk_interview_sessions_request_id",
+            "user_id",
             "request_id",
             unique=True,
         ),
@@ -421,7 +427,7 @@ class KnowledgeBase(Base):
             "question_gen_status IN ('NONE', 'QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED')",
             name="knowledge_bases_question_gen_status_check",
         ),
-        UniqueConstraint("file_hash", name="idx_kb_hash"),
+        UniqueConstraint("user_id", "file_hash", name="uq_knowledge_bases_user_hash"),
         Index("idx_kb_category", "category"),
         Index(
             "idx_kb_question_gen_status_updated",
@@ -440,6 +446,11 @@ class KnowledgeBase(Base):
     category: Mapped[str | None] = mapped_column(String(100))
     chunk_count: Mapped[int | None] = mapped_column(Integer)
     content_type: Mapped[str | None] = mapped_column(String(255))
+    embedding_provider_alias: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        server_default=text("'dashscope'"),
+    )
     file_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     file_size: Mapped[int | None] = mapped_column(BigInteger)
     last_accessed_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
@@ -466,6 +477,11 @@ class KnowledgeBase(Base):
         server_default=text("0"),
     )
     question_gen_updated_at: Mapped[datetime | None] = mapped_column(TIMESTAMP_6)
+    question_provider_alias: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        server_default=text("'dashscope'"),
+    )
     storage_key: Mapped[str | None] = mapped_column(String(500))
     storage_url: Mapped[str | None] = mapped_column(String(1000))
     uploaded_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)

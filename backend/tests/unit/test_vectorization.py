@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from uuid import UUID
 
 import pytest
 
@@ -74,6 +75,10 @@ class FakeVectorRepository:
     completed: list[tuple[int, str, int]] = field(default_factory=list)
     cleaned_jobs: list[str] = field(default_factory=list)
 
+    async def provider_context(self, knowledge_base_id: int) -> tuple[UUID, str] | None:
+        del knowledge_base_id
+        return UUID("11111111-1111-1111-1111-111111111111"), "fake-alias"
+
     async def store_pending_batch(self, vectors: Sequence[EmbeddedVector]) -> None:
         self.stored_batches.append(list(vectors))
 
@@ -98,7 +103,7 @@ class FakeEmbeddingProviderRegistry:
         self,
         provider_id: str | None = None,
     ) -> ProviderConfig:
-        assert provider_id is None
+        assert provider_id == "fake-alias"
         self.calls += 1
         return ProviderConfig(
             provider_id="fake-embedding-provider",
@@ -136,7 +141,7 @@ def vectorization_service(
 ) -> KnowledgeBaseVectorizationService:
     return KnowledgeBaseVectorizationService(
         repository,
-        registry,
+        lambda user_id: registry,
         adapter,
         job_id_factory=lambda: "fixed-job",
         chunk_size=1,

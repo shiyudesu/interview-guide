@@ -571,7 +571,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_tenant_isolation_integration.py",
-      "sha256": "fc899834a6a3b00cfbb0ad413eebb2324335473045d8d9a8cc5770d2820063a7"
+      "sha256": "e659c9c6b34cc862a67d546d75b0b0ec5e0cf16a7d383214a9f712f9d36da65e"
     },
     {
       "disabledMarkers": 0,
@@ -581,7 +581,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_vectorization_worker_integration.py",
-      "sha256": "f89a8286b88eb671d12625152cbef9eab6483dedd038a3e4ad63a0eb3490e872"
+      "sha256": "fe460eb1db84742aa574ecbe8a35c1d1abf3f4592ae4d4e7214134b22115913e"
     },
     {
       "disabledMarkers": 0,
@@ -696,7 +696,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_resume_analysis.py",
-      "sha256": "37c695a868c18003632791e3f94d25cea106d2af96a1dadf98e1891b3ec343ed"
+      "sha256": "9141eef00b5d646b61a29985cf569843984c079cf4bb2bd713b236796493dbec"
     },
     {
       "disabledMarkers": 0,
@@ -726,7 +726,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_vectorization.py",
-      "sha256": "d8e4a1a123ad7fb921d40817380f5bc487d23b7a60db94c271cc773c119cac82"
+      "sha256": "be1a2db8eec6b21b116693fd77be53d0c6952ab794a9c44f9942486fe1efcdf0"
     },
     {
       "disabledMarkers": 0,
@@ -736,7 +736,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_dashscope_protocol.py",
-      "sha256": "27aef64ba08c4d61dd8b519155ed05af92bcad1034be7e92da0848669c1f298d"
+      "sha256": "7a245919d2b772e753b193fa0c29aae1db7985206775b81b0cfcd6c59774a0bc"
     },
     {
       "disabledMarkers": 0,

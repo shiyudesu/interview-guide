@@ -3,6 +3,10 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from urllib.parse import urlsplit
+from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from interview_guide.common.ai.encryption import ApiKeyEncryption
 from interview_guide.common.ai.outbound import ProviderOutboundPolicy
@@ -12,10 +16,11 @@ from interview_guide.common.ai.providers import (
 )
 from interview_guide.common.ai.user_providers import (
     CURRENT_ENCRYPTION_VERSION,
+    UserLlmProviderResolver,
     UserProviderRepository,
     provider_key_aad,
 )
-from interview_guide.common.db.models import UserLlmProviderConfig
+from interview_guide.common.db.models import UserLlmProviderConfig, VoiceInterviewSession
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.llm_provider.models import (
     AsrConfigRequest,
@@ -274,3 +279,45 @@ class VoiceConfigService:
 
 def normalized_url(value: str) -> str:
     return value.strip().rstrip("/")
+
+
+class UserVoiceConfigResolver:
+    def __init__(
+        self,
+        sessions: async_sessionmaker[AsyncSession],
+        provider_resolver: UserLlmProviderResolver,
+        encryption: ApiKeyEncryption,
+        outbound_policy: ProviderOutboundPolicy,
+    ) -> None:
+        self._sessions = sessions
+        self._provider_resolver = provider_resolver
+        self._encryption = encryption
+        self._outbound_policy = outbound_policy
+
+    async def asr_config(self, session_id: str) -> AsrConfig:
+        return await (await self._service(session_id)).asr_config()
+
+    async def tts_config(self, session_id: str) -> TtsConfig:
+        return await (await self._service(session_id)).tts_config()
+
+    async def _service(self, session_id: str) -> VoiceConfigService:
+        try:
+            numeric_session_id = int(session_id)
+        except ValueError as error:
+            raise BusinessException(ErrorCode.VOICE_SESSION_NOT_FOUND) from error
+        async with self._sessions() as session:
+            user_id = await session.scalar(
+                select(VoiceInterviewSession.user_id).where(
+                    VoiceInterviewSession.id == numeric_session_id
+                )
+            )
+        if not isinstance(user_id, UUID):
+            raise BusinessException(ErrorCode.VOICE_SESSION_NOT_FOUND)
+        resolver = self._provider_resolver
+        scoped_registry = resolver.for_user(user_id)
+        return VoiceConfigService(
+            UserProviderRepository(self._sessions, user_id),
+            scoped_registry,
+            self._encryption,
+            self._outbound_policy,
+        )

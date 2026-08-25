@@ -46,6 +46,7 @@ async def knowledge_base_service(
 ) -> AsyncIterator[KnowledgeBaseService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
+    registry = infrastructure.provider_resolver.for_user(actor.user_id)
     async with infrastructure.database.sessions() as session:
         yield KnowledgeBaseService(
             session,
@@ -55,6 +56,8 @@ async def knowledge_base_service(
             infrastructure.document_parser,
             now=datetime.now,
             user_id=actor.user_id,
+            embedding_provider_alias=await registry.default_embedding_alias(),
+            question_provider_alias=await registry.default_chat_alias(),
         )
 
 
@@ -105,13 +108,16 @@ async def enforce_query_rate_limit(
     count: int,
 ) -> None:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     await infrastructure.rate_limiter.check(
         scope=scope,
         rules=(
             RateLimitRule(RateLimitDimension.GLOBAL, float(count)),
             RateLimitRule(RateLimitDimension.IP, float(count)),
+            RateLimitRule(RateLimitDimension.USER, float(count)),
         ),
         client_ip=client_ip(request),
+        user_id=str(actor.user_id),
         now_ms=time.time_ns() // 1_000_000,
     )
 

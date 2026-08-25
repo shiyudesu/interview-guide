@@ -51,10 +51,12 @@ class StaticVoiceConfig:
             volume=60,
         )
 
-    async def asr_config(self) -> AsrConfig:
+    async def asr_config(self, session_id: str) -> AsrConfig:
+        del session_id
         return self._asr
 
-    async def tts_config(self) -> TtsConfig:
+    async def tts_config(self, session_id: str) -> TtsConfig:
+        del session_id
         return self._tts
 
 
@@ -167,7 +169,7 @@ async def test_dashscope_tts_adapter_collects_audio_delta() -> None:
     )
     synthesizer = DashScopeTtsSynthesizer(config, settings())
     try:
-        audio = await synthesizer.synthesize("测试语音")
+        audio = await synthesizer.synthesize("session-1", "测试语音")
     finally:
         server.close()
         await server.wait_closed()

@@ -72,11 +72,8 @@ async def run_worker(
             await resolved_stop_event.wait()
         else:
             resources = Path(__file__).resolve().parents[2] / "resources"
-            grading = ResumeGradingService(
-                infrastructure.provider_registry,
-                StructuredOutputInvoker(infrastructure.llm_adapter),
-                PromptRepository(resources),
-            )
+            resume_structured = StructuredOutputInvoker(infrastructure.llm_adapter)
+            resume_prompts = PromptRepository(resources)
             now_factory = datetime.now
             resume_consumer = SequentialStreamConsumer(
                 streams,
@@ -85,7 +82,11 @@ async def run_worker(
                 ResumeAnalyzeHandler(
                     infrastructure.database.sessions,
                     streams,
-                    grading,
+                    lambda user_id: ResumeGradingService(
+                        infrastructure.provider_resolver.for_user(user_id),
+                        resume_structured,
+                        resume_prompts,
+                    ),
                     now_factory,
                 ),
             )
@@ -99,7 +100,7 @@ async def run_worker(
                     streams,
                     KnowledgeBaseVectorizationService(
                         vector_repository,
-                        infrastructure.provider_registry,
+                        infrastructure.provider_resolver.for_user,
                         infrastructure.llm_adapter,
                     ),
                 ),
@@ -121,7 +122,7 @@ async def run_worker(
                     question_generation_producer,
                     KnowledgeBaseQuestionGenerationService(
                         infrastructure.database.sessions,
-                        infrastructure.provider_registry,
+                        infrastructure.provider_resolver.for_user,
                         infrastructure.llm_adapter,
                         StructuredOutputInvoker(infrastructure.llm_adapter),
                         PromptRepository(resources),
@@ -146,7 +147,7 @@ async def run_worker(
                     ),
                     streams,
                     unified_evaluation,
-                    infrastructure.provider_registry,
+                    infrastructure.provider_resolver.for_user,
                 ),
             )
             await run_stream_consumers(

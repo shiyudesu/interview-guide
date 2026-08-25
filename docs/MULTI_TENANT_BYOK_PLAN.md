@@ -11,7 +11,8 @@
 当前实施状态：安全前置修复、账号/Session/CSRF、管理员 CLI、`legacy-owner` 回填，以及简历、
 日程、面试、知识库、题库、RAG、语音 REST/SSE/WebSocket/下载的 Repository 级所有权校验，以及
 用户级 Provider、默认聊天/Embedding/ASR/TTS、AAD Key 加密和同名 alias 隔离已经实现；文件
-hash/对象 key 和异步任务 Provider 归属仍在后续阶段，注册继续关闭。
+hash 联合唯一、用户对象 key、私有 Bucket、用户级幂等缓存和四组异步任务 Provider 归属也已经
+实现；前端账号体验、开放注册和最终浏览器/生产 Compose 门禁仍在后续阶段，注册继续关闭。
 
 本文描述目标行为、数据迁移和交付顺序，不代表仓库当前已经具备账号或多租户能力。实施过程中
 必须使用 Alembic 更新数据库，并在相同变更中同步更新 `AGENTS.md`、README、配置、运维、部署和

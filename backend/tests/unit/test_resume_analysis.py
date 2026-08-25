@@ -13,7 +13,8 @@ BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 class FakeRegistry:
-    async def get_chat(self) -> ProviderConfig:
+    async def get_chat(self, provider_id: str | None = None) -> ProviderConfig:
+        del provider_id
         return ProviderConfig(
             provider_id="test",
             base_url="https://example.test/v1",

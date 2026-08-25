@@ -51,6 +51,7 @@ class ResumeService:
         blocking_executor: BlockingExecutor | None = None,
         now: datetime | None = None,
         user_id: UUID | None = None,
+        analysis_provider_alias: str = "dashscope",
     ) -> None:
         self._session = session
         self._user_id = user_id or LEGACY_OWNER_ID
@@ -60,6 +61,7 @@ class ResumeService:
         self._parser = parser
         self._blocking_executor = blocking_executor
         self._now = now or datetime.now()
+        self._analysis_provider_alias = analysis_provider_alias
 
     async def list(
         self,
@@ -212,7 +214,7 @@ class ResumeService:
             data,
             filename,
             upload_content_type,
-            "resumes",
+            f"users/{self._user_id}/resumes",
         )
         file_url = self._storage.object_url(file_key)
         try:
@@ -222,6 +224,7 @@ class ResumeService:
                         access_count=1,
                         analyze_error=None,
                         analyze_status="PENDING",
+                        analysis_provider_alias=self._analysis_provider_alias,
                         content_type=upload_content_type,
                         file_hash=file_hash,
                         file_size=len(data),
@@ -292,6 +295,7 @@ class ResumeService:
                 stored.resume_text = resume_text
             stored.analyze_status = "PENDING"
             stored.analyze_error = None
+            stored.analysis_provider_alias = self._analysis_provider_alias
         try:
             await self._streams.add(
                 RESUME_ANALYZE.key,

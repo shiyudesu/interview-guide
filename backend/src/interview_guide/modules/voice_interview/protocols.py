@@ -40,7 +40,7 @@ class VoiceAsrProvider(Protocol):
 
 
 class VoiceTtsSynthesizer(Protocol):
-    async def synthesize(self, text: str) -> bytes: ...
+    async def synthesize(self, session_id: str, text: str) -> bytes: ...
 
 
 class VoiceClock(Protocol):

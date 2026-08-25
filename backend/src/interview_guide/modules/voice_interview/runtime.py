@@ -24,9 +24,9 @@ def create_voice_websocket_runtime(
     metrics: ApplicationMetrics | None = None,
 ) -> VoiceWebSocketRuntime:
     service = build_service(infrastructure, settings, metrics)
-    asr: VoiceAsrProvider = DashScopeAsrProvider(infrastructure.voice_config)
+    asr: VoiceAsrProvider = DashScopeAsrProvider(infrastructure.voice_config_resolver)
     tts: VoiceTtsSynthesizer = DashScopeTtsSynthesizer(
-        infrastructure.voice_config,
+        infrastructure.voice_config_resolver,
         settings,
     )
     return VoiceWebSocketRuntime(

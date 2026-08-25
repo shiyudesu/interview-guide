@@ -5,7 +5,7 @@ import base64
 import json
 import logging
 from types import TracebackType
-from typing import Any
+from typing import Any, Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from websockets.asyncio.client import ClientConnection, connect
@@ -14,7 +14,6 @@ from interview_guide.common.config.settings import Settings
 from interview_guide.modules.llm_provider.voice import (
     AsrConfig,
     TtsConfig,
-    VoiceConfigService,
 )
 from interview_guide.modules.voice_interview.protocols import (
     AsrAppendError,
@@ -29,6 +28,12 @@ from interview_guide.modules.voice_interview.protocols import (
 logger = logging.getLogger(__name__)
 ASR_READY_WAIT_SECONDS = 1.2
 TTS_SDK_WAIT_SECONDS = 30
+
+
+class VoiceConfigResolver(Protocol):
+    async def asr_config(self, session_id: str) -> AsrConfig: ...
+
+    async def tts_config(self, session_id: str) -> TtsConfig: ...
 
 
 def _model_url(url: str, model: str) -> str:
@@ -232,7 +237,7 @@ class DashScopeAsrSession(VoiceAsrSession):
 
 
 class DashScopeAsrProvider(VoiceAsrProvider):
-    def __init__(self, config_store: VoiceConfigService) -> None:
+    def __init__(self, config_store: VoiceConfigResolver) -> None:
         self._config_store = config_store
 
     async def open(
@@ -244,9 +249,8 @@ class DashScopeAsrProvider(VoiceAsrProvider):
         on_final: AsrTextCallback,
         on_error: AsrErrorCallback,
     ) -> DashScopeAsrSession:
-        del session_id
         session = DashScopeAsrSession(
-            await self._config_store.asr_config(),
+            await self._config_store.asr_config(session_id),
             on_ready=on_ready,
             on_partial=on_partial,
             on_final=on_final,
@@ -259,16 +263,16 @@ class DashScopeAsrProvider(VoiceAsrProvider):
 class DashScopeTtsSynthesizer:
     def __init__(
         self,
-        config_store: VoiceConfigService,
+        config_store: VoiceConfigResolver,
         settings: Settings,
     ) -> None:
         self._config_store = config_store
         self._connect_timeout = max(1, settings.voice_tts_connect_timeout_seconds)
 
-    async def synthesize(self, text: str) -> bytes:
+    async def synthesize(self, session_id: str, text: str) -> bytes:
         if not text.strip():
             return b""
-        config = await self._config_store.tts_config()
+        config = await self._config_store.tts_config(session_id)
         try:
             return await self._synthesize(config, text)
         except asyncio.CancelledError:

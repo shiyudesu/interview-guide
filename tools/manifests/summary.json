@@ -22,7 +22,7 @@
       "alterationCount": 1,
       "extensionCount": 3,
       "indexCount": 17,
-      "migrationCount": 4,
+      "migrationCount": 5,
       "tableCount": 17
     },
     "redis.json": {

@@ -83,7 +83,7 @@ def build_interview_service(
     )
     return InterviewService(
         repository,
-        InterviewSessionCache(infrastructure.redis.client),
+        InterviewSessionCache(infrastructure.redis.client, user_id),
         infrastructure.streams,
         questions,
         decisions,
@@ -117,10 +117,12 @@ async def enforce_rate_limit(
     rules: tuple[RateLimitRule, ...],
 ) -> None:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     await infrastructure.rate_limiter.check(
         scope=scope,
         rules=rules,
         client_ip=client_ip(request),
+        user_id=str(actor.user_id),
         now_ms=time.time_ns() // 1_000_000,
     )
 
@@ -155,6 +157,7 @@ async def create_session(
         (
             RateLimitRule(RateLimitDimension.GLOBAL, 5),
             RateLimitRule(RateLimitDimension.IP, 5),
+            RateLimitRule(RateLimitDimension.USER, 5),
         ),
     )
     return result_response(
@@ -197,7 +200,10 @@ async def submit_turn(
     await enforce_rate_limit(
         request,
         "interview:submit-turn",
-        (RateLimitRule(RateLimitDimension.GLOBAL, 10),),
+        (
+            RateLimitRule(RateLimitDimension.GLOBAL, 10),
+            RateLimitRule(RateLimitDimension.USER, 10),
+        ),
     )
     return result_response(Result.ok(await service.submit_turn(session_id, payload)))
 

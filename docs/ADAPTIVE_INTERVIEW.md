@@ -103,7 +103,8 @@ requestId，失败重试和页面恢复必须复用。
 ## 运行与恢复
 
 - Alembic 管理当前面试表结构和约束，API 不直接执行 schema 变更。
-- Redis 会话缓存使用 `interview:create:*`、`interview:turn:*` 与 `voice:interview:*`。
+- Redis 会话缓存使用 `interview:create:*`、`interview:turn:*` 与 `voice:interview:*`，实际 key
+  包含用户 UUID，防止不同用户的 requestId 或会话缓存互相命中。
 - Worker 按 Stream 消费评估任务，失败时先重投或写失败状态，再执行 ACK。
 - Scheduler 回收租约过期的 Turn、恢复遗漏的评估任务并清理过期语音会话。
 - requestId 幂等锁、结果缓存和数据库唯一索引共同防止重复决策与重复写入。

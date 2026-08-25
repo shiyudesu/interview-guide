@@ -189,6 +189,7 @@ class InterviewService:
             if existing is not None:
                 return self._session_dto(existing)
         session_id = self._uuid_factory().hex[:16]
+        resolved_provider = llm_provider or await self._registry.default_chat_alias()
         try:
             aggregate = await self._repository.create_session(
                 session_id=session_id,
@@ -196,7 +197,7 @@ class InterviewService:
                 resume_id=resume_id,
                 questions=questions,
                 max_follow_ups_per_main=max_follow_ups_per_main,
-                llm_provider=llm_provider,
+                llm_provider=resolved_provider,
                 skill_id=skill_id,
                 difficulty=difficulty,
                 request_id=request_id,
@@ -772,12 +773,12 @@ class InterviewEvaluateHandler:
         repository: InterviewRepository,
         streams: RedisStreamService,
         evaluation: UnifiedEvaluationService,
-        registry: ProviderRegistry,
+        registry_factory: Callable[[UUID], ProviderRegistry],
     ) -> None:
         self._repository = repository
         self._streams = streams
         self._evaluation = evaluation
-        self._registry = registry
+        self._registry_factory = registry_factory
 
     async def parse(self, message: StreamMessage) -> EvaluatePayload | None:
         session_id = message.data.get(FIELD_SESSION_ID)
@@ -798,7 +799,7 @@ class InterviewEvaluateHandler:
         aggregate = await self._repository.find_session(payload.session_id)
         if aggregate is None:
             return
-        provider = await self._registry.get_chat(
+        provider = await self._registry_factory(aggregate.session.user_id).get_chat(
             None
             if aggregate.session.llm_provider in {None, "", "default"}
             else aggregate.session.llm_provider

@@ -23,6 +23,7 @@ router = APIRouter(prefix="/api/resumes", responses=STANDARD_ERROR_RESPONSES)
 async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
+    registry = infrastructure.provider_resolver.for_user(actor.user_id)
     async with infrastructure.database.sessions() as session:
         yield ResumeService(
             session,
@@ -31,6 +32,7 @@ async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
             infrastructure.document_parser,
             infrastructure.blocking_executor,
             user_id=actor.user_id,
+            analysis_provider_alias=await registry.default_chat_alias(),
         )
 
 

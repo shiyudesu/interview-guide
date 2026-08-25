@@ -56,6 +56,7 @@ async def question_service(
 ) -> AsyncIterator[KnowledgeBaseQuestionService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
+    registry = infrastructure.provider_resolver.for_user(actor.user_id)
     state = generation_state(request)
     async with infrastructure.database.sessions() as session:
         yield KnowledgeBaseQuestionService(
@@ -63,6 +64,7 @@ async def question_service(
             state,
             QuestionGenStreamProducer(infrastructure.streams, state),
             user_id=actor.user_id,
+            default_provider_alias=await registry.default_chat_alias(),
         )
 
 
@@ -74,13 +76,16 @@ QuestionServiceDependency = Annotated[
 
 async def enforce_generation_rate_limit(request: Request) -> None:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     await infrastructure.rate_limiter.check(
         scope="knowledge-base:generate-questions",
         rules=(
             RateLimitRule(RateLimitDimension.GLOBAL, 2),
             RateLimitRule(RateLimitDimension.IP, 2),
+            RateLimitRule(RateLimitDimension.USER, 2),
         ),
         client_ip=client_ip(request),
+        user_id=str(actor.user_id),
         now_ms=time.time_ns() // 1_000_000,
     )
 

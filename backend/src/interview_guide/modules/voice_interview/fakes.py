@@ -129,7 +129,8 @@ class ExplicitFakeTtsSynthesizer:
         self.max_active = 0
         self.cancelled = 0
 
-    async def synthesize(self, text: str) -> bytes:
+    async def synthesize(self, session_id: str, text: str) -> bytes:
+        del session_id
         self.calls.append(text)
         self.active += 1
         self.max_active = max(self.max_active, self.active)

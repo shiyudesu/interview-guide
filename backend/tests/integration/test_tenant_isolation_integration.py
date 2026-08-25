@@ -164,13 +164,14 @@ async def test_root_repositories_hide_other_users_resources(
                 user_id=user_a.id,
             )
         )
+        shared_resume_hash = f"{suffix.hex[:32]}a".ljust(64, "0")
         resume_a = await ResumeRepository(session, user_a.id).add(
             Resume(
                 access_count=1,
                 analyze_error=None,
                 analyze_status="COMPLETED",
                 content_type="text/plain",
-                file_hash=f"{suffix.hex[:32]}a".ljust(64, "0"),
+                file_hash=shared_resume_hash,
                 file_size=1,
                 last_accessed_at=timestamp,
                 original_filename="a.txt",
@@ -181,13 +182,32 @@ async def test_root_repositories_hide_other_users_resources(
                 user_id=user_a.id,
             )
         )
+        resume_b = await ResumeRepository(session, user_b.id).add(
+            Resume(
+                access_count=1,
+                analyze_error=None,
+                analyze_status="COMPLETED",
+                analysis_provider_alias="dashscope",
+                content_type="text/plain",
+                file_hash=shared_resume_hash,
+                file_size=1,
+                last_accessed_at=timestamp,
+                original_filename="b.txt",
+                resume_text="B resume",
+                storage_key=None,
+                storage_url=None,
+                uploaded_at=timestamp,
+                user_id=user_b.id,
+            )
+        )
+        shared_kb_hash = f"{suffix.hex[:32]}b".ljust(64, "0")
         knowledge_a = await KnowledgeBaseRepository(session, user_a.id).add(
             KnowledgeBase(
                 access_count=1,
                 category=None,
                 chunk_count=0,
                 content_type="text/plain",
-                file_hash=f"{suffix.hex[:32]}b".ljust(64, "0"),
+                file_hash=shared_kb_hash,
                 file_size=1,
                 last_accessed_at=timestamp,
                 name="A knowledge",
@@ -207,6 +227,36 @@ async def test_root_repositories_hide_other_users_resources(
                 vector_error=None,
                 vector_status="COMPLETED",
                 user_id=user_a.id,
+            )
+        )
+        knowledge_b = await KnowledgeBaseRepository(session, user_b.id).add(
+            KnowledgeBase(
+                access_count=1,
+                category=None,
+                chunk_count=0,
+                content_type="text/plain",
+                embedding_provider_alias="dashscope",
+                file_hash=shared_kb_hash,
+                file_size=1,
+                last_accessed_at=timestamp,
+                name="B knowledge",
+                original_filename="b-kb.txt",
+                question_count=0,
+                question_gen_status="NONE",
+                question_gen_error=None,
+                question_gen_task_id=None,
+                question_gen_config=None,
+                question_gen_message=None,
+                question_gen_saved_count=0,
+                question_gen_skipped_count=0,
+                question_gen_updated_at=None,
+                question_provider_alias="dashscope",
+                storage_key=None,
+                storage_url=None,
+                uploaded_at=timestamp,
+                vector_error=None,
+                vector_status="COMPLETED",
+                user_id=user_b.id,
             )
         )
 
@@ -236,6 +286,8 @@ async def test_root_repositories_hide_other_users_resources(
         assert await InterviewScheduleRepository(session, user_b.id).get(schedule_a.id) is None
         assert await ResumeRepository(session, user_b.id).get(resume_a.id) is None
         assert await KnowledgeBaseRepository(session, user_b.id).get(knowledge_a.id) is None
+        assert await ResumeRepository(session, user_a.id).get(resume_b.id) is None
+        assert await KnowledgeBaseRepository(session, user_a.id).get(knowledge_b.id) is None
     assert (
         await InterviewRepository(
             tenant_database.sessions,

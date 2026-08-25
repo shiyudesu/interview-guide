@@ -27,7 +27,10 @@ from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.infrastructure.file.document import create_document_parser
 from interview_guide.infrastructure.storage.s3 import S3Storage
 from interview_guide.modules.auth.runtime import AuthRuntime
-from interview_guide.modules.llm_provider.voice import VoiceConfigService
+from interview_guide.modules.llm_provider.voice import (
+    UserVoiceConfigResolver,
+    VoiceConfigService,
+)
 
 
 class RuntimeInfrastructure:
@@ -79,6 +82,12 @@ class RuntimeInfrastructure:
         self.voice_config = VoiceConfigService(
             self.provider_repository,
             self.provider_registry,
+            encryption,
+            self.provider_outbound_policy,
+        )
+        self.voice_config_resolver = UserVoiceConfigResolver(
+            self.database.sessions,
+            self.provider_resolver,
             encryption,
             self.provider_outbound_policy,
         )

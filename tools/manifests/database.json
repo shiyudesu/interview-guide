@@ -206,6 +206,11 @@
       "file": "backend/alembic/versions/0003_add_user_providers.py",
       "sha256": "cc85ee2a964e80dd9783bf2b8ced5fb171d60c82a297d9f5a284141416b0c669",
       "statementTerminatorCount": 0
+    },
+    {
+      "file": "backend/alembic/versions/0004_scope_async_and_files.py",
+      "sha256": "4794ea1068c520a2b4e8032023d6c7afabce8f35ef635233ad0c649d3224b75f",
+      "statementTerminatorCount": 0
     }
   ],
   "schemaVersion": 1,
@@ -214,7 +219,7 @@
     "alterationCount": 1,
     "extensionCount": 3,
     "indexCount": 17,
-    "migrationCount": 4,
+    "migrationCount": 5,
     "tableCount": 17
   },
   "tables": [

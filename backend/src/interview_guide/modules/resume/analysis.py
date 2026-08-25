@@ -5,6 +5,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -64,7 +65,11 @@ class ResumeGradingService:
         self._structured = structured
         self._prompts = prompts
 
-    async def analyze(self, resume_text: str) -> ResumeAnalysisResult:
+    async def analyze(
+        self,
+        resume_text: str,
+        provider_id: str | None = None,
+    ) -> ResumeAnalysisResult:
         system_prompt = self._prompts.render("resume-analysis-system.st")
         user_prompt = self._prompts.render(
             "resume-analysis-user.st",
@@ -76,7 +81,7 @@ class ResumeGradingService:
             separators=(",", ":"),
         )
         output = await self._structured.invoke(
-            await self._registry.get_chat(),
+            await self._registry.get_chat(provider_id),
             f"{system_prompt}\n\n{schema}",
             user_prompt,
             AnalysisOutput,
@@ -97,12 +102,12 @@ class ResumeAnalyzeHandler:
         self,
         sessions: async_sessionmaker[AsyncSession],
         streams: RedisStreamService,
-        grading: ResumeGradingService,
+        grading_factory: Callable[[UUID], ResumeGradingService],
         now: Callable[[], datetime],
     ) -> None:
         self._sessions = sessions
         self._streams = streams
-        self._grading = grading
+        self._grading_factory = grading_factory
         self._now = now
 
     async def parse(self, message: StreamMessage) -> AnalyzePayload | None:
@@ -123,7 +128,21 @@ class ResumeAnalyzeHandler:
         return await self._update_status(payload.resume_id, "PROCESSING", None)
 
     async def process(self, payload: AnalyzePayload) -> None:
-        result = await self._grading.analyze(payload.content)
+        async with self._sessions() as session:
+            context = (
+                await session.execute(
+                    select(
+                        Resume.user_id,
+                        Resume.analysis_provider_alias,
+                    ).where(Resume.id == payload.resume_id)
+                )
+            ).one_or_none()
+        if context is None:
+            return
+        result = await self._grading_factory(context.user_id).analyze(
+            payload.content,
+            context.analysis_provider_alias,
+        )
         async with self._sessions() as session, session.begin():
             resume = await session.get(Resume, payload.resume_id)
             if resume is None:

@@ -253,6 +253,12 @@ class ScopedProviderRegistry:
             provider_id = (await self._repository.default_aliases()).default_chat_provider_id
         return await self._resolver.resolve(self._repository.user_id, provider_id)
 
+    async def default_chat_alias(self) -> str:
+        return (await self._repository.default_aliases()).default_chat_provider_id
+
+    async def default_embedding_alias(self) -> str:
+        return (await self._repository.default_aliases()).default_embedding_provider_id
+
     async def get_embedding(self, provider_id: str | None = None) -> ProviderConfig:
         if provider_id is None:
             provider_id = (await self._repository.default_aliases()).default_embedding_provider_id

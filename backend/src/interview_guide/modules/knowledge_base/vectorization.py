@@ -70,6 +70,11 @@ class EmbeddingLlmAdapter(Protocol):
 
 
 class VectorizationRepository(Protocol):
+    async def provider_context(
+        self,
+        knowledge_base_id: int,
+    ) -> tuple[uuid.UUID, str] | None: ...
+
     async def store_pending_batch(
         self,
         vectors: Sequence[EmbeddedVector],
@@ -209,6 +214,21 @@ class KnowledgeBaseVectorRepository:
             entity = await session.get(KnowledgeBase, knowledge_base_id)
             return entity is None or entity.vector_status == "COMPLETED"
 
+    async def provider_context(
+        self,
+        knowledge_base_id: int,
+    ) -> tuple[uuid.UUID, str] | None:
+        async with self._sessions() as session:
+            row = (
+                await session.execute(
+                    select(
+                        KnowledgeBase.user_id,
+                        KnowledgeBase.embedding_provider_alias,
+                    ).where(KnowledgeBase.id == knowledge_base_id)
+                )
+            ).one_or_none()
+            return (row.user_id, row.embedding_provider_alias) if row is not None else None
+
     async def exists(self, knowledge_base_id: int) -> bool:
         async with self._sessions() as session:
             return await session.get(KnowledgeBase, knowledge_base_id) is not None
@@ -276,7 +296,7 @@ class KnowledgeBaseVectorizationService:
     def __init__(
         self,
         repository: VectorizationRepository,
-        registry: EmbeddingProviderRegistry,
+        registry_factory: Callable[[uuid.UUID], EmbeddingProviderRegistry],
         adapter: EmbeddingLlmAdapter,
         *,
         job_id_factory: Callable[[], str] | None = None,
@@ -286,7 +306,7 @@ class KnowledgeBaseVectorizationService:
         max_num_chunks: int = MAX_NUM_CHUNKS,
     ) -> None:
         self._repository = repository
-        self._registry = registry
+        self._registry_factory = registry_factory
         self._adapter = adapter
         self._job_id_factory = job_id_factory or (lambda: str(uuid.uuid4()))
         self._chunk_size = chunk_size
@@ -306,7 +326,11 @@ class KnowledgeBaseVectorizationService:
             )
             vectors = pending_vectors(knowledge_base_id, job_id, chunks)
             if vectors:
-                provider = await self._registry.get_embedding()
+                context = await self._repository.provider_context(knowledge_base_id)
+                if context is None:
+                    return
+                user_id, provider_alias = context
+                provider = await self._registry_factory(user_id).get_embedding(provider_alias)
                 if provider.embedding_dimensions != EMBEDDING_DIMENSIONS:
                     raise ValueError(
                         "Embedding dimension must be "

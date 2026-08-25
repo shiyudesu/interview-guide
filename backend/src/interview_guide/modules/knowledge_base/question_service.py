@@ -530,12 +530,14 @@ class KnowledgeBaseQuestionService:
         *,
         now: Callable[[], datetime] = datetime.now,
         user_id: uuid.UUID | None = None,
+        default_provider_alias: str = "dashscope",
     ) -> None:
         self._session = session
         self._repository = KnowledgeBaseQuestionRepository(session, user_id)
         self._state = state
         self._producer = producer
         self._now = now
+        self._default_provider_alias = default_provider_alias
 
     async def list_questions(
         self,
@@ -677,7 +679,7 @@ class KnowledgeBaseQuestionService:
                 1,
                 min(request.category_limit or DEFAULT_CATEGORY_LIMIT, 5),
             ),
-            llm_provider=trim_to_none(request.llm_provider),
+            llm_provider=trim_to_none(request.llm_provider) or self._default_provider_alias,
         )
         response = await self._state.create_task(knowledge_base_id, config)
         assert response.question_gen_task_id is not None
@@ -724,7 +726,7 @@ class KnowledgeBaseQuestionGenerationService:
     def __init__(
         self,
         sessions: async_sessionmaker[AsyncSession],
-        registry: ProviderRegistry,
+        registry_factory: Callable[[uuid.UUID], ProviderRegistry],
         adapter: LlmAdapter,
         structured: StructuredOutputInvoker,
         prompts: PromptRepository,
@@ -734,7 +736,7 @@ class KnowledgeBaseQuestionGenerationService:
         now: Callable[[], datetime] = datetime.now,
     ) -> None:
         self._sessions = sessions
-        self._registry = registry
+        self._registry_factory = registry_factory
         self._adapter = adapter
         self._structured = structured
         self._prompts = prompts
@@ -757,11 +759,19 @@ class KnowledgeBaseQuestionGenerationService:
                 return
             knowledge_base_name = knowledge_base.name
             content_hash = knowledge_base.file_hash
+            user_id = knowledge_base.user_id
+            embedding_provider_alias = knowledge_base.embedding_provider_alias
 
+        registry = self._registry_factory(user_id)
         difficulty = normalize_difficulty(config.difficulty)
         follow_up_count = max(0, min(config.follow_up_count, MAX_FOLLOW_UP_COUNT))
         category_limit = max(1, min(config.category_limit, 5))
-        context = await self._generation_context(knowledge_base_id)
+        context = await self._generation_context(
+            knowledge_base_id,
+            user_id,
+            embedding_provider_alias,
+            registry,
+        )
         generated = await self._call_llm(
             knowledge_base_id,
             knowledge_base_name,
@@ -771,6 +781,7 @@ class KnowledgeBaseQuestionGenerationService:
             category_limit,
             config.llm_provider,
             context,
+            registry,
         )
         if generated.questions is None or not generated.questions:
             raise BusinessException(
@@ -798,9 +809,15 @@ class KnowledgeBaseQuestionGenerationService:
             skipped_count,
         )
 
-    async def _generation_context(self, knowledge_base_id: int) -> str:
-        query_repository = KnowledgeBaseQueryRepository(self._sessions)
-        provider = await self._registry.get_embedding()
+    async def _generation_context(
+        self,
+        knowledge_base_id: int,
+        user_id: uuid.UUID,
+        provider_alias: str,
+        registry: ProviderRegistry,
+    ) -> str:
+        query_repository = KnowledgeBaseQueryRepository(self._sessions, user_id)
+        provider = await registry.get_embedding(provider_alias)
         texts: list[str] = []
         seen: set[str] = set()
         for query in GENERATION_QUERIES:
@@ -844,6 +861,7 @@ class KnowledgeBaseQuestionGenerationService:
         category_limit: int,
         provider_id: str | None,
         context: str,
+        registry: ProviderRegistry,
     ) -> GeneratedQuestionList:
         async with self._sessions() as session:
             repository = KnowledgeBaseQuestionRepository(session)
@@ -888,7 +906,7 @@ class KnowledgeBaseQuestionGenerationService:
                 ),
             },
         )
-        provider = await self._registry.get_chat(
+        provider = await registry.get_chat(
             None if provider_id in {None, "", "default"} else provider_id
         )
         return await self._structured.invoke(

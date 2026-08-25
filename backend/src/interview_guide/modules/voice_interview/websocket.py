@@ -513,6 +513,7 @@ class VoiceWebSocketRuntime:
                 value.strip() for value in (response.acknowledgement, next_text) if value.strip()
             )
             sentence_end = self._start_complete_sentences(
+                session_id,
                 state,
                 normalized,
                 0,
@@ -521,7 +522,13 @@ class VoiceWebSocketRuntime:
             if len(normalized) > sentence_end:
                 remaining = normalized[sentence_end:].strip()
                 if remaining:
-                    self._start_tts_task(state, len(tts_tasks), remaining, tts_tasks)
+                    self._start_tts_task(
+                        session_id,
+                        state,
+                        len(tts_tasks),
+                        remaining,
+                        tts_tasks,
+                    )
             ai_reply = optimize_for_voice(
                 normalized,
                 self._config.ai_question_max_chars,
@@ -540,7 +547,7 @@ class VoiceWebSocketRuntime:
             )
             emitted = await self._emit_tts_chunks(session_id, tts_tasks)
             if emitted == 0 and tts_tasks:
-                fallback = await self._synthesize_with_timeout(ai_reply, state)
+                fallback = await self._synthesize_with_timeout(session_id, ai_reply, state)
                 current = self.connections.current(session_id)
                 if fallback and current is not None and current.socket.open:
                     await current.socket.send_json(
@@ -583,6 +590,7 @@ class VoiceWebSocketRuntime:
 
     def _start_complete_sentences(
         self,
+        session_id: int,
         state: VoiceSessionState,
         normalized: str,
         sentence_end: int,
@@ -602,23 +610,25 @@ class VoiceWebSocketRuntime:
             sentence = normalized[sentence_end : terminal + 1].strip()
             sentence_end = terminal + 1
             if sentence:
-                self._start_tts_task(state, len(tasks), sentence, tasks)
+                self._start_tts_task(session_id, state, len(tasks), sentence, tasks)
 
     def _start_tts_task(
         self,
+        session_id: int,
         state: VoiceSessionState,
         index: int,
         sentence: str,
         tasks: list[tuple[int, asyncio.Task[bytes]]],
     ) -> None:
         task = asyncio.create_task(
-            self._synthesize_with_timeout(sentence, state),
+            self._synthesize_with_timeout(session_id, sentence, state),
             name=f"voice-tts-{index}",
         )
         tasks.append((index, task))
 
     async def _synthesize_with_timeout(
         self,
+        session_id: int,
         text: str,
         state: VoiceSessionState,
     ) -> bytes:
@@ -627,7 +637,7 @@ class VoiceWebSocketRuntime:
         async with semaphore:
             try:
                 return await asyncio.wait_for(
-                    self._tts.synthesize(text),
+                    self._tts.synthesize(str(session_id), text),
                     timeout=self._config.tts_sentence_timeout_seconds,
                 )
             except TimeoutError:
@@ -810,7 +820,7 @@ class VoiceWebSocketRuntime:
             return
         await self._service.save_message(session.id, None, question)
         await self._send_text(current.socket, question, True)
-        audio = await self._tts.synthesize(question)
+        audio = await self._tts.synthesize(str(session.id), question)
         current = self.connections.current(session.id)
         if audio and current is not None and current.socket.open:
             await current.socket.send_json(

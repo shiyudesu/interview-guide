@@ -21,6 +21,7 @@ from interview_guide.common.redis.rate_limit import (
     RateLimitRule,
 )
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.interview.models import CategoryRequest
 from interview_guide.modules.interview.question import (
     InterviewSkillLibrary,
@@ -59,14 +60,19 @@ async def get_skill(skill_id: str) -> Response:
 @router.post("/parse-jd", response_model=list[CategoryRequest])
 async def parse_jd(request: Request, payload: ParseJdRequest) -> Response:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     await infrastructure.rate_limiter.check(
         scope="interview-skill:parse-jd",
-        rules=(RateLimitRule(RateLimitDimension.IP, 5),),
+        rules=(
+            RateLimitRule(RateLimitDimension.IP, 5),
+            RateLimitRule(RateLimitDimension.USER, 5),
+        ),
         client_ip=client_ip(request),
+        user_id=str(actor.user_id),
         now_ms=time.time_ns() // 1_000_000,
     )
     parser = JdParseService(
-        infrastructure.provider_registry,
+        infrastructure.provider_resolver.for_user(actor.user_id),
         StructuredOutputInvoker(infrastructure.llm_adapter),
         prompts,
         infrastructure.prompt_sanitizer,
