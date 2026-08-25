@@ -93,9 +93,21 @@ jobs:
           POSTGRES_PASSWORD: ci-postgres-secret
         run: |
           docker compose config --quiet
+          COMPOSE_PROFILES=https \
+            PUBLIC_DOMAIN=interview.example.com \
+            ACME_EMAIL=admin@example.com \
+            docker compose config --quiet
           docker compose -f docker-compose.yml -f docker-compose.test.yml config --quiet
           INTERVIEW_GUIDE_IMAGE_NAMESPACE=example \
+            PUBLIC_DOMAIN=interview.example.com \
+            ACME_EMAIL=admin@example.com \
             docker compose --env-file deploy/.env.example -f deploy/compose.yml config --quiet
+          docker run --rm \
+            -e PUBLIC_DOMAIN=interview.example.com \
+            -e ACME_EMAIL=admin@example.com \
+            -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            docker.io/library/caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d \
+            caddy validate --config /etc/caddy/Caddyfile
 
   backend:
     name: Backend checks

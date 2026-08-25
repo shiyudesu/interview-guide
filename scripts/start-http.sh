@@ -54,7 +54,7 @@ ensure_http_env() {
 }
 
 compose() {
-  docker compose \
+  COMPOSE_PROFILES="" docker compose \
     --project-name "$compose_project" \
     --env-file "$http_env_file" \
     -f docker-compose.yml \

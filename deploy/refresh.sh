@@ -70,7 +70,7 @@ docker cp "${container_id}:/bundle/." "$next_dir/"
 docker rm "$container_id" >/dev/null
 container_id=""
 chmod 755 "$next_dir"/*.sh
-[[ -f "$next_dir/compose.yml" && -x "$next_dir/update.sh" ]] \
+[[ -f "$next_dir/compose.yml" && -f "$next_dir/Caddyfile" && -x "$next_dir/update.sh" ]] \
   || deploy_die "部署包内容不完整。"
 
 "${next_dir}/update.sh" \

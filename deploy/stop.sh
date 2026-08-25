@@ -18,13 +18,16 @@ deploy_validate_root "$deploy_root"
 env_file="${deploy_root}/.env"
 [[ -f "$env_file" ]] || deploy_die "缺少部署配置: ${env_file}"
 project_name="$(deploy_env_value "$env_file" COMPOSE_PROJECT_NAME interview-guide)"
+compose_profiles="$(deploy_env_value "$env_file" COMPOSE_PROFILES)"
 tag="$(deploy_env_value "$env_file" INTERVIEW_GUIDE_IMAGE_TAG main)"
 if [[ -f "${deploy_root}/state/current-tag" ]]; then
   tag="$(tr -d '\r\n' <"${deploy_root}/state/current-tag")"
 fi
 
 compose() {
-  INTERVIEW_GUIDE_IMAGE_TAG="$tag" docker compose \
+  COMPOSE_PROFILES="$compose_profiles" \
+    INTERVIEW_GUIDE_IMAGE_TAG="$tag" \
+    docker compose \
     --project-name "$project_name" \
     --project-directory "$deploy_root" \
     --env-file "$env_file" \

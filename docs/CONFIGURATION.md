@@ -43,10 +43,31 @@ FRONTEND_BIND_ADDRESS=127.0.0.1
 DEV_INFRASTRUCTURE_BIND_ADDRESS=127.0.0.1
 ```
 
-生产 Compose 只发布前端端口，默认绑定 `127.0.0.1`；服务器需要直接接收 NAT 或公网流量时，
-显式设置 `FRONTEND_BIND_ADDRESS=0.0.0.0`。API、PostgreSQL、Redis 和 MinIO 不发布宿主机端口。
-本地开发 Compose 的三组基础设施端口默认也只绑定回环地址。Compose 使用项目作用域自动生成
-容器名和数据卷名，不再声明全局固定容器名。
+基础 Compose 的前端 HTTP 端口默认绑定 `127.0.0.1`。正式部署不把该端口暴露公网，而是启用
+Caddy HTTPS profile，由 Caddy 发布 80/443。API、PostgreSQL、Redis 和 MinIO 不发布宿主机
+端口。本地开发 Compose 的三组基础设施端口默认也只绑定回环地址。Compose 使用项目作用域自动
+生成容器名和数据卷名，不再声明全局固定容器名。
+
+正式 HTTPS 配置：
+
+```env
+COMPOSE_PROFILES=https
+PUBLIC_DOMAIN=interview.example.com
+ACME_EMAIL=admin@example.com
+TLS_BIND_ADDRESS=0.0.0.0
+TLS_HTTP_PORT=80
+TLS_HTTPS_PORT=443
+FRONTEND_BIND_ADDRESS=127.0.0.1
+```
+
+- `PUBLIC_DOMAIN` 只填写已备案并解析到服务器的域名，不包含协议、端口或路径。
+- `ACME_EMAIL` 用于 Let's Encrypt 账号和证书通知。
+- 公网 TCP 80 和 TCP 443 必须转发到对应宿主机端口。
+- Caddy 的证书、ACME 账号和续期状态保存在 `caddy_data`、`caddy_config` Volume。
+- `FRONTEND_PORT` 在 HTTPS 模式下只作为服务器本机诊断入口，不应建立公网转发。
+- 生产环境不允许把 `TLS_HTTP_PORT` 改成无法由公网 80 到达的端口，也不允许把
+  `TLS_HTTPS_PORT` 改成无法由公网 443 到达的端口；使用 NAT 时可以保持公网端口为 80/443，
+  再转发到这里配置的宿主机端口。
 
 ## Docker Hub 镜像来源
 

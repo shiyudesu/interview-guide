@@ -64,7 +64,7 @@ function Show-Diagnostics {
     & docker compose ps -a
     Write-Host ""
     Write-Host "Recent service logs:"
-    & docker compose logs --tail=80 migrate app worker scheduler frontend
+    & docker compose logs --tail=80 migrate app worker scheduler frontend gateway
 }
 
 function Refresh-ProcessPath {
@@ -162,6 +162,43 @@ function Get-ConfiguredPort {
     return $DefaultValue
 }
 
+function Get-ConfiguredValue {
+    param(
+        [string]$Name,
+        [string]$DefaultValue = ""
+    )
+    $Line = Get-Content ".env" | Where-Object { $_ -match "^\s*$([regex]::Escape($Name))\s*=" } | Select-Object -Last 1
+    if (-not $Line) {
+        return $DefaultValue
+    }
+    $Value = ($Line -split "=", 2)[1]
+    $Value = ($Value -split "#", 2)[0].Trim().Trim([char]34).Trim([char]39)
+    if ($Value) { return $Value }
+    return $DefaultValue
+}
+
+function Test-HttpsEnabled {
+    $Profiles = ",$(Get-ConfiguredValue 'COMPOSE_PROFILES')," -replace '\s', ''
+    return $Profiles.Contains(",https,")
+}
+
+function Assert-HttpsConfiguration {
+    $Domain = Get-ConfiguredValue "PUBLIC_DOMAIN"
+    $Email = Get-ConfiguredValue "ACME_EMAIL"
+    if (
+        $Domain -notmatch '^[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$' -or
+        -not $Domain.Contains('.') -or
+        $Domain.Contains('..') -or
+        $Domain.Contains(':') -or
+        $Domain.Contains('/')
+    ) {
+        Stop-WithMessage "HTTPS is enabled, but PUBLIC_DOMAIN is not a valid filed domain. Do not include a scheme, port, or path."
+    }
+    if ($Email -notmatch '^[^\s@]+@[^\s@]+\.[^\s@]+$') {
+        Stop-WithMessage "HTTPS is enabled, but ACME_EMAIL is not a valid email address."
+    }
+}
+
 function Get-SuggestedPort {
     param(
         [string]$Name,
@@ -169,6 +206,8 @@ function Get-SuggestedPort {
     )
     $Suggestion = switch ($Name) {
         "FRONTEND_PORT" { 5174 }
+        "TLS_HTTP_PORT" { 8080 }
+        "TLS_HTTPS_PORT" { 8443 }
         default { $Current + 10000 }
     }
     if ($Suggestion -eq $Current) {
@@ -187,9 +226,14 @@ function Get-SuggestedPort {
 }
 
 function Get-PortDefinitions {
-    return @(
+    $Definitions = @(
         [pscustomobject]@{ Name = "FRONTEND_PORT"; Port = Get-ConfiguredPort "FRONTEND_PORT" 5173; Label = "Frontend" }
     )
+    if (Test-HttpsEnabled) {
+        $Definitions += [pscustomobject]@{ Name = "TLS_HTTP_PORT"; Port = Get-ConfiguredPort "TLS_HTTP_PORT" 80; Label = "ACME/HTTP redirect" }
+        $Definitions += [pscustomobject]@{ Name = "TLS_HTTPS_PORT"; Port = Get-ConfiguredPort "TLS_HTTPS_PORT" 443; Label = "HTTPS" }
+    }
+    return $Definitions
 }
 
 function Test-PortInUse {
@@ -217,7 +261,7 @@ function Show-PortGuidance {
     }
     Write-Host ""
     Write-Host "Save .env and run the startup script again. Container-internal ports do not need to change."
-    Write-Host "For example, FRONTEND_PORT=5174 changes the URL to http://localhost:5174."
+    Write-Host "In HTTPS mode, public ports 80/443 must forward to the configured TLS_HTTP_PORT/TLS_HTTPS_PORT."
 }
 
 function Test-ConfiguredPorts {
@@ -304,6 +348,12 @@ if (-not (Test-DockerDaemon)) {
 
 Initialize-EnvironmentFile
 Test-SupportedDockerArchitecture
+$env:COMPOSE_PROFILES = Get-ConfiguredValue "COMPOSE_PROFILES"
+
+$HttpsEnabled = Test-HttpsEnabled
+if ($HttpsEnabled) {
+    Assert-HttpsConfiguration
+}
 
 & docker compose config --quiet
 if ($LASTEXITCODE -ne 0) {
@@ -311,7 +361,14 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $FrontendPort = Get-ConfiguredPort "FRONTEND_PORT" 5173
-$FrontendUrl = if ($FrontendPort -eq 80) { "http://localhost" } else { "http://localhost:$FrontendPort" }
+if ($HttpsEnabled) {
+    $PublicDomain = Get-ConfiguredValue "PUBLIC_DOMAIN"
+    $HttpsPort = Get-ConfiguredPort "TLS_HTTPS_PORT" 443
+    $FrontendUrl = if ($HttpsPort -eq 443) { "https://$PublicDomain" } else { "https://${PublicDomain}:$HttpsPort" }
+}
+else {
+    $FrontendUrl = if ($FrontendPort -eq 80) { "http://localhost" } else { "http://localhost:$FrontendPort" }
+}
 
 Test-ConfiguredPorts
 
@@ -339,6 +396,9 @@ Write-Host "Frontend: $FrontendUrl"
 Write-Host "Settings: $FrontendUrl/settings"
 Write-Host "API docs: $FrontendUrl/docs"
 Write-Host "OpenAPI:  $FrontendUrl/openapi.json"
+if ($HttpsEnabled) {
+    Write-Host "TLS:      Caddy will obtain and renew the Let's Encrypt certificate automatically"
+}
 Write-Host ""
 Write-Host "First-time setup: edit dashscope on the Settings page and enter the Bailian API Key."
 Write-Host "Stop services: stop.cmd or scripts\stop.ps1"

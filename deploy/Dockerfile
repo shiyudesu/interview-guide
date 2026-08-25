@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.description="InterviewGuide server-side pull depl
       org.opencontainers.image.title="InterviewGuide deployment bundle"
 
 COPY compose.yml /bundle/compose.yml
+COPY Caddyfile /bundle/Caddyfile
 COPY .env.example /bundle/.env.example
 COPY install.sh /bundle/install.sh
 COPY lib.sh /bundle/lib.sh

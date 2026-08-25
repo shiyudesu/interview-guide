@@ -27,7 +27,7 @@ class LifecycleScriptsTest(unittest.TestCase):
                 mode = (REPOSITORY_ROOT / relative).stat().st_mode
                 self.assertTrue(mode & os.X_OK)
 
-    def test_start_scripts_check_the_only_production_host_port(self) -> None:
+    def test_start_scripts_check_all_published_frontend_ports(self) -> None:
         for relative in (
             "scripts/start.sh",
             "scripts/start.ps1",
@@ -39,8 +39,11 @@ class LifecycleScriptsTest(unittest.TestCase):
                 self.assertIn("port", content.lower())
 
         compose = (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
-        self.assertEqual(compose.count("    ports:\n"), 1)
+        self.assertEqual(compose.count("    ports:\n"), 2)
         self.assertIn("FRONTEND_BIND_ADDRESS", compose)
+        self.assertIn("TLS_HTTP_PORT", compose)
+        self.assertIn("TLS_HTTPS_PORT", compose)
+        self.assertIn('profiles: ["https"]', compose)
         for internal_port in (
             "${SERVER_PORT:-8080}:8080",
             "${POSTGRES_PORT:-5432}:5432",
@@ -112,6 +115,7 @@ class LifecycleScriptsTest(unittest.TestCase):
 
     def test_frontend_is_the_single_origin_for_http_and_websocket_traffic(self) -> None:
         nginx = (REPOSITORY_ROOT / "frontend/nginx.conf").read_text(encoding="utf-8")
+        caddy = (REPOSITORY_ROOT / "deploy/Caddyfile").read_text(encoding="utf-8")
         vite = (REPOSITORY_ROOT / "frontend/vite.config.ts").read_text(
             encoding="utf-8"
         )
@@ -122,6 +126,9 @@ class LifecycleScriptsTest(unittest.TestCase):
         self.assertIn("location = /openapi.json", nginx)
         self.assertIn("proxy_set_header Host $http_host;", nginx)
         self.assertIn("$http_x_forwarded_proto", nginx)
+        self.assertIn("{$PUBLIC_DOMAIN}", caddy)
+        self.assertIn("reverse_proxy frontend:80", caddy)
+        self.assertIn("Strict-Transport-Security", caddy)
         self.assertIn("'/ws':", vite)
         self.assertIn("ws: true", vite)
 
@@ -132,9 +139,11 @@ class LifecycleScriptsTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertNotIn("build:", compose)
         self.assertNotIn("container_name:", compose)
-        self.assertEqual(compose.count("    ports:\n"), 1)
+        self.assertEqual(compose.count("    ports:\n"), 2)
         self.assertIn("interview-guide-backend", compose)
         self.assertIn("interview-guide-frontend", compose)
+        self.assertIn("library/caddy:2.10.2-alpine@sha256:", compose)
+        self.assertIn('profiles: ["https"]', compose)
         self.assertIn("workflow_run:", workflow)
         self.assertIn("packages: write", workflow)
         self.assertIn("linux/amd64,linux/arm64", workflow)
@@ -186,10 +195,52 @@ class LifecycleScriptsTest(unittest.TestCase):
 
     def test_deployment_installer_requires_systemd_and_repairs_empty_channel(self) -> None:
         install = (REPOSITORY_ROOT / "deploy/install.sh").read_text(encoding="utf-8")
+        dockerfile = (REPOSITORY_ROOT / "deploy/Dockerfile").read_text(
+            encoding="utf-8"
+        )
         stop = (REPOSITORY_ROOT / "deploy/stop.sh").read_text(encoding="utf-8")
         self.assertIn("command -v systemctl", install)
         self.assertGreaterEqual(install.count("INTERVIEW_GUIDE_UPDATE_CHANNEL"), 2)
+        self.assertIn("deploy_validate_domain", install)
+        self.assertIn("deploy_validate_email", install)
+        self.assertIn("Caddyfile", install)
+        self.assertIn("COPY Caddyfile /bundle/Caddyfile", dockerfile)
         self.assertIn("interview-guide-update.timer", stop)
+
+    def test_deployment_validates_https_identity(self) -> None:
+        lib = REPOSITORY_ROOT / "deploy/lib.sh"
+        for domain in ("https://example.com", "example.com:443", "localhost", "bad..example"):
+            with self.subTest(domain=domain):
+                result = subprocess.run(
+                    [
+                        "bash",
+                        "-c",
+                        'source "$1"; deploy_validate_domain "$2"',
+                        "bash",
+                        str(lib),
+                        domain,
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertNotEqual(result.returncode, 0)
+
+        result = subprocess.run(
+            [
+                "bash",
+                "-c",
+                'source "$1"; deploy_validate_domain "$2"; deploy_validate_email "$3"',
+                "bash",
+                str(lib),
+                "interview.example.com",
+                "admin@example.com",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_dockerhub_registry_override_covers_runtime_and_build_images(self) -> None:
         variable = "INTERVIEW_GUIDE_DOCKERHUB_REGISTRY"

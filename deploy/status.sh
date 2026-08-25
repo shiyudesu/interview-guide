@@ -18,6 +18,7 @@ deploy_validate_root "$deploy_root"
 env_file="${deploy_root}/.env"
 [[ -f "$env_file" ]] || deploy_die "缺少部署配置: ${env_file}"
 project_name="$(deploy_env_value "$env_file" COMPOSE_PROJECT_NAME interview-guide)"
+compose_profiles="$(deploy_env_value "$env_file" COMPOSE_PROFILES)"
 tag="$(deploy_env_value "$env_file" INTERVIEW_GUIDE_IMAGE_TAG main)"
 if [[ -f "${deploy_root}/state/current-tag" ]]; then
   tag="$(tr -d '\r\n' <"${deploy_root}/state/current-tag")"
@@ -30,8 +31,15 @@ fi
 if [[ -f "${deploy_root}/state/last-successful-update" ]]; then
   echo "最近更新: $(tr -d '\r\n' <"${deploy_root}/state/last-successful-update")"
 fi
+if deploy_https_enabled "$compose_profiles"; then
+  echo "HTTPS 入口: https://$(deploy_env_value "$env_file" PUBLIC_DOMAIN)"
+else
+  echo "入口模式: 兼容 HTTP；正式公网部署应切换到 HTTPS。"
+fi
 echo
-INTERVIEW_GUIDE_IMAGE_TAG="$tag" docker compose \
+COMPOSE_PROFILES="$compose_profiles" \
+  INTERVIEW_GUIDE_IMAGE_TAG="$tag" \
+  docker compose \
   --project-name "$project_name" \
   --project-directory "$deploy_root" \
   --env-file "$env_file" \

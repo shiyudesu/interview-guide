@@ -7,9 +7,11 @@ from pathlib import Path
 
 LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 ENVIRONMENT_VARIABLE = re.compile(
-    r"\b(?:AI|APP|CORS|DEV|FRONTEND|INTERVIEW_GUIDE|LOG|OTEL|POSTGRES|PROVIDER|"
-    r"REAL_BACKEND|REDIS|RUN_REAL_BACKEND|SERVER|TEST|TZ|VITE)_[A-Z0-9_]+\b"
+    r"\b(?:ACME|AI|APP|COMPOSE|CORS|DEV|FRONTEND|INTERVIEW_GUIDE|LOG|OTEL|"
+    r"POSTGRES|PROVIDER|PUBLIC|REAL_BACKEND|REDIS|RUN_REAL_BACKEND|SERVER|TEST|"
+    r"TLS|TZ|VITE)_[A-Z0-9_]+\b"
 )
+BUILTIN_ENVIRONMENT_VARIABLES = {"COMPOSE_PROFILES"}
 IGNORED_PARTS = {".git", ".venv", "node_modules"}
 PROJECT_DOCUMENTS = (
     "README.md",
@@ -84,7 +86,7 @@ def source_environment_variables(root: Path) -> set[str]:
         root / ".github/workflows/ci.yml",
         root / ".github/workflows/real-model.yml",
     )
-    values: set[str] = set()
+    values = set(BUILTIN_ENVIRONMENT_VARIABLES)
     for path in paths:
         values.update(ENVIRONMENT_VARIABLE.findall(path.read_text(encoding="utf-8")))
     return values

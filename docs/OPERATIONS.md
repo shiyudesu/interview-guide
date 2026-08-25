@@ -31,6 +31,10 @@ docker compose up -d --build --wait
 docker compose ps -a
 ```
 
+源码部署正式 HTTPS 时，在 `.env` 设置 `COMPOSE_PROFILES=https`、`PUBLIC_DOMAIN`、
+`ACME_EMAIL` 和 TLS 端口后再运行同一启动命令。Caddy 自动申请和续期 Let's Encrypt 证书；本机
+开发保持 `COMPOSE_PROFILES` 为空，不会启动公网 TLS 网关。
+
 关闭服务时使用配套脚本，默认保留所有数据卷：
 
 ```bash
@@ -51,6 +55,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\stop.ps1
 - `migrate` 执行成功后退出
 - `app`、`postgres`、`redis`、`minio` 为 healthy
 - `worker`、`scheduler`、`frontend` 为 running
+- HTTPS profile 启用时，`gateway` 为 healthy，`http://域名` 跳转到 `https://域名`
 
 ## 临时 HTTP 验收部署
 
@@ -96,8 +101,9 @@ WebSocket 路由，不能完成真实麦克风录音验收；该项必须改用 
 
 ## 端口占用
 
-生产 Compose 只发布前端入口，所以启动脚本只检查一个端口，并在 Compose 仍因端口竞争失败时
-再次解析错误。提示会直接列出占用进程和建议修改项，例如：
+普通本机模式只检查 `FRONTEND_PORT`。HTTPS profile 启用后，启动脚本还会检查
+`TLS_HTTP_PORT` 和 `TLS_HTTPS_PORT`，并在 Compose 仍因端口竞争失败时再次解析错误。提示会直接
+列出占用进程和建议修改项，例如：
 
 ```env
 FRONTEND_PORT=5174
@@ -105,6 +111,42 @@ FRONTEND_PORT=5174
 
 只修改宿主机映射变量即可，不要修改容器内部端口。修改 `FRONTEND_PORT` 后，访问地址也要带上
 新端口，例如 <http://localhost:5174>。
+
+正式公网 ACME 验证仍要求公网 80/443 可达。宿主机 TLS 端口变化时，必须同步调整 NAT，使公网
+80/443 分别转发到 `TLS_HTTP_PORT`、`TLS_HTTPS_PORT`。
+
+## HTTPS 证书签发或续期失败
+
+先检查配置和服务：
+
+```bash
+docker compose ps gateway frontend app
+docker compose logs --tail=200 gateway
+docker compose exec gateway caddy validate --config /etc/caddy/Caddyfile
+```
+
+依次确认：
+
+1. `PUBLIC_DOMAIN` 的 A/AAAA 记录已经指向当前公网地址；如果服务器没有可用 IPv6，不要保留错误
+   AAAA 记录。
+2. 公网 TCP 80 和 443 能到达 Caddy，云安全组、主机防火墙和 NAT 均已放行。
+3. `ACME_EMAIL` 有效，服务器能够访问 Let's Encrypt ACME API。
+4. 80/443 没有被宿主机其他 Nginx、Apache、Caddy 或面板占用。
+5. `caddy_data`、`caddy_config` Volume 未被删除，容器对 `/data`、`/config` 可写。
+
+查看证书数据卷：
+
+```bash
+docker volume ls | grep caddy
+docker compose exec gateway caddy list-modules >/dev/null
+```
+
+不要反复删除 Caddy 数据卷重新申请证书，这可能触发 CA 限额。修复 DNS 或端口后重启 gateway
+即可让 Caddy 继续重试：
+
+```bash
+docker compose restart gateway
+```
 
 ## 宿主机架构
 

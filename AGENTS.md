@@ -5,6 +5,11 @@
 生产后端为 Python/FastAPI。当前行为由后端测试、仓库清单、生产 Compose 集成和受保护
 真实模型工作流验证。
 
+多租户账号和用户自带 API Key 尚未实现，目标架构、迁移边界和发布门禁见
+`docs/MULTI_TENANT_BYOK_PLAN.md`。该文档描述规划行为，不改变本文件记录的当前生产约束；开始
+实施时必须通过 Alembic 和同一组代码、测试、README、AGENTS、配置及运维文档变更，把完成迁移
+后的多租户约束更新为新的受保护行为。
+
 目录：
 
 ```text
@@ -114,13 +119,15 @@ Actions 不持有服务器 SSH Key；更新过程必须校验镜像 revision、�
 3. Worker：处理四组 Redis Stream。
 4. Scheduler：单实例恢复和过期任务。
 
-生产前端 Nginx 必须通过 Docker DNS 动态解析 `app`，健康检查经由反向代理访问 `/health`，
-后端容器重建不能要求同时重启前端。
+正式公网部署必须使用备案域名和 HTTPS。Caddy 作为唯一公网入口发布 80/443，通过 Let's Encrypt
+自动签发和续期证书，80 仅用于 ACME 和跳转 HTTPS；证书状态必须保存在独立数据卷。前端 Nginx
+不直接暴露公网，必须通过 Docker DNS 动态解析 `app`，健康检查经由反向代理访问 `/health`，
+后端容器重建不能要求同时重启前端。`scripts/start-http.sh` 仍只用于隔离的临时明文验收。
 
 ```bash
 docker compose up -d --build --wait
 docker compose ps
-docker compose logs migrate app worker scheduler
+docker compose logs migrate app worker scheduler frontend gateway
 ```
 
 ## 测试

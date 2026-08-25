@@ -74,6 +74,36 @@ deploy_validate_tag() {
     || deploy_die "镜像 tag 无效: ${tag}"
 }
 
+deploy_validate_domain() {
+  local domain="$1"
+  [[ -n "$domain" ]] || deploy_die "缺少正式 HTTPS 域名。"
+  [[ "$domain" != http://* && "$domain" != https://* ]] \
+    || deploy_die "域名不要包含 http:// 或 https://：${domain}"
+  [[ "$domain" != *:* && "$domain" != */* && "$domain" != *..* ]] \
+    || deploy_die "域名不能包含端口、路径或连续点：${domain}"
+  local -a labels=()
+  IFS='.' read -r -a labels <<<"$domain"
+  (( ${#labels[@]} >= 2 )) || deploy_die "正式 HTTPS 域名必须包含至少两个标签：${domain}"
+  local label
+  for label in "${labels[@]}"; do
+    [[ "$label" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$ ]] \
+      || deploy_die "域名标签无效：${domain}"
+  done
+}
+
+deploy_validate_email() {
+  local email="$1"
+  [[ "$email" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]] \
+    || deploy_die "ACME 联系邮箱无效：${email:-未设置}"
+}
+
+deploy_https_enabled() {
+  local profiles="$1"
+  profiles="${profiles//[[:space:]]/}"
+  profiles=",${profiles},"
+  [[ "$profiles" == *,https,* ]]
+}
+
 deploy_validate_architecture() {
   local architecture
   architecture="$(docker info --format '{{.Architecture}}' 2>/dev/null || true)"

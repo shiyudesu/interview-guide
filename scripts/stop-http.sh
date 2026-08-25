@@ -33,7 +33,7 @@ if [[ ! -f "$http_env_file" ]]; then
 fi
 
 compose() {
-  docker compose \
+  COMPOSE_PROFILES="" docker compose \
     --project-name interview-guide-http \
     --env-file "$http_env_file" \
     -f docker-compose.yml \

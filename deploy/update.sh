@@ -50,9 +50,20 @@ deploy_validate_architecture
 namespace="$(deploy_env_value "$env_file" INTERVIEW_GUIDE_IMAGE_NAMESPACE)"
 registry="$(deploy_env_value "$env_file" INTERVIEW_GUIDE_IMAGE_REGISTRY ghcr.io)"
 project_name="$(deploy_env_value "$env_file" COMPOSE_PROJECT_NAME interview-guide)"
+compose_profiles="$(deploy_env_value "$env_file" COMPOSE_PROFILES)"
 deploy_validate_namespace "$namespace"
 [[ "$registry" =~ ^[A-Za-z0-9.-]+(:[0-9]+)?$ ]] || deploy_die "镜像仓库地址无效: ${registry}"
 [[ "$project_name" =~ ^[a-z0-9][a-z0-9_-]{0,62}$ ]] || deploy_die "Compose 项目名无效: ${project_name}"
+
+https_enabled=false
+public_domain=""
+if deploy_https_enabled "$compose_profiles"; then
+  https_enabled=true
+  public_domain="$(deploy_env_value "$env_file" PUBLIC_DOMAIN)"
+  acme_email="$(deploy_env_value "$env_file" ACME_EMAIL)"
+  deploy_validate_domain "$public_domain"
+  deploy_validate_email "$acme_email"
+fi
 
 mkdir -p "$state_dir"
 if [[ -z "$candidate_tag" ]]; then
@@ -71,7 +82,9 @@ if [[ -f "${state_dir}/current-tag" ]]; then
   current_tag="$(tr -d '\r\n' <"${state_dir}/current-tag")"
 fi
 compose() {
-  INTERVIEW_GUIDE_IMAGE_TAG="$candidate_tag" docker compose \
+  COMPOSE_PROFILES="$compose_profiles" \
+    INTERVIEW_GUIDE_IMAGE_TAG="$candidate_tag" \
+    docker compose \
     --project-name "$project_name" \
     --project-directory "$deploy_root" \
     --env-file "$env_file" \
@@ -79,9 +92,29 @@ compose() {
     "$@"
 }
 
+verify_https() {
+  local attempt
+  for attempt in {1..36}; do
+    if compose exec -T app python -c \
+      "import urllib.request; urllib.request.urlopen('https://${public_domain}/health', timeout=4).read()" \
+      >/dev/null 2>&1; then
+      return
+    fi
+    if (( attempt % 6 == 0 )); then
+      echo "仍在等待 Let's Encrypt 证书和 HTTPS 健康检查（${attempt}/36）..."
+    fi
+    sleep 5
+  done
+  compose logs --tail=120 gateway frontend app >&2 || true
+  deploy_die "HTTPS 验证失败。请检查域名解析、公网 80/443、防火墙和 Caddy 日志。"
+}
+
 if [[ "$force" != true && "$candidate_tag" == "$current_tag" ]]; then
   echo "当前已经是 ${candidate_tag}，检查服务状态..."
   compose up -d --wait
+  if [[ "$https_enabled" == true ]]; then
+    verify_https
+  fi
   echo "服务状态已收敛。"
   exit 0
 fi
@@ -110,14 +143,24 @@ if ! compose up -d --wait; then
   echo "部署 ${candidate_tag} 失败，当前成功版本记录保持为 ${current_tag:-未设置}。" >&2
   if [[ -n "$current_tag" && "$current_tag" != "$candidate_tag" ]]; then
     echo "尝试恢复上一应用版本 ${current_tag}（不回滚数据库迁移）..." >&2
-    INTERVIEW_GUIDE_IMAGE_TAG="$current_tag" docker compose \
+    rollback_services=(app worker scheduler frontend)
+    if [[ "$https_enabled" == true ]]; then
+      rollback_services+=(gateway)
+    fi
+    COMPOSE_PROFILES="$compose_profiles" \
+      INTERVIEW_GUIDE_IMAGE_TAG="$current_tag" \
+      docker compose \
       --project-name "$project_name" \
       --project-directory "$deploy_root" \
       --env-file "$env_file" \
       -f "$compose_file" \
-      up -d --no-deps --force-recreate app worker scheduler frontend || true
+      up -d --no-deps --force-recreate "${rollback_services[@]}" || true
   fi
   exit 1
+fi
+
+if [[ "$https_enabled" == true ]]; then
+  verify_https
 fi
 
 if [[ -n "$current_tag" && "$current_tag" != "$candidate_tag" ]]; then
@@ -130,4 +173,8 @@ echo
 compose ps
 echo
 echo "部署成功: ${candidate_tag}"
-echo "入口端口: $(deploy_env_value "$env_file" FRONTEND_PORT 5173)"
+if [[ "$https_enabled" == true ]]; then
+  echo "HTTPS 入口: https://${public_domain}"
+else
+  echo "HTTP 兼容入口: $(deploy_env_value "$env_file" FRONTEND_PORT 5173)"
+fi

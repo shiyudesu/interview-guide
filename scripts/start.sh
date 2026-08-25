@@ -78,7 +78,7 @@ show_diagnostics() {
   docker_cli compose ps -a || true
   echo
   echo "关键日志（最近 80 行）:"
-  docker_cli compose logs --tail=80 migrate app worker scheduler frontend || true
+  docker_cli compose logs --tail=80 migrate app worker scheduler frontend gateway || true
 }
 
 docker_cli() {
@@ -275,12 +275,51 @@ configured_port() {
   fi
 }
 
+configured_value() {
+  local name="$1"
+  local default_value="${2:-}"
+  local line value
+  line="$(grep -E "^[[:space:]]*${name}[[:space:]]*=" .env 2>/dev/null | tail -n 1 || true)"
+  if [[ -z "$line" ]]; then
+    printf '%s\n' "$default_value"
+    return
+  fi
+  value="${line#*=}"
+  value="${value%%#*}"
+  value="$(printf '%s' "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^['\"'\'']//' -e 's/['\"'\'']$//')"
+  printf '%s\n' "${value:-$default_value}"
+}
+
+https_enabled() {
+  local profiles
+  profiles="$(configured_value COMPOSE_PROFILES)"
+  profiles="${profiles//[[:space:]]/}"
+  profiles=",${profiles},"
+  [[ "$profiles" == *,https,* ]]
+}
+
+validate_https_configuration() {
+  local domain email
+  domain="$(configured_value PUBLIC_DOMAIN)"
+  email="$(configured_value ACME_EMAIL)"
+  [[ "$domain" =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ \
+    && "$domain" == *.* \
+    && "$domain" != *..* \
+    && "$domain" != *:* \
+    && "$domain" != */* ]] \
+    || fail "HTTPS 已启用，但 PUBLIC_DOMAIN 不是有效的备案域名。不要包含协议、端口或路径。"
+  [[ "$email" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]] \
+    || fail "HTTPS 已启用，但 ACME_EMAIL 未设置为有效邮箱。"
+}
+
 suggested_port() {
   local name="$1"
   local current="$2"
   local suggestion
   case "$name" in
     FRONTEND_PORT) suggestion=5174 ;;
+    TLS_HTTP_PORT) suggestion=8080 ;;
+    TLS_HTTPS_PORT) suggestion=8443 ;;
     *) suggestion=$((current + 10000)) ;;
   esac
   if (( suggestion == current )); then
@@ -325,8 +364,12 @@ show_port_owner() {
 }
 
 port_records() {
-  printf '%s\n' \
-    "FRONTEND_PORT|$(configured_port FRONTEND_PORT 5173)|前端"
+  printf '%s\n' "FRONTEND_PORT|$(configured_port FRONTEND_PORT 5173)|本机前端诊断入口"
+  if https_enabled; then
+    printf '%s\n' \
+      "TLS_HTTP_PORT|$(configured_port TLS_HTTP_PORT 80)|HTTPS 跳转/ACME 入口" \
+      "TLS_HTTPS_PORT|$(configured_port TLS_HTTPS_PORT 443)|HTTPS 入口"
+  fi
 }
 
 show_port_guidance() {
@@ -341,7 +384,7 @@ show_port_guidance() {
   done
   echo
   echo "修改 .env 后重新运行 ./scripts/start.sh。容器内部端口无需修改。"
-  echo "如果修改 FRONTEND_PORT，例如 FRONTEND_PORT=5174，请访问 http://localhost:5174。"
+  echo "HTTPS 模式下，如果宿主机不是直接使用 80/443，必须确保公网 80/443 正确转发到对应宿主机端口。"
 }
 
 show_registry_guidance() {
@@ -463,13 +506,28 @@ fi
 
 ensure_environment_file
 validate_docker_architecture
+export COMPOSE_PROFILES="$(configured_value COMPOSE_PROFILES)"
+
+use_https=false
+if https_enabled; then
+  use_https=true
+  validate_https_configuration
+fi
 
 if ! docker_cli compose config --quiet; then
   fail "Compose 配置无效，请检查 .env。"
 fi
 
 frontend_port="$(configured_port FRONTEND_PORT 5173)"
-if [[ "$frontend_port" == "80" ]]; then
+if [[ "$use_https" == true ]]; then
+  public_domain="$(configured_value PUBLIC_DOMAIN)"
+  https_port="$(configured_port TLS_HTTPS_PORT 443)"
+  if [[ "$https_port" == "443" ]]; then
+    frontend_url="https://${public_domain}"
+  else
+    frontend_url="https://${public_domain}:${https_port}"
+  fi
+elif [[ "$frontend_port" == "80" ]]; then
   frontend_url="http://localhost"
 else
   frontend_url="http://localhost:${frontend_port}"
@@ -496,6 +554,9 @@ echo "前端:   ${frontend_url}"
 echo "设置页: ${frontend_url}/settings"
 echo "API 文档: ${frontend_url}/docs"
 echo "OpenAPI:  ${frontend_url}/openapi.json"
+if [[ "$use_https" == true ]]; then
+  echo "TLS:      Caddy 将通过 Let's Encrypt 自动签发和续期证书"
+fi
 echo
 echo "首次使用请在设置页编辑 dashscope，并录入百炼 API Key。"
 echo "停止服务: ./scripts/stop.sh"

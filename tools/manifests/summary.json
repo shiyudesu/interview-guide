@@ -13,8 +13,8 @@
       "webSocketEndpointCount": 1
     },
     "configuration.json": {
-      "configurationValueCount": 221,
-      "envExampleCount": 80,
+      "configurationValueCount": 243,
+      "envExampleCount": 92,
       "envReferencedButUndocumentedCount": 0,
       "propertyBindingCount": 75
     },

@@ -1459,6 +1459,123 @@
     },
     {
       "environmentReferences": [],
+      "property": "services.gateway.profiles",
+      "rawValue": "[\"https\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 198
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-docker.io",
+          "name": "INTERVIEW_GUIDE_DOCKERHUB_REGISTRY",
+          "sensitive": false
+        }
+      ],
+      "property": "services.gateway.image",
+      "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 199
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.depends_on.frontend.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 202
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-admin@example.invalid",
+          "name": "ACME_EMAIL",
+          "sensitive": false
+        }
+      ],
+      "property": "services.gateway.environment.ACME_EMAIL",
+      "rawValue": "${ACME_EMAIL:-admin@example.invalid}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 204
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-localhost",
+          "name": "PUBLIC_DOMAIN",
+          "sensitive": false
+        }
+      ],
+      "property": "services.gateway.environment.PUBLIC_DOMAIN",
+      "rawValue": "${PUBLIC_DOMAIN:-localhost}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 205
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.test",
+      "rawValue": "[\"CMD\", \"wget\", \"--quiet\", \"--tries=1\", \"--spider\", \"http://127.0.0.1:2019/config/\"]",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 218
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 219
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.timeout",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 220
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.retries",
+      "rawValue": "24",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 221
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.start_period",
+      "rawValue": "5s",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 222
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.restart",
+      "rawValue": "unless-stopped",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 223
+      }
+    },
+    {
+      "environmentReferences": [],
       "property": "x-backend-environment",
       "rawValue": "&backend-environment",
       "source": {
@@ -2583,6 +2700,123 @@
         "file": "deploy/compose.yml",
         "line": 183
       }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.profiles",
+      "rawValue": "[\"https\"]",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 186
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-docker.io",
+          "name": "INTERVIEW_GUIDE_DOCKERHUB_REGISTRY",
+          "sensitive": false
+        }
+      ],
+      "property": "services.gateway.image",
+      "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 187
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.depends_on.frontend.condition",
+      "rawValue": "service_healthy",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 190
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-admin@example.invalid",
+          "name": "ACME_EMAIL",
+          "sensitive": false
+        }
+      ],
+      "property": "services.gateway.environment.ACME_EMAIL",
+      "rawValue": "${ACME_EMAIL:-admin@example.invalid}",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 192
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-localhost",
+          "name": "PUBLIC_DOMAIN",
+          "sensitive": false
+        }
+      ],
+      "property": "services.gateway.environment.PUBLIC_DOMAIN",
+      "rawValue": "${PUBLIC_DOMAIN:-localhost}",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 193
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.test",
+      "rawValue": "[\"CMD\", \"wget\", \"--quiet\", \"--tries=1\", \"--spider\", \"http://127.0.0.1:2019/config/\"]",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 206
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.interval",
+      "rawValue": "5s",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 207
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.timeout",
+      "rawValue": "5s",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 208
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.retries",
+      "rawValue": "24",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 209
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.healthcheck.start_period",
+      "rawValue": "5s",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 210
+      }
+    },
+    {
+      "environmentReferences": [],
+      "property": "services.gateway.restart",
+      "rawValue": "unless-stopped",
+      "source": {
+        "file": "deploy/compose.yml",
+        "line": 211
+      }
     }
   ],
   "envExample": [
@@ -2758,12 +2992,66 @@
       }
     },
     {
+      "default": "",
+      "name": "COMPOSE_PROFILES",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 38
+      }
+    },
+    {
+      "default": "",
+      "name": "PUBLIC_DOMAIN",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 39
+      }
+    },
+    {
+      "default": "",
+      "name": "ACME_EMAIL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 40
+      }
+    },
+    {
+      "default": "0.0.0.0",
+      "name": "TLS_BIND_ADDRESS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 41
+      }
+    },
+    {
+      "default": "80",
+      "name": "TLS_HTTP_PORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 42
+      }
+    },
+    {
+      "default": "443",
+      "name": "TLS_HTTPS_PORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.example",
+        "line": 43
+      }
+    },
+    {
       "default": "127.0.0.1",
       "name": "DEV_INFRASTRUCTURE_BIND_ADDRESS",
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 37
+        "line": 45
       }
     },
     {
@@ -2772,7 +3060,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 38
+        "line": 46
       }
     },
     {
@@ -2781,7 +3069,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 39
+        "line": 47
       }
     },
     {
@@ -2790,7 +3078,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 40
+        "line": 48
       }
     },
     {
@@ -2799,7 +3087,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 41
+        "line": 49
       }
     },
     {
@@ -2808,7 +3096,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 42
+        "line": 50
       }
     },
     {
@@ -2817,7 +3105,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 45
+        "line": 53
       }
     },
     {
@@ -2826,7 +3114,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 48
+        "line": 56
       }
     },
     {
@@ -2835,7 +3123,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 49
+        "line": 57
       }
     },
     {
@@ -2844,7 +3132,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 50
+        "line": 58
       }
     },
     {
@@ -2853,7 +3141,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 51
+        "line": 59
       }
     },
     {
@@ -2862,7 +3150,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 52
+        "line": 60
       }
     },
     {
@@ -2871,7 +3159,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 53
+        "line": 61
       }
     },
     {
@@ -2880,7 +3168,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 54
+        "line": 62
       }
     },
     {
@@ -2889,7 +3177,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 55
+        "line": 63
       }
     },
     {
@@ -2898,7 +3186,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 56
+        "line": 64
       }
     },
     {
@@ -2907,7 +3195,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 57
+        "line": 65
       }
     },
     {
@@ -2916,7 +3204,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 58
+        "line": 66
       }
     },
     {
@@ -2925,7 +3213,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 59
+        "line": 67
       }
     },
     {
@@ -2934,7 +3222,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 60
+        "line": 68
       }
     },
     {
@@ -2943,7 +3231,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 61
+        "line": 69
       }
     },
     {
@@ -2952,7 +3240,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 62
+        "line": 70
       }
     },
     {
@@ -2961,7 +3249,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 63
+        "line": 71
       }
     },
     {
@@ -2970,7 +3258,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 66
+        "line": 74
       }
     },
     {
@@ -2979,7 +3267,7 @@
       "sensitive": false,
       "source": {
         "file": ".env.example",
-        "line": 67
+        "line": 75
       }
     },
     {
@@ -3181,12 +3469,66 @@
       }
     },
     {
+      "default": "https",
+      "name": "COMPOSE_PROFILES",
+      "sensitive": false,
+      "source": {
+        "file": "deploy/.env.example",
+        "line": 11
+      }
+    },
+    {
+      "default": "",
+      "name": "PUBLIC_DOMAIN",
+      "sensitive": false,
+      "source": {
+        "file": "deploy/.env.example",
+        "line": 12
+      }
+    },
+    {
+      "default": "",
+      "name": "ACME_EMAIL",
+      "sensitive": false,
+      "source": {
+        "file": "deploy/.env.example",
+        "line": 13
+      }
+    },
+    {
       "default": "0.0.0.0",
+      "name": "TLS_BIND_ADDRESS",
+      "sensitive": false,
+      "source": {
+        "file": "deploy/.env.example",
+        "line": 14
+      }
+    },
+    {
+      "default": "80",
+      "name": "TLS_HTTP_PORT",
+      "sensitive": false,
+      "source": {
+        "file": "deploy/.env.example",
+        "line": 15
+      }
+    },
+    {
+      "default": "443",
+      "name": "TLS_HTTPS_PORT",
+      "sensitive": false,
+      "source": {
+        "file": "deploy/.env.example",
+        "line": 16
+      }
+    },
+    {
+      "default": "127.0.0.1",
       "name": "FRONTEND_BIND_ADDRESS",
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 10
+        "line": 19
       }
     },
     {
@@ -3195,7 +3537,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 11
+        "line": 20
       }
     },
     {
@@ -3204,7 +3546,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 13
+        "line": 22
       }
     },
     {
@@ -3213,7 +3555,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 14
+        "line": 23
       }
     },
     {
@@ -3222,7 +3564,7 @@
       "sensitive": true,
       "source": {
         "file": "deploy/.env.example",
-        "line": 15
+        "line": 24
       }
     },
     {
@@ -3231,7 +3573,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 16
+        "line": 25
       }
     },
     {
@@ -3240,7 +3582,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 17
+        "line": 26
       }
     },
     {
@@ -3249,7 +3591,7 @@
       "sensitive": true,
       "source": {
         "file": "deploy/.env.example",
-        "line": 19
+        "line": 28
       }
     },
     {
@@ -3258,7 +3600,7 @@
       "sensitive": true,
       "source": {
         "file": "deploy/.env.example",
-        "line": 20
+        "line": 29
       }
     },
     {
@@ -3267,7 +3609,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 21
+        "line": 30
       }
     },
     {
@@ -3276,7 +3618,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 22
+        "line": 31
       }
     },
     {
@@ -3285,7 +3627,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 24
+        "line": 33
       }
     },
     {
@@ -3294,7 +3636,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 25
+        "line": 34
       }
     },
     {
@@ -3303,7 +3645,7 @@
       "sensitive": false,
       "source": {
         "file": "deploy/.env.example",
-        "line": 26
+        "line": 35
       }
     }
   ],
@@ -3912,8 +4254,8 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "configurationValueCount": 221,
-    "envExampleCount": 80,
+    "configurationValueCount": 243,
+    "envExampleCount": 92,
     "envReferencedButUndocumentedCount": 0,
     "propertyBindingCount": 75
   },

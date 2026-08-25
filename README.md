@@ -109,8 +109,10 @@ docker compose logs migrate
 deployment bundle 三个 GHCR 多架构镜像；服务器的 systemd timer 每 5 分钟主动检查部署通道，
 并按不可变的 `sha-<commit>` tag 完成迁移和更新。
 
-服务器只保存 `.env`、纯镜像 Compose、更新脚本和版本状态，不需要 Git、Node.js、Python、pnpm
-或 uv。首次安装、private GHCR 登录、NAT 配置、日志和回滚命令见
+服务器只保存 `.env`、纯镜像 Compose、Caddy 配置、更新脚本和版本状态，不需要 Git、Node.js、
+Python、pnpm 或 uv。正式安装要求提供已备案且解析到服务器的域名和 ACME 联系邮箱；Caddy 只公开
+80/443，自动通过 Let's Encrypt 签发、续期并热加载证书，HTTP 自动跳转 HTTPS。首次安装、
+private GHCR 登录、DNS/TLS 配置、日志和回滚命令见
 [GHCR 主动拉取部署](docs/DEPLOYMENT.md)。
 
 后端生产镜像使用无图形界面的 LibreOffice 组件，并将系统依赖和 Python 依赖拆成较小的 OCI
@@ -131,7 +133,8 @@ NAT 服务器没有可用的 80/443，或宿主机已有多个服务时，可以
 | --- | --- |
 | 唯一公网入口 | `0.0.0.0:18073` |
 
-API、PostgreSQL、Redis 和 MinIO 只存在于 Compose 网络，不发布任何宿主机端口。
+API、PostgreSQL、Redis 和 MinIO 只存在于 Compose 网络，不发布任何宿主机端口。该模式只用于
+临时 HTTP 验收；正式公网入口使用备案域名和 HTTPS。
 
 只需配置一条 NAT TCP 映射，例如“公网 `28080` → 服务器 `18073`”，然后访问
 `http://公网IP或域名:28080`。公网端口不必与 `FRONTEND_PORT` 相同。端口冲突时编辑
@@ -156,8 +159,9 @@ API、PostgreSQL、Redis 和 MinIO 只存在于 Compose 网络，不发布任何
 4. `interview-guide-scheduler` 处理日程过期、题目生成恢复和语音会话恢复。
 
 API、Worker 和 Scheduler 会等 Migrate 成功后再启动。前端由 Nginx 提供静态文件，并把
-`/api/`、`/ws/`、`/docs` 和 `/openapi.json` 转发到 API。镜像使用多架构 manifest digest，
-Docker 会按宿主机自动选择 `linux/amd64` 或 `linux/arm64`，Compose 不再强制模拟 amd64。
+`/api/`、`/ws/`、`/docs` 和 `/openapi.json` 转发到 API；正式服务器由 Caddy 在最外层终止 TLS、
+处理 80 到 443 跳转并代理到前端。镜像使用多架构 manifest digest，Docker 会按宿主机自动选择
+`linux/amd64` 或 `linux/arm64`，Compose 不再强制模拟 amd64。
 
 ## 本地开发
 
@@ -279,6 +283,7 @@ docker-compose.dev.yml  本地基础设施
 - [配置说明](docs/CONFIGURATION.md)
 - [运行与排障](docs/OPERATIONS.md)
 - [统一自适应面试](docs/ADAPTIVE_INTERVIEW.md)
+- [多租户账号与 BYOK 实施计划](docs/MULTI_TENANT_BYOK_PLAN.md)
 - [后端开发](backend/README.md)
 - [前端开发](frontend/README.md)
 - [仓库工具](tools/README.md)

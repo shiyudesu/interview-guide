@@ -58,8 +58,15 @@ docker compose version
 sudo docker info --format '{{.Architecture}}'
 ```
 
-服务器只需要 Docker Engine、Compose v2、systemd 和访问 GHCR/Docker Hub 的网络，不需要 Git、
-Node.js、pnpm、Python 或 uv。
+服务器只需要 Docker Engine、Compose v2、systemd、已备案域名、可用的公网 80/443，以及访问
+GHCR、Docker Hub 和 Let's Encrypt 的网络，不需要 Git、Node.js、pnpm、Python、Certbot 或 uv。
+
+安装前完成：
+
+1. 域名 A/AAAA 记录解析到该服务器的公网地址。
+2. 公网 TCP 80 和 TCP 443 可到达服务器。
+3. 云安全组、主机防火墙和 NAT 转发允许上述端口。
+4. 旧服务器仍提供服务时，先降低 DNS TTL；切换前不要关闭旧入口。
 
 ## 首次安装
 
@@ -79,7 +86,9 @@ sudo docker rm "$DEPLOY_CONTAINER"
 sudo "$DEPLOY_TMP/install.sh" \
   --root /opt/interview-guide \
   --namespace "$GHCR_NAMESPACE" \
-  --channel main
+  --channel main \
+  --domain interview.example.com \
+  --email admin@example.com
 
 sudo rm -rf -- "$DEPLOY_TMP"
 ```
@@ -88,8 +97,10 @@ sudo rm -rf -- "$DEPLOY_TMP"
 
 - 创建 `/opt/interview-guide/.env`
 - 生成随机 PostgreSQL 和 MinIO 密码
-- 安装纯镜像 Compose 清单和主动更新脚本
+- 写入备案域名和 ACME 联系邮箱
+- 安装纯镜像 Compose、Caddy 配置和主动更新脚本
 - 首次拉取并启动已经通过 CI 的不可变镜像
+- 等待 Let's Encrypt 证书签发并通过真实 HTTPS `/health` 检查
 - 安装并启动 `interview-guide-update.timer`
 
 服务器保存的只有：
@@ -99,6 +110,7 @@ sudo rm -rf -- "$DEPLOY_TMP"
 ├── .env
 ├── bundle/
 │   ├── compose.yml
+│   ├── Caddyfile
 │   ├── refresh.sh
 │   ├── update.sh
 │   ├── rollback.sh
@@ -110,27 +122,72 @@ sudo rm -rf -- "$DEPLOY_TMP"
     └── bundle-revision
 ```
 
-## HTTP 和 NAT 配置
+## HTTPS、DNS 和端口
 
-默认配置为：
+新安装默认配置为：
 
 ```env
-FRONTEND_BIND_ADDRESS=0.0.0.0
+COMPOSE_PROFILES=https
+PUBLIC_DOMAIN=interview.example.com
+ACME_EMAIL=admin@example.com
+TLS_BIND_ADDRESS=0.0.0.0
+TLS_HTTP_PORT=80
+TLS_HTTPS_PORT=443
+FRONTEND_BIND_ADDRESS=127.0.0.1
 FRONTEND_PORT=18073
 ```
 
-生产 Compose 只发布该前端端口。API、PostgreSQL、Redis 和 MinIO 只存在于 Compose 网络。
-
-NAT 示例：
+正式公网入口只有 Caddy：
 
 ```text
-公网 TCP 28080 -> 服务器 TCP 18073
-访问地址        -> http://example.com:28080
+公网 TCP 80   -> Caddy HTTP/ACME 入口
+公网 TCP 443  -> Caddy HTTPS 入口
 ```
 
-不要为 `8080`、`5432`、`6379`、`9000` 或 `9001` 建立公网映射。
+Caddy 使用备案域名向 Let's Encrypt 自动签发和续期证书，HTTP 自动跳转到 HTTPS。前端 Nginx
+仍在 Compose 网络内负责静态文件以及 `/api`、`/ws`、`/docs` 和 `/openapi.json` 的同源代理。
+API、PostgreSQL、Redis 和 MinIO 不发布宿主机端口。
 
-修改配置后手动执行一次更新：
+使用 NAT 时，公网端口仍必须是 80/443，但可以转发到服务器上由 `TLS_HTTP_PORT` 和
+`TLS_HTTPS_PORT` 指定的端口。例如：
+
+```text
+公网 TCP 80  -> 服务器 TCP 8080  （TLS_HTTP_PORT=8080）
+公网 TCP 443 -> 服务器 TCP 8443  （TLS_HTTPS_PORT=8443）
+访问地址      -> https://interview.example.com
+```
+
+不能使用“公网高端口到服务器 80/443”代替上述映射，因为 ACME HTTP-01 和正常浏览器 HTTPS 都从
+公网 80/443 到达。不要为 `FRONTEND_PORT`、`8080`、`5432`、`6379`、`9000` 或 `9001` 建立公网
+映射。
+
+证书和 ACME 状态保存在 Compose 的 `caddy_data`、`caddy_config` Volume。更新和普通停止不会删除
+这些卷，Caddy 会在到期前自动续期并热加载，不需要部署者安装 Certbot 或编写 reload 定时任务。
+
+检查入口：
+
+```bash
+curl -I http://interview.example.com
+curl -fsS https://interview.example.com/health
+```
+
+第一条应跳转到 HTTPS，第二条应返回健康结果。
+
+### 从旧服务器迁移
+
+应用数据不会随镜像自动复制到新服务器。需要保留现有数据时，切换 DNS 前必须迁移：
+
+- PostgreSQL 数据或逻辑备份。
+- MinIO 对象数据。
+- `provider_key` Volume；如果曾保存 Provider Key，该卷必须与 PostgreSQL 一起迁移。
+- 需要保留的 Redis 持久化数据；迁移期间停止旧 API、Worker 和 Scheduler，避免两边同时消费
+  Stream。
+
+当前没有业务数据和 Provider Key 时，可以直接在新服务器执行全新安装。存在数据时应先完成备份
+恢复演练，再安排只读/停机窗口；不要复制正在写入中的 Docker Volume，也不要通过 `down -v`
+清理旧服务器。
+
+修改 TLS 或域名配置后手动执行一次更新：
 
 ```bash
 sudo /opt/interview-guide/bundle/refresh.sh --root /opt/interview-guide
@@ -160,8 +217,9 @@ journalctl -u interview-guide-update.service -n 100 --no-pager
 4. 校验两个镜像的 revision 标签与目标 tag 一致。
 5. 保持 PostgreSQL、Redis、MinIO 健康。
 6. 重新执行 Bucket 初始化和 Alembic。
-7. 更新 API、Worker、Scheduler 和前端并等待健康检查。
-8. 成功后记录当前版本和上一版本。
+7. 更新 API、Worker、Scheduler、前端和 Caddy 并等待容器健康检查。
+8. 从应用网络内验证证书有效的 `https://域名/health`。
+9. 成功后记录当前版本和上一版本。
 
 部署包也由服务器主动更新，因此 Compose 或更新脚本变化不需要重新登录服务器复制文件。
 
@@ -183,7 +241,7 @@ sudo env INTERVIEW_GUIDE_IMAGE_TAG="$TAG" docker compose \
   --project-directory /opt/interview-guide \
   --env-file /opt/interview-guide/.env \
   -f /opt/interview-guide/bundle/compose.yml \
-  logs -f app worker scheduler frontend
+  logs -f gateway frontend app worker scheduler
 ```
 
 回滚到上一次成功部署的应用版本：
