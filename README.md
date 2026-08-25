@@ -221,6 +221,10 @@ Provider。Provider alias、默认聊天/Embedding 模型以及 ASR/TTS 配置�
 修改密码或撤销全部 Session；Session Token 只存在于 Secure/HttpOnly Cookie，前端不会持久化
 Session Token 或 API Key。自助注册在邮箱验证和最终隔离门禁完成前保持关闭。
 
+仓库已提供邮箱验证和密码找回链路；部署者配置 HTTPS 公网地址和 SMTP 后，才可以把
+`APP_AUTH_REGISTRATION_ENABLED` 显式改为 `true`。注册用户验证邮箱前不能登录，重置密码会撤销
+该账号的全部现有 Session。
+
 当前默认模型：
 
 ```text

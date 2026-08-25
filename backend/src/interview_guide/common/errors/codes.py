@@ -70,6 +70,9 @@ class ErrorCode(Enum):
     AUTH_SESSION_INVALID = (12004, "登录状态已失效")
     AUTH_CSRF_INVALID = (12005, "请求安全校验失败")
     AUTH_REGISTRATION_DISABLED = (12006, "当前未开放注册")
+    AUTH_EMAIL_NOT_VERIFIED = (12007, "邮箱尚未验证")
+    AUTH_ACTION_TOKEN_INVALID = (12008, "链接无效或已过期")
+    AUTH_EMAIL_DELIVERY_FAILED = (12009, "邮件发送失败，请稍后重试")
 
     def __init__(self, code: int, message: str) -> None:
         self.code = code

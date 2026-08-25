@@ -73,4 +73,37 @@ test.describe('账号与路由保护', () => {
     await expect(page.getByText('当前未开放自助注册，请联系管理员创建账号。')).toBeVisible();
     await expect(page.getByRole('button', { name: '注册并继续' })).toBeDisabled();
   });
+
+  test('邮箱验证和密码找回页面完成公开账号流程', async ({ page }) => {
+    await installAuthRoutes(page);
+    await page.route('**/api/auth/email/verification/confirm', async route => {
+      expect(route.request().postDataJSON()).toEqual({ token: 'verify-token' });
+      await route.fulfill({ status: 204, body: '' });
+    });
+    await page.route('**/api/auth/password/reset/request', async route => {
+      expect(route.request().postDataJSON()).toEqual({ email: USER.email });
+      await route.fulfill({ status: 204, body: '' });
+    });
+    await page.route('**/api/auth/password/reset/confirm', async route => {
+      expect(route.request().postDataJSON()).toEqual({
+        token: 'reset-token',
+        newPassword: 'replacement horse battery staple',
+      });
+      await route.fulfill({ status: 204, body: '' });
+    });
+
+    await page.goto('/verify-email?token=verify-token');
+    await expect(page.getByText('邮箱验证成功，现在可以登录了。')).toBeVisible();
+
+    await page.goto('/forgot-password');
+    await page.getByLabel('邮箱').fill(USER.email);
+    await page.getByRole('button', { name: '发送重置邮件' }).click();
+    await expect(page.getByText('如果该邮箱对应可用账号，密码重置邮件已经发送。')).toBeVisible();
+
+    await page.goto('/reset-password?token=reset-token');
+    await page.getByLabel('新密码', { exact: true }).fill('replacement horse battery staple');
+    await page.getByLabel('确认新密码').fill('replacement horse battery staple');
+    await page.getByRole('button', { name: '重置密码' }).click();
+    await expect(page.getByText('密码已重置，所有旧 Session 均已撤销。')).toBeVisible();
+  });
 });

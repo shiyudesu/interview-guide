@@ -195,6 +195,19 @@ APP_AUTH_SESSION_ABSOLUTE_SECONDS=604800
 APP_AUTH_LOGIN_IP_LIMIT_PER_MINUTE=20
 APP_AUTH_LOGIN_ACCOUNT_LIMIT_PER_MINUTE=8
 APP_AUTH_REGISTRATION_IP_LIMIT_PER_HOUR=5
+APP_AUTH_EMAIL_VERIFICATION_REQUIRED=true
+APP_AUTH_PUBLIC_URL=https://interview.example.com
+APP_AUTH_EMAIL_VERIFICATION_SECONDS=86400
+APP_AUTH_PASSWORD_RESET_SECONDS=3600
+APP_AUTH_EMAIL_REQUEST_LIMIT_PER_HOUR=5
+APP_AUTH_SMTP_HOST=smtp.example.com
+APP_AUTH_SMTP_PORT=587
+APP_AUTH_SMTP_USERNAME=
+APP_AUTH_SMTP_PASSWORD=
+APP_AUTH_SMTP_STARTTLS=true
+APP_AUTH_SMTP_SSL=false
+APP_AUTH_SMTP_FROM_EMAIL=noreply@example.com
+APP_AUTH_SMTP_TIMEOUT_SECONDS=10
 ```
 
 - Session 保存在 Redis，浏览器只保存 `HttpOnly + Secure + SameSite=Lax` Cookie。
@@ -202,9 +215,18 @@ APP_AUTH_REGISTRATION_IP_LIMIT_PER_HOUR=5
   `X-CSRF-Token`，并通过同源 Origin 校验。
 - 密码使用 Argon2id 哈希，哈希操作进入受限线程池。
 - 登录同时按客户端 IP 和不可逆邮箱摘要限流，日志和 Redis key 不保存邮箱明文。
+- 注册用户先以 `PENDING` 状态创建，验证邮件 Token 只以 SHA-256 摘要保存在 Redis，默认 24 小时
+  过期且只能使用一次；验证成功后才切换为 `ACTIVE`。
+- 密码找回请求对存在和不存在的邮箱返回相同 204；重置 Token 默认 1 小时过期，成功后撤销该用户
+  的全部 Session。邮件 Token、SMTP 密码和邮件正文不会写入应用日志。
+- `APP_AUTH_SMTP_STARTTLS` 与 `APP_AUTH_SMTP_SSL` 只能启用一个。使用 465 端口时通常选择 SSL 并
+  关闭 STARTTLS；使用 587 端口时通常使用 STARTTLS。
+- 一旦把 `APP_AUTH_REGISTRATION_ENABLED` 改为 `true`，配置校验会强制要求认证、Secure Cookie、
+  邮箱验证、HTTPS 的 `APP_AUTH_PUBLIC_URL`、SMTP 主机和发件邮箱全部有效，否则服务拒绝启动。
 - `APP_AUTH_ENABLED` 对已有未配置部署默认保持关闭，避免自动更新后无管理员可登录；新安装模板会
   显式设为 `true`。
-- `APP_AUTH_REGISTRATION_ENABLED` 在业务资源和 Provider 完成多租户隔离前必须保持 `false`。
+- `APP_AUTH_REGISTRATION_ENABLED` 默认保持 `false`；只有生产 HTTPS、SMTP 和双用户门禁全部通过后
+  才能由部署者显式改为 `true`。
 - `.env.http` 明确设置 `APP_AUTH_ENABLED=false`，临时公网 HTTP 不承载正式账号或 BYOK。
 
 ## 多租户文件和异步任务
@@ -282,9 +304,10 @@ Session；未登录会跳转 `/login` 并在成功后返回原目标页面。浏
 Session Cookie，CSRF Token 仅保存在页面内存中并自动附加到 POST、PUT、PATCH 和 DELETE 请求，
 不会写入 Local Storage、Session Storage 或 URL。收到 HTTP 401 后前端会清理内存登录态。
 
-`/account` 提供密码修改和撤销全部 Session；两项操作成功后当前设备也会退出。注册关闭时
-`/register` 只显示管理员创建账号提示，不能提交注册表单。临时 HTTP 验收配置关闭认证时，前端
-根据 `/api/auth/config` 进入兼容的本地单用户界面，不显示可用的正式退出操作。
+`/account` 提供密码修改和撤销全部 Session；两项操作成功后当前设备也会退出。`/verify-email`、
+`/forgot-password` 和 `/reset-password` 分别承接邮箱验证与密码找回。注册关闭时 `/register` 只
+显示管理员创建账号提示，不能提交注册表单。临时 HTTP 验收配置关闭认证时，前端根据
+`/api/auth/config` 进入兼容的本地单用户界面，不显示可用的正式退出操作。
 
 ```env
 SERVER_PORT=8080

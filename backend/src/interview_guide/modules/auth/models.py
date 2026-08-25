@@ -25,6 +25,37 @@ class RegisterRequest(CamelModel):
         return value
 
 
+class EmailRequest(CamelModel):
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: str) -> str:
+        return normalized_email(value)
+
+
+class ActionTokenRequest(CamelModel):
+    token: str
+
+    @field_validator("token")
+    @classmethod
+    def validate_token(cls, value: str) -> str:
+        token = value.strip()
+        if not token or len(token) > 256:
+            raise ValueError("链接 Token 无效")
+        return token
+
+
+class PasswordResetConfirmRequest(ActionTokenRequest):
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value: str) -> str:
+        validate_password_length(value)
+        return value
+
+
 class LoginRequest(CamelModel):
     email: str
     password: str
@@ -63,6 +94,11 @@ class AuthSessionResponse(CamelModel):
 class AuthConfigResponse(CamelModel):
     auth_enabled: bool
     registration_enabled: bool
+
+
+class RegistrationResponse(CamelModel):
+    email: str
+    verification_required: bool
 
 
 def normalized_email(value: str) -> str:

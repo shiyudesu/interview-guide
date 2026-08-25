@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote_plus
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -72,11 +72,79 @@ class Settings(BaseSettings):
         ge=1,
         validation_alias="APP_AUTH_REGISTRATION_IP_LIMIT_PER_HOUR",
     )
+    auth_email_verification_required: bool = Field(
+        default=True,
+        validation_alias="APP_AUTH_EMAIL_VERIFICATION_REQUIRED",
+    )
+    auth_public_url: str = Field(default="", validation_alias="APP_AUTH_PUBLIC_URL")
+    auth_email_verification_seconds: int = Field(
+        default=24 * 60 * 60,
+        ge=300,
+        validation_alias="APP_AUTH_EMAIL_VERIFICATION_SECONDS",
+    )
+    auth_password_reset_seconds: int = Field(
+        default=60 * 60,
+        ge=300,
+        validation_alias="APP_AUTH_PASSWORD_RESET_SECONDS",
+    )
+    auth_email_request_limit_per_hour: int = Field(
+        default=5,
+        ge=1,
+        validation_alias="APP_AUTH_EMAIL_REQUEST_LIMIT_PER_HOUR",
+    )
+    auth_smtp_host: str = Field(default="", validation_alias="APP_AUTH_SMTP_HOST")
+    auth_smtp_port: int = Field(
+        default=587,
+        ge=1,
+        le=65535,
+        validation_alias="APP_AUTH_SMTP_PORT",
+    )
+    auth_smtp_username: str = Field(
+        default="",
+        validation_alias="APP_AUTH_SMTP_USERNAME",
+    )
+    auth_smtp_password: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias="APP_AUTH_SMTP_PASSWORD",
+    )
+    auth_smtp_starttls: bool = Field(
+        default=True,
+        validation_alias="APP_AUTH_SMTP_STARTTLS",
+    )
+    auth_smtp_ssl: bool = Field(default=False, validation_alias="APP_AUTH_SMTP_SSL")
+    auth_smtp_from_email: str = Field(
+        default="",
+        validation_alias="APP_AUTH_SMTP_FROM_EMAIL",
+    )
+    auth_smtp_timeout_seconds: float = Field(
+        default=10,
+        gt=0,
+        validation_alias="APP_AUTH_SMTP_TIMEOUT_SECONDS",
+    )
     blocking_worker_count: int = Field(
         default=8,
         ge=1,
         validation_alias="APP_BLOCKING_WORKER_COUNT",
     )
+
+    @model_validator(mode="after")
+    def validate_registration_delivery(self) -> Settings:
+        if self.auth_smtp_ssl and self.auth_smtp_starttls:
+            raise ValueError("APP_AUTH_SMTP_SSL 与 APP_AUTH_SMTP_STARTTLS 不能同时启用")
+        if not self.auth_registration_enabled:
+            return self
+        if not self.auth_enabled:
+            raise ValueError("开放注册前必须启用 APP_AUTH_ENABLED")
+        if not self.auth_cookie_secure:
+            raise ValueError("开放注册只允许使用 Secure Session Cookie")
+        if not self.auth_email_verification_required:
+            raise ValueError("开放注册前必须启用邮箱验证")
+        if not self.auth_public_url.startswith("https://"):
+            raise ValueError("开放注册需要配置 HTTPS 的 APP_AUTH_PUBLIC_URL")
+        if not self.auth_smtp_host or not self.auth_smtp_from_email:
+            raise ValueError("开放注册需要配置 SMTP 主机和发件邮箱")
+        return self
+
     infrastructure_startup_enabled: bool = Field(
         default=True,
         validation_alias="APP_INFRASTRUCTURE_STARTUP_ENABLED",

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, LockKeyhole, Sparkles } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { authApi } from '../api/auth';
 import { getErrorMessage } from '../api/request';
 
 interface LoginLocationState {
@@ -19,11 +20,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitting(true);
     setError('');
+    setVerificationSent(false);
     try {
       await login({ email, password });
       navigate(state.from || '/history', { replace: true });
@@ -63,7 +66,24 @@ export default function LoginPage() {
           )}
           {error && (
             <div role="alert" className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
-              {error}
+              <p>{error}</p>
+              {error.includes('邮箱尚未验证') && email && (
+                <button
+                  type="button"
+                  className="mt-2 font-medium underline"
+                  onClick={async () => {
+                    try {
+                      await authApi.requestEmailVerification(email);
+                      setVerificationSent(true);
+                    } catch (caught) {
+                      setError(getErrorMessage(caught));
+                    }
+                  }}
+                >
+                  重新发送验证邮件
+                </button>
+              )}
+              {verificationSent && <p className="mt-2 text-emerald-700">如果账号处于待验证状态，邮件已重新发送。</p>}
             </div>
           )}
 
@@ -102,6 +122,10 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+          </div>
+
+          <div className="-mt-3 mb-5 text-right">
+            <Link to="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-700">忘记密码？</Link>
           </div>
 
           <button

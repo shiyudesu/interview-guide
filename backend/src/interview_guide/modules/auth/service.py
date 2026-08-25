@@ -14,12 +14,18 @@ from interview_guide.common.redis.rate_limit import (
     RateLimiter,
     RateLimitRule,
 )
+from interview_guide.modules.auth.action_tokens import AuthActionTokenStore
 from interview_guide.modules.auth.domain import Actor, UserRole
+from interview_guide.modules.auth.mailer import AuthMailer
 from interview_guide.modules.auth.models import (
+    ActionTokenRequest,
     AuthSessionResponse,
     ChangePasswordRequest,
+    EmailRequest,
     LoginRequest,
+    PasswordResetConfirmRequest,
     RegisterRequest,
+    RegistrationResponse,
     UserResponse,
 )
 from interview_guide.modules.auth.passwords import PasswordService
@@ -39,12 +45,16 @@ class AuthService:
         repository: AuthRepository,
         passwords: PasswordService,
         sessions: AuthSessionStore,
+        action_tokens: AuthActionTokenStore,
+        mailer: AuthMailer,
         rate_limiter: RateLimiter,
         settings: Settings,
     ) -> None:
         self._repository = repository
         self._passwords = passwords
         self._sessions = sessions
+        self._action_tokens = action_tokens
+        self._mailer = mailer
         self._rate_limiter = rate_limiter
         self._settings = settings
 
@@ -53,9 +63,10 @@ class AuthService:
         request: RegisterRequest,
         *,
         client_ip: str,
-    ) -> AuthenticatedSession:
+    ) -> RegistrationResponse:
         if not self._settings.auth_registration_enabled:
             raise BusinessException(ErrorCode.AUTH_REGISTRATION_DISABLED)
+        account_key = hashlib.sha256(request.email.encode()).hexdigest()
         await self._rate_limiter.check(
             scope="auth.register",
             rules=(
@@ -64,8 +75,14 @@ class AuthService:
                     float(self._settings.auth_registration_ip_limit_per_hour),
                     interval_ms=60 * 60 * 1000,
                 ),
+                RateLimitRule(
+                    RateLimitDimension.USER,
+                    float(self._settings.auth_registration_ip_limit_per_hour),
+                    interval_ms=60 * 60 * 1000,
+                ),
             ),
             client_ip=client_ip,
+            user_id=account_key,
             now_ms=int(time.time() * 1000),
         )
         password_hash = await self._passwords.hash(request.password)
@@ -75,11 +92,78 @@ class AuthService:
             display_name=request.display_name,
             password_hash=password_hash,
             role=UserRole.USER.value,
-            status="ACTIVE",
+            status="PENDING",
             now=now,
             email_verified=False,
         )
-        return await self._new_authenticated_session(user)
+        token = await self._action_tokens.create_email_verification(user.id)
+        await self._mailer.send_email_verification(user.email, user.display_name, token)
+        return RegistrationResponse(email=user.email, verification_required=True)
+
+    async def request_email_verification(
+        self,
+        request: EmailRequest,
+        *,
+        client_ip: str,
+    ) -> None:
+        await self._check_email_rate_limit(
+            scope="auth.email-verification",
+            email=request.email,
+            client_ip=client_ip,
+        )
+        user = await self._repository.get_user_by_email(request.email)
+        if (
+            user is None
+            or user.kind != "HUMAN"
+            or user.status != "PENDING"
+            or user.email_verified_at is not None
+        ):
+            return
+        token = await self._action_tokens.create_email_verification(user.id)
+        await self._mailer.send_email_verification(user.email, user.display_name, token)
+
+    async def confirm_email_verification(self, request: ActionTokenRequest) -> None:
+        user_id = await self._action_tokens.consume_email_verification(request.token)
+        if user_id is None or await self._repository.verify_email(user_id, utc_now()) is None:
+            raise BusinessException(ErrorCode.AUTH_ACTION_TOKEN_INVALID)
+
+    async def request_password_reset(
+        self,
+        request: EmailRequest,
+        *,
+        client_ip: str,
+    ) -> None:
+        await self._check_email_rate_limit(
+            scope="auth.password-reset",
+            email=request.email,
+            client_ip=client_ip,
+        )
+        user = await self._repository.get_user_by_email(request.email)
+        if (
+            user is None
+            or user.kind != "HUMAN"
+            or user.status != "ACTIVE"
+            or user.email_verified_at is None
+        ):
+            return
+        token = await self._action_tokens.create_password_reset(user.id)
+        await self._mailer.send_password_reset(user.email, user.display_name, token)
+
+    async def confirm_password_reset(self, request: PasswordResetConfirmRequest) -> None:
+        user_id = await self._action_tokens.consume_password_reset(request.token)
+        if user_id is None:
+            raise BusinessException(ErrorCode.AUTH_ACTION_TOKEN_INVALID)
+        user = await self._repository.get_user(user_id)
+        if (
+            user is None
+            or user.kind != "HUMAN"
+            or user.status != "ACTIVE"
+            or user.email_verified_at is None
+        ):
+            raise BusinessException(ErrorCode.AUTH_ACTION_TOKEN_INVALID)
+        password_hash = await self._passwords.hash(request.new_password)
+        await self._repository.update_password(user_id, password_hash, utc_now())
+        await self._sessions.revoke_all(user_id)
 
     async def login(
         self,
@@ -114,6 +198,8 @@ class AuthService:
         if not verified:
             raise BusinessException(ErrorCode.AUTH_INVALID_CREDENTIALS)
         if record.user.status != "ACTIVE" or record.user.kind != "HUMAN":
+            if record.user.status == "PENDING" and record.user.email_verified_at is None:
+                raise BusinessException(ErrorCode.AUTH_EMAIL_NOT_VERIFIED)
             raise BusinessException(ErrorCode.USER_DISABLED)
         if self._passwords.needs_rehash(record.credential.password_hash):
             rehashed = await self._passwords.hash(request.password)
@@ -194,6 +280,33 @@ class AuthService:
         if user is None or user.status != "ACTIVE" or user.kind != "HUMAN":
             raise BusinessException(ErrorCode.AUTH_SESSION_INVALID)
         return user
+
+    async def _check_email_rate_limit(
+        self,
+        *,
+        scope: str,
+        email: str,
+        client_ip: str,
+    ) -> None:
+        account_key = hashlib.sha256(email.encode()).hexdigest()
+        await self._rate_limiter.check(
+            scope=scope,
+            rules=(
+                RateLimitRule(
+                    RateLimitDimension.IP,
+                    float(self._settings.auth_email_request_limit_per_hour),
+                    interval_ms=60 * 60 * 1000,
+                ),
+                RateLimitRule(
+                    RateLimitDimension.USER,
+                    float(self._settings.auth_email_request_limit_per_hour),
+                    interval_ms=60 * 60 * 1000,
+                ),
+            ),
+            client_ip=client_ip,
+            user_id=account_key,
+            now_ms=int(time.time() * 1000),
+        )
 
 
 def user_response(user: UserAccount) -> UserResponse:

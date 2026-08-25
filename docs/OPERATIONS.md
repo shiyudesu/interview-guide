@@ -169,6 +169,20 @@ docker compose exec redis redis-cli --scan --pattern 'auth:user-sessions:*'
 3. `Origin`、`Host`、`X-Forwarded-Host` 和 `X-Forwarded-Proto` 是否对应同一个 HTTPS 域名。
 4. Caddy 和前端 Nginx 是否仍保持同源代理，不要把 API 暴露为另一个域名。
 
+### 开放自助注册
+
+先保持 `APP_AUTH_REGISTRATION_ENABLED=false` 完成管理员登录和双用户验收。准备开放时：
+
+1. 确认备案域名的 HTTPS、证书续期和 `/health` 正常。
+2. 设置 `APP_AUTH_PUBLIC_URL=https://实际域名`，该地址用于生成验证和重置链接。
+3. 配置 SMTP 主机、端口、发件邮箱和凭据；587 通常使用 STARTTLS，465 通常使用 SSL，不能同时
+   开启两种模式。
+4. 使用测试邮箱完成注册、验证、登录、找回密码，并确认重置后旧 Session 失效。
+5. 再把 `APP_AUTH_REGISTRATION_ENABLED=true` 并重建 API、Worker 和 Scheduler 使用的公共环境。
+
+缺少 HTTPS 公网地址、Secure Cookie、邮箱验证或 SMTP 配置时，后端会拒绝在注册开启状态启动，
+不会降级为未验证账号直接激活。找回密码接口始终返回相同的空响应，不能据此判断邮箱是否存在。
+
 ## 宿主机架构
 
 生产镜像不再固定 `linux/amd64`。先查看 Docker daemon 架构：

@@ -19,6 +19,10 @@ PUBLIC_PATHS = {
     "/api/auth/login",
     "/api/auth/register",
     "/api/auth/config",
+    "/api/auth/email/verification/request",
+    "/api/auth/email/verification/confirm",
+    "/api/auth/password/reset/request",
+    "/api/auth/password/reset/confirm",
 }
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 

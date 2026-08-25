@@ -313,7 +313,7 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 396
+        "line": 464
       },
       "value": "{self.postgres_host}:{self.postgres_port}/{database}"
     },
@@ -372,6 +372,13 @@
         "line": 55
       },
       "value": "knowledgebase:question-gen:stream"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/action_tokens.py",
+        "line": 53
+      },
+      "value": "auth:{purpose}:{digest}"
     },
     {
       "source": {

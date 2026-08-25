@@ -19,6 +19,11 @@ export interface AuthSession {
   csrfToken: string;
 }
 
+export interface RegistrationResult {
+  email: string;
+  verificationRequired: boolean;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -46,8 +51,24 @@ export const authApi = {
     return request.post<AuthSession>('/api/auth/login', payload);
   },
 
-  register(payload: RegisterRequest): Promise<AuthSession> {
-    return request.post<AuthSession>('/api/auth/register', payload);
+  register(payload: RegisterRequest): Promise<RegistrationResult> {
+    return request.post<RegistrationResult>('/api/auth/register', payload);
+  },
+
+  requestEmailVerification(email: string): Promise<void> {
+    return request.post<void>('/api/auth/email/verification/request', { email });
+  },
+
+  confirmEmailVerification(token: string): Promise<void> {
+    return request.post<void>('/api/auth/email/verification/confirm', { token });
+  },
+
+  requestPasswordReset(email: string): Promise<void> {
+    return request.post<void>('/api/auth/password/reset/request', { email });
+  },
+
+  confirmPasswordReset(token: string, newPassword: string): Promise<void> {
+    return request.post<void>('/api/auth/password/reset/confirm', { token, newPassword });
   },
 
   logout(): Promise<void> {

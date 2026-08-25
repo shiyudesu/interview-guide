@@ -131,6 +131,16 @@ class AuthRepository:
                 credential.password_hash = password_hash
                 credential.updated_at = now
 
+    async def verify_email(self, user_id: UUID, now: datetime) -> UserAccount | None:
+        async with self._sessions() as session, session.begin():
+            user = await session.get(UserAccount, user_id, with_for_update=True)
+            if user is None or user.kind != "HUMAN" or user.status == "DISABLED":
+                return None
+            user.email_verified_at = user.email_verified_at or now
+            user.status = "ACTIVE"
+            user.updated_at = now
+            return user
+
     async def claim_legacy_resources(self, user_id: UUID) -> dict[str, int]:
         tables = (
             InterviewSchedule,

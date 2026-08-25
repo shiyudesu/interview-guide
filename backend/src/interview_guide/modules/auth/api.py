@@ -14,11 +14,15 @@ from interview_guide.modules.auth.dependencies import current_actor, current_ses
 from interview_guide.modules.auth.domain import Actor
 from interview_guide.modules.auth.middleware import request_origin_allowed
 from interview_guide.modules.auth.models import (
+    ActionTokenRequest,
     AuthConfigResponse,
     AuthSessionResponse,
     ChangePasswordRequest,
+    EmailRequest,
     LoginRequest,
+    PasswordResetConfirmRequest,
     RegisterRequest,
+    RegistrationResponse,
 )
 from interview_guide.modules.auth.service import AuthenticatedSession, AuthService
 from interview_guide.modules.auth.session import AuthSession
@@ -45,15 +49,58 @@ async def auth_config(request: Request) -> AuthConfigResponse:
     )
 
 
-@router.post("/register", response_model=AuthSessionResponse, status_code=201)
+@router.post("/register", response_model=RegistrationResponse, status_code=201)
 async def register(
     payload: RegisterRequest,
     request: Request,
     service: ServiceDependency,
+) -> RegistrationResponse:
+    require_public_origin(request)
+    return await service.register(payload, client_ip=client_ip(request))
+
+
+@router.post("/email/verification/request", status_code=204)
+async def request_email_verification(
+    payload: EmailRequest,
+    request: Request,
+    service: ServiceDependency,
 ) -> Response:
     require_public_origin(request)
-    authenticated = await service.register(payload, client_ip=client_ip(request))
-    return session_response(authenticated, request.app.state.settings, status_code=201)
+    await service.request_email_verification(payload, client_ip=client_ip(request))
+    return Response(status_code=204)
+
+
+@router.post("/email/verification/confirm", status_code=204)
+async def confirm_email_verification(
+    payload: ActionTokenRequest,
+    request: Request,
+    service: ServiceDependency,
+) -> Response:
+    require_public_origin(request)
+    await service.confirm_email_verification(payload)
+    return Response(status_code=204)
+
+
+@router.post("/password/reset/request", status_code=204)
+async def request_password_reset(
+    payload: EmailRequest,
+    request: Request,
+    service: ServiceDependency,
+) -> Response:
+    require_public_origin(request)
+    await service.request_password_reset(payload, client_ip=client_ip(request))
+    return Response(status_code=204)
+
+
+@router.post("/password/reset/confirm", status_code=204)
+async def confirm_password_reset(
+    payload: PasswordResetConfirmRequest,
+    request: Request,
+    service: ServiceDependency,
+) -> Response:
+    require_public_origin(request)
+    await service.confirm_password_reset(payload)
+    return Response(status_code=204)
 
 
 @router.post("/login", response_model=AuthSessionResponse)

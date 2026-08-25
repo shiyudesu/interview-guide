@@ -23,8 +23,15 @@ export default function RegisterPage() {
     setSubmitting(true);
     setError('');
     try {
-      await register({ email, password, displayName: displayName.trim() || undefined });
-      navigate('/settings', { replace: true });
+      const result = await register({ email, password, displayName: displayName.trim() || undefined });
+      navigate('/login', {
+        replace: true,
+        state: {
+          message: result.verificationRequired
+            ? `验证邮件已发送至 ${result.email}，请完成验证后登录`
+            : '账号创建成功，请登录',
+        },
+      });
     } catch (caught) {
       setError(getErrorMessage(caught));
     } finally {

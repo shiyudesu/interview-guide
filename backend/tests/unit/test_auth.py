@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import ErrorCode
 from interview_guide.common.runtime import BlockingExecutor
+from interview_guide.modules.auth.action_tokens import AuthActionTokenStore
 from interview_guide.modules.auth.api import session_response
 from interview_guide.modules.auth.domain import Actor, UserRole
 from interview_guide.modules.auth.middleware import AuthenticationMiddleware
@@ -87,6 +88,25 @@ def test_email_and_password_validation_use_unicode_character_semantics() -> None
     validate_password_length("密码安全长度十二个字符以上")
     with pytest.raises(ValueError, match="至少需要 12"):
         validate_password_length("too-short")
+
+
+def test_open_registration_requires_https_email_delivery() -> None:
+    with pytest.raises(ValueError, match="APP_AUTH_PUBLIC_URL"):
+        Settings(
+            _env_file=None,
+            APP_AUTH_ENABLED=True,
+            APP_AUTH_REGISTRATION_ENABLED=True,
+        )
+
+    configured = Settings(
+        _env_file=None,
+        APP_AUTH_ENABLED=True,
+        APP_AUTH_REGISTRATION_ENABLED=True,
+        APP_AUTH_PUBLIC_URL="https://interview.example.test",
+        APP_AUTH_SMTP_HOST="smtp.example.test",
+        APP_AUTH_SMTP_FROM_EMAIL="noreply@example.test",
+    )
+    assert configured.auth_registration_enabled is True
 
 
 def test_authentication_middleware_defaults_to_deny() -> None:
@@ -194,6 +214,9 @@ class FakeRedis:
     async def get(self, key: str) -> str | None:
         return self.values.get(key)
 
+    async def getdel(self, key: str) -> str | None:
+        return self.values.pop(key, None)
+
     async def expire(self, key: object, ttl: object) -> None:
         del key
         assert int(str(ttl)) > 0
@@ -245,6 +268,23 @@ async def test_session_store_creates_touches_and_revokes_server_session() -> Non
     assert loaded.csrf_token == created.session.csrf_token
     await store.revoke_all(USER_ID)
     assert await store.get(created.token) is None
+
+
+@pytest.mark.asyncio
+async def test_action_tokens_are_hashed_expiring_and_one_time() -> None:
+    redis = FakeRedis()
+    store = AuthActionTokenStore(
+        redis,  # type: ignore[arg-type]
+        verification_seconds=600,
+        password_reset_seconds=300,
+    )
+
+    token = await store.create_email_verification(USER_ID)
+
+    assert token not in " ".join(redis.values)
+    assert all(token not in key for key in redis.values)
+    assert await store.consume_email_verification(token) == USER_ID
+    assert await store.consume_email_verification(token) is None
 
 
 def test_login_response_sets_hardened_cookie_and_no_store() -> None:

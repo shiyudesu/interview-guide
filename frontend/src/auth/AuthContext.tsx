@@ -14,6 +14,7 @@ import {
   type ChangePasswordRequest,
   type LoginRequest,
   type RegisterRequest,
+  type RegistrationResult,
 } from '../api/auth';
 import { AUTH_UNAUTHORIZED_EVENT, setCsrfToken } from '../api/request';
 
@@ -23,7 +24,7 @@ interface AuthContextValue {
   authenticationEnabled: boolean;
   registrationEnabled: boolean;
   login: (payload: LoginRequest) => Promise<void>;
-  register: (payload: RegisterRequest) => Promise<void>;
+  register: (payload: RegisterRequest) => Promise<RegistrationResult>;
   logout: () => Promise<void>;
   changePassword: (payload: ChangePasswordRequest) => Promise<void>;
   revokeSessions: () => Promise<void>;
@@ -99,8 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applySession]);
 
   const register = useCallback(async (payload: RegisterRequest) => {
-    applySession(await authApi.register(payload));
-  }, [applySession]);
+    return authApi.register(payload);
+  }, []);
 
   const logout = useCallback(async () => {
     try {

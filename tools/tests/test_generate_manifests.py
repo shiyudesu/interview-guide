@@ -24,12 +24,6 @@ class GenerateManifestsTest(unittest.TestCase):
         backend_only_paths = {item["path"] for item in manifest["unmatched"]["backendOnly"]}
         self.assertEqual(
             {
-                "/api/auth/login",
-                "/api/auth/logout",
-                "/api/auth/me",
-                "/api/auth/password/change",
-                "/api/auth/register",
-                "/api/auth/sessions/revoke",
                 "/api/interview-schedule/{schedule_id}/status",
                 "/api/interview/sessions/{session_id}/report",
                 "/health",

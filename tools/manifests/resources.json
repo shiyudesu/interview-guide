@@ -526,7 +526,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_auth_integration.py",
-      "sha256": "22df14943c16d24ff283d0b2ce27fc8fbc2eea20c7889b977671cfd96dc96457"
+      "sha256": "0d6591de420b84c978bc37a253007b9efee08ea037c3ab2557271affb34c56c1"
     },
     {
       "disabledMarkers": 0,
@@ -596,7 +596,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_auth.py",
-      "sha256": "911fa6df34f30d207795d1d779583705292b15de81bbfa79f95cd31441f12037"
+      "sha256": "9b2996371e36f1fb6645032d42b4a3910b3dd0a3395949413bd4bb4e2f9914f8"
     },
     {
       "disabledMarkers": 0,
@@ -746,7 +746,7 @@
     {
       "disabledMarkers": 0,
       "file": "frontend/e2e/auth.spec.ts",
-      "sha256": "6033f89aad8864d6861e870973bfab791f09698e9ea578366bdde25733ab69f5"
+      "sha256": "bc2429986e994f495467628072e69030cfde7149a1878da96860ab35e0fc8988"
     },
     {
       "disabledMarkers": 1,
