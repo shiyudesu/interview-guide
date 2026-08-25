@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 56
+    "testFileCount": 57
   },
   "tests": [
     {
@@ -591,12 +591,12 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_api_foundation.py",
-      "sha256": "9341ef37911cbc6061dba1db7d76f1258e01fabf8524ad08af1664e206071a79"
+      "sha256": "7fa47718dd000abe8a6486487881a9aafedd96e7d2826f97d297116fb2e4c482"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_auth.py",
-      "sha256": "a8ca5d25a3c1b1b0246ae414e747ec903e9dc168bacddf89d0c9f4e637bac3d4"
+      "sha256": "911fa6df34f30d207795d1d779583705292b15de81bbfa79f95cd31441f12037"
     },
     {
       "disabledMarkers": 0,
@@ -744,6 +744,11 @@
       "sha256": "55eb34c04fa191350be9a4a71ca05b53bfa5e6abc89aab58929fcb62839e66e3"
     },
     {
+      "disabledMarkers": 0,
+      "file": "frontend/e2e/auth.spec.ts",
+      "sha256": "6033f89aad8864d6861e870973bfab791f09698e9ea578366bdde25733ab69f5"
+    },
+    {
       "disabledMarkers": 1,
       "file": "frontend/e2e/real-backend.spec.ts",
       "sha256": "f2d4cb042bb5d1a14ba1cd530ba6236a3859197aa5188c5dcb3423a0d915974e"
@@ -751,12 +756,12 @@
     {
       "disabledMarkers": 0,
       "file": "frontend/e2e/resume-detail.spec.ts",
-      "sha256": "e3a11839a2179f9c2a07fc19af356ede5b6aa76aa86f40674a0d2cfc1d5193a5"
+      "sha256": "8ea251081a917fc77715de11548ef01ada2aefb49768e2d70a1c481432a8671b"
     },
     {
       "disabledMarkers": 0,
       "file": "frontend/e2e/voice-interview.spec.ts",
-      "sha256": "9db0272084b58e08f7363c51b7aa7ed7278d5771e9a565fddd2d6482feae8811"
+      "sha256": "2fe7eb6dd263df6698bbb0f748544cd812c17608d7ebb456085de4a74e968786"
     },
     {
       "disabledMarkers": 0,

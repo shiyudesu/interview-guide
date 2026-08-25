@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Settings, Plus, Trash2, Plug, CheckCircle, XCircle,
-  Loader2, Eye, EyeOff, RefreshCw, Server, Edit2, Mic, Volume2, ChevronDown, Database,
+  Loader2, Eye, EyeOff, RefreshCw, Server, Edit2, Mic, Volume2, ChevronDown, Database, KeyRound,
 } from 'lucide-react';
 import { llmProviderApi } from '../api/llmProvider';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -557,6 +557,16 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {!loading && !providers.some(provider => provider.hasApiKey) && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+          <KeyRound className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">尚未配置个人 API Key</p>
+            <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">模型分析、知识库、文字和语音面试暂不可用。编辑已有 Provider 或新增 Provider，Key 只会加密保存到你的账号。</p>
+          </div>
+        </div>
+      )}
 
       {/* Loading state */}
       {loading ? (

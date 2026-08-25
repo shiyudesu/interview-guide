@@ -277,6 +277,15 @@ Compose 对空值直接报错，不再回退到仓库内置弱密码。`docker-c
 
 ## API 和前端
 
+前端启动时先读取公开的 `GET /api/auth/config`。正式账号模式下随后调用 `/api/auth/me` 恢复
+Session；未登录会跳转 `/login` 并在成功后返回原目标页面。浏览器只保存后端设置的 HttpOnly
+Session Cookie，CSRF Token 仅保存在页面内存中并自动附加到 POST、PUT、PATCH 和 DELETE 请求，
+不会写入 Local Storage、Session Storage 或 URL。收到 HTTP 401 后前端会清理内存登录态。
+
+`/account` 提供密码修改和撤销全部 Session；两项操作成功后当前设备也会退出。注册关闭时
+`/register` 只显示管理员创建账号提示，不能提交注册表单。临时 HTTP 验收配置关闭认证时，前端
+根据 `/api/auth/config` 进入兼容的本地单用户界面，不显示可用的正式退出操作。
+
 ```env
 SERVER_PORT=8080
 FRONTEND_PORT=5173

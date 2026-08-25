@@ -4,10 +4,10 @@
   ],
   "manifests": {
     "api.json": {
-      "backendEndpointCount": 98,
-      "backendOnlyCount": 11,
+      "backendEndpointCount": 99,
+      "backendOnlyCount": 5,
       "controllerCount": 5,
-      "frontendCallCount": 87,
+      "frontendCallCount": 94,
       "frontendOnlyCount": 0,
       "sseEndpointCount": 2,
       "webSocketEndpointCount": 1
@@ -40,7 +40,7 @@
         "redis-script": 1,
         "skill": 66
       },
-      "testFileCount": 56
+      "testFileCount": 57
     }
   },
   "schemaVersion": 1

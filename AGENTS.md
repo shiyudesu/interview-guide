@@ -8,8 +8,9 @@
 多租户账号和用户自带 API Key 正在按 `docs/MULTI_TENANT_BYOK_PLAN.md` 分阶段实施。当前已经具备
 Provider 出站防护、账号/Session/CSRF、管理员 CLI、`legacy-owner` 兼容迁移，以及简历、日程、
 面试、知识库、题库、RAG 和语音的 Repository 级所有权校验、用户级 Provider、默认模型/语音
-配置及 AAD Key 加密、用户级文件去重与对象 key，以及异步任务 Provider 归属。前端登录、开放
-注册和最终浏览器/生产门禁仍未完成。
+配置及 AAD Key 加密、用户级文件去重与对象 key，以及异步任务 Provider 归属。前端已具备登录、
+注册关闭提示、受保护路由、CSRF、401 失效处理、账号安全和退出入口；邮箱验证、密码找回、开放
+注册和最终生产门禁仍未完成。
 `APP_AUTH_REGISTRATION_ENABLED` 必须保持关闭，直到计划中的全部双用户隔离门禁通过。
 
 目录：

@@ -2,6 +2,10 @@ import { expect, test } from '@playwright/test';
 
 test.describe('简历详情契约', () => {
   test('展示后端返回的分析和面试记录', async ({ page }) => {
+    await page.route('**/api/auth/config', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ authEnabled: false, registrationEnabled: false }),
+    }));
     await page.route('**/api/resumes/7/detail', async route => {
       await route.fulfill({
         contentType: 'application/json',

@@ -18,6 +18,7 @@ PUBLIC_PATHS = {
     "/info",
     "/api/auth/login",
     "/api/auth/register",
+    "/api/auth/config",
 }
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 

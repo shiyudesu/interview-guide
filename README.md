@@ -217,6 +217,10 @@ REST API 成功时直接返回业务 JSON；无响应体操作返回 HTTP 204。
 Provider。Provider alias、默认聊天/Embedding 模型以及 ASR/TTS 配置全部按用户隔离；系统启动后，
 当前用户在数据库和设置页中的配置是实际数据源，不会回退到管理员或其他用户的 Key。
 
+正式 HTTPS 部署启用账号后，未登录访问会进入登录页并在登录成功后返回原页面。左侧账号入口可
+修改密码或撤销全部 Session；Session Token 只存在于 Secure/HttpOnly Cookie，前端不会持久化
+Session Token 或 API Key。自助注册在邮箱验证和最终隔离门禁完成前保持关闭。
+
 当前默认模型：
 
 ```text

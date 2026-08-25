@@ -8,6 +8,10 @@ const NEXT_USER_SUBTITLE = '当前这一轮我会使用唯一索引保证幂等�
 test.describe('语音面试', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('https://cdn.jsdelivr.net/**', route => route.abort());
+    await page.route('**/api/auth/config', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ authEnabled: false, registrationEnabled: false }),
+    }));
 
     await page.addInitScript(() => {
       type SocketMessage = {

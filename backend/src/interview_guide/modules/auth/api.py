@@ -14,6 +14,7 @@ from interview_guide.modules.auth.dependencies import current_actor, current_ses
 from interview_guide.modules.auth.domain import Actor
 from interview_guide.modules.auth.middleware import request_origin_allowed
 from interview_guide.modules.auth.models import (
+    AuthConfigResponse,
     AuthSessionResponse,
     ChangePasswordRequest,
     LoginRequest,
@@ -33,6 +34,15 @@ def auth_service(request: Request) -> AuthService:
 ServiceDependency = Annotated[AuthService, Depends(auth_service)]
 ActorDependency = Annotated[Actor, Depends(current_actor)]
 SessionDependency = Annotated[AuthSession, Depends(current_session)]
+
+
+@router.get("/config", response_model=AuthConfigResponse)
+async def auth_config(request: Request) -> AuthConfigResponse:
+    settings: Settings = request.app.state.settings
+    return AuthConfigResponse(
+        auth_enabled=settings.auth_enabled,
+        registration_enabled=settings.auth_registration_enabled,
+    )
 
 
 @router.post("/register", response_model=AuthSessionResponse, status_code=201)

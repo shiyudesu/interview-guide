@@ -60,6 +60,11 @@ class AuthSessionResponse(CamelModel):
     csrf_token: str
 
 
+class AuthConfigResponse(CamelModel):
+    auth_enabled: bool
+    registration_enabled: bool
+
+
 def normalized_email(value: str) -> str:
     normalized = value.strip().casefold()
     if (

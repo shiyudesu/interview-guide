@@ -40,6 +40,24 @@ def test_native_health_response() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_public_auth_config_exposes_only_feature_switches() -> None:
+    app = create_app(
+        settings(
+            APP_AUTH_ENABLED=True,
+            APP_AUTH_REGISTRATION_ENABLED=False,
+        )
+    )
+
+    with TestClient(app) as client:
+        response = client.get("/api/auth/config")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "authEnabled": True,
+        "registrationEnabled": False,
+    }
+
+
 def test_request_logging_keeps_normal_traffic_nonblocking_at_info_level() -> None:
     assert request_log_level(200, 0.1) == logging.DEBUG
     assert request_log_level(200, 1.0) == logging.INFO

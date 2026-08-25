@@ -126,7 +126,7 @@ def test_authenticated_mutation_requires_csrf_and_same_origin() -> None:
 
 @pytest.mark.parametrize(
     "path",
-    ("/api/auth/login", "/api/auth/register"),
+    ("/api/auth/login", "/api/auth/register", "/api/auth/config"),
 )
 def test_login_and_registration_paths_are_public(path: str) -> None:
     app = auth_app()

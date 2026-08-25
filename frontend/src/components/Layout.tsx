@@ -1,10 +1,11 @@
 import {Link, Outlet, useLocation, useNavigate} from 'react-router-dom';
 import {motion} from 'framer-motion';
-import {BookOpen, Calendar, ChevronRight, Database, FileStack, MessageSquare, Moon, Settings, Sparkles, Sun, Users,} from 'lucide-react';
+import {BookOpen, Calendar, ChevronRight, Database, FileStack, LogOut, MessageSquare, Moon, Settings, Sparkles, Sun, UserRound, Users,} from 'lucide-react';
 import {useTheme} from '../hooks/useTheme';
 import {useState} from 'react';
 import UnifiedInterviewModal, {UnifiedInterviewConfig} from './UnifiedInterviewModal';
 import {ROUTES} from '../constants/routes';
+import {useAuth} from '../auth/AuthContext';
 
 interface NavItem {
   id: string;
@@ -25,6 +26,8 @@ export default function Layout() {
   const currentPath = location.pathname;
   const {theme, toggleTheme} = useTheme();
   const navigate = useNavigate();
+  const {user, logout, authenticationEnabled} = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
   const [interviewModalPreset, setInterviewModalPreset] = useState<{
     defaultMode: 'text' | 'voice';
     defaultResumeId?: number;
@@ -106,6 +109,7 @@ export default function Layout() {
       title: '系统',
       items: [
         { id: 'settings', path: '/settings', label: '设置', icon: Settings, description: '管理模型和语音服务' },
+        { id: 'account', path: '/account', label: '账号与安全', icon: UserRound, description: '密码和登录设备' },
       ],
     },
   ];
@@ -220,11 +224,38 @@ export default function Layout() {
           </div>
         </nav>
 
-        {/* 底部信息 */}
+        {/* 当前账号 */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-700">
-          <div className="px-3 py-2 bg-gradient-to-r from-primary-50 to-indigo-50 dark:from-primary-900/30 dark:to-slate-800 rounded-xl">
-            <p className="text-xs text-primary-600 dark:text-primary-400 font-medium">AI 面试助手 v1.0</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Powered by AI</p>
+          <div className="rounded-xl bg-gradient-to-r from-primary-50 to-indigo-50 px-3 py-3 dark:from-primary-900/30 dark:to-slate-800">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-primary-300">
+                <UserRound className="h-4 w-4" />
+              </div>
+              <Link to="/account" className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{user?.displayName || user?.email}</p>
+                <p className="truncate text-[11px] text-slate-400 dark:text-slate-500">{user?.email}</p>
+              </Link>
+              {authenticationEnabled && (
+                <button
+                  type="button"
+                  disabled={loggingOut}
+                  onClick={async () => {
+                    setLoggingOut(true);
+                    try {
+                      await logout();
+                      navigate('/login', {replace: true});
+                    } finally {
+                      setLoggingOut(false);
+                    }
+                  }}
+                  aria-label="退出登录"
+                  title="退出登录"
+                  className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-red-500 disabled:opacity-50 dark:hover:bg-slate-700"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </aside>

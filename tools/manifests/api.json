@@ -1,10 +1,51 @@
 {
   "backendEndpoints": [
     {
+      "canonicalPath": "/api/auth/config",
+      "consumes": null,
+      "controller": "api",
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/auth/config",
+          "httpMethod": "GET",
+          "path": "/api/auth/config",
+          "source": {
+            "file": "frontend/src/api/auth.ts",
+            "line": 38
+          }
+        }
+      ],
+      "handler": "auth_config",
+      "httpMethod": "GET",
+      "parameters": [
+        {
+          "annotation": "Request",
+          "name": "request"
+        }
+      ],
+      "path": "/api/auth/config",
+      "produces": null,
+      "source": {
+        "file": "backend/src/interview_guide/modules/auth/api.py",
+        "line": 39
+      },
+      "transport": "rest"
+    },
+    {
       "canonicalPath": "/api/auth/login",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [],
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/auth/login",
+          "httpMethod": "POST",
+          "path": "/api/auth/login",
+          "source": {
+            "file": "frontend/src/api/auth.ts",
+            "line": 46
+          }
+        }
+      ],
       "handler": "login",
       "httpMethod": "POST",
       "parameters": [
@@ -25,7 +66,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/auth/api.py",
-        "line": 49
+        "line": 59
       },
       "transport": "rest"
     },
@@ -33,7 +74,17 @@
       "canonicalPath": "/api/auth/logout",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [],
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/auth/logout",
+          "httpMethod": "POST",
+          "path": "/api/auth/logout",
+          "source": {
+            "file": "frontend/src/api/auth.ts",
+            "line": 54
+          }
+        }
+      ],
       "handler": "logout",
       "httpMethod": "POST",
       "parameters": [
@@ -54,7 +105,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/auth/api.py",
-        "line": 60
+        "line": 70
       },
       "transport": "rest"
     },
@@ -62,7 +113,17 @@
       "canonicalPath": "/api/auth/me",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [],
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/auth/me",
+          "httpMethod": "GET",
+          "path": "/api/auth/me",
+          "source": {
+            "file": "frontend/src/api/auth.ts",
+            "line": 42
+          }
+        }
+      ],
       "handler": "me",
       "httpMethod": "GET",
       "parameters": [
@@ -83,7 +144,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/auth/api.py",
-        "line": 72
+        "line": 82
       },
       "transport": "rest"
     },
@@ -91,7 +152,17 @@
       "canonicalPath": "/api/auth/password/change",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [],
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/auth/password/change",
+          "httpMethod": "POST",
+          "path": "/api/auth/password/change",
+          "source": {
+            "file": "frontend/src/api/auth.ts",
+            "line": 58
+          }
+        }
+      ],
       "handler": "change_password",
       "httpMethod": "POST",
       "parameters": [
@@ -116,7 +187,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/auth/api.py",
-        "line": 81
+        "line": 91
       },
       "transport": "rest"
     },
@@ -124,7 +195,17 @@
       "canonicalPath": "/api/auth/register",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [],
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/auth/register",
+          "httpMethod": "POST",
+          "path": "/api/auth/register",
+          "source": {
+            "file": "frontend/src/api/auth.ts",
+            "line": 50
+          }
+        }
+      ],
       "handler": "register",
       "httpMethod": "POST",
       "parameters": [
@@ -145,7 +226,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/auth/api.py",
-        "line": 38
+        "line": 48
       },
       "transport": "rest"
     },
@@ -153,7 +234,17 @@
       "canonicalPath": "/api/auth/sessions/revoke",
       "consumes": null,
       "controller": "api",
-      "frontendUsages": [],
+      "frontendUsages": [
+        {
+          "canonicalPath": "/api/auth/sessions/revoke",
+          "httpMethod": "POST",
+          "path": "/api/auth/sessions/revoke",
+          "source": {
+            "file": "frontend/src/api/auth.ts",
+            "line": 62
+          }
+        }
+      ],
       "handler": "revoke_sessions",
       "httpMethod": "POST",
       "parameters": [
@@ -174,7 +265,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/auth/api.py",
-        "line": 94
+        "line": 104
       },
       "transport": "rest"
     },
@@ -3446,6 +3537,69 @@
   ],
   "frontendCalls": [
     {
+      "canonicalPath": "/api/auth/config",
+      "httpMethod": "GET",
+      "path": "/api/auth/config",
+      "source": {
+        "file": "frontend/src/api/auth.ts",
+        "line": 38
+      }
+    },
+    {
+      "canonicalPath": "/api/auth/login",
+      "httpMethod": "POST",
+      "path": "/api/auth/login",
+      "source": {
+        "file": "frontend/src/api/auth.ts",
+        "line": 46
+      }
+    },
+    {
+      "canonicalPath": "/api/auth/logout",
+      "httpMethod": "POST",
+      "path": "/api/auth/logout",
+      "source": {
+        "file": "frontend/src/api/auth.ts",
+        "line": 54
+      }
+    },
+    {
+      "canonicalPath": "/api/auth/me",
+      "httpMethod": "GET",
+      "path": "/api/auth/me",
+      "source": {
+        "file": "frontend/src/api/auth.ts",
+        "line": 42
+      }
+    },
+    {
+      "canonicalPath": "/api/auth/password/change",
+      "httpMethod": "POST",
+      "path": "/api/auth/password/change",
+      "source": {
+        "file": "frontend/src/api/auth.ts",
+        "line": 58
+      }
+    },
+    {
+      "canonicalPath": "/api/auth/register",
+      "httpMethod": "POST",
+      "path": "/api/auth/register",
+      "source": {
+        "file": "frontend/src/api/auth.ts",
+        "line": 50
+      }
+    },
+    {
+      "canonicalPath": "/api/auth/sessions/revoke",
+      "httpMethod": "POST",
+      "path": "/api/auth/sessions/revoke",
+      "source": {
+        "file": "frontend/src/api/auth.ts",
+        "line": 62
+      }
+    },
+    {
       "canonicalPath": "/api/interview-schedule",
       "httpMethod": "GET",
       "path": "/api/interview-schedule",
@@ -4235,64 +4389,16 @@
     "frontend/src URL literals"
   ],
   "summary": {
-    "backendEndpointCount": 98,
-    "backendOnlyCount": 11,
+    "backendEndpointCount": 99,
+    "backendOnlyCount": 5,
     "controllerCount": 5,
-    "frontendCallCount": 87,
+    "frontendCallCount": 94,
     "frontendOnlyCount": 0,
     "sseEndpointCount": 2,
     "webSocketEndpointCount": 1
   },
   "unmatched": {
     "backendOnly": [
-      {
-        "httpMethod": "POST",
-        "path": "/api/auth/login",
-        "source": {
-          "file": "backend/src/interview_guide/modules/auth/api.py",
-          "line": 49
-        }
-      },
-      {
-        "httpMethod": "POST",
-        "path": "/api/auth/logout",
-        "source": {
-          "file": "backend/src/interview_guide/modules/auth/api.py",
-          "line": 60
-        }
-      },
-      {
-        "httpMethod": "GET",
-        "path": "/api/auth/me",
-        "source": {
-          "file": "backend/src/interview_guide/modules/auth/api.py",
-          "line": 72
-        }
-      },
-      {
-        "httpMethod": "POST",
-        "path": "/api/auth/password/change",
-        "source": {
-          "file": "backend/src/interview_guide/modules/auth/api.py",
-          "line": 81
-        }
-      },
-      {
-        "httpMethod": "POST",
-        "path": "/api/auth/register",
-        "source": {
-          "file": "backend/src/interview_guide/modules/auth/api.py",
-          "line": 38
-        }
-      },
-      {
-        "httpMethod": "POST",
-        "path": "/api/auth/sessions/revoke",
-        "source": {
-          "file": "backend/src/interview_guide/modules/auth/api.py",
-          "line": 94
-        }
-      },
       {
         "httpMethod": "PUT",
         "path": "/api/interview-schedule/{schedule_id}/status",

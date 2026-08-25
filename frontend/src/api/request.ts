@@ -11,12 +11,34 @@ export interface PageOptions {
 }
 
 const PROBLEM_BLOB_PARSE_LIMIT = 64 * 1024;
+const MUTATING_METHODS = new Set(['post', 'put', 'patch', 'delete']);
+
+export const AUTH_UNAUTHORIZED_EVENT = 'interview-guide:auth-unauthorized';
+
+let csrfToken: string | null = null;
 
 export const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL ?? '';
 
 const instance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 60000,
+  withCredentials: true,
+});
+
+export function setCsrfToken(token: string | null): void {
+  csrfToken = token;
+}
+
+export function getCsrfToken(): string | null {
+  return csrfToken;
+}
+
+instance.interceptors.request.use(config => {
+  const method = config.method?.toLowerCase();
+  if (csrfToken && method && MUTATING_METHODS.has(method)) {
+    config.headers.set('X-CSRF-Token', csrfToken);
+  }
+  return config;
 });
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -76,6 +98,9 @@ instance.interceptors.response.use(
   response => response,
   async (error) => {
     if (error.response) {
+      if (error.response.status === 401 && typeof window !== 'undefined') {
+        window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
+      }
       const problem = await parseProblemPayload(error.response.data);
       if (problem) {
         return Promise.reject(new Error(problem.detail));
