@@ -11,6 +11,7 @@ from uuid import UUID
 
 from interview_guide.common.ai.adapter import ProviderConfig
 from interview_guide.common.ai.providers import ProviderRegistry
+from interview_guide.common.ai.user_providers import normalize_provider_alias
 from interview_guide.common.api.models import compact_json_text
 from interview_guide.common.db.models import InterviewQuestionRecord, InterviewTurnRecord
 from interview_guide.common.errors import BusinessException, ErrorCode
@@ -189,7 +190,9 @@ class InterviewService:
             if existing is not None:
                 return self._session_dto(existing)
         session_id = self._uuid_factory().hex[:16]
-        resolved_provider = llm_provider or await self._registry.default_chat_alias()
+        resolved_provider = normalize_provider_alias(llm_provider)
+        if resolved_provider is None:
+            resolved_provider = await self._registry.default_chat_alias()
         try:
             aggregate = await self._repository.create_session(
                 session_id=session_id,
@@ -626,9 +629,7 @@ class InterviewService:
         return aggregate
 
     async def _provider(self, provider_id: str | None) -> ProviderConfig:
-        return await self._registry.get_chat(
-            None if provider_id in {None, "", "default"} else provider_id
-        )
+        return await self._registry.get_chat(normalize_provider_alias(provider_id))
 
     @staticmethod
     def _validate_replayed_turn(
@@ -800,9 +801,7 @@ class InterviewEvaluateHandler:
         if aggregate is None:
             return
         provider = await self._registry_factory(aggregate.session.user_id).get_chat(
-            None
-            if aggregate.session.llm_provider in {None, "", "default"}
-            else aggregate.session.llm_provider
+            normalize_provider_alias(aggregate.session.llm_provider)
         )
         report = await self._evaluation.evaluate(provider, aggregate)
         await self._repository.save_report(payload.session_id, report)

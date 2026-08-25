@@ -249,6 +249,7 @@ class ScopedProviderRegistry:
         self._resolver = resolver
 
     async def get_chat(self, provider_id: str | None = None) -> ProviderConfig:
+        provider_id = normalize_provider_alias(provider_id)
         if provider_id is None:
             provider_id = (await self._repository.default_aliases()).default_chat_provider_id
         return await self._resolver.resolve(self._repository.user_id, provider_id)
@@ -260,6 +261,7 @@ class ScopedProviderRegistry:
         return (await self._repository.default_aliases()).default_embedding_provider_id
 
     async def get_embedding(self, provider_id: str | None = None) -> ProviderConfig:
+        provider_id = normalize_provider_alias(provider_id)
         if provider_id is None:
             provider_id = (await self._repository.default_aliases()).default_embedding_provider_id
         provider = await self._resolver.resolve(self._repository.user_id, provider_id)
@@ -272,7 +274,10 @@ class ScopedProviderRegistry:
         return provider
 
     async def get_voice(self, provider_id: str) -> ProviderConfig:
-        return await self._resolver.resolve(self._repository.user_id, provider_id)
+        normalized = normalize_provider_alias(provider_id)
+        if normalized is None:
+            normalized = (await self._repository.default_aliases()).default_chat_provider_id
+        return await self._resolver.resolve(self._repository.user_id, normalized)
 
     async def publish_change(self) -> int:
         return await self._resolver.publish_change(self._repository.user_id)
@@ -300,12 +305,15 @@ class UserLlmProviderResolver:
 
     async def resolve(self, user_id: UUID, alias: str) -> ProviderConfig:
         repository = UserProviderRepository(self._sessions, user_id)
-        provider = await repository.get_provider(alias)
+        normalized = normalize_provider_alias(alias)
+        if normalized is None:
+            normalized = (await repository.default_aliases()).default_chat_provider_id
+        provider = await repository.get_provider(normalized)
         api_key = self._decrypt_key(provider)
         if not api_key.strip():
             raise BusinessException(
                 ErrorCode.PROVIDER_CONFIG_READ_FAILED,
-                f"Provider '{alias}' 未配置 API Key",
+                f"Provider '{normalized}' 未配置 API Key",
             )
         return ProviderConfig(
             provider_id=provider.alias,
@@ -424,3 +432,10 @@ async def ensure_user_provider_defaults(
 
 def provider_key_aad(user_id: UUID, provider_id: UUID, version: int) -> bytes:
     return f"provider-key:v{version}:{user_id}:{provider_id}".encode()
+
+
+def normalize_provider_alias(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    return None if normalized in {"", "default"} else normalized

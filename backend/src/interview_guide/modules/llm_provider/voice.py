@@ -18,6 +18,7 @@ from interview_guide.common.ai.user_providers import (
     CURRENT_ENCRYPTION_VERSION,
     UserLlmProviderResolver,
     UserProviderRepository,
+    normalize_provider_alias,
     provider_key_aad,
 )
 from interview_guide.common.db.models import UserLlmProviderConfig, VoiceInterviewSession
@@ -148,7 +149,7 @@ class VoiceConfigService:
     async def update_asr(self, request: AsrConfigRequest) -> None:
         entity = await self._repository.voice_config()
         current_provider = await self._repository.get_provider_by_id(entity.asr_provider_id)
-        provider_alias = request.provider_id or current_provider.alias
+        provider_alias = normalize_provider_alias(request.provider_id) or current_provider.alias
         provider = await self._repository.get_provider(provider_alias)
         if request.url is not None:
             await self._outbound_policy.validate_websocket_url(request.url)
@@ -177,7 +178,7 @@ class VoiceConfigService:
     async def update_tts(self, request: TtsConfigRequest) -> None:
         entity = await self._repository.voice_config()
         current_provider = await self._repository.get_provider_by_id(entity.tts_provider_id)
-        provider_alias = request.provider_id or current_provider.alias
+        provider_alias = normalize_provider_alias(request.provider_id) or current_provider.alias
         provider = await self._repository.get_provider(provider_alias)
         if request.url is not None:
             await self._outbound_policy.validate_websocket_url(request.url)

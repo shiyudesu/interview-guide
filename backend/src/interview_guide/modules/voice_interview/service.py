@@ -9,6 +9,7 @@ from uuid import UUID
 
 from redis.asyncio import Redis
 
+from interview_guide.common.ai.user_providers import normalize_provider_alias
 from interview_guide.common.db.models import (
     LEGACY_OWNER_ID,
     VoiceInterviewMessage,
@@ -73,11 +74,7 @@ class VoiceInterviewService:
                 if existing_voice is not None:
                     return self._response(existing_voice, existing_core.session_id)
         skill_id = request.skill_id if request.skill_id is not None else DEFAULT_SKILL_ID
-        llm_provider = (
-            request.llm_provider
-            if request.llm_provider is not None and request.llm_provider.strip()
-            else None
-        )
+        llm_provider = normalize_provider_alias(request.llm_provider)
         duration = request.planned_duration or 30
         phases = self._question_phases(request, duration // 5)
         questions = await self._voice_questions(
