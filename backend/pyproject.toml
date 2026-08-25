@@ -10,6 +10,7 @@ dependencies = [
     "cryptography==50.0.0",
     "fastapi==0.141.1",
     "httpx==0.28.1",
+    "httpcore==1.0.9",
     "langchain-openai==1.5.1",
     "langgraph==1.2.11",
     "opentelemetry-api==1.44.0",

@@ -7,6 +7,7 @@ from interview_guide.common.ai.encryption import (
     ApiKeyEncryption,
     resolve_configured_key,
 )
+from interview_guide.common.ai.outbound import ProviderOutboundPolicy
 from interview_guide.common.ai.prompts import PromptSanitizer
 from interview_guide.common.ai.providers import (
     LlmProviderRegistry,
@@ -46,18 +47,23 @@ class RuntimeInfrastructure:
         repository = ProviderRepository(self.database.sessions)
         self.provider_repository = repository
         self._settings = settings
+        self.provider_outbound_policy = ProviderOutboundPolicy.from_settings(
+            settings,
+            self.blocking_executor,
+        )
         self.provider_registry = LlmProviderRegistry(
             repository,
             encryption,
             self.redis.client,
             settings,
         )
-        self.llm_adapter = LlmAdapter()
+        self.llm_adapter = LlmAdapter(self.provider_outbound_policy)
         self.prompt_sanitizer = PromptSanitizer()
         self.voice_config = VoiceConfigService(
             repository,
             self.provider_registry,
             encryption,
+            self.provider_outbound_policy,
         )
         self.storage = S3Storage(
             settings,

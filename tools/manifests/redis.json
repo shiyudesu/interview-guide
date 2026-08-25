@@ -252,7 +252,7 @@
       "name": "MODEL_LIST_CACHE_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 33
+        "line": 34
       },
       "valueExpression": "\"llm:provider:models:\""
     },
@@ -260,7 +260,7 @@
       "name": "MODEL_LIST_CACHE_TTL_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 34
+        "line": 35
       },
       "valueExpression": "300"
     },
@@ -299,7 +299,7 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 336
+        "line": 360
       },
       "value": "{self.postgres_host}:{self.postgres_port}/{database}"
     },
@@ -453,28 +453,35 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 33
+        "line": 34
       },
       "value": "llm:provider:models:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 37
+        "line": 38
       },
       "value": "(?:^|[-_/])(asr|tts|speech|audio|image|video|ocr|rerank|moderation)(?:[-_/]|$)"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 46
+        "line": 47
       },
       "value": "{api_key[:3]}***{api_key[-3:]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 451
+        "line": 335
+      },
+      "value": "{provider.id}:{provider.updated_at.isoformat()}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/modules/llm_provider/service.py",
+        "line": 499
       },
       "value": "{normalized[:200]}..."
     },

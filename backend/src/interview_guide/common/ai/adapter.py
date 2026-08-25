@@ -10,6 +10,7 @@ from typing import Any
 
 import httpx
 
+from interview_guide.common.ai.outbound import ProviderOutboundPolicy
 from interview_guide.common.errors import BusinessException, ErrorCode
 
 TRAILING_VERSION = re.compile(r"/v\d+[A-Za-z0-9]*$")
@@ -43,10 +44,15 @@ class ChatResult:
 class LlmAdapter:
     def __init__(
         self,
+        outbound_policy: ProviderOutboundPolicy,
         client: httpx.AsyncClient | None = None,
     ) -> None:
+        self._outbound_policy = outbound_policy
         self._owns_client = client is None
         self._client = client or httpx.AsyncClient(
+            transport=outbound_policy.guarded_http_transport(
+                limits=httpx.Limits(max_connections=100, max_keepalive_connections=20)
+            ),
             timeout=httpx.Timeout(
                 connect=10,
                 read=300,
@@ -54,6 +60,7 @@ class LlmAdapter:
                 pool=10,
             ),
             follow_redirects=False,
+            trust_env=False,
         )
 
     async def close(self) -> None:
@@ -121,6 +128,7 @@ class LlmAdapter:
             stream=True,
         )
         url = self._url(provider, "chat/completions")
+        await self._outbound_policy.validate_http_url(url)
         try:
             async with self._client.stream(
                 "POST",
@@ -186,9 +194,11 @@ class LlmAdapter:
         path: str,
         payload: dict[str, Any],
     ) -> httpx.Response:
+        url = self._url(provider, path)
+        await self._outbound_policy.validate_http_url(url)
         try:
             response = await self._client.post(
-                self._url(provider, path),
+                url,
                 headers=self._headers(provider),
                 json=payload,
             )

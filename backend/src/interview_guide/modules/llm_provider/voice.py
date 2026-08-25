@@ -5,11 +5,13 @@ from dataclasses import dataclass
 from urllib.parse import urlsplit
 
 from interview_guide.common.ai.encryption import ApiKeyEncryption
+from interview_guide.common.ai.outbound import ProviderOutboundPolicy
 from interview_guide.common.ai.providers import (
     LlmProviderRegistry,
     ProviderRepository,
     provider_now,
 )
+from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.llm_provider.models import (
     AsrConfigRequest,
     AsrConfigResponse,
@@ -54,10 +56,12 @@ class VoiceConfigService:
         repository: ProviderRepository,
         registry: LlmProviderRegistry,
         encryption: ApiKeyEncryption,
+        outbound_policy: ProviderOutboundPolicy,
     ) -> None:
         self._repository = repository
         self._registry = registry
         self._encryption = encryption
+        self._outbound_policy = outbound_policy
 
     async def asr(self) -> AsrConfigResponse:
         entity = await self._repository.voice_config()
@@ -82,6 +86,7 @@ class VoiceConfigService:
 
     async def asr_config(self) -> AsrConfig:
         entity = await self._repository.voice_config()
+        await self._outbound_policy.validate_websocket_url(entity.asr_url)
         provider = await self._registry.get_voice(entity.asr_provider_id)
         return AsrConfig(
             url=entity.asr_url,
@@ -119,6 +124,7 @@ class VoiceConfigService:
 
     async def tts_config(self) -> TtsConfig:
         entity = await self._repository.voice_config()
+        await self._outbound_policy.validate_websocket_url(entity.tts_url)
         provider = await self._registry.get_voice(entity.tts_provider_id)
         return TtsConfig(
             url=entity.tts_url,
@@ -137,6 +143,10 @@ class VoiceConfigService:
         entity = await self._repository.voice_config()
         provider_id = request.provider_id or entity.asr_provider_id
         await self._repository.get_provider(provider_id)
+        if request.url is not None:
+            await self._outbound_policy.validate_websocket_url(request.url)
+            if normalized_url(request.url) != normalized_url(entity.asr_url):
+                self._require_key_for_url_change(request.api_key)
         await self._update_api_key(provider_id, request.api_key)
         values: dict[str, object] = {
             "asr_provider_id": provider_id,
@@ -161,6 +171,10 @@ class VoiceConfigService:
         entity = await self._repository.voice_config()
         provider_id = request.provider_id or entity.tts_provider_id
         await self._repository.get_provider(provider_id)
+        if request.url is not None:
+            await self._outbound_policy.validate_websocket_url(request.url)
+            if normalized_url(request.url) != normalized_url(entity.tts_url):
+                self._require_key_for_url_change(request.api_key)
         await self._update_api_key(provider_id, request.api_key)
         values: dict[str, object] = {
             "tts_provider_id": provider_id,
@@ -219,3 +233,15 @@ class VoiceConfigService:
             },
         )
         await self._registry.publish_change()
+
+    @staticmethod
+    def _require_key_for_url_change(api_key: str | None) -> None:
+        if api_key is None or not api_key.strip():
+            raise BusinessException(
+                ErrorCode.BAD_REQUEST,
+                "修改语音 WebSocket URL 时必须同时填写新的 API Key",
+            )
+
+
+def normalized_url(value: str) -> str:
+    return value.strip().rstrip("/")

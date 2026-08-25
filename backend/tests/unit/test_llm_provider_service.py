@@ -6,8 +6,10 @@ from unittest.mock import AsyncMock, Mock
 import httpx
 import pytest
 
+from interview_guide.common.ai.outbound import ProviderOutboundPolicy
+from interview_guide.common.errors import BusinessException
 from interview_guide.modules.llm_provider import service as provider_service
-from interview_guide.modules.llm_provider.models import ModelDiscoveryRequest
+from interview_guide.modules.llm_provider.models import ModelDiscoveryRequest, UpdateProviderRequest
 from interview_guide.modules.llm_provider.service import (
     LlmProviderService,
     abbreviate,
@@ -22,6 +24,16 @@ from interview_guide.modules.llm_provider.service import (
     model_list_urls,
     parse_model_ids,
 )
+
+
+class PublicResolver:
+    async def resolve(self, host: str, port: int) -> tuple[str, ...]:
+        del host, port
+        return ("93.184.216.34",)
+
+
+def outbound_policy() -> ProviderOutboundPolicy:
+    return ProviderOutboundPolicy(PublicResolver())
 
 
 def test_api_key_mask_is_stable() -> None:
@@ -105,13 +117,22 @@ async def test_remote_model_fetch_tries_openai_v1_fallback(monkeypatch: pytest.M
 
     async_client = httpx.AsyncClient
     transport = httpx.MockTransport(handler)
+
+    def test_client(**kwargs: object) -> httpx.AsyncClient:
+        kwargs["transport"] = transport
+        return async_client(**kwargs)  # type: ignore[arg-type]
+
     monkeypatch.setattr(
         provider_service.httpx,
         "AsyncClient",
-        lambda **kwargs: async_client(transport=transport, **kwargs),
+        test_client,
     )
 
-    models, warning = await fetch_remote_models("https://example.test", "secret")
+    models, warning = await fetch_remote_models(
+        "https://example.test",
+        "secret",
+        outbound_policy(),
+    )
 
     assert models == ["model-a", "model-b"]
     assert warning is None
@@ -139,6 +160,7 @@ async def test_provider_without_api_key_uses_configured_models_without_http_requ
         encryption,
         Mock(),
         Mock(),
+        outbound_policy(),
     )
 
     result = await service.discover_models(ModelDiscoveryRequest(provider_id="kimi"))
@@ -150,3 +172,65 @@ async def test_provider_without_api_key_uses_configured_models_without_http_requ
     assert result.warning == "Provider 未配置 API Key，无法拉取模型列表"
     assert connection.success is False
     assert connection.message == "连接失败: Provider 未配置 API Key"
+
+
+@pytest.mark.asyncio
+async def test_saved_key_cannot_be_sent_to_request_override_base_url() -> None:
+    repository = Mock()
+    repository.get_provider = AsyncMock(
+        return_value=SimpleNamespace(
+            api_key_ciphertext="ciphertext",
+            api_key_nonce="nonce",
+            base_url="https://provider.example/v1",
+            embedding_model=None,
+            model="model",
+        )
+    )
+    encryption = Mock()
+    service = LlmProviderService(
+        repository,
+        Mock(),
+        encryption,
+        Mock(),
+        Mock(),
+        outbound_policy(),
+    )
+
+    with pytest.raises(BusinessException, match="不能修改 baseUrl"):
+        await service.discover_models(
+            ModelDiscoveryRequest(
+                provider_id="saved",
+                base_url="https://attacker.example/v1",
+            )
+        )
+
+    encryption.decrypt.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_provider_base_url_change_requires_new_key() -> None:
+    repository = Mock()
+    repository.get_provider = AsyncMock(
+        return_value=SimpleNamespace(
+            base_url="https://provider.example/v1",
+            embedding_dimensions=1024,
+            embedding_model=None,
+            supports_embedding=False,
+        )
+    )
+    service = LlmProviderService(
+        repository,
+        Mock(),
+        Mock(),
+        Mock(ai_embedding_dimensions=1024),
+        Mock(),
+        outbound_policy(),
+    )
+
+    with pytest.raises(BusinessException, match="必须同时填写新的 apiKey"):
+        await service.update(
+            "saved",
+            UpdateProviderRequest(base_url="https://replacement.example/v1"),
+        )
+
+    repository.update_provider.assert_not_called()

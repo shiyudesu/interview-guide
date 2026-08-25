@@ -6,6 +6,8 @@ import pytest
 
 from interview_guide.common.ai.adapter import ProviderConfig
 from interview_guide.common.ai.encryption import ApiKeyEncryption
+from interview_guide.common.ai.outbound import ProviderOutboundPolicy
+from interview_guide.common.errors import BusinessException
 from interview_guide.modules.llm_provider.models import AsrConfigRequest, TtsConfigRequest
 from interview_guide.modules.llm_provider.voice import VoiceConfigService
 
@@ -74,6 +76,16 @@ class FakeRegistry:
         return self.publish_count
 
 
+class PublicResolver:
+    async def resolve(self, host: str, port: int) -> tuple[str, ...]:
+        del host, port
+        return ("93.184.216.34",)
+
+
+def outbound_policy() -> ProviderOutboundPolicy:
+    return ProviderOutboundPolicy(PublicResolver())
+
+
 @pytest.mark.asyncio
 async def test_asr_update_uses_database_config_and_provider_key() -> None:
     repository = FakeRepository()
@@ -82,6 +94,7 @@ async def test_asr_update_uses_database_config_and_provider_key() -> None:
         repository,  # type: ignore[arg-type]
         registry,  # type: ignore[arg-type]
         ApiKeyEncryption("test-key"),
+        outbound_policy(),
     )
 
     await service.update_asr(
@@ -106,6 +119,7 @@ async def test_tts_update_preserves_unset_fields() -> None:
         repository,  # type: ignore[arg-type]
         FakeRegistry(),  # type: ignore[arg-type]
         ApiKeyEncryption("test-key"),
+        outbound_policy(),
     )
     before = await service.tts()
 
@@ -115,3 +129,19 @@ async def test_tts_update_preserves_unset_fields() -> None:
     assert after.voice == "Updated"
     assert after.model == before.model
     assert after.sample_rate == before.sample_rate
+
+
+@pytest.mark.asyncio
+async def test_voice_url_change_requires_new_key() -> None:
+    repository = FakeRepository()
+    service = VoiceConfigService(
+        repository,  # type: ignore[arg-type]
+        FakeRegistry(),  # type: ignore[arg-type]
+        ApiKeyEncryption("test-key"),
+        outbound_policy(),
+    )
+
+    with pytest.raises(BusinessException, match="必须同时填写新的 API Key"):
+        await service.update_asr(AsrConfigRequest(url="wss://replacement.example/asr"))
+
+    assert repository.provider_updates == []

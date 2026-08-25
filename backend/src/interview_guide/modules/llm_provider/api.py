@@ -34,6 +34,7 @@ async def provider_service(request: Request) -> LlmProviderService:
         infrastructure.api_key_encryption,
         request.app.state.settings,
         infrastructure.redis.client,
+        infrastructure.provider_outbound_policy,
     )
 
 

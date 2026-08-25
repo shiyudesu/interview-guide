@@ -11,6 +11,7 @@ from redis.asyncio import Redis
 from redis.exceptions import RedisError
 
 from interview_guide.common.ai.encryption import ApiKeyEncryption
+from interview_guide.common.ai.outbound import ProviderOutboundPolicy, normalize_outbound_url
 from interview_guide.common.ai.providers import (
     LlmProviderRegistry,
     ProviderRepository,
@@ -61,12 +62,14 @@ class LlmProviderService:
         encryption: ApiKeyEncryption,
         settings: Settings,
         redis: Redis,
+        outbound_policy: ProviderOutboundPolicy,
     ) -> None:
         self._repository = repository
         self._registry = registry
         self._encryption = encryption
         self._settings = settings
         self._redis = redis
+        self._outbound_policy = outbound_policy
 
     async def list(self) -> list[ProviderResponse]:
         setting, providers = await self._repository.provider_listing()
@@ -128,6 +131,7 @@ class LlmProviderService:
     async def create(self, request: CreateProviderRequest) -> None:
         provider_id = self._required(request.id, "id 不能为空")
         base_url = self._required(request.base_url, "baseUrl 不能为空")
+        validated_base_url = await self._outbound_policy.validate_http_url(base_url)
         model = self._required(request.model, "model 不能为空")
         api_key = self._required(request.api_key, "apiKey 不能为空")
         embedding_model = self._trim(request.embedding_model)
@@ -150,7 +154,7 @@ class LlmProviderService:
                 id=provider_id,
                 api_key_ciphertext=encrypted.ciphertext,
                 api_key_nonce=encrypted.nonce,
-                base_url=base_url,
+                base_url=validated_base_url.url,
                 builtin=False,
                 created_at=timestamp,
                 embedding_dimensions=dimensions,
@@ -181,6 +185,11 @@ class LlmProviderService:
                 raise BusinessException(ErrorCode.BAD_REQUEST, message)
             if trimmed is not None and field_name != "api_key":
                 values[field_name] = trimmed
+        if request.base_url is not None:
+            validated_base_url = await self._outbound_policy.validate_http_url(request.base_url)
+            values["base_url"] = validated_base_url.url
+            if normalized_url(validated_base_url.url) != normalized_url(provider.base_url):
+                self._require_key_for_base_url_change(request.api_key)
         embedding_model = provider.embedding_model
         dimensions = provider.embedding_dimensions or self._settings.ai_embedding_dimensions
         supports_embedding = provider.supports_embedding
@@ -227,10 +236,13 @@ class LlmProviderService:
                 model=provider.model,
             )
         candidates = connectivity_test_urls(provider.base_url)
+        await self._outbound_policy.validate_http_url(provider.base_url)
         last_failure = "Unknown error"
         async with httpx.AsyncClient(
+            transport=self._outbound_policy.guarded_http_transport(),
             timeout=httpx.Timeout(connect=5, read=10, write=10, pool=5),
             follow_redirects=False,
+            trust_env=False,
         ) as client:
             for url in candidates:
                 try:
@@ -274,11 +286,24 @@ class LlmProviderService:
         if provider_id is not None:
             provider = await self._repository.get_provider(provider_id)
 
-        base_url = self._trim(request.base_url)
-        if base_url is None and provider is not None:
+        requested_base_url = self._trim(request.base_url)
+        requested_api_key = self._trim(request.api_key)
+        base_url: str | None
+        if provider is not None and requested_api_key is None:
+            if requested_base_url is not None and (
+                normalized_url(requested_base_url) != normalized_url(provider.base_url)
+            ):
+                raise BusinessException(
+                    ErrorCode.BAD_REQUEST,
+                    "使用已保存 API Key 时不能修改 baseUrl；请同时填写新的 apiKey",
+                )
             base_url = provider.base_url
+        else:
+            base_url = requested_base_url or (provider.base_url if provider is not None else None)
         if base_url is None:
             raise BusinessException(ErrorCode.BAD_REQUEST, "baseUrl 不能为空")
+        validated_base_url = await self._outbound_policy.validate_http_url(base_url)
+        base_url = validated_base_url.url
 
         configured_chat = self._trim(request.model)
         configured_embedding = self._trim(request.embedding_model)
@@ -286,7 +311,7 @@ class LlmProviderService:
             configured_chat = configured_chat or provider.model
             configured_embedding = configured_embedding or provider.embedding_model
 
-        api_key = self._trim(request.api_key)
+        api_key = requested_api_key
         if api_key is None and provider is not None:
             api_key = self._trim(
                 self._encryption.decrypt(
@@ -304,12 +329,27 @@ class LlmProviderService:
                 )
             raise BusinessException(ErrorCode.BAD_REQUEST, "apiKey 不能为空")
 
-        cache_key = model_list_cache_key(base_url, api_key)
-        models = None if request.refresh else await self._read_cached_models(cache_key)
+        cache_key = (
+            model_list_cache_key(
+                base_url,
+                f"{provider.id}:{provider.updated_at.isoformat()}",
+            )
+            if provider is not None and requested_api_key is None
+            else None
+        )
+        models = (
+            None
+            if request.refresh or cache_key is None
+            else await self._read_cached_models(cache_key)
+        )
         warning = None
         if models is None:
-            models, warning = await fetch_remote_models(base_url, api_key)
-            if models:
+            models, warning = await fetch_remote_models(
+                base_url,
+                api_key,
+                self._outbound_policy,
+            )
+            if models and cache_key is not None:
                 await self._write_cached_models(cache_key, models)
 
         if not models:
@@ -443,12 +483,24 @@ class LlmProviderService:
         if dimensions <= 0:
             raise BusinessException(ErrorCode.BAD_REQUEST, "向量维度必须为正整数")
 
+    @staticmethod
+    def _require_key_for_base_url_change(api_key: str | None) -> None:
+        if api_key is None or not api_key.strip():
+            raise BusinessException(
+                ErrorCode.BAD_REQUEST,
+                "修改 baseUrl 时必须同时填写新的 apiKey",
+            )
+
 
 def abbreviate(value: str | None) -> str:
     if value is None or not value.strip():
         return "[no body]"
     normalized = re.sub(r"\s+", " ", value).strip()
     return normalized if len(normalized) <= 200 else f"{normalized[:200]}..."
+
+
+def normalized_url(value: str) -> str:
+    return normalize_outbound_url(value)[0]
 
 
 def connectivity_test_urls(base_url: str) -> list[str]:
@@ -467,19 +519,23 @@ def model_list_urls(base_url: str) -> list[str]:
     return list(dict.fromkeys(candidates))
 
 
-def model_list_cache_key(base_url: str, api_key: str) -> str:
-    identity = f"{base_url.strip().rstrip('/')}\0{api_key}".encode()
-    return f"{MODEL_LIST_CACHE_PREFIX}{hashlib.sha256(identity).hexdigest()}"
+def model_list_cache_key(base_url: str, identity: str) -> str:
+    encoded_identity = f"{base_url.strip().rstrip('/')}\0{identity}".encode()
+    return f"{MODEL_LIST_CACHE_PREFIX}{hashlib.sha256(encoded_identity).hexdigest()}"
 
 
 async def fetch_remote_models(
     base_url: str,
     api_key: str,
+    outbound_policy: ProviderOutboundPolicy,
 ) -> tuple[list[str], str | None]:
+    await outbound_policy.validate_http_url(base_url)
     last_failure = "Unknown error"
     async with httpx.AsyncClient(
+        transport=outbound_policy.guarded_http_transport(),
         timeout=httpx.Timeout(connect=5, read=10, write=10, pool=5),
         follow_redirects=False,
+        trust_env=False,
     ) as client:
         for url in model_list_urls(base_url):
             try:

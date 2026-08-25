@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 51
+    "testFileCount": 52
   },
   "tests": [
     {
@@ -631,12 +631,12 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_llm_adapter.py",
-      "sha256": "4e598effec8886a1f69c92f614e1bf3e3141c02e0feee34e7d03c380318098a2"
+      "sha256": "729a6fff9150f6af4ca6eaee15d332900348ab66e506ccc866726d7075019de3"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_llm_provider_service.py",
-      "sha256": "b3840aef0a0c1a9d1ac732c390961d737d89abcd3ad050abf99cf008c78c7487"
+      "sha256": "c7ab12de93463ab19154d431d6040e38ed87fd8177fe05f377078cce03db0fd9"
     },
     {
       "disabledMarkers": 0,
@@ -647,6 +647,11 @@
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_pdf_export.py",
       "sha256": "37595a8c0656ccc179d087d9b81f85ae1293ecf390ee20e4fc83a6f2fd7f9302"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/unit/test_provider_outbound.py",
+      "sha256": "13e948da74c0391b7c1b1e5903482a519871f20157d68ed2b9f170316b62045d"
     },
     {
       "disabledMarkers": 0,
@@ -691,7 +696,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_settings.py",
-      "sha256": "0e7aa48b6812eec4b81f4d72431abc8cb83e18dafbb94792f8cec423e4c9fbef"
+      "sha256": "a99b1c2b76ae7e5ee70e51742b271894d52343c05fa89bdec18faa8463ec1dc5"
     },
     {
       "disabledMarkers": 0,
@@ -706,7 +711,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_config_store.py",
-      "sha256": "5de5eae636c1381b3873669cbbb3a2d23c0abf08682037ed8c73223fc06dd212"
+      "sha256": "7d9c03b50e44adba5f03282ea0149dfbe9154736a3717e472fc80a32fc57577b"
     },
     {
       "disabledMarkers": 0,

@@ -133,6 +133,14 @@ class Settings(BaseSettings):
         gt=0,
         validation_alias="APP_AI_EMBEDDING_DIMENSIONS",
     )
+    provider_outbound_allowed_hosts: str = Field(
+        default="",
+        validation_alias="APP_PROVIDER_OUTBOUND_ALLOWED_HOSTS",
+    )
+    provider_outbound_allowed_networks: str = Field(
+        default="",
+        validation_alias="APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS",
+    )
     ai_rag_rewrite_enabled: bool = Field(
         default=True,
         validation_alias="APP_AI_RAG_REWRITE_ENABLED",
@@ -324,6 +332,22 @@ class Settings(BaseSettings):
     def allowed_origins(self) -> tuple[str, ...]:
         return tuple(
             origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()
+        )
+
+    @property
+    def provider_outbound_allowed_host_list(self) -> tuple[str, ...]:
+        return tuple(
+            host.strip()
+            for host in self.provider_outbound_allowed_hosts.split(",")
+            if host.strip()
+        )
+
+    @property
+    def provider_outbound_allowed_network_list(self) -> tuple[str, ...]:
+        return tuple(
+            network.strip()
+            for network in self.provider_outbound_allowed_networks.split(",")
+            if network.strip()
         )
 
     @property

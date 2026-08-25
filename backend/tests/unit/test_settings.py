@@ -24,6 +24,8 @@ def test_existing_environment_names_are_supported() -> None:
         APP_AI_CONFIG_ENCRYPTION_KEY="test-key",
         APP_DATABASE_MAX_OVERFLOW=3,
         APP_DATABASE_POOL_SIZE=12,
+        APP_PROVIDER_OUTBOUND_ALLOWED_HOSTS="lmstudio.internal, ollama.internal",
+        APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS="192.168.10.0/24,10.20.0.0/16",
         CORS_ALLOWED_ORIGINS="http://localhost:5173,http://localhost:5174",
         POSTGRES_DB="comparison",
         POSTGRES_PASSWORD="secret",
@@ -35,6 +37,14 @@ def test_existing_environment_names_are_supported() -> None:
     assert settings.database_max_overflow == 3
     assert settings.postgres_db == "comparison"
     assert settings.postgres_password.get_secret_value() == "secret"
+    assert settings.provider_outbound_allowed_host_list == (
+        "lmstudio.internal",
+        "ollama.internal",
+    )
+    assert settings.provider_outbound_allowed_network_list == (
+        "192.168.10.0/24",
+        "10.20.0.0/16",
+    )
     assert settings.allowed_origins == (
         "http://localhost:5173",
         "http://localhost:5174",

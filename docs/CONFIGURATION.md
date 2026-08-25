@@ -129,6 +129,26 @@ openssl rand -hex 32
 
 ## Provider 配置
 
+### Provider 出站安全策略
+
+Provider 测试、模型发现、聊天、Embedding 和语音配置默认只允许 HTTPS/WSS，且域名解析结果必须
+全部是可公开路由地址。回环、私网、链路本地、保留、组播和云元数据地址默认拒绝；连接建立前会
+重新解析并校验地址，HTTP SDK 环境代理也不会绕过该策略。
+
+部署者确实需要连接可信内网 OpenAI 兼容服务时，必须同时登记主机和允许访问的 CIDR：
+
+```env
+APP_PROVIDER_OUTBOUND_ALLOWED_HOSTS=lmstudio.internal
+APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS=192.168.10.0/24
+```
+
+- 主机 allowlist 允许该主机使用 HTTP/WS，但不会单独放开任意私网地址。
+- 网络 allowlist 决定实际允许连接的非公网 IP 段。
+- 两项均由部署配置控制，设置页用户不能修改。
+- 不要加入 `127.0.0.0/8`、`169.254.0.0/16` 或云元数据地址。
+- 修改已有 Provider Base URL 或语音 WebSocket URL 时必须同时填写新 API Key，防止把已保存 Key
+  发送到新地址。
+
 内置 Provider 只有百炼：
 
 | Provider | Base URL | 默认聊天模型 | 默认向量模型 |

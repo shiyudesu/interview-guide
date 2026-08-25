@@ -13,10 +13,10 @@
       "webSocketEndpointCount": 1
     },
     "configuration.json": {
-      "configurationValueCount": 243,
-      "envExampleCount": 92,
+      "configurationValueCount": 247,
+      "envExampleCount": 96,
       "envReferencedButUndocumentedCount": 0,
-      "propertyBindingCount": 75
+      "propertyBindingCount": 77
     },
     "database.json": {
       "alterationCount": 1,
@@ -40,7 +40,7 @@
         "redis-script": 1,
         "skill": 66
       },
-      "testFileCount": 51
+      "testFileCount": 52
     }
   },
   "schemaVersion": 1

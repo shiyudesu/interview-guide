@@ -13,6 +13,7 @@ from interview_guide.common.ai.adapter import (
     ProviderConfig,
     resolve_versioned_base_url,
 )
+from interview_guide.common.ai.outbound import ProviderOutboundPolicy
 from interview_guide.common.ai.structured import (
     StructuredOutputInvoker,
     repair_unescaped_quotes,
@@ -30,6 +31,16 @@ def provider() -> ProviderConfig:
         embedding_dimensions=1024,
         supports_embedding=True,
     )
+
+
+class PublicResolver:
+    async def resolve(self, host: str, port: int) -> tuple[str, ...]:
+        del host, port
+        return ("93.184.216.34",)
+
+
+def outbound_policy() -> ProviderOutboundPolicy:
+    return ProviderOutboundPolicy(PublicResolver())
 
 
 def test_versioned_base_url_resolver() -> None:
@@ -52,7 +63,7 @@ async def test_chat_tool_request_and_headers_are_explicit() -> None:
         )
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    adapter = LlmAdapter(client)
+    adapter = LlmAdapter(outbound_policy(), client)
     tools = [
         {
             "type": "function",
@@ -95,7 +106,7 @@ async def test_http_failure_is_not_retried() -> None:
         return httpx.Response(500, json={"error": "failed"})
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    adapter = LlmAdapter(client)
+    adapter = LlmAdapter(outbound_policy(), client)
 
     with pytest.raises(BusinessException) as captured:
         await adapter.chat(
@@ -125,7 +136,7 @@ async def test_embedding_batch_limit_and_order() -> None:
         )
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    adapter = LlmAdapter(client)
+    adapter = LlmAdapter(outbound_policy(), client)
 
     assert await adapter.embed(provider(), ["first", "second"]) == [
         [0.0, 1.0],
@@ -148,7 +159,7 @@ async def test_base64_embedding_response_is_decoded_as_float32() -> None:
         )
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    adapter = LlmAdapter(client)
+    adapter = LlmAdapter(outbound_policy(), client)
 
     embeddings = await adapter.embed(provider(), ["fixed"])
     assert embeddings[0] == pytest.approx([0.25, -0.5])
