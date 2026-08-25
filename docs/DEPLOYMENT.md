@@ -93,6 +93,40 @@ sudo "$DEPLOY_TMP/install.sh" \
 sudo rm -rf -- "$DEPLOY_TMP"
 ```
 
+### 复用服务器已有 Caddy
+
+宿主机 Caddy 已经承载其他站点时，不要停止或卸载它。先在 `/etc/caddy/Caddyfile` 增加：
+
+```caddyfile
+interview.example.com {
+    reverse_proxy 127.0.0.1:18073
+}
+```
+
+校验并重载宿主机 Caddy：
+
+```bash
+sudo caddy validate --config /etc/caddy/Caddyfile
+sudo systemctl reload caddy
+```
+
+然后在安装命令末尾增加 `--external-caddy`：
+
+```bash
+sudo "$DEPLOY_TMP/install.sh" \
+  --root /opt/interview-guide \
+  --namespace "$GHCR_NAMESPACE" \
+  --channel main \
+  --domain interview.example.com \
+  --email admin@example.com \
+  --external-caddy
+```
+
+该模式不会启动 Compose `gateway`，也不会占用宿主机 80/443；应用前端只监听
+`127.0.0.1:18073`。证书申请、续期和 HTTP 跳转 HTTPS 全部由现有宿主机 Caddy 完成。安装和后续
+主动更新会使用 `curl --resolve` 经本机 443 校验真实域名证书及 `/health`，因此宿主机需要安装
+`curl`。
+
 安装器会：
 
 - 创建 `/opt/interview-guide/.env`
@@ -158,6 +192,16 @@ ACME_EMAIL=admin@example.com
 TLS_BIND_ADDRESS=0.0.0.0
 TLS_HTTP_PORT=80
 TLS_HTTPS_PORT=443
+FRONTEND_BIND_ADDRESS=127.0.0.1
+FRONTEND_PORT=18073
+```
+
+复用宿主机 Caddy 时安装器改为：
+
+```env
+COMPOSE_PROFILES=
+EXTERNAL_CADDY=true
+PUBLIC_DOMAIN=interview.example.com
 FRONTEND_BIND_ADDRESS=127.0.0.1
 FRONTEND_PORT=18073
 ```

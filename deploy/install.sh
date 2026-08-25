@@ -11,6 +11,7 @@ namespace=""
 channel="main"
 domain=""
 acme_email=""
+external_caddy=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -38,6 +39,10 @@ while [[ $# -gt 0 ]]; do
       [[ $# -ge 2 ]] || deploy_die "--email 需要 ACME 联系邮箱。"
       acme_email="$2"
       shift 2
+      ;;
+    --external-caddy)
+      external_caddy=true
+      shift
       ;;
     *) deploy_die "未知参数: $1" ;;
   esac
@@ -74,9 +79,16 @@ if [[ ! -f "$env_file" ]]; then
   install -m 0600 "${bundle_dir}/.env.example" "$env_file"
   deploy_replace_env_value "$env_file" INTERVIEW_GUIDE_IMAGE_NAMESPACE "$namespace"
   deploy_replace_env_value "$env_file" INTERVIEW_GUIDE_UPDATE_CHANNEL "$channel"
-  deploy_replace_env_value "$env_file" COMPOSE_PROFILES https
+  if [[ "$external_caddy" == true ]]; then
+    deploy_replace_env_value "$env_file" COMPOSE_PROFILES ""
+    deploy_replace_env_value "$env_file" EXTERNAL_CADDY true
+  else
+    deploy_replace_env_value "$env_file" COMPOSE_PROFILES https
+    deploy_replace_env_value "$env_file" EXTERNAL_CADDY false
+  fi
   deploy_replace_env_value "$env_file" PUBLIC_DOMAIN "$domain"
   deploy_replace_env_value "$env_file" ACME_EMAIL "$acme_email"
+  deploy_replace_env_value "$env_file" APP_AUTH_PUBLIC_URL "https://${domain}"
   deploy_replace_env_value "$env_file" FRONTEND_BIND_ADDRESS 127.0.0.1
   deploy_replace_env_value "$env_file" POSTGRES_PASSWORD "$(deploy_random_secret)"
   deploy_replace_env_value "$env_file" APP_STORAGE_SECRET_KEY "$(deploy_random_secret)"
@@ -88,9 +100,16 @@ else
     || deploy_replace_env_value "$env_file" INTERVIEW_GUIDE_IMAGE_NAMESPACE "$namespace"
   [[ -n "$(deploy_env_value "$env_file" INTERVIEW_GUIDE_UPDATE_CHANNEL)" ]] \
     || deploy_replace_env_value "$env_file" INTERVIEW_GUIDE_UPDATE_CHANNEL "$channel"
-  deploy_replace_env_value "$env_file" COMPOSE_PROFILES https
+  if [[ "$external_caddy" == true ]]; then
+    deploy_replace_env_value "$env_file" COMPOSE_PROFILES ""
+    deploy_replace_env_value "$env_file" EXTERNAL_CADDY true
+  else
+    deploy_replace_env_value "$env_file" COMPOSE_PROFILES https
+    deploy_replace_env_value "$env_file" EXTERNAL_CADDY false
+  fi
   deploy_replace_env_value "$env_file" PUBLIC_DOMAIN "$domain"
   deploy_replace_env_value "$env_file" ACME_EMAIL "$acme_email"
+  deploy_replace_env_value "$env_file" APP_AUTH_PUBLIC_URL "https://${domain}"
   deploy_replace_env_value "$env_file" FRONTEND_BIND_ADDRESS 127.0.0.1
   [[ -n "$(deploy_env_value "$env_file" POSTGRES_PASSWORD)" ]] \
     || deploy_replace_env_value "$env_file" POSTGRES_PASSWORD "$(deploy_random_secret)"
@@ -117,7 +136,12 @@ systemctl enable --now interview-guide-update.timer
 echo
 echo "主动拉取部署已安装。"
 echo "配置文件: ${env_file}"
-echo "HTTPS 入口: https://${domain}"
+if [[ "$external_caddy" == true ]]; then
+  echo "宿主机 Caddy 上游: http://127.0.0.1:$(deploy_env_value "$env_file" FRONTEND_PORT 18073)"
+  echo "HTTPS 入口: https://${domain}（由宿主机 Caddy 提供）"
+else
+  echo "HTTPS 入口: https://${domain}"
+fi
 echo "状态命令: ${deploy_root}/bundle/status.sh --root ${deploy_root}"
 echo "更新日志: journalctl -u interview-guide-update.service"
 echo "定时器:    systemctl list-timers interview-guide-update.timer"

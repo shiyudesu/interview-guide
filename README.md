@@ -115,6 +115,9 @@ Python、pnpm 或 uv。正式安装要求提供已备案且解析到服务器的
 private GHCR 登录、DNS/TLS 配置、日志和回滚命令见
 [GHCR 主动拉取部署](docs/DEPLOYMENT.md)。
 
+服务器已有宿主机 Caddy 承载其他网站时，安装器使用 `--external-caddy`，共享现有 80/443 和自动
+证书；本项目只在 `127.0.0.1:18073` 提供反向代理上游，不再启动 Compose gateway。
+
 后端生产镜像使用无图形界面的 LibreOffice 组件，并将系统依赖和 Python 依赖拆成较小的 OCI
 layer；`.doc`、`.rtf` 文件转换能力保持不变，同时降低弱网络拉取单个大 layer 超时的概率。
 

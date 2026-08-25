@@ -117,6 +117,18 @@ FRONTEND_PORT=5174
 
 ## HTTPS 证书签发或续期失败
 
+复用宿主机 Caddy 的部署先确认：
+
+```bash
+sudo caddy validate --config /etc/caddy/Caddyfile
+sudo systemctl status caddy --no-pager
+curl --noproxy '*' --resolve '实际域名:443:127.0.0.1' https://实际域名/health
+```
+
+`/opt/interview-guide/.env` 应包含 `EXTERNAL_CADDY=true`、空的 `COMPOSE_PROFILES`，并保持
+`FRONTEND_BIND_ADDRESS=127.0.0.1`。宿主机 Caddy 上游必须是 `127.0.0.1:18073`，不能直接暴露
+API、PostgreSQL、Redis 或对象存储。
+
 先检查配置和服务：
 
 ```bash

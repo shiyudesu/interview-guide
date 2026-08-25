@@ -128,6 +128,9 @@ Actions 不持有服务器 SSH Key；更新过程必须校验镜像 revision、�
 自动签发和续期证书，80 仅用于 ACME 和跳转 HTTPS；证书状态必须保存在独立数据卷。前端 Nginx
 不直接暴露公网，必须通过 Docker DNS 动态解析 `app`，健康检查经由反向代理访问 `/health`，
 后端容器重建不能要求同时重启前端。`scripts/start-http.sh` 仍只用于隔离的临时明文验收。
+服务器已有宿主机 Caddy 时，正式部署包必须支持 `--external-caddy`：不启动 Compose gateway，
+前端只绑定 `127.0.0.1:18073`，宿主机 Caddy 自动签证书并反向代理；主动更新仍需通过本机 443
+验证真实域名证书和 `/health`。
 
 ```bash
 docker compose up -d --build --wait
