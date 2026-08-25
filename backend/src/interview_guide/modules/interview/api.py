@@ -22,6 +22,7 @@ from interview_guide.common.redis.rate_limit import (
     RateLimitRule,
 )
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.interview.cache import InterviewSessionCache
 from interview_guide.modules.interview.models import (
     CreateInterviewRequest,
@@ -56,10 +57,12 @@ def build_interview_service(
     infrastructure: RuntimeInfrastructure,
     settings: Settings,
     metrics: ApplicationMetrics | None = None,
+    user_id: uuid.UUID | None = None,
 ) -> InterviewService:
     repository = InterviewRepository(
         infrastructure.database.sessions,
         now=datetime.now,
+        user_id=user_id,
     )
     structured = StructuredOutputInvoker(infrastructure.llm_adapter)
     questions = InterviewQuestionService(
@@ -94,10 +97,12 @@ def build_interview_service(
 
 async def interview_service(request: Request) -> AsyncIterator[InterviewService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     yield build_interview_service(
         infrastructure,
         request.app.state.settings,
         request.app.state.metrics,
+        actor.user_id,
     )
 
 

@@ -4,10 +4,11 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from interview_guide.common.db.models import Resume, ResumeAnalysis
+from interview_guide.common.db.models import LEGACY_OWNER_ID, Resume, ResumeAnalysis
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.redis.streams import (
     RESUME_ANALYZE,
@@ -49,9 +50,11 @@ class ResumeService:
         parser: AsyncDocumentParser | None = None,
         blocking_executor: BlockingExecutor | None = None,
         now: datetime | None = None,
+        user_id: UUID | None = None,
     ) -> None:
         self._session = session
-        self._repository = ResumeRepository(session)
+        self._user_id = user_id or LEGACY_OWNER_ID
+        self._repository = ResumeRepository(session, self._user_id)
         self._storage = storage
         self._streams = streams
         self._parser = parser

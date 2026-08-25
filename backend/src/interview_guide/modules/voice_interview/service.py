@@ -52,11 +52,13 @@ class VoiceInterviewService:
         cache_redis: Redis,
         interview_service: InterviewService,
         now: Callable[[], datetime],
+        user_id: UUID | None = None,
     ) -> None:
         self.repository = repository
         self._redis = cache_redis
         self._interview = interview_service
         self._now = now
+        self._user_id = user_id
 
     async def create_session(
         self,
@@ -125,10 +127,16 @@ class VoiceInterviewService:
     async def get_session(self, session_id: int | None) -> VoiceInterviewSession | None:
         if session_id is None:
             return None
-        cached = await self._redis.get(self._cache_key(session_id))
+        cached = (
+            await self._redis.get(self._cache_key(session_id, self._user_id))
+            if self._user_id is not None
+            else None
+        )
         if cached is not None:
             try:
-                return self._session_from_cache(json.loads(cached))
+                entity = self._session_from_cache(json.loads(cached))
+                if self._user_id is None or entity.user_id == self._user_id:
+                    return entity
             except (TypeError, ValueError, json.JSONDecodeError):
                 logger.warning("invalid voice session cache sessionId=%s", session_id)
         return await self.repository.find_session(session_id)
@@ -189,7 +197,7 @@ class VoiceInterviewService:
         )
         if entity is None:
             return False
-        await self._invalidate_cache(session_id)
+        await self._invalidate_cache(session_id, entity.user_id)
         if core_id is not None:
             await self._interview.complete(core_id)
         return True
@@ -204,7 +212,7 @@ class VoiceInterviewService:
                 f"会话状态为 {entity.status}，无法暂停",
             )
         await self.repository.pause_session(session_id)
-        await self._invalidate_cache(session_id)
+        await self._invalidate_cache(session_id, entity.user_id)
         logger.info("voice session paused sessionId=%s reason=%s", session_id, reason)
 
     async def resume_session(self, session_id: int) -> VoiceSessionResponse:
@@ -237,6 +245,8 @@ class VoiceInterviewService:
             await self._cache_session(updated)
 
     async def messages(self, session_id: int) -> list[VoiceInterviewMessageResponse]:
+        if await self.get_session(session_id) is None:
+            raise BusinessException(ErrorCode.VOICE_SESSION_NOT_FOUND)
         return [self._message_response(item) for item in await self.repository.messages(session_id)]
 
     async def history(self, session_id: int) -> list[VoiceInterviewMessage]:
@@ -292,7 +302,7 @@ class VoiceInterviewService:
             await self.start_phase(session_id, response.next_question.phase)
         if response.completed:
             await self.repository.end_session(session_id, only_if_in_progress=False)
-            await self._invalidate_cache(session_id)
+            await self._invalidate_cache(session_id, voice.user_id)
         return response
 
     async def evaluation_report(self, session_id: int) -> InterviewReportDTO | None:
@@ -305,13 +315,19 @@ class VoiceInterviewService:
             return None
 
     async def delete_session(self, session_id: int) -> None:
+        entity = await self.repository.find_session(session_id)
+        if entity is None:
+            raise BusinessException(
+                ErrorCode.VOICE_SESSION_NOT_FOUND,
+                f"会话不存在: {session_id}",
+            )
         core_id = await self.repository.core_session_public_id(session_id)
         if not await self.repository.delete_session(session_id):
             raise BusinessException(
                 ErrorCode.VOICE_SESSION_NOT_FOUND,
                 f"会话不存在: {session_id}",
             )
-        await self._invalidate_cache(session_id)
+        await self._invalidate_cache(session_id, entity.user_id)
         if core_id is not None:
             await self._interview.delete(core_id)
 
@@ -348,7 +364,7 @@ class VoiceInterviewService:
 
     async def _cache_session(self, entity: VoiceInterviewSession) -> None:
         await self._redis.set(
-            self._cache_key(entity.id),
+            self._cache_key(entity.id, entity.user_id),
             json.dumps(
                 self._session_cache_document(entity),
                 ensure_ascii=False,
@@ -357,12 +373,19 @@ class VoiceInterviewService:
             ex=SESSION_CACHE_TTL_SECONDS,
         )
 
-    async def _invalidate_cache(self, session_id: int) -> None:
-        await self._redis.delete(self._cache_key(session_id))
+    async def _invalidate_cache(
+        self,
+        session_id: int,
+        user_id: UUID | None = None,
+    ) -> None:
+        owner = user_id or self._user_id
+        if owner is not None:
+            await self._redis.delete(self._cache_key(session_id, owner))
 
     @staticmethod
-    def _cache_key(session_id: int) -> str:
-        return f"{SESSION_CACHE_KEY_PREFIX}{session_id}"
+    def _cache_key(session_id: int, owner: UUID | None = None) -> str:
+        owner = owner or LEGACY_OWNER_ID
+        return f"{SESSION_CACHE_KEY_PREFIX}{owner}:{session_id}"
 
     @staticmethod
     def _first_phase(request: CreateVoiceSessionRequest) -> str:

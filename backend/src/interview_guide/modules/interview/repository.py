@@ -5,14 +5,16 @@ import uuid
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.sql import Select
 
 from interview_guide.common.api.models import compact_json_text
 from interview_guide.common.db.models import (
+    LEGACY_OWNER_ID,
     InterviewQuestionRecord,
     InterviewSession,
     InterviewTurnRecord,
@@ -57,10 +59,12 @@ class InterviewRepository:
         sessions: async_sessionmaker[AsyncSession],
         now: Callable[[], datetime],
         *,
+        user_id: UUID | None = None,
         uuid_factory: Callable[[], UUID] = uuid.uuid4,
     ) -> None:
         self._sessions = sessions
         self._now = now
+        self._user_id = user_id
         self._uuid_factory = uuid_factory
 
     async def list_sessions(
@@ -92,6 +96,8 @@ class InterviewRepository:
                 .outerjoin(answered_main, answered_main.c.session_id == InterviewSession.id)
                 .order_by(InterviewSession.created_at.desc())
             )
+            if self._user_id is not None:
+                statement = statement.where(InterviewSession.user_id == self._user_id)
             if session_ids is not None:
                 statement = statement.where(InterviewSession.session_id.in_(session_ids))
             if offset:
@@ -108,7 +114,11 @@ class InterviewRepository:
     async def find_by_request_id(self, request_id: str) -> SessionAggregate | None:
         async with self._sessions() as session:
             public_id = await session.scalar(
-                select(InterviewSession.session_id).where(InterviewSession.request_id == request_id)
+                self._owned_session_statement(
+                    select(InterviewSession.session_id).where(
+                        InterviewSession.request_id == request_id
+                    )
+                )
             )
             return await self._aggregate(session, public_id) if public_id is not None else None
 
@@ -118,13 +128,13 @@ class InterviewRepository:
         channel: InterviewChannel = InterviewChannel.TEXT,
     ) -> SessionAggregate | None:
         async with self._sessions() as session:
-            public_id = await session.scalar(
-                select(InterviewSession.session_id)
-                .where(
+            statement = select(InterviewSession.session_id).where(
                     InterviewSession.resume_id == resume_id,
                     InterviewSession.channel == channel.value,
                     InterviewSession.status.in_(("CREATED", "IN_PROGRESS")),
                 )
+            public_id = await session.scalar(
+                self._owned_session_statement(statement)
                 .order_by(InterviewSession.created_at.desc())
                 .limit(1)
             )
@@ -134,7 +144,10 @@ class InterviewRepository:
         if resume_id is None:
             return ""
         async with self._sessions() as session:
-            value = await session.scalar(select(Resume.resume_text).where(Resume.id == resume_id))
+            statement = select(Resume.resume_text).where(Resume.id == resume_id)
+            if self._user_id is not None:
+                statement = statement.where(Resume.user_id == self._user_id)
+            value = await session.scalar(statement)
             return str(value or "")
 
     async def create_session(
@@ -164,7 +177,10 @@ class InterviewRepository:
             if resume_id is not None:
                 row = (
                     await session.execute(
-                        select(Resume.id, Resume.resume_text).where(Resume.id == resume_id)
+                        select(Resume.id, Resume.resume_text).where(
+                            Resume.id == resume_id,
+                            Resume.user_id == (self._user_id or LEGACY_OWNER_ID),
+                        )
                     )
                 ).first()
                 if row is not None:
@@ -194,6 +210,7 @@ class InterviewRepository:
                 skill_id=skill_id or "java-backend",
                 status="CREATED",
                 strengths_json=None,
+                user_id=self._user_id or LEGACY_OWNER_ID,
             )
             session.add(entity)
             await session.flush()
@@ -219,8 +236,11 @@ class InterviewRepository:
             entity = cast(
                 InterviewSession | None,
                 await session.scalar(
-                    select(InterviewSession)
-                    .where(InterviewSession.session_id == session_id)
+                    self._owned_session_statement(
+                        select(InterviewSession).where(
+                            InterviewSession.session_id == session_id
+                        )
+                    )
                     .with_for_update()
                 ),
             )
@@ -288,19 +308,22 @@ class InterviewRepository:
 
     async def turn(self, session_id: str, turn_id: UUID) -> InterviewTurnRecord | None:
         async with self._sessions() as session:
+            statement = (
+                select(InterviewTurnRecord)
+                .join(
+                    InterviewSession,
+                    InterviewSession.id == InterviewTurnRecord.interview_session_id,
+                )
+                .where(
+                    InterviewSession.session_id == session_id,
+                    InterviewTurnRecord.id == turn_id,
+                )
+            )
+            if self._user_id is not None:
+                statement = statement.where(InterviewSession.user_id == self._user_id)
             return cast(
                 InterviewTurnRecord | None,
-                await session.scalar(
-                    select(InterviewTurnRecord)
-                    .join(
-                        InterviewSession,
-                        InterviewSession.id == InterviewTurnRecord.interview_session_id,
-                    )
-                    .where(
-                        InterviewSession.session_id == session_id,
-                        InterviewTurnRecord.id == turn_id,
-                    )
-                ),
+                await session.scalar(statement),
             )
 
     async def finalize_turn(
@@ -329,8 +352,11 @@ class InterviewRepository:
             entity = cast(
                 InterviewSession | None,
                 await session.scalar(
-                    select(InterviewSession)
-                    .where(InterviewSession.session_id == session_id)
+                    self._owned_session_statement(
+                        select(InterviewSession).where(
+                            InterviewSession.session_id == session_id
+                        )
+                    )
                     .with_for_update()
                 ),
             )
@@ -462,8 +488,11 @@ class InterviewRepository:
             entity = cast(
                 InterviewSession | None,
                 await session.scalar(
-                    select(InterviewSession)
-                    .where(InterviewSession.session_id == session_id)
+                    self._owned_session_statement(
+                        select(InterviewSession).where(
+                            InterviewSession.session_id == session_id
+                        )
+                    )
                     .with_for_update()
                 ),
             )
@@ -486,7 +515,9 @@ class InterviewRepository:
     ) -> bool:
         async with self._sessions() as session, session.begin():
             entity = await session.scalar(
-                select(InterviewSession).where(InterviewSession.session_id == session_id)
+                self._owned_session_statement(
+                    select(InterviewSession).where(InterviewSession.session_id == session_id)
+                )
             )
             if entity is None:
                 return False
@@ -522,7 +553,9 @@ class InterviewRepository:
     async def save_report(self, session_id: str, report: InterviewReportDTO) -> None:
         async with self._sessions() as session, session.begin():
             entity = await session.scalar(
-                select(InterviewSession).where(InterviewSession.session_id == session_id)
+                self._owned_session_statement(
+                    select(InterviewSession).where(InterviewSession.session_id == session_id)
+                )
             )
             if entity is None:
                 raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
@@ -541,8 +574,10 @@ class InterviewRepository:
     async def saved_report(self, session_id: str) -> InterviewReportDTO | None:
         async with self._sessions() as session:
             raw = await session.scalar(
-                select(InterviewSession.reference_answers_json).where(
-                    InterviewSession.session_id == session_id
+                self._owned_session_statement(
+                    select(InterviewSession.reference_answers_json).where(
+                        InterviewSession.session_id == session_id
+                    )
                 )
             )
             if raw is None:
@@ -552,7 +587,9 @@ class InterviewRepository:
     async def delete_session(self, session_id: str) -> None:
         async with self._sessions() as session, session.begin():
             entity = await session.scalar(
-                select(InterviewSession).where(InterviewSession.session_id == session_id)
+                self._owned_session_statement(
+                    select(InterviewSession).where(InterviewSession.session_id == session_id)
+                )
             )
             if entity is None:
                 raise BusinessException(ErrorCode.INTERVIEW_SESSION_NOT_FOUND)
@@ -591,6 +628,8 @@ class InterviewRepository:
                     InterviewQuestionRecord.kind == QuestionKind.MAIN.value,
                 )
             )
+            if self._user_id is not None:
+                statement = statement.where(InterviewSession.user_id == self._user_id)
             if resume_id is not None:
                 statement = statement.where(InterviewSession.resume_id == resume_id)
             rows = await session.execute(
@@ -605,13 +644,16 @@ class InterviewRepository:
     ) -> SessionAggregate | None:
         if session_id is None:
             return None
-        row = (
-            await session.execute(
-                select(InterviewSession, Resume.resume_text)
-                .outerjoin(Resume, Resume.id == InterviewSession.resume_id)
-                .where(InterviewSession.session_id == session_id)
+        statement = (
+            select(InterviewSession, Resume.resume_text)
+            .outerjoin(
+                Resume,
+                (Resume.id == InterviewSession.resume_id)
+                & (Resume.user_id == InterviewSession.user_id),
             )
-        ).first()
+            .where(InterviewSession.session_id == session_id)
+        )
+        row = (await session.execute(self._owned_session_statement(statement))).first()
         if row is None:
             return None
         return await self._aggregate_for_entity(session, row[0], str(row[1] or ""))
@@ -624,7 +666,10 @@ class InterviewRepository:
     ) -> SessionAggregate:
         if resume_text is None and entity.resume_id is not None:
             resume_text = await session.scalar(
-                select(Resume.resume_text).where(Resume.id == entity.resume_id)
+                select(Resume.resume_text).where(
+                    Resume.id == entity.resume_id,
+                    Resume.user_id == entity.user_id,
+                )
             )
         questions = list(
             await session.scalars(
@@ -644,6 +689,11 @@ class InterviewRepository:
             )
         )
         return SessionAggregate(entity, str(resume_text or ""), questions, turns)
+
+    def _owned_session_statement(self, statement: Select[Any]) -> Select[Any]:
+        if self._user_id is None:
+            return statement
+        return statement.where(InterviewSession.user_id == self._user_id)
 
     def _new_main_question(
         self,

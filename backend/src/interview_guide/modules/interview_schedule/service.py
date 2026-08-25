@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from interview_guide.common.db.models import InterviewSchedule
+from interview_guide.common.db.models import LEGACY_OWNER_ID, InterviewSchedule
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.interview_schedule.models import (
     CreateInterviewRequest,
@@ -22,9 +23,11 @@ class InterviewScheduleService:
         self,
         session: AsyncSession,
         now: Callable[[], datetime] = datetime.now,
+        user_id: UUID | None = None,
     ) -> None:
         self._session = session
-        self._repository = InterviewScheduleRepository(session)
+        self._user_id = user_id
+        self._repository = InterviewScheduleRepository(session, user_id)
         self._now = now
 
     async def create(
@@ -46,6 +49,7 @@ class InterviewScheduleService:
                     status=InterviewStatus.PENDING.value,
                     created_at=timestamp,
                     updated_at=timestamp,
+                    user_id=self._user_id or LEGACY_OWNER_ID,
                 )
             )
         return self._response(entity)
@@ -88,6 +92,7 @@ class InterviewScheduleService:
 
     async def delete(self, schedule_id: int) -> None:
         async with self._session.begin():
+            await self._required(schedule_id)
             await self._repository.delete(schedule_id)
 
     async def update_status(

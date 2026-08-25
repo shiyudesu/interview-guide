@@ -9,6 +9,7 @@ from starlette.responses import Response
 from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.resume.models import (
     ResumeDetailResponse,
     ResumeListResponse,
@@ -21,6 +22,7 @@ router = APIRouter(prefix="/api/resumes", responses=STANDARD_ERROR_RESPONSES)
 
 async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     async with infrastructure.database.sessions() as session:
         yield ResumeService(
             session,
@@ -28,6 +30,7 @@ async def resume_service(request: Request) -> AsyncIterator[ResumeService]:
             infrastructure.streams,
             infrastructure.document_parser,
             infrastructure.blocking_executor,
+            user_id=actor.user_id,
         )
 
 

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import cast
+from uuid import UUID
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,28 +12,38 @@ from interview_guide.modules.interview_schedule.models import InterviewStatus
 
 
 class InterviewScheduleRepository:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, user_id: UUID | None = None) -> None:
         self._session = session
+        self._user_id = user_id
 
     async def add(self, entity: InterviewSchedule) -> InterviewSchedule:
+        if self._user_id is not None:
+            entity.user_id = self._user_id
         self._session.add(entity)
         await self._session.flush()
         return entity
 
     async def get(self, schedule_id: int) -> InterviewSchedule | None:
-        return await self._session.get(InterviewSchedule, schedule_id)
+        statement = select(InterviewSchedule).where(InterviewSchedule.id == schedule_id)
+        if self._user_id is not None:
+            statement = statement.where(InterviewSchedule.user_id == self._user_id)
+        return cast(InterviewSchedule | None, await self._session.scalar(statement))
 
     async def list_all(self) -> list[InterviewSchedule]:
-        result = await self._session.scalars(select(InterviewSchedule))
+        statement = select(InterviewSchedule)
+        if self._user_id is not None:
+            statement = statement.where(InterviewSchedule.user_id == self._user_id)
+        result = await self._session.scalars(statement)
         return list(result)
 
     async def list_by_status(
         self,
         status: InterviewStatus,
     ) -> list[InterviewSchedule]:
-        result = await self._session.scalars(
-            select(InterviewSchedule).where(InterviewSchedule.status == status.value)
-        )
+        statement = select(InterviewSchedule).where(InterviewSchedule.status == status.value)
+        if self._user_id is not None:
+            statement = statement.where(InterviewSchedule.user_id == self._user_id)
+        result = await self._session.scalars(statement)
         return list(result)
 
     async def list_between(
@@ -39,18 +51,22 @@ class InterviewScheduleRepository:
         start: datetime,
         end: datetime,
     ) -> list[InterviewSchedule]:
-        result = await self._session.scalars(
-            select(InterviewSchedule).where(InterviewSchedule.interview_time.between(start, end))
+        statement = select(InterviewSchedule).where(
+            InterviewSchedule.interview_time.between(start, end)
         )
+        if self._user_id is not None:
+            statement = statement.where(InterviewSchedule.user_id == self._user_id)
+        result = await self._session.scalars(statement)
         return list(result)
 
     async def delete(self, schedule_id: int) -> None:
-        await self._session.execute(
-            delete(InterviewSchedule).where(InterviewSchedule.id == schedule_id)
-        )
+        statement = delete(InterviewSchedule).where(InterviewSchedule.id == schedule_id)
+        if self._user_id is not None:
+            statement = statement.where(InterviewSchedule.user_id == self._user_id)
+        await self._session.execute(statement)
 
     async def expire_pending(self, cutoff: datetime) -> int:
-        result = await self._session.execute(
+        statement = (
             update(InterviewSchedule)
             .where(
                 InterviewSchedule.status == InterviewStatus.PENDING.value,
@@ -59,4 +75,7 @@ class InterviewScheduleRepository:
             .values(status=InterviewStatus.CANCELLED.value)
             .returning(InterviewSchedule.id)
         )
+        if self._user_id is not None:
+            statement = statement.where(InterviewSchedule.user_id == self._user_id)
+        result = await self._session.execute(statement)
         return len(result.scalars().all())

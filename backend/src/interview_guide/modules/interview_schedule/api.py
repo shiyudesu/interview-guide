@@ -11,6 +11,7 @@ from starlette.responses import Response
 from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.interview_schedule.models import (
     CreateInterviewRequest,
     InterviewScheduleResponse,
@@ -40,10 +41,13 @@ SessionDependency = Annotated[AsyncSession, Depends(database_session)]
 
 async def schedule_service(
     session: SessionDependency,
+    request: Request,
 ) -> InterviewScheduleService:
+    actor = current_actor(request)
     return InterviewScheduleService(
         session,
         now=schedule_now,
+        user_id=actor.user_id,
     )
 
 

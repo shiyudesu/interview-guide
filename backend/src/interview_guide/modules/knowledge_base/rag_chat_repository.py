@@ -4,12 +4,15 @@ from collections import defaultdict
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
+from uuid import UUID
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.sql import Select
 
 from interview_guide.common.db.models import (
+    LEGACY_OWNER_ID,
     KnowledgeBase,
     RagChatMessage,
     RagChatSession,
@@ -42,9 +45,11 @@ class RagChatRepository:
         self,
         sessions: async_sessionmaker[AsyncSession],
         now: Callable[[], datetime] = datetime.now,
+        user_id: UUID | None = None,
     ) -> None:
         self._sessions = sessions
         self._now = now
+        self._user_id = user_id
 
     async def create_session(
         self,
@@ -68,6 +73,7 @@ class RagChatRepository:
                 status="ACTIVE",
                 title=resolved_title,
                 updated_at=now,
+                user_id=self._user_id or LEGACY_OWNER_ID,
             )
             session.add(entity)
             await session.flush()
@@ -92,6 +98,8 @@ class RagChatRepository:
                 RagChatSession.is_pinned.desc(),
                 RagChatSession.updated_at.desc(),
             )
+            if self._user_id is not None:
+                statement = statement.where(RagChatSession.user_id == self._user_id)
             if offset:
                 statement = statement.offset(offset)
             if limit is not None:
@@ -114,21 +122,22 @@ class RagChatRepository:
 
     async def session_detail(self, session_id: int) -> SessionDetailRecord:
         async with self._sessions() as session:
+            statement = (
+                select(RagChatSession, KnowledgeBase)
+                .outerjoin(
+                    RagSessionKnowledgeBase,
+                    RagSessionKnowledgeBase.session_id == RagChatSession.id,
+                )
+                .outerjoin(
+                    KnowledgeBase,
+                    KnowledgeBase.id == RagSessionKnowledgeBase.knowledge_base_id,
+                )
+                .where(RagChatSession.id == session_id)
+            )
+            if self._user_id is not None:
+                statement = statement.where(RagChatSession.user_id == self._user_id)
             rows = list(
-                (
-                    await session.execute(
-                        select(RagChatSession, KnowledgeBase)
-                        .outerjoin(
-                            RagSessionKnowledgeBase,
-                            RagSessionKnowledgeBase.session_id == RagChatSession.id,
-                        )
-                        .outerjoin(
-                            KnowledgeBase,
-                            KnowledgeBase.id == RagSessionKnowledgeBase.knowledge_base_id,
-                        )
-                        .where(RagChatSession.id == session_id)
-                    )
-                ).all()
+                (await session.execute(statement)).all()
             )
             if not rows:
                 raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
@@ -183,9 +192,7 @@ class RagChatRepository:
 
     async def delete_session(self, session_id: int) -> None:
         async with self._sessions() as session, session.begin():
-            entity = await session.get(RagChatSession, session_id)
-            if entity is None:
-                raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
+            entity = await self._require_session(session, session_id)
             await session.execute(
                 delete(RagSessionKnowledgeBase).where(
                     RagSessionKnowledgeBase.session_id == session_id
@@ -201,7 +208,9 @@ class RagChatRepository:
             entity = cast(
                 RagChatSession | None,
                 await session.scalar(
-                    select(RagChatSession).where(RagChatSession.id == session_id).with_for_update()
+                    self._owned_session_statement(
+                        select(RagChatSession).where(RagChatSession.id == session_id)
+                    ).with_for_update()
                 ),
             )
             if entity is None:
@@ -236,7 +245,14 @@ class RagChatRepository:
 
     async def complete_stream_message(self, message_id: int, content: str) -> None:
         async with self._sessions() as session, session.begin():
-            message = await session.get(RagChatMessage, message_id)
+            statement = (
+                select(RagChatMessage)
+                .join(RagChatSession, RagChatSession.id == RagChatMessage.session_id)
+                .where(RagChatMessage.id == message_id)
+            )
+            if self._user_id is not None:
+                statement = statement.where(RagChatSession.user_id == self._user_id)
+            message = await session.scalar(statement)
             if message is None:
                 raise BusinessException(ErrorCode.NOT_FOUND, "消息不存在")
             message.content = content
@@ -251,18 +267,21 @@ class RagChatRepository:
         history_max_messages: int,
     ) -> StreamContext:
         async with self._sessions() as session:
-            rows = (
-                await session.execute(
-                    select(
-                        RagChatSession.id,
-                        RagSessionKnowledgeBase.knowledge_base_id,
-                    )
-                    .outerjoin(
-                        RagSessionKnowledgeBase,
-                        RagSessionKnowledgeBase.session_id == RagChatSession.id,
-                    )
-                    .where(RagChatSession.id == session_id)
+            statement = (
+                select(
+                    RagChatSession.id,
+                    RagSessionKnowledgeBase.knowledge_base_id,
                 )
+                .outerjoin(
+                    RagSessionKnowledgeBase,
+                    RagSessionKnowledgeBase.session_id == RagChatSession.id,
+                )
+                .where(RagChatSession.id == session_id)
+            )
+            if self._user_id is not None:
+                statement = statement.where(RagChatSession.user_id == self._user_id)
+            rows = (
+                await session.execute(statement)
             ).all()
             if not rows:
                 raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
@@ -294,25 +313,40 @@ class RagChatRepository:
             )
             return StreamContext(knowledge_base_ids, history)
 
-    @staticmethod
     async def _require_session(
+        self,
         session: AsyncSession,
         session_id: int,
     ) -> RagChatSession:
-        entity = await session.get(RagChatSession, session_id)
+        entity = cast(
+            RagChatSession | None,
+            await session.scalar(
+                self._owned_session_statement(
+                    select(RagChatSession).where(RagChatSession.id == session_id)
+                )
+            ),
+        )
         if entity is None:
             raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
         return entity
 
-    @staticmethod
     async def _find_knowledge_bases(
+        self,
         session: AsyncSession,
         knowledge_base_ids: Sequence[int | None],
     ) -> list[KnowledgeBase]:
         ids = [value for value in knowledge_base_ids if value is not None]
         if not ids:
             return []
-        return list(await session.scalars(select(KnowledgeBase).where(KnowledgeBase.id.in_(ids))))
+        statement = select(KnowledgeBase).where(KnowledgeBase.id.in_(ids))
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
+        return list(await session.scalars(statement))
+
+    def _owned_session_statement(self, statement: Select[Any]) -> Select[Any]:
+        if self._user_id is None:
+            return statement
+        return statement.where(RagChatSession.user_id == self._user_id)
 
     @staticmethod
     def _generate_title(knowledge_bases: Sequence[KnowledgeBase]) -> str:

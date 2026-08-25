@@ -240,10 +240,12 @@ class QuestionGenerationStateService:
         *,
         now: Callable[[], datetime] = datetime.now,
         task_id_factory: Callable[[], str] = lambda: str(uuid.uuid4()),
+        user_id: uuid.UUID | None = None,
     ) -> None:
         self._sessions = sessions
         self._now = now
         self._task_id_factory = task_id_factory
+        self._user_id = user_id
 
     async def create_task(
         self,
@@ -251,7 +253,7 @@ class QuestionGenerationStateService:
         config: QuestionGenerationConfig,
     ) -> QuestionGenStatusResponse:
         async with self._sessions() as session, session.begin():
-            repository = KnowledgeBaseQuestionRepository(session)
+            repository = KnowledgeBaseQuestionRepository(session, self._user_id)
             entity = await repository.knowledge_base(knowledge_base_id, for_update=True)
             if entity is None:
                 raise BusinessException(ErrorCode.KNOWLEDGE_BASE_NOT_FOUND)
@@ -274,7 +276,9 @@ class QuestionGenerationStateService:
 
     async def get_status(self, knowledge_base_id: int) -> QuestionGenStatusResponse:
         async with self._sessions() as session:
-            entity = await KnowledgeBaseQuestionRepository(session).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(
+                session, self._user_id
+            ).knowledge_base(
                 knowledge_base_id
             )
             if entity is None:
@@ -287,7 +291,9 @@ class QuestionGenerationStateService:
         task_id: str,
     ) -> QuestionGenerationConfig:
         async with self._sessions() as session:
-            entity = await KnowledgeBaseQuestionRepository(session).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(
+                session, self._user_id
+            ).knowledge_base(
                 knowledge_base_id
             )
             if entity is None:
@@ -301,7 +307,9 @@ class QuestionGenerationStateService:
 
     async def try_mark_processing(self, knowledge_base_id: int, task_id: str) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(session).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(
+                session, self._user_id
+            ).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -323,7 +331,9 @@ class QuestionGenerationStateService:
 
     async def mark_failed(self, knowledge_base_id: int, task_id: str) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(session).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(
+                session, self._user_id
+            ).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -344,7 +354,7 @@ class QuestionGenerationStateService:
         skipped_count: int,
     ) -> bool:
         async with self._sessions() as session, session.begin():
-            repository = KnowledgeBaseQuestionRepository(session)
+            repository = KnowledgeBaseQuestionRepository(session, self._user_id)
             entity = await repository.knowledge_base(knowledge_base_id, for_update=True)
             if not self._matches(entity, task_id, "PROCESSING"):
                 return False
@@ -397,7 +407,9 @@ class QuestionGenerationStateService:
         threshold: datetime,
     ) -> list[tuple[int, str | None]]:
         async with self._sessions() as session:
-            return await KnowledgeBaseQuestionRepository(session).stale_generation_tasks(
+            return await KnowledgeBaseQuestionRepository(
+                session, self._user_id
+            ).stale_generation_tasks(
                 status.value,
                 threshold,
             )
@@ -410,7 +422,9 @@ class QuestionGenerationStateService:
         target: str,
     ) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(session).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(
+                session, self._user_id
+            ).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -430,7 +444,9 @@ class QuestionGenerationStateService:
         threshold: datetime,
     ) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(session).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(
+                session, self._user_id
+            ).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -525,9 +541,10 @@ class KnowledgeBaseQuestionService:
         producer: QuestionGenStreamProducer,
         *,
         now: Callable[[], datetime] = datetime.now,
+        user_id: uuid.UUID | None = None,
     ) -> None:
         self._session = session
-        self._repository = KnowledgeBaseQuestionRepository(session)
+        self._repository = KnowledgeBaseQuestionRepository(session, user_id)
         self._state = state
         self._producer = producer
         self._now = now
@@ -540,6 +557,8 @@ class KnowledgeBaseQuestionService:
         difficulty: str | None,
         keyword: str | None,
     ) -> list[KnowledgeBaseQuestionDTO]:
+        if await self._repository.knowledge_base(knowledge_base_id) is None:
+            raise BusinessException(ErrorCode.KNOWLEDGE_BASE_NOT_FOUND)
         rows = await self._repository.list_questions(
             knowledge_base_id,
             status.value if status is not None else None,
@@ -556,6 +575,8 @@ class KnowledgeBaseQuestionService:
         ]
 
     async def list_categories(self, knowledge_base_id: int) -> list[CategoryCount]:
+        if await self._repository.knowledge_base(knowledge_base_id) is None:
+            raise BusinessException(ErrorCode.KNOWLEDGE_BASE_NOT_FOUND)
         return [
             CategoryCount(category=item.category, count=item.count)
             for item in await self._repository.categories(knowledge_base_id)
@@ -1053,10 +1074,12 @@ class KnowledgeBaseInterviewService:
         interview: InterviewService,
         *,
         random_selection: RandomSelection | None = None,
+        user_id: uuid.UUID | None = None,
     ) -> None:
         self._sessions = sessions
         self._interview = interview
         self._random = random_selection or SystemRandomSelection()
+        self._user_id = user_id
 
     async def create_session(
         self,
@@ -1066,7 +1089,7 @@ class KnowledgeBaseInterviewService:
         category = trim_to_none(request.category)
         difficulty = normalize_difficulty(request.difficulty)
         async with self._sessions() as session:
-            repository = KnowledgeBaseQuestionRepository(session)
+            repository = KnowledgeBaseQuestionRepository(session, self._user_id)
             if await repository.knowledge_base(request.knowledge_base_id) is None:
                 raise BusinessException(ErrorCode.KNOWLEDGE_BASE_NOT_FOUND)
             raw = await repository.active_questions(
@@ -1107,7 +1130,7 @@ class KnowledgeBaseInterviewService:
         normalized_category = trim_to_none(category)
         normalized_difficulty = normalize_difficulty(difficulty)
         async with self._sessions() as session:
-            repository = KnowledgeBaseQuestionRepository(session)
+            repository = KnowledgeBaseQuestionRepository(session, self._user_id)
             if await repository.knowledge_base(knowledge_base_id) is None:
                 raise BusinessException(ErrorCode.KNOWLEDGE_BASE_NOT_FOUND)
             raw = await repository.active_questions(

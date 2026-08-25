@@ -11,6 +11,7 @@ from starlette.responses import Response, StreamingResponse
 from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.knowledge_base.api import knowledge_base_query_service
 from interview_guide.modules.knowledge_base.rag_chat_models import (
     CreateSessionRequest,
@@ -31,10 +32,12 @@ router = APIRouter(prefix="/api/rag-chat", responses=STANDARD_ERROR_RESPONSES)
 
 def rag_chat_service(request: Request) -> RagChatService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     settings = request.app.state.settings
     repository = RagChatRepository(
         infrastructure.database.sessions,
         now=datetime.now,
+        user_id=actor.user_id,
     )
     return RagChatService(
         repository,

@@ -19,6 +19,7 @@ from interview_guide.common.redis.rate_limit import (
     RateLimitRule,
 )
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.knowledge_base.models import (
     KnowledgeBaseItemResponse,
     KnowledgeBaseStatisticsResponse,
@@ -44,6 +45,7 @@ async def knowledge_base_service(
     request: Request,
 ) -> AsyncIterator[KnowledgeBaseService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     async with infrastructure.database.sessions() as session:
         yield KnowledgeBaseService(
             session,
@@ -52,6 +54,7 @@ async def knowledge_base_service(
             infrastructure.streams,
             infrastructure.document_parser,
             now=datetime.now,
+            user_id=actor.user_id,
         )
 
 
@@ -65,8 +68,9 @@ def knowledge_base_query_service(
     request: Request,
 ) -> KnowledgeBaseQueryService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     return KnowledgeBaseQueryService(
-        KnowledgeBaseQueryRepository(infrastructure.database.sessions),
+        KnowledgeBaseQueryRepository(infrastructure.database.sessions, actor.user_id),
         infrastructure.provider_registry,
         infrastructure.llm_adapter,
         PromptRepository(RESOURCES),

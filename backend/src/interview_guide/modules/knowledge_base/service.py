@@ -4,10 +4,11 @@ import logging
 from collections.abc import Callable, Sequence
 from datetime import datetime
 from typing import Any, Protocol
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from interview_guide.common.db.models import KnowledgeBase
+from interview_guide.common.db.models import LEGACY_OWNER_ID, KnowledgeBase
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.redis.streams import (
     FIELD_CONTENT,
@@ -99,10 +100,12 @@ class KnowledgeBaseService:
         streams: KnowledgeBaseStreams,
         parser: KnowledgeBaseDocumentParser,
         now: Callable[[], datetime] = datetime.now,
+        user_id: UUID | None = None,
     ) -> None:
         self._session = session
         self._sessions = sessions
-        self._repository = KnowledgeBaseRepository(session)
+        self._user_id = user_id or LEGACY_OWNER_ID
+        self._repository = KnowledgeBaseRepository(session, self._user_id)
         self._storage = storage
         self._streams = streams
         self._parser = parser
@@ -266,6 +269,7 @@ class KnowledgeBaseService:
                     uploaded_at=uploaded_at,
                     vector_error=None,
                     vector_status="PENDING",
+                    user_id=self._user_id,
                 )
             )
         await self._enqueue_vectorization(entity.id, content)
@@ -370,7 +374,10 @@ class KnowledgeBaseService:
 
     async def _delete_vectors(self, knowledge_base_id: int) -> None:
         async with self._sessions() as vector_session, vector_session.begin():
-            await KnowledgeBaseRepository(vector_session).delete_vectors(knowledge_base_id)
+            await KnowledgeBaseRepository(
+                vector_session,
+                self._user_id,
+            ).delete_vectors(knowledge_base_id)
 
     async def update_question_counts(
         self,

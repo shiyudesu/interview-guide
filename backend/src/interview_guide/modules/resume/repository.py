@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import cast
+from uuid import UUID
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,8 +26,9 @@ class ResumeListRow:
 
 
 class ResumeRepository:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, user_id: UUID) -> None:
         self._session = session
+        self._user_id = user_id
 
     async def list_rows(
         self,
@@ -50,7 +53,10 @@ class ResumeRepository:
                 InterviewSession.resume_id.label("resume_id"),
                 func.count(InterviewSession.id).label("interview_count"),
             )
-            .where(InterviewSession.resume_id.is_not(None))
+            .where(
+                InterviewSession.resume_id.is_not(None),
+                InterviewSession.user_id == self._user_id,
+            )
             .group_by(InterviewSession.resume_id)
             .subquery()
         )
@@ -66,6 +72,7 @@ class ResumeRepository:
                 (latest.c.resume_id == Resume.id) & (latest.c.row_number == 1),
             )
             .outerjoin(counts, counts.c.resume_id == Resume.id)
+            .where(Resume.user_id == self._user_id)
             .order_by(Resume.uploaded_at.desc())
         )
         if ids is not None:
@@ -86,13 +93,27 @@ class ResumeRepository:
         ]
 
     async def get(self, resume_id: int) -> Resume | None:
-        return await self._session.get(Resume, resume_id)
+        return cast(
+            Resume | None,
+            await self._session.scalar(
+                select(Resume).where(
+                    Resume.id == resume_id,
+                    Resume.user_id == self._user_id,
+                )
+            ),
+        )
 
     async def get_by_hash(self, file_hash: str) -> Resume | None:
-        result = await self._session.scalars(select(Resume).where(Resume.file_hash == file_hash))
+        result = await self._session.scalars(
+            select(Resume).where(
+                Resume.file_hash == file_hash,
+                Resume.user_id == self._user_id,
+            )
+        )
         return result.first()
 
     async def add(self, resume: Resume) -> Resume:
+        resume.user_id = self._user_id
         self._session.add(resume)
         await self._session.flush()
         return resume
@@ -108,7 +129,10 @@ class ResumeRepository:
     async def interviews(self, resume_id: int) -> list[InterviewSession]:
         result = await self._session.scalars(
             select(InterviewSession)
-            .where(InterviewSession.resume_id == resume_id)
+            .where(
+                InterviewSession.resume_id == resume_id,
+                InterviewSession.user_id == self._user_id,
+            )
             .order_by(InterviewSession.created_at.desc())
         )
         return list(result)
@@ -126,10 +150,16 @@ class ResumeRepository:
         return result.first()
 
     async def delete_graph(self, resume_id: int) -> None:
-        session_ids = select(InterviewSession.id).where(InterviewSession.resume_id == resume_id)
+        session_ids = select(InterviewSession.id).where(
+            InterviewSession.resume_id == resume_id,
+            InterviewSession.user_id == self._user_id,
+        )
         await self._session.execute(
             update(InterviewSession)
-            .where(InterviewSession.resume_id == resume_id)
+            .where(
+                InterviewSession.resume_id == resume_id,
+                InterviewSession.user_id == self._user_id,
+            )
             .values(current_question_id=None)
         )
         await self._session.execute(
@@ -143,9 +173,14 @@ class ResumeRepository:
             )
         )
         await self._session.execute(
-            delete(InterviewSession).where(InterviewSession.resume_id == resume_id)
+            delete(InterviewSession).where(
+                InterviewSession.resume_id == resume_id,
+                InterviewSession.user_id == self._user_id,
+            )
         )
         await self._session.execute(
             delete(ResumeAnalysis).where(ResumeAnalysis.resume_id == resume_id)
         )
-        await self._session.execute(delete(Resume).where(Resume.id == resume_id))
+        await self._session.execute(
+            delete(Resume).where(Resume.id == resume_id, Resume.user_id == self._user_id)
+        )

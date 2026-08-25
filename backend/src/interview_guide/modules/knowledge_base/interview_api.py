@@ -12,6 +12,7 @@ from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.redis.rate_limit import RateLimitDimension, RateLimitRule
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.interview.api import (
     ServiceDependency as InterviewServiceDependency,
 )
@@ -43,19 +44,25 @@ def generation_state(
     request: Request,
 ) -> QuestionGenerationStateService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    return QuestionGenerationStateService(infrastructure.database.sessions)
+    actor = current_actor(request)
+    return QuestionGenerationStateService(
+        infrastructure.database.sessions,
+        user_id=actor.user_id,
+    )
 
 
 async def question_service(
     request: Request,
 ) -> AsyncIterator[KnowledgeBaseQuestionService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     state = generation_state(request)
     async with infrastructure.database.sessions() as session:
         yield KnowledgeBaseQuestionService(
             session,
             state,
             QuestionGenStreamProducer(infrastructure.streams, state),
+            user_id=actor.user_id,
         )
 
 
@@ -207,9 +214,11 @@ async def create_knowledge_base_interview(
     interview: InterviewServiceDependency,
 ) -> Response:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     service = KnowledgeBaseInterviewService(
         infrastructure.database.sessions,
         interview,
+        user_id=actor.user_id,
     )
     return result_response(
         Result.ok(await service.create_session(payload)),
@@ -238,9 +247,11 @@ async def knowledge_base_interview_capacity(
             "系统繁忙，请稍后重试",
         )
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     service = KnowledgeBaseInterviewService(
         infrastructure.database.sessions,
         interview,
+        user_id=actor.user_id,
     )
     return result_response(
         Result.ok(

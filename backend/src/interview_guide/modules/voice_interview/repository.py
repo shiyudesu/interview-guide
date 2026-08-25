@@ -41,9 +41,11 @@ class VoiceInterviewRepository:
         self,
         sessions: async_sessionmaker[AsyncSession],
         now: Callable[[], datetime],
+        user_id: UUID | None = None,
     ) -> None:
         self._sessions = sessions
         self._now = now
+        self._user_id = user_id
 
     async def create_session(
         self,
@@ -64,11 +66,12 @@ class VoiceInterviewRepository:
     ) -> VoiceInterviewSession:
         timestamp = self._now()
         async with self._sessions() as session, session.begin():
-            interview_session_id = await session.scalar(
-                select(InterviewSession.id).where(
-                    InterviewSession.session_id == interview_session_public_id
-                )
+            statement = select(InterviewSession.id).where(
+                InterviewSession.session_id == interview_session_public_id
             )
+            if self._user_id is not None:
+                statement = statement.where(InterviewSession.user_id == self._user_id)
+            interview_session_id = await session.scalar(statement)
             if interview_session_id is None:
                 raise LookupError(f"核心面试会话不存在: {interview_session_public_id}")
             entity = VoiceInterviewSession(
@@ -95,7 +98,7 @@ class VoiceInterviewRepository:
                 status="IN_PROGRESS",
                 tech_enabled=tech_enabled,
                 updated_at=timestamp,
-                user_id=LEGACY_OWNER_ID,
+                user_id=self._user_id or LEGACY_OWNER_ID,
             )
             session.add(entity)
             await session.flush()
@@ -105,18 +108,21 @@ class VoiceInterviewRepository:
         if session_id is None:
             return None
         async with self._sessions() as session:
-            return await session.get(VoiceInterviewSession, session_id)
+            return await self._get_session(session, session_id)
 
     async def resume_text(self, resume_id: int | None) -> str | None:
         if resume_id is None:
             return None
         async with self._sessions() as session:
-            value = await session.scalar(select(Resume.resume_text).where(Resume.id == resume_id))
+            statement = select(Resume.resume_text).where(Resume.id == resume_id)
+            if self._user_id is not None:
+                statement = statement.where(Resume.user_id == self._user_id)
+            value = await session.scalar(statement)
             return str(value) if value is not None else None
 
     async def core_session_public_id(self, session_id: int) -> str | None:
         async with self._sessions() as session:
-            value = await session.scalar(
+            statement = (
                 select(InterviewSession.session_id)
                 .join(
                     VoiceInterviewSession,
@@ -124,6 +130,9 @@ class VoiceInterviewRepository:
                 )
                 .where(VoiceInterviewSession.id == session_id)
             )
+            if self._user_id is not None:
+                statement = statement.where(VoiceInterviewSession.user_id == self._user_id)
+            value = await session.scalar(statement)
             return str(value) if value is not None else None
 
     async def find_by_core_public_id(
@@ -131,21 +140,24 @@ class VoiceInterviewRepository:
         core_session_id: str,
     ) -> VoiceInterviewSession | None:
         async with self._sessions() as session:
+            statement = (
+                select(VoiceInterviewSession)
+                .join(
+                    InterviewSession,
+                    InterviewSession.id == VoiceInterviewSession.interview_session_id,
+                )
+                .where(InterviewSession.session_id == core_session_id)
+            )
+            if self._user_id is not None:
+                statement = statement.where(VoiceInterviewSession.user_id == self._user_id)
             return cast(
                 VoiceInterviewSession | None,
-                await session.scalar(
-                    select(VoiceInterviewSession)
-                    .join(
-                        InterviewSession,
-                        InterviewSession.id == VoiceInterviewSession.interview_session_id,
-                    )
-                    .where(InterviewSession.session_id == core_session_id)
-                ),
+                await session.scalar(statement),
             )
 
     async def core_evaluate_status(self, session_id: int) -> str | None:
         async with self._sessions() as session:
-            return await session.scalar(
+            statement = (
                 select(InterviewSession.evaluate_status)
                 .join(
                     VoiceInterviewSession,
@@ -153,6 +165,9 @@ class VoiceInterviewRepository:
                 )
                 .where(VoiceInterviewSession.id == session_id)
             )
+            if self._user_id is not None:
+                statement = statement.where(VoiceInterviewSession.user_id == self._user_id)
+            return await session.scalar(statement)
 
     async def list_sessions(
         self,
@@ -183,7 +198,7 @@ class VoiceInterviewRepository:
                         VoiceInterviewMessage.message_type != SUMMARY_MESSAGE_TYPE,
                     ),
                 )
-                .where(VoiceInterviewSession.user_id == user_id)
+                .where(VoiceInterviewSession.user_id == (self._user_id or user_id))
                 .group_by(
                     VoiceInterviewSession.id,
                     InterviewSession.evaluate_status,
@@ -214,7 +229,7 @@ class VoiceInterviewRepository:
 
     async def update_phase(self, session_id: int, phase: str) -> VoiceInterviewSession | None:
         async with self._sessions() as session, session.begin():
-            entity = await session.get(VoiceInterviewSession, session_id)
+            entity = await self._get_session(session, session_id)
             if entity is None:
                 return None
             entity.current_phase = phase
@@ -228,7 +243,7 @@ class VoiceInterviewRepository:
         only_if_in_progress: bool,
     ) -> VoiceInterviewSession | None:
         async with self._sessions() as session, session.begin():
-            entity = await session.get(VoiceInterviewSession, session_id)
+            entity = await self._get_session(session, session_id)
             if entity is None:
                 return None
             if only_if_in_progress and entity.status != "IN_PROGRESS":
@@ -247,7 +262,7 @@ class VoiceInterviewRepository:
 
     async def pause_session(self, session_id: int) -> VoiceInterviewSession | None:
         async with self._sessions() as session, session.begin():
-            entity = await session.get(VoiceInterviewSession, session_id)
+            entity = await self._get_session(session, session_id)
             if entity is None:
                 return None
             timestamp = self._now()
@@ -258,7 +273,7 @@ class VoiceInterviewRepository:
 
     async def resume_session(self, session_id: int) -> VoiceInterviewSession | None:
         async with self._sessions() as session, session.begin():
-            entity = await session.get(VoiceInterviewSession, session_id)
+            entity = await self._get_session(session, session_id)
             if entity is None:
                 return None
             timestamp = self._now()
@@ -269,6 +284,8 @@ class VoiceInterviewRepository:
 
     async def messages(self, session_id: int) -> list[VoiceInterviewMessage]:
         async with self._sessions() as session:
+            if await self._get_session(session, session_id) is None:
+                return []
             result = await session.scalars(
                 select(VoiceInterviewMessage)
                 .where(
@@ -281,6 +298,8 @@ class VoiceInterviewRepository:
 
     async def dialogue_count(self, session_id: int) -> int:
         async with self._sessions() as session:
+            if await self._get_session(session, session_id) is None:
+                return 0
             value = await session.scalar(
                 select(func.count(VoiceInterviewMessage.id)).where(
                     VoiceInterviewMessage.session_id == session_id,
@@ -307,7 +326,7 @@ class VoiceInterviewRepository:
                 )
                 if existing is not None:
                     return existing
-            voice_session = await session.get(VoiceInterviewSession, session_id)
+            voice_session = await self._get_session(session, session_id)
             if voice_session is None:
                 return None
             answer_attached = False
@@ -355,7 +374,7 @@ class VoiceInterviewRepository:
 
     async def delete_session(self, session_id: int) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await session.get(VoiceInterviewSession, session_id)
+            entity = await self._get_session(session, session_id)
             if entity is None:
                 return False
             await session.execute(
@@ -371,7 +390,7 @@ class VoiceInterviewRepository:
         error: str | None,
     ) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await session.get(VoiceInterviewSession, session_id)
+            entity = await self._get_session(session, session_id)
             if entity is None:
                 return False
             entity.evaluate_status = status
@@ -388,3 +407,13 @@ class VoiceInterviewRepository:
                 )
             )
             return list(result)
+
+    async def _get_session(
+        self,
+        session: AsyncSession,
+        session_id: int,
+    ) -> VoiceInterviewSession | None:
+        statement = select(VoiceInterviewSession).where(VoiceInterviewSession.id == session_id)
+        if self._user_id is not None:
+            statement = statement.where(VoiceInterviewSession.user_id == self._user_id)
+        return cast(VoiceInterviewSession | None, await session.scalar(statement))

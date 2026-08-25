@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 54
+    "testFileCount": 55
   },
   "tests": [
     {
@@ -567,6 +567,11 @@
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_s3_integration.py",
       "sha256": "7456fa5607ac5cc5e58e8c86d97a18a4f8a2df116c96f4f70e51d740eb0005a6"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/integration/test_tenant_isolation_integration.py",
+      "sha256": "d89e27a8bd6d2a42ae688dc2a2c15bac618fa034d41d340d79536e6ff6e6dd41"
     },
     {
       "disabledMarkers": 0,

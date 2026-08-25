@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from typing import cast
+from uuid import UUID
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,8 +24,9 @@ class StoredCategoryCount:
 
 
 class KnowledgeBaseQuestionRepository:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, user_id: UUID | None = None) -> None:
         self._session = session
+        self._user_id = user_id
 
     async def knowledge_base(
         self,
@@ -33,6 +35,8 @@ class KnowledgeBaseQuestionRepository:
         for_update: bool = False,
     ) -> KnowledgeBase | None:
         statement = select(KnowledgeBase).where(KnowledgeBase.id == knowledge_base_id)
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
         if for_update:
             statement = statement.with_for_update()
         return cast(KnowledgeBase | None, await self._session.scalar(statement))
@@ -41,16 +45,17 @@ class KnowledgeBaseQuestionRepository:
         self,
         question_id: int,
     ) -> QuestionRow | None:
-        row = (
-            await self._session.execute(
-                select(KnowledgeBaseQuestion, KnowledgeBase.name)
-                .outerjoin(
-                    KnowledgeBase,
-                    KnowledgeBase.id == KnowledgeBaseQuestion.knowledge_base_id,
-                )
-                .where(KnowledgeBaseQuestion.id == question_id)
+        statement = (
+            select(KnowledgeBaseQuestion, KnowledgeBase.name)
+            .join(
+                KnowledgeBase,
+                KnowledgeBase.id == KnowledgeBaseQuestion.knowledge_base_id,
             )
-        ).first()
+            .where(KnowledgeBaseQuestion.id == question_id)
+        )
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
+        row = (await self._session.execute(statement)).first()
         return QuestionRow(row[0], row[1]) if row is not None else None
 
     async def list_questions(
@@ -60,12 +65,14 @@ class KnowledgeBaseQuestionRepository:
     ) -> list[QuestionRow]:
         statement = (
             select(KnowledgeBaseQuestion, KnowledgeBase.name)
-            .outerjoin(
+            .join(
                 KnowledgeBase,
                 KnowledgeBase.id == KnowledgeBaseQuestion.knowledge_base_id,
             )
             .where(KnowledgeBaseQuestion.knowledge_base_id == knowledge_base_id)
         )
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
         if status is not None:
             statement = statement.where(KnowledgeBaseQuestion.status == status)
         rows = await self._session.execute(
@@ -74,11 +81,12 @@ class KnowledgeBaseQuestionRepository:
         return [QuestionRow(row[0], row[1]) for row in rows]
 
     async def categories(self, knowledge_base_id: int) -> list[StoredCategoryCount]:
-        rows = await self._session.execute(
+        statement = (
             select(
                 KnowledgeBaseQuestion.category,
                 func.count(KnowledgeBaseQuestion.id),
             )
+            .join(KnowledgeBase, KnowledgeBase.id == KnowledgeBaseQuestion.knowledge_base_id)
             .where(
                 KnowledgeBaseQuestion.knowledge_base_id == knowledge_base_id,
                 KnowledgeBaseQuestion.category.is_not(None),
@@ -90,6 +98,9 @@ class KnowledgeBaseQuestionRepository:
                 KnowledgeBaseQuestion.category.asc(),
             )
         )
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
+        rows = await self._session.execute(statement)
         return [
             StoredCategoryCount(str(category), int(count))
             for category, count in rows
@@ -102,11 +113,17 @@ class KnowledgeBaseQuestionRepository:
         difficulty: str,
         category: str | None,
     ) -> list[KnowledgeBaseQuestion]:
-        statement = select(KnowledgeBaseQuestion).where(
-            KnowledgeBaseQuestion.knowledge_base_id == knowledge_base_id,
-            KnowledgeBaseQuestion.difficulty == difficulty,
-            KnowledgeBaseQuestion.status == "ACTIVE",
+        statement = (
+            select(KnowledgeBaseQuestion)
+            .join(KnowledgeBase, KnowledgeBase.id == KnowledgeBaseQuestion.knowledge_base_id)
+            .where(
+                KnowledgeBaseQuestion.knowledge_base_id == knowledge_base_id,
+                KnowledgeBaseQuestion.difficulty == difficulty,
+                KnowledgeBaseQuestion.status == "ACTIVE",
+            )
         )
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
         if category is not None:
             statement = statement.where(KnowledgeBaseQuestion.category == category)
         result = await self._session.scalars(
@@ -120,8 +137,9 @@ class KnowledgeBaseQuestionRepository:
         difficulty: str,
         limit: int = 20,
     ) -> list[KnowledgeBaseQuestion]:
-        result = await self._session.scalars(
+        statement = (
             select(KnowledgeBaseQuestion)
+            .join(KnowledgeBase, KnowledgeBase.id == KnowledgeBaseQuestion.knowledge_base_id)
             .where(
                 KnowledgeBaseQuestion.knowledge_base_id == knowledge_base_id,
                 KnowledgeBaseQuestion.difficulty == difficulty,
@@ -129,6 +147,9 @@ class KnowledgeBaseQuestionRepository:
             .order_by(KnowledgeBaseQuestion.updated_at.desc())
             .limit(limit)
         )
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
+        result = await self._session.scalars(statement)
         return list(result)
 
     async def stale_generation_tasks(
@@ -136,15 +157,16 @@ class KnowledgeBaseQuestionRepository:
         status: str,
         threshold: datetime,
     ) -> list[tuple[int, str | None]]:
-        rows = await self._session.execute(
-            select(KnowledgeBase.id, KnowledgeBase.question_gen_task_id).where(
-                KnowledgeBase.question_gen_status == status,
-                (
-                    KnowledgeBase.question_gen_updated_at.is_(None)
-                    | (KnowledgeBase.question_gen_updated_at < threshold)
-                ),
-            )
+        statement = select(KnowledgeBase.id, KnowledgeBase.question_gen_task_id).where(
+            KnowledgeBase.question_gen_status == status,
+            (
+                KnowledgeBase.question_gen_updated_at.is_(None)
+                | (KnowledgeBase.question_gen_updated_at < threshold)
+            ),
         )
+        if self._user_id is not None:
+            statement = statement.where(KnowledgeBase.user_id == self._user_id)
+        rows = await self._session.execute(statement)
         return [(int(knowledge_base_id), task_id) for knowledge_base_id, task_id in rows]
 
     async def add(self, question: KnowledgeBaseQuestion) -> KnowledgeBaseQuestion:

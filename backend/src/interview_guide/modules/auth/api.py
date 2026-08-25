@@ -10,6 +10,7 @@ from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES
 from interview_guide.common.config.settings import Settings
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
+from interview_guide.modules.auth.dependencies import current_actor, current_session
 from interview_guide.modules.auth.domain import Actor
 from interview_guide.modules.auth.middleware import request_origin_allowed
 from interview_guide.modules.auth.models import (
@@ -27,20 +28,6 @@ router = APIRouter(prefix="/api/auth", responses=STANDARD_ERROR_RESPONSES)
 def auth_service(request: Request) -> AuthService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     return infrastructure.auth_runtime.service
-
-
-def current_actor(request: Request) -> Actor:
-    actor = getattr(request.state, "actor", None)
-    if not isinstance(actor, Actor):
-        raise BusinessException(ErrorCode.AUTH_SESSION_INVALID)
-    return actor
-
-
-def current_session(request: Request) -> AuthSession:
-    session = getattr(request.state, "auth_session", None)
-    if not isinstance(session, AuthSession):
-        raise BusinessException(ErrorCode.AUTH_SESSION_INVALID)
-    return session
 
 
 ServiceDependency = Annotated[AuthService, Depends(auth_service)]

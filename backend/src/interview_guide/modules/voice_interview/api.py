@@ -13,6 +13,7 @@ from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.interview.api import build_interview_service
 from interview_guide.modules.voice_interview.models import (
     CreateVoiceSessionRequest,
@@ -31,25 +32,30 @@ def build_service(
     infrastructure: RuntimeInfrastructure,
     settings: Settings,
     metrics: ApplicationMetrics | None = None,
+    user_id: UUID | None = None,
 ) -> VoiceInterviewService:
     repository = VoiceInterviewRepository(
         infrastructure.database.sessions,
         datetime.now,
+        user_id=user_id,
     )
     return VoiceInterviewService(
         repository,
         infrastructure.redis.client,
-        build_interview_service(infrastructure, settings, metrics),
+        build_interview_service(infrastructure, settings, metrics, user_id),
         datetime.now,
+        user_id,
     )
 
 
 async def service_dependency(request: Request) -> VoiceInterviewService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     return build_service(
         infrastructure,
         request.app.state.settings,
         request.app.state.metrics,
+        actor.user_id,
     )
 
 
