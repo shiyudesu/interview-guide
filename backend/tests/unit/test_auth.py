@@ -85,9 +85,9 @@ def test_email_and_password_validation_use_unicode_character_semantics() -> None
     assert normalized_email(" User@Example.COM ") == "user@example.com"
     with pytest.raises(ValueError, match="邮箱格式无效"):
         normalized_email("invalid")
-    validate_password_length("密码安全长度十二个字符以上")
-    with pytest.raises(ValueError, match="至少需要 12"):
-        validate_password_length("too-short")
+    validate_password_length("密码安全六字符")
+    with pytest.raises(ValueError, match="至少需要 6"):
+        validate_password_length("short")
 
 
 def test_open_registration_requires_https_email_delivery() -> None:

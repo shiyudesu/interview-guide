@@ -57,7 +57,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <h2 className="font-semibold text-slate-900 dark:text-white">注册新账号</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">密码至少 12 个字符</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">密码至少 6 个字符</p>
             </div>
           </div>
 
@@ -79,11 +79,11 @@ export default function RegisterPage() {
             </label>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">密码</span>
-              <input type="password" minLength={12} maxLength={128} required value={password} onChange={event => setPassword(event.target.value)} disabled={!registrationEnabled} autoComplete="new-password" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+              <input type="password" minLength={6} maxLength={128} required value={password} onChange={event => setPassword(event.target.value)} disabled={!registrationEnabled} autoComplete="new-password" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
             </label>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">确认密码</span>
-              <input type="password" minLength={12} maxLength={128} required value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} disabled={!registrationEnabled} autoComplete="new-password" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+              <input type="password" minLength={6} maxLength={128} required value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} disabled={!registrationEnabled} autoComplete="new-password" className="w-full rounded-xl border border-slate-200 px-3.5 py-3 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
             </label>
           </div>
 

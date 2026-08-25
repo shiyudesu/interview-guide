@@ -123,7 +123,7 @@ def normalized_email(value: str) -> str:
 
 
 def validate_password_length(value: str) -> None:
-    if len(value) < 12:
-        raise ValueError("密码至少需要 12 个字符")
+    if len(value) < 6:
+        raise ValueError("密码至少需要 6 个字符")
     if len(value) > 128:
         raise ValueError("密码不能超过 128 个字符")
