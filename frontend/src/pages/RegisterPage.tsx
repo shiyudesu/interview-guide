@@ -28,7 +28,7 @@ export default function RegisterPage() {
         replace: true,
         state: {
           message: result.verificationRequired
-            ? `验证邮件已发送至 ${result.email}，请完成验证后登录`
+            ? `验证邮件已发送至 ${result.email}，请完成验证后登录。如果收件箱中没有看到邮件，请检查垃圾邮件。`
             : '账号创建成功，请登录',
         },
       });

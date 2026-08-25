@@ -55,7 +55,6 @@ export default function LoginPage() {
             </div>
             <div>
               <h2 className="font-semibold text-slate-900 dark:text-white">账号登录</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Session 保存在安全的 HttpOnly Cookie 中</p>
             </div>
           </div>
 
@@ -83,7 +82,7 @@ export default function LoginPage() {
                   重新发送验证邮件
                 </button>
               )}
-              {verificationSent && <p className="mt-2 text-emerald-700">如果账号处于待验证状态，邮件已重新发送。</p>}
+              {verificationSent && <p className="mt-2 text-emerald-700">如果账号处于待验证状态，邮件已重新发送；如果收件箱中没有，请检查垃圾邮件。</p>}
             </div>
           )}
 

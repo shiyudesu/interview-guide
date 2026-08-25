@@ -10,12 +10,12 @@ const USER = {
 };
 const CSRF_TOKEN = 'csrf-test-token';
 
-async function installAuthRoutes(page: Page) {
+async function installAuthRoutes(page: Page, registrationEnabled = false) {
   let authenticated = false;
 
   await page.route('**/api/auth/config', route => route.fulfill({
     contentType: 'application/json',
-    body: JSON.stringify({ authEnabled: true, registrationEnabled: false }),
+    body: JSON.stringify({ authEnabled: true, registrationEnabled }),
   }));
   await page.route('**/api/auth/me', route => {
     if (!authenticated) {
@@ -72,6 +72,30 @@ test.describe('账号与路由保护', () => {
 
     await expect(page.getByText('当前未开放自助注册，请联系管理员创建账号。')).toBeVisible();
     await expect(page.getByRole('button', { name: '注册并继续' })).toBeDisabled();
+  });
+
+  test('注册成功提示检查垃圾邮件且不展示技术 Cookie 文案', async ({ page }) => {
+    await installAuthRoutes(page, true);
+    await page.route('**/api/auth/register', async route => {
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          email: USER.email,
+          verificationRequired: true,
+        }),
+      });
+    });
+
+    await page.goto('/register');
+    await page.getByLabel('邮箱').fill(USER.email);
+    await page.getByLabel('密码', { exact: true }).fill('correct horse battery staple');
+    await page.getByLabel('确认密码').fill('correct horse battery staple');
+    await page.getByRole('button', { name: '注册并继续' }).click();
+
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByText(/如果收件箱中没有看到邮件，请检查垃圾邮件/)).toBeVisible();
+    await expect(page.getByText(/HttpOnly/i)).toHaveCount(0);
   });
 
   test('邮箱验证和密码找回页面完成公开账号流程', async ({ page }) => {
