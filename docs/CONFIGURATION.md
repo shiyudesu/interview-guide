@@ -149,21 +149,23 @@ APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS=192.168.10.0/24
 - 修改已有 Provider Base URL 或语音 WebSocket URL 时必须同时填写新 API Key，防止把已保存 Key
   发送到新地址。
 
-内置 Provider 只有百炼：
+每个用户的内置 Provider 只有百炼：
 
 | Provider | Base URL | 默认聊天模型 | 默认向量模型 |
 | --- | --- | --- | --- |
 | 百炼 | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3.7-max` | `qwen3.7-text-embedding` |
 
 初始 API Key 为空，请在前端设置页录入。Kimi、DeepSeek、GLM、LM Studio 和其他 OpenAI
-兼容服务均通过“新增 Provider”添加，不再由环境变量初始化。
+兼容服务均通过“新增 Provider”添加，不再由环境变量初始化。Provider 使用内部 UUID 作为数据库
+主键，以 `(user_id, alias)` 唯一，因此不同用户可以拥有同名 Provider。
 
 设置页会自动调用 Provider 的 OpenAI 兼容模型列表接口。后端先请求
 `{baseUrl}/models`；当 Base URL 没有版本后缀时，还会尝试 `{baseUrl}/v1/models`。
 拉取结果写入 `llm:provider:models:*`，TTL 为 5 分钟；设置页的“刷新列表”会跳过缓存重新请求。
 
-编辑已有 Provider 时使用数据库中加密保存的 API Key。新建 Provider 时，填写 Base URL 和
-API Key 后即可自动拉取。API Key 只发送给本系统后端，不会由浏览器直接请求厂商接口。
+编辑已有 Provider 时使用当前用户数据库中加密保存的 API Key。新建 Provider 时，填写 Base URL
+和 API Key 后即可自动拉取。API Key 只发送给本系统后端，不会由浏览器直接请求厂商接口，也不会
+回退到平台或其他用户配置。
 
 并非所有 OpenAI 兼容 Provider 都实现模型列表接口。请求失败时，接口会明确返回警告并仅展示
 当前已配置模型；模型输入框始终允许手工填写。模型列表只能说明账号可见的模型 ID，不能替代

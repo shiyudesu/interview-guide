@@ -19,7 +19,7 @@ from interview_guide.common.ai.prompts import (
     PromptRepository,
     PromptSanitizer,
 )
-from interview_guide.common.ai.providers import LlmProviderRegistry
+from interview_guide.common.ai.providers import ProviderRegistry
 from interview_guide.common.ai.skills import Skill, SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker, structured_output_format
 from interview_guide.common.errors import BusinessException, ErrorCode
@@ -500,7 +500,7 @@ class InterviewSkillLibrary:
 class InterviewQuestionService:
     def __init__(
         self,
-        registry: LlmProviderRegistry,
+        registry: ProviderRegistry,
         structured: StructuredOutputInvoker,
         prompts: PromptRepository,
         sanitizer: PromptSanitizer,
@@ -903,7 +903,7 @@ class InterviewQuestionService:
 class JdParseService:
     def __init__(
         self,
-        registry: LlmProviderRegistry,
+        registry: ProviderRegistry,
         structured: StructuredOutputInvoker,
         prompts: PromptRepository,
         sanitizer: PromptSanitizer,

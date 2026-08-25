@@ -77,9 +77,7 @@ async def cleanup_users(database: Database, user_ids: list[UUID]) -> None:
         )
         rag_ids = select(RagChatSession.id).where(RagChatSession.user_id.in_(user_ids))
         resume_ids = select(Resume.id).where(Resume.user_id.in_(user_ids))
-        knowledge_base_ids = select(KnowledgeBase.id).where(
-            KnowledgeBase.user_id.in_(user_ids)
-        )
+        knowledge_base_ids = select(KnowledgeBase.id).where(KnowledgeBase.user_id.in_(user_ids))
         await session.execute(
             delete(VoiceInterviewMessage).where(VoiceInterviewMessage.session_id.in_(voice_ids))
         )
@@ -105,9 +103,7 @@ async def cleanup_users(database: Database, user_ids: list[UUID]) -> None:
             delete(InterviewSession).where(InterviewSession.user_id.in_(user_ids))
         )
         await session.execute(
-            delete(RagSessionKnowledgeBase).where(
-                RagSessionKnowledgeBase.session_id.in_(rag_ids)
-            )
+            delete(RagSessionKnowledgeBase).where(RagSessionKnowledgeBase.session_id.in_(rag_ids))
         )
         await session.execute(delete(RagChatMessage).where(RagChatMessage.session_id.in_(rag_ids)))
         await session.execute(delete(RagChatSession).where(RagChatSession.user_id.in_(user_ids)))

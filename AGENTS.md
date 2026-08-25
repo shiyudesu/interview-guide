@@ -7,8 +7,9 @@
 
 多租户账号和用户自带 API Key 正在按 `docs/MULTI_TENANT_BYOK_PLAN.md` 分阶段实施。当前已经具备
 Provider 出站防护、账号/Session/CSRF、管理员 CLI、`legacy-owner` 兼容迁移，以及简历、日程、
-面试、知识库、题库、RAG 和语音的 Repository 级所有权校验；用户级 Provider、用户级文件去重与
-对象 key、异步任务 Provider 归属、前端登录和开放注册仍未完成。
+面试、知识库、题库、RAG 和语音的 Repository 级所有权校验、用户级 Provider、默认模型/语音
+配置及 AAD Key 加密。用户级文件去重与对象 key、异步任务 Provider 归属、前端登录和开放注册
+仍未完成。
 `APP_AUTH_REGISTRATION_ENABLED` 必须保持关闭，直到计划中的全部双用户隔离门禁通过。
 
 目录：
@@ -63,7 +64,8 @@ docker-compose.test.yml CI/集成测试回环端口覆盖
 - 四组 Stream 每组内部顺序消费，失败时先重投或写失败状态，再 ACK。
 - 文字和语音面试统一写入 `interview:evaluate:stream`。
 - 限流 key 使用业务 scope，不使用 Controller 或方法类名。
-- 所有模型客户端由 `LlmProviderRegistry` 和统一 LLM Adapter 提供。
+- 所有模型客户端由用户作用域 `ScopedProviderRegistry` 和统一 LLM Adapter 提供；Worker 必须先
+  根据资源所有者取得用户作用域，不能使用全局或 legacy Provider 回退。
 - 普通面试外部题库只允许通过 `tools/scripts/reference_sources.py` 离线采集，生产请求链路不得
   调用外部题库；运行时只读取已审核并提交的 Skill reference。
 - 外部来源必须登记在 `tools/reference_sources/catalog.json`，新增或修改 reference 时同步更新

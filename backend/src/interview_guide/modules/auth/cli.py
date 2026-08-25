@@ -38,7 +38,7 @@ async def create_admin(email: str, display_name: str | None, password: str) -> N
     database = Database(settings)
     executor = BlockingExecutor(settings.blocking_worker_count)
     try:
-        repository = AuthRepository(database.sessions)
+        repository = AuthRepository(database.sessions, settings)
         existing = await repository.get_user_by_email(email)
         if existing is not None:
             raise SystemExit(f"用户已存在: {email}")
@@ -72,7 +72,7 @@ async def claim_legacy_data(email: str) -> None:
     settings = get_settings()
     database = Database(settings)
     try:
-        repository = AuthRepository(database.sessions)
+        repository = AuthRepository(database.sessions, settings)
         user = await repository.get_user_by_email(email)
         if user is None or user.kind != "HUMAN" or user.role != "ADMIN":
             raise SystemExit(f"管理员不存在: {email}")

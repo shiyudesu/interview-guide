@@ -44,9 +44,7 @@ class KnowledgeBaseRepository:
         return cast(
             KnowledgeBase | None,
             await self._session.scalar(
-                self._owned(
-                    select(KnowledgeBase).where(KnowledgeBase.id == knowledge_base_id)
-                )
+                self._owned(select(KnowledgeBase).where(KnowledgeBase.id == knowledge_base_id))
             ),
         )
 
@@ -54,9 +52,7 @@ class KnowledgeBaseRepository:
         return cast(
             KnowledgeBase | None,
             await self._session.scalar(
-                self._owned(
-                    select(KnowledgeBase).where(KnowledgeBase.file_hash == file_hash)
-                )
+                self._owned(select(KnowledgeBase).where(KnowledgeBase.file_hash == file_hash))
             ),
         )
 
@@ -100,13 +96,13 @@ class KnowledgeBaseRepository:
         result = await self._session.scalars(
             self._owned(
                 select(KnowledgeBase)
-            .where(
-                or_(
-                    func.lower(KnowledgeBase.name).like(value),
-                    func.lower(KnowledgeBase.original_filename).like(value),
+                .where(
+                    or_(
+                        func.lower(KnowledgeBase.name).like(value),
+                        func.lower(KnowledgeBase.original_filename).like(value),
+                    )
                 )
-            )
-            .order_by(KnowledgeBase.uploaded_at.desc())
+                .order_by(KnowledgeBase.uploaded_at.desc())
             )
         )
         return list(result)
@@ -136,9 +132,7 @@ class KnowledgeBaseRepository:
         if self._user_id is not None:
             total_statement = total_statement.where(KnowledgeBase.user_id == self._user_id)
             access_statement = access_statement.where(KnowledgeBase.user_id == self._user_id)
-            completed_statement = completed_statement.where(
-                KnowledgeBase.user_id == self._user_id
-            )
+            completed_statement = completed_statement.where(KnowledgeBase.user_id == self._user_id)
             processing_statement = processing_statement.where(
                 KnowledgeBase.user_id == self._user_id
             )
@@ -150,13 +144,9 @@ class KnowledgeBaseRepository:
             .where(RagChatMessage.type == "USER")
         )
         if self._user_id is not None:
-            message_statement = message_statement.where(
-                RagChatSession.user_id == self._user_id
-            )
+            message_statement = message_statement.where(RagChatSession.user_id == self._user_id)
         user_messages = await self._session.scalar(message_statement)
-        access = await self._session.scalar(
-            access_statement
-        )
+        access = await self._session.scalar(access_statement)
         completed = await self._session.scalar(completed_statement)
         processing = await self._session.scalar(processing_statement)
         return KnowledgeBaseStatistics(
@@ -238,9 +228,7 @@ class KnowledgeBaseRepository:
         unique_ids = list(dict.fromkeys(knowledge_base_ids))
         rows = await self._session.execute(
             self._owned(
-                select(KnowledgeBase.id, KnowledgeBase.name).where(
-                    KnowledgeBase.id.in_(unique_ids)
-                )
+                select(KnowledgeBase.id, KnowledgeBase.name).where(KnowledgeBase.id.in_(unique_ids))
             )
         )
         names = {int(knowledge_base_id): name for knowledge_base_id, name in rows}

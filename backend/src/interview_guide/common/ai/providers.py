@@ -5,6 +5,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Protocol
 
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
@@ -32,6 +33,21 @@ DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 DASHSCOPE_CHAT_MODEL = "qwen3.7-max"
 DASHSCOPE_EMBEDDING_MODEL = "qwen3.7-text-embedding"
 DASHSCOPE_EMBEDDING_DIMENSIONS = 1024
+
+
+class ProviderRegistry(Protocol):
+    async def get_chat(self, provider_id: str | None = None) -> ProviderConfig: ...
+
+    async def get_embedding(
+        self,
+        provider_id: str | None = None,
+    ) -> ProviderConfig: ...
+
+    async def get_voice(self, provider_id: str) -> ProviderConfig: ...
+
+    async def publish_change(self) -> int: ...
+
+    async def reload(self) -> None: ...
 
 
 @dataclass(frozen=True)

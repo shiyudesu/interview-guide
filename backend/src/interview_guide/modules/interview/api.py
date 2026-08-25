@@ -15,6 +15,7 @@ from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.config.settings import Settings
+from interview_guide.common.db.models import LEGACY_OWNER_ID
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.metrics import ApplicationMetrics
 from interview_guide.common.redis.rate_limit import (
@@ -59,6 +60,7 @@ def build_interview_service(
     metrics: ApplicationMetrics | None = None,
     user_id: uuid.UUID | None = None,
 ) -> InterviewService:
+    registry = infrastructure.provider_resolver.for_user(user_id or LEGACY_OWNER_ID)
     repository = InterviewRepository(
         infrastructure.database.sessions,
         now=datetime.now,
@@ -66,7 +68,7 @@ def build_interview_service(
     )
     structured = StructuredOutputInvoker(infrastructure.llm_adapter)
     questions = InterviewQuestionService(
-        infrastructure.provider_registry,
+        registry,
         structured,
         PROMPTS,
         infrastructure.prompt_sanitizer,
@@ -85,7 +87,7 @@ def build_interview_service(
         infrastructure.streams,
         questions,
         decisions,
-        infrastructure.provider_registry,
+        registry,
         infrastructure.blocking_executor,
         follow_up_count=settings.interview_follow_up_count,
         turn_lease_seconds=settings.interview_turn_lease_seconds,

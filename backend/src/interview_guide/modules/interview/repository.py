@@ -129,10 +129,10 @@ class InterviewRepository:
     ) -> SessionAggregate | None:
         async with self._sessions() as session:
             statement = select(InterviewSession.session_id).where(
-                    InterviewSession.resume_id == resume_id,
-                    InterviewSession.channel == channel.value,
-                    InterviewSession.status.in_(("CREATED", "IN_PROGRESS")),
-                )
+                InterviewSession.resume_id == resume_id,
+                InterviewSession.channel == channel.value,
+                InterviewSession.status.in_(("CREATED", "IN_PROGRESS")),
+            )
             public_id = await session.scalar(
                 self._owned_session_statement(statement)
                 .order_by(InterviewSession.created_at.desc())
@@ -237,11 +237,8 @@ class InterviewRepository:
                 InterviewSession | None,
                 await session.scalar(
                     self._owned_session_statement(
-                        select(InterviewSession).where(
-                            InterviewSession.session_id == session_id
-                        )
-                    )
-                    .with_for_update()
+                        select(InterviewSession).where(InterviewSession.session_id == session_id)
+                    ).with_for_update()
                 ),
             )
             if entity is None:
@@ -353,11 +350,8 @@ class InterviewRepository:
                 InterviewSession | None,
                 await session.scalar(
                     self._owned_session_statement(
-                        select(InterviewSession).where(
-                            InterviewSession.session_id == session_id
-                        )
-                    )
-                    .with_for_update()
+                        select(InterviewSession).where(InterviewSession.session_id == session_id)
+                    ).with_for_update()
                 ),
             )
             if entity is None:
@@ -489,11 +483,8 @@ class InterviewRepository:
                 InterviewSession | None,
                 await session.scalar(
                     self._owned_session_statement(
-                        select(InterviewSession).where(
-                            InterviewSession.session_id == session_id
-                        )
-                    )
-                    .with_for_update()
+                        select(InterviewSession).where(InterviewSession.session_id == session_id)
+                    ).with_for_update()
                 ),
             )
             if entity is None:

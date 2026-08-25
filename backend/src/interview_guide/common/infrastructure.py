@@ -10,11 +10,15 @@ from interview_guide.common.ai.encryption import (
 from interview_guide.common.ai.outbound import ProviderOutboundPolicy
 from interview_guide.common.ai.prompts import PromptSanitizer
 from interview_guide.common.ai.providers import (
-    LlmProviderRegistry,
     ProviderRepository,
     provider_now,
 )
+from interview_guide.common.ai.user_providers import (
+    UserLlmProviderResolver,
+    UserProviderRepository,
+)
 from interview_guide.common.config.settings import Settings
+from interview_guide.common.db.models import LEGACY_OWNER_ID
 from interview_guide.common.db.session import Database
 from interview_guide.common.redis import RedisConnection
 from interview_guide.common.redis.rate_limit import RateLimiter
@@ -52,23 +56,28 @@ class RuntimeInfrastructure:
             settings,
         )
         encryption = ApiKeyEncryption(resolve_configured_key(settings))
-        repository = ProviderRepository(self.database.sessions)
-        self.provider_repository = repository
+        legacy_repository = ProviderRepository(self.database.sessions)
+        self.legacy_provider_repository = legacy_repository
+        self.provider_repository = UserProviderRepository(
+            self.database.sessions,
+            LEGACY_OWNER_ID,
+        )
         self._settings = settings
         self.provider_outbound_policy = ProviderOutboundPolicy.from_settings(
             settings,
             self.blocking_executor,
         )
-        self.provider_registry = LlmProviderRegistry(
-            repository,
+        self.provider_resolver = UserLlmProviderResolver(
+            self.database.sessions,
             encryption,
             self.redis.client,
             settings,
         )
+        self.provider_registry = self.provider_resolver.for_user(LEGACY_OWNER_ID)
         self.llm_adapter = LlmAdapter(self.provider_outbound_policy)
         self.prompt_sanitizer = PromptSanitizer()
         self.voice_config = VoiceConfigService(
-            repository,
+            self.provider_repository,
             self.provider_registry,
             encryption,
             self.provider_outbound_policy,
@@ -88,17 +97,18 @@ class RuntimeInfrastructure:
         await self.redis.start()
         await self.rate_limiter.start()
         await self.storage.start()
-        await self.provider_repository.bootstrap(
+        await self.legacy_provider_repository.bootstrap(
             self._settings,
             self.api_key_encryption,
             now=provider_now,
         )
-        await self.provider_registry.start()
+        await self.provider_repository.ensure_defaults(self._settings, provider_now())
+        await self.provider_resolver.start()
         self._started = True
 
     async def close(self) -> None:
         if self._started:
-            await self.provider_registry.close()
+            await self.provider_resolver.close()
         await self.llm_adapter.close()
         await self.redis.close()
         await self.database.close()

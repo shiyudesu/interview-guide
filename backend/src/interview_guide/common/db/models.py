@@ -605,6 +605,111 @@ class VoiceModelConfig(Base):
     updated_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
 
 
+class UserLlmProviderConfig(Base):
+    __tablename__ = "user_llm_providers"
+    __table_args__ = (
+        UniqueConstraint("user_id", "alias", name="uq_user_llm_providers_alias"),
+        Index("idx_user_llm_providers_user_id", "user_id"),
+    )
+
+    id: Mapped[PythonUUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_user_llm_providers_user", ondelete="CASCADE"),
+        nullable=False,
+    )
+    alias: Mapped[str] = mapped_column(String(64), nullable=False)
+    api_key_ciphertext: Mapped[str | None] = mapped_column(String(4096))
+    api_key_nonce: Mapped[str | None] = mapped_column(String(64))
+    encryption_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    base_url: Mapped[str] = mapped_column(String(512), nullable=False)
+    builtin: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    embedding_dimensions: Mapped[int | None] = mapped_column(Integer)
+    embedding_model: Mapped[str | None] = mapped_column(String(128))
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    model: Mapped[str] = mapped_column(String(128), nullable=False)
+    supports_embedding: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    temperature: Mapped[float | None] = mapped_column(DOUBLE_PRECISION)
+    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+
+
+class UserAiSetting(Base):
+    __tablename__ = "user_ai_settings"
+
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_user_ai_settings_user", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    default_chat_provider_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "user_llm_providers.id",
+            name="fk_user_ai_settings_chat_provider",
+        ),
+        nullable=False,
+    )
+    default_embedding_provider_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "user_llm_providers.id",
+            name="fk_user_ai_settings_embedding_provider",
+        ),
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+
+
+class UserVoiceSetting(Base):
+    __tablename__ = "user_voice_settings"
+
+    user_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", name="fk_user_voice_settings_user", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    asr_provider_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "user_llm_providers.id",
+            name="fk_user_voice_settings_asr_provider",
+        ),
+        nullable=False,
+    )
+    asr_url: Mapped[str] = mapped_column(String(512), nullable=False)
+    asr_model: Mapped[str] = mapped_column(String(128), nullable=False)
+    asr_language: Mapped[str] = mapped_column(String(32), nullable=False)
+    asr_format: Mapped[str] = mapped_column(String(32), nullable=False)
+    asr_sample_rate: Mapped[int] = mapped_column(Integer, nullable=False)
+    asr_enable_turn_detection: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    asr_turn_detection_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    asr_turn_detection_threshold: Mapped[float] = mapped_column(
+        DOUBLE_PRECISION,
+        nullable=False,
+    )
+    asr_silence_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    tts_provider_id: Mapped[PythonUUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "user_llm_providers.id",
+            name="fk_user_voice_settings_tts_provider",
+        ),
+        nullable=False,
+    )
+    tts_url: Mapped[str] = mapped_column(String(512), nullable=False)
+    tts_model: Mapped[str] = mapped_column(String(128), nullable=False)
+    tts_voice: Mapped[str] = mapped_column(String(128), nullable=False)
+    tts_format: Mapped[str] = mapped_column(String(32), nullable=False)
+    tts_sample_rate: Mapped[int] = mapped_column(Integer, nullable=False)
+    tts_mode: Mapped[str] = mapped_column(String(32), nullable=False)
+    tts_language_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    tts_speech_rate: Mapped[float] = mapped_column(DOUBLE_PRECISION, nullable=False)
+    tts_volume: Mapped[int] = mapped_column(Integer, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP_6, nullable=False)
+
+
 class RagChatSession(Base):
     __tablename__ = "rag_chat_sessions"
     __table_args__ = (

@@ -12,7 +12,7 @@
       "name": "PROVIDER_VERSION_KEY",
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 26
+        "line": 27
       },
       "valueExpression": "\"llm:provider:config:version\""
     },
@@ -20,7 +20,7 @@
       "name": "PROVIDER_BOOTSTRAP_LOCK",
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 28
+        "line": 29
       },
       "valueExpression": "0x49475F50524F5644"
     },
@@ -252,7 +252,7 @@
       "name": "MODEL_LIST_CACHE_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 34
+        "line": 36
       },
       "valueExpression": "\"llm:provider:models:\""
     },
@@ -260,7 +260,7 @@
       "name": "MODEL_LIST_CACHE_TTL_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 35
+        "line": 37
       },
       "valueExpression": "300"
     },
@@ -285,16 +285,30 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 26
+        "line": 27
       },
       "value": "llm:provider:config:version"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/providers.py",
-        "line": 27
+        "line": 28
       },
       "value": "llm:provider:config:changed"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/common/ai/user_providers.py",
+        "line": 321
+      },
+      "value": "{user_id}:{version}"
+    },
+    {
+      "source": {
+        "file": "backend/src/interview_guide/common/ai/user_providers.py",
+        "line": 420
+      },
+      "value": "provider-key:v{version}:{user_id}:{provider_id}"
     },
     {
       "source": {
@@ -376,14 +390,14 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 152
+        "line": 154
       },
       "value": "interview:create"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 197
+        "line": 199
       },
       "value": "interview:submit-turn"
     },
@@ -432,21 +446,21 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 120
+        "line": 121
       },
       "value": "data:{line}\\n"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 162
+        "line": 163
       },
       "value": "knowledge-base:query"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 173
+        "line": 174
       },
       "value": "knowledge-base:query-stream"
     },
@@ -467,35 +481,35 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 34
+        "line": 36
       },
       "value": "llm:provider:models:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 38
+        "line": 40
       },
       "value": "(?:^|[-_/])(asr|tts|speech|audio|image|video|ocr|rerank|moderation)(?:[-_/]|$)"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 47
+        "line": 49
       },
       "value": "{api_key[:3]}***{api_key[-3:]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 335
+        "line": 348
       },
       "value": "{provider.id}:{provider.updated_at.isoformat()}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/service.py",
-        "line": 499
+        "line": 527
       },
       "value": "{normalized[:200]}..."
     },
@@ -605,7 +619,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 118
+        "line": 120
       }
     },
     {
@@ -621,7 +635,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 107
+        "line": 108
       }
     },
     {

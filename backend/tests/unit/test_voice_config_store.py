@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from uuid import UUID
 
 import pytest
 
@@ -15,12 +16,17 @@ from interview_guide.modules.llm_provider.voice import VoiceConfigService
 class FakeRepository:
     def __init__(self) -> None:
         encrypted = ApiKeyEncryption("test-key").encrypt("initial-voice-key")
+        self.provider_id = UUID("11111111-1111-1111-1111-111111111111")
         self.provider = SimpleNamespace(
+            id=self.provider_id,
+            user_id=UUID("22222222-2222-2222-2222-222222222222"),
+            alias="dashscope",
             api_key_ciphertext=encrypted.ciphertext,
             api_key_nonce=encrypted.nonce,
+            encryption_version=0,
         )
         self.entity = SimpleNamespace(
-            asr_provider_id="dashscope",
+            asr_provider_id=self.provider_id,
             asr_url="wss://example.test/asr",
             asr_model="asr-initial",
             asr_language="zh",
@@ -30,7 +36,7 @@ class FakeRepository:
             asr_turn_detection_type="server_vad",
             asr_turn_detection_threshold=0.0,
             asr_silence_ms=2000,
-            tts_provider_id="dashscope",
+            tts_provider_id=self.provider_id,
             tts_url="wss://example.test/tts",
             tts_model="tts-initial",
             tts_voice="Cherry",
@@ -48,6 +54,10 @@ class FakeRepository:
 
     async def get_provider(self, provider_id: str):
         del provider_id
+        return self.provider
+
+    async def get_provider_by_id(self, provider_id: UUID):
+        assert provider_id == self.provider_id
         return self.provider
 
     async def update_voice_config(self, values: dict[str, object]) -> None:

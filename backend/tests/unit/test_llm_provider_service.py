@@ -145,8 +145,8 @@ async def test_provider_without_api_key_uses_configured_models_without_http_requ
     repository = Mock()
     repository.get_provider = AsyncMock(
         return_value=SimpleNamespace(
-            api_key_ciphertext=b"",
-            api_key_nonce=b"",
+            api_key_ciphertext=None,
+            api_key_nonce=None,
             base_url="https://api.moonshot.cn/v1",
             embedding_model=None,
             model="kimi-k2.6",

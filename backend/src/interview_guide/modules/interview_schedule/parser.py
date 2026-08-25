@@ -12,7 +12,7 @@ from interview_guide.common.ai.prompts import (
     DATA_BOUNDARY_INSTRUCTION,
     PromptSanitizer,
 )
-from interview_guide.common.ai.providers import LlmProviderRegistry
+from interview_guide.common.ai.providers import ProviderRegistry
 from interview_guide.modules.interview_schedule.models import (
     CreateInterviewRequest,
     ParseResponse,
@@ -113,7 +113,7 @@ class ParsedSchedule:
 class InterviewParseService:
     def __init__(
         self,
-        registry: LlmProviderRegistry,
+        registry: ProviderRegistry,
         adapter: LlmAdapter,
         sanitizer: PromptSanitizer,
         now: datetime,

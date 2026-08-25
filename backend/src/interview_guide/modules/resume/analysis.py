@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from interview_guide.common.ai.prompts import PromptRepository
-from interview_guide.common.ai.providers import LlmProviderRegistry
+from interview_guide.common.ai.providers import ProviderRegistry
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.db.models import Resume, ResumeAnalysis
 from interview_guide.common.errors import ErrorCode
@@ -56,7 +56,7 @@ class ResumeAnalysisResult:
 class ResumeGradingService:
     def __init__(
         self,
-        registry: LlmProviderRegistry,
+        registry: ProviderRegistry,
         structured: StructuredOutputInvoker,
         prompts: PromptRepository,
     ) -> None:

@@ -7,10 +7,15 @@ from urllib.parse import urlsplit
 from interview_guide.common.ai.encryption import ApiKeyEncryption
 from interview_guide.common.ai.outbound import ProviderOutboundPolicy
 from interview_guide.common.ai.providers import (
-    LlmProviderRegistry,
-    ProviderRepository,
+    ProviderRegistry,
     provider_now,
 )
+from interview_guide.common.ai.user_providers import (
+    CURRENT_ENCRYPTION_VERSION,
+    UserProviderRepository,
+    provider_key_aad,
+)
+from interview_guide.common.db.models import UserLlmProviderConfig
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.llm_provider.models import (
     AsrConfigRequest,
@@ -53,8 +58,8 @@ class TtsConfig:
 class VoiceConfigService:
     def __init__(
         self,
-        repository: ProviderRepository,
-        registry: LlmProviderRegistry,
+        repository: UserProviderRepository,
+        registry: ProviderRegistry,
         encryption: ApiKeyEncryption,
         outbound_policy: ProviderOutboundPolicy,
     ) -> None:
@@ -65,13 +70,10 @@ class VoiceConfigService:
 
     async def asr(self) -> AsrConfigResponse:
         entity = await self._repository.voice_config()
-        provider = await self._repository.get_provider(entity.asr_provider_id)
-        api_key = self._encryption.decrypt(
-            provider.api_key_nonce,
-            provider.api_key_ciphertext,
-        )
+        provider = await self._repository.get_provider_by_id(entity.asr_provider_id)
+        api_key = self._decrypt_key(provider)
         return AsrConfigResponse(
-            provider_id=entity.asr_provider_id,
+            provider_id=provider.alias,
             url=entity.asr_url,
             model=entity.asr_model,
             masked_api_key=mask_api_key(api_key),
@@ -87,7 +89,8 @@ class VoiceConfigService:
     async def asr_config(self) -> AsrConfig:
         entity = await self._repository.voice_config()
         await self._outbound_policy.validate_websocket_url(entity.asr_url)
-        provider = await self._registry.get_voice(entity.asr_provider_id)
+        stored_provider = await self._repository.get_provider_by_id(entity.asr_provider_id)
+        provider = await self._registry.get_voice(stored_provider.alias)
         return AsrConfig(
             url=entity.asr_url,
             model=entity.asr_model,
@@ -103,13 +106,10 @@ class VoiceConfigService:
 
     async def tts(self) -> TtsConfigResponse:
         entity = await self._repository.voice_config()
-        provider = await self._repository.get_provider(entity.tts_provider_id)
-        api_key = self._encryption.decrypt(
-            provider.api_key_nonce,
-            provider.api_key_ciphertext,
-        )
+        provider = await self._repository.get_provider_by_id(entity.tts_provider_id)
+        api_key = self._decrypt_key(provider)
         return TtsConfigResponse(
-            provider_id=entity.tts_provider_id,
+            provider_id=provider.alias,
             url=entity.tts_url,
             model=entity.tts_model,
             masked_api_key=mask_api_key(api_key),
@@ -125,7 +125,8 @@ class VoiceConfigService:
     async def tts_config(self) -> TtsConfig:
         entity = await self._repository.voice_config()
         await self._outbound_policy.validate_websocket_url(entity.tts_url)
-        provider = await self._registry.get_voice(entity.tts_provider_id)
+        stored_provider = await self._repository.get_provider_by_id(entity.tts_provider_id)
+        provider = await self._registry.get_voice(stored_provider.alias)
         return TtsConfig(
             url=entity.tts_url,
             model=entity.tts_model,
@@ -141,15 +142,16 @@ class VoiceConfigService:
 
     async def update_asr(self, request: AsrConfigRequest) -> None:
         entity = await self._repository.voice_config()
-        provider_id = request.provider_id or entity.asr_provider_id
-        await self._repository.get_provider(provider_id)
+        current_provider = await self._repository.get_provider_by_id(entity.asr_provider_id)
+        provider_alias = request.provider_id or current_provider.alias
+        provider = await self._repository.get_provider(provider_alias)
         if request.url is not None:
             await self._outbound_policy.validate_websocket_url(request.url)
             if normalized_url(request.url) != normalized_url(entity.asr_url):
                 self._require_key_for_url_change(request.api_key)
-        await self._update_api_key(provider_id, request.api_key)
+        await self._update_api_key(provider_alias, request.api_key)
         values: dict[str, object] = {
-            "asr_provider_id": provider_id,
+            "asr_provider_id": provider.id,
             "updated_at": provider_now(),
         }
         for name, value in (
@@ -169,15 +171,16 @@ class VoiceConfigService:
 
     async def update_tts(self, request: TtsConfigRequest) -> None:
         entity = await self._repository.voice_config()
-        provider_id = request.provider_id or entity.tts_provider_id
-        await self._repository.get_provider(provider_id)
+        current_provider = await self._repository.get_provider_by_id(entity.tts_provider_id)
+        provider_alias = request.provider_id or current_provider.alias
+        provider = await self._repository.get_provider(provider_alias)
         if request.url is not None:
             await self._outbound_policy.validate_websocket_url(request.url)
             if normalized_url(request.url) != normalized_url(entity.tts_url):
                 self._require_key_for_url_change(request.api_key)
-        await self._update_api_key(provider_id, request.api_key)
+        await self._update_api_key(provider_alias, request.api_key)
         values: dict[str, object] = {
-            "tts_provider_id": provider_id,
+            "tts_provider_id": provider.id,
             "updated_at": provider_now(),
         }
         for name, value in (
@@ -223,16 +226,42 @@ class VoiceConfigService:
     async def _update_api_key(self, provider_id: str, api_key: str | None) -> None:
         if api_key is None or not api_key.strip():
             return
-        encrypted = self._encryption.encrypt(api_key.strip())
+        provider = await self._repository.get_provider(provider_id)
+        encrypted = self._encryption.encrypt(
+            api_key.strip(),
+            aad=provider_key_aad(
+                provider.user_id,
+                provider.id,
+                CURRENT_ENCRYPTION_VERSION,
+            ),
+        )
         await self._repository.update_provider(
             provider_id,
             {
                 "api_key_nonce": encrypted.nonce,
                 "api_key_ciphertext": encrypted.ciphertext,
+                "encryption_version": CURRENT_ENCRYPTION_VERSION,
                 "updated_at": provider_now(),
             },
         )
         await self._registry.publish_change()
+
+    def _decrypt_key(self, provider: UserLlmProviderConfig) -> str:
+        nonce = provider.api_key_nonce
+        ciphertext = provider.api_key_ciphertext
+        if nonce is None or ciphertext is None:
+            return ""
+        version = provider.encryption_version
+        aad = (
+            provider_key_aad(
+                provider.user_id,
+                provider.id,
+                version,
+            )
+            if version >= CURRENT_ENCRYPTION_VERSION
+            else None
+        )
+        return self._encryption.decrypt(nonce, ciphertext, aad=aad)
 
     @staticmethod
     def _require_key_for_url_change(api_key: str | None) -> None:

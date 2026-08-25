@@ -94,7 +94,7 @@ class ApiKeyEncryption:
     def from_settings(cls, settings: Settings) -> ApiKeyEncryption:
         return cls(resolve_configured_key(settings))
 
-    def encrypt(self, plaintext: str) -> EncryptedValue:
+    def encrypt(self, plaintext: str, *, aad: bytes | None = None) -> EncryptedValue:
         try:
             nonce = self._nonce_factory(NONCE_BYTES)
             if len(nonce) != NONCE_BYTES:
@@ -102,7 +102,7 @@ class ApiKeyEncryption:
             ciphertext = AESGCM(self._key).encrypt(
                 nonce,
                 plaintext.encode(),
-                None,
+                aad,
             )
             return EncryptedValue(
                 nonce=base64.b64encode(nonce).decode(),
@@ -114,11 +114,17 @@ class ApiKeyEncryption:
                 "加密 Provider API Key 失败",
             ) from error
 
-    def decrypt(self, nonce_base64: str, ciphertext_base64: str) -> str:
+    def decrypt(
+        self,
+        nonce_base64: str,
+        ciphertext_base64: str,
+        *,
+        aad: bytes | None = None,
+    ) -> str:
         try:
             nonce = base64.b64decode(nonce_base64, validate=True)
             ciphertext = base64.b64decode(ciphertext_base64, validate=True)
-            plaintext = AESGCM(self._key).decrypt(nonce, ciphertext, None)
+            plaintext = AESGCM(self._key).decrypt(nonce, ciphertext, aad)
             return plaintext.decode()
         except Exception as error:
             raise BusinessException(

@@ -5,11 +5,13 @@ from datetime import datetime
 from typing import Any, cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from interview_guide.common.ai.user_providers import ensure_user_provider_defaults
+from interview_guide.common.config.settings import Settings
 from interview_guide.common.db.models import (
     LEGACY_OWNER_ID,
     InterviewSchedule,
@@ -18,7 +20,10 @@ from interview_guide.common.db.models import (
     RagChatSession,
     Resume,
     UserAccount,
+    UserAiSetting,
+    UserLlmProviderConfig,
     UserPasswordCredential,
+    UserVoiceSetting,
     VoiceInterviewSession,
 )
 from interview_guide.common.errors import BusinessException, ErrorCode
@@ -31,8 +36,13 @@ class LoginRecord:
 
 
 class AuthRepository:
-    def __init__(self, sessions: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(
+        self,
+        sessions: async_sessionmaker[AsyncSession],
+        settings: Settings | None = None,
+    ) -> None:
         self._sessions = sessions
+        self._settings = settings
 
     async def find_login(self, email: str) -> LoginRecord | None:
         async with self._sessions() as session:
@@ -94,6 +104,13 @@ class AuthRepository:
             async with self._sessions() as session, session.begin():
                 session.add(entity)
                 session.add(credential)
+                if self._settings is not None:
+                    await ensure_user_provider_defaults(
+                        session,
+                        entity.id,
+                        self._settings,
+                        now,
+                    )
         except IntegrityError as error:
             raise BusinessException(ErrorCode.USER_ALREADY_EXISTS, "该邮箱已注册") from error
         return entity
@@ -135,4 +152,35 @@ class AuthRepository:
                     ),
                 )
                 counts[model.__tablename__] = int(result.rowcount or 0)
+            legacy_providers = list(
+                await session.scalars(
+                    select(UserLlmProviderConfig).where(
+                        UserLlmProviderConfig.user_id == LEGACY_OWNER_ID
+                    )
+                )
+            )
+            if legacy_providers:
+                await session.execute(
+                    delete(UserVoiceSetting).where(UserVoiceSetting.user_id == user_id)
+                )
+                await session.execute(delete(UserAiSetting).where(UserAiSetting.user_id == user_id))
+                await session.execute(
+                    delete(UserLlmProviderConfig).where(UserLlmProviderConfig.user_id == user_id)
+                )
+                await session.execute(
+                    update(UserLlmProviderConfig)
+                    .where(UserLlmProviderConfig.user_id == LEGACY_OWNER_ID)
+                    .values(user_id=user_id)
+                )
+                await session.execute(
+                    update(UserAiSetting)
+                    .where(UserAiSetting.user_id == LEGACY_OWNER_ID)
+                    .values(user_id=user_id)
+                )
+                await session.execute(
+                    update(UserVoiceSetting)
+                    .where(UserVoiceSetting.user_id == LEGACY_OWNER_ID)
+                    .values(user_id=user_id)
+                )
+                counts["user_llm_providers"] = len(legacy_providers)
         return counts

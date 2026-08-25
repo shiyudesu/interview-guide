@@ -10,7 +10,7 @@ from pathlib import Path
 from uuid import UUID
 
 from interview_guide.common.ai.adapter import ProviderConfig
-from interview_guide.common.ai.providers import LlmProviderRegistry
+from interview_guide.common.ai.providers import ProviderRegistry
 from interview_guide.common.api.models import compact_json_text
 from interview_guide.common.db.models import InterviewQuestionRecord, InterviewTurnRecord
 from interview_guide.common.errors import BusinessException, ErrorCode
@@ -71,7 +71,7 @@ class InterviewService:
         streams: RedisStreamService,
         questions: InterviewQuestionService,
         decisions: InterviewTurnDecisionService,
-        registry: LlmProviderRegistry,
+        registry: ProviderRegistry,
         blocking_executor: BlockingExecutor,
         *,
         follow_up_count: int,
@@ -772,7 +772,7 @@ class InterviewEvaluateHandler:
         repository: InterviewRepository,
         streams: RedisStreamService,
         evaluation: UnifiedEvaluationService,
-        registry: LlmProviderRegistry,
+        registry: ProviderRegistry,
     ) -> None:
         self._repository = repository
         self._streams = streams

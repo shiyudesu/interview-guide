@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import re
+import uuid
 
 import httpx
 from redis.asyncio import Redis
@@ -12,13 +13,14 @@ from redis.exceptions import RedisError
 
 from interview_guide.common.ai.encryption import ApiKeyEncryption
 from interview_guide.common.ai.outbound import ProviderOutboundPolicy, normalize_outbound_url
-from interview_guide.common.ai.providers import (
-    LlmProviderRegistry,
-    ProviderRepository,
-    provider_now,
+from interview_guide.common.ai.providers import ProviderRegistry, provider_now
+from interview_guide.common.ai.user_providers import (
+    CURRENT_ENCRYPTION_VERSION,
+    UserProviderRepository,
+    provider_key_aad,
 )
 from interview_guide.common.config.settings import Settings
-from interview_guide.common.db.models import LlmProviderConfig
+from interview_guide.common.db.models import UserLlmProviderConfig
 from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.modules.llm_provider.models import (
     CreateProviderRequest,
@@ -57,8 +59,8 @@ def looks_like_chat_model(model: str) -> bool:
 class LlmProviderService:
     def __init__(
         self,
-        repository: ProviderRepository,
-        registry: LlmProviderRegistry,
+        repository: UserProviderRepository,
+        registry: ProviderRegistry,
         encryption: ApiKeyEncryption,
         settings: Settings,
         redis: Redis,
@@ -91,7 +93,7 @@ class LlmProviderService:
         )
 
     async def defaults(self) -> DefaultProviderRequest:
-        setting = await self._repository.global_setting()
+        setting = await self._repository.default_aliases()
         return DefaultProviderRequest(
             default_provider=setting.default_chat_provider_id,
             default_embedding_provider=setting.default_embedding_provider_id,
@@ -147,13 +149,24 @@ class LlmProviderService:
             embedding_model,
             dimensions,
         )
-        encrypted = self._encryption.encrypt(api_key)
+        internal_id = uuid.uuid4()
+        encrypted = self._encryption.encrypt(
+            api_key,
+            aad=provider_key_aad(
+                self._repository.user_id,
+                internal_id,
+                CURRENT_ENCRYPTION_VERSION,
+            ),
+        )
         timestamp = provider_now()
         await self._repository.create_provider(
-            LlmProviderConfig(
-                id=provider_id,
+            UserLlmProviderConfig(
+                id=internal_id,
+                user_id=self._repository.user_id,
+                alias=provider_id,
                 api_key_ciphertext=encrypted.ciphertext,
                 api_key_nonce=encrypted.nonce,
+                encryption_version=CURRENT_ENCRYPTION_VERSION,
                 base_url=validated_base_url.url,
                 builtin=False,
                 created_at=timestamp,
@@ -212,9 +225,17 @@ class LlmProviderService:
             values["temperature"] = request.temperature
         trimmed_api_key = self._trim(request.api_key)
         if trimmed_api_key is not None:
-            encrypted = self._encryption.encrypt(trimmed_api_key)
+            encrypted = self._encryption.encrypt(
+                trimmed_api_key,
+                aad=provider_key_aad(
+                    provider.user_id,
+                    provider.id,
+                    CURRENT_ENCRYPTION_VERSION,
+                ),
+            )
             values["api_key_nonce"] = encrypted.nonce
             values["api_key_ciphertext"] = encrypted.ciphertext
+            values["encryption_version"] = CURRENT_ENCRYPTION_VERSION
         values["updated_at"] = provider_now()
         await self._repository.update_provider(provider_id, values)
         await self._registry.publish_change()
@@ -225,10 +246,7 @@ class LlmProviderService:
 
     async def test(self, provider_id: str) -> ProviderTestResult:
         provider = await self._repository.get_provider(provider_id)
-        api_key = self._encryption.decrypt(
-            provider.api_key_nonce,
-            provider.api_key_ciphertext,
-        )
+        api_key = self._decrypt_key(provider)
         if not api_key.strip():
             return ProviderTestResult(
                 success=False,
@@ -313,12 +331,7 @@ class LlmProviderService:
 
         api_key = requested_api_key
         if api_key is None and provider is not None:
-            api_key = self._trim(
-                self._encryption.decrypt(
-                    provider.api_key_nonce,
-                    provider.api_key_ciphertext,
-                )
-            )
+            api_key = self._trim(self._decrypt_key(provider))
         if api_key is None:
             if provider is not None:
                 return ProviderModelList(
@@ -411,16 +424,13 @@ class LlmProviderService:
 
     def _response(
         self,
-        provider: LlmProviderConfig,
+        provider: UserLlmProviderConfig,
         default_chat: str,
         default_embedding: str,
     ) -> ProviderResponse:
-        api_key = self._encryption.decrypt(
-            provider.api_key_nonce,
-            provider.api_key_ciphertext,
-        )
+        api_key = self._decrypt_key(provider)
         return ProviderResponse(
-            id=provider.id,
+            id=provider.alias,
             base_url=provider.base_url,
             masked_api_key=mask_api_key(api_key),
             has_api_key=bool(api_key.strip()),
@@ -431,8 +441,8 @@ class LlmProviderService:
             ),
             supports_embedding=provider.supports_embedding,
             temperature=provider.temperature,
-            default_chat_provider=provider.id == default_chat,
-            default_embedding_provider=provider.id == default_embedding,
+            default_chat_provider=provider.alias == default_chat,
+            default_embedding_provider=provider.alias == default_embedding,
         )
 
     @staticmethod
@@ -482,6 +492,24 @@ class LlmProviderService:
             )
         if dimensions <= 0:
             raise BusinessException(ErrorCode.BAD_REQUEST, "向量维度必须为正整数")
+
+    def _decrypt_key(self, provider: UserLlmProviderConfig) -> str:
+        if provider.api_key_nonce is None or provider.api_key_ciphertext is None:
+            return ""
+        aad = (
+            provider_key_aad(
+                provider.user_id,
+                provider.id,
+                provider.encryption_version,
+            )
+            if provider.encryption_version >= CURRENT_ENCRYPTION_VERSION
+            else None
+        )
+        return self._encryption.decrypt(
+            provider.api_key_nonce,
+            provider.api_key_ciphertext,
+            aad=aad,
+        )
 
     @staticmethod
     def _require_key_for_base_url_change(api_key: str | None) -> None:

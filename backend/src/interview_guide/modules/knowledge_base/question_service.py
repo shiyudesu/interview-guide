@@ -17,7 +17,7 @@ from interview_guide.common.ai.prompts import (
     PromptRepository,
     PromptSanitizer,
 )
-from interview_guide.common.ai.providers import LlmProviderRegistry
+from interview_guide.common.ai.providers import ProviderRegistry
 from interview_guide.common.ai.structured import StructuredOutputInvoker, structured_output_format
 from interview_guide.common.api.models import compact_json_text
 from interview_guide.common.db.models import KnowledgeBaseQuestion
@@ -276,9 +276,7 @@ class QuestionGenerationStateService:
 
     async def get_status(self, knowledge_base_id: int) -> QuestionGenStatusResponse:
         async with self._sessions() as session:
-            entity = await KnowledgeBaseQuestionRepository(
-                session, self._user_id
-            ).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(session, self._user_id).knowledge_base(
                 knowledge_base_id
             )
             if entity is None:
@@ -291,9 +289,7 @@ class QuestionGenerationStateService:
         task_id: str,
     ) -> QuestionGenerationConfig:
         async with self._sessions() as session:
-            entity = await KnowledgeBaseQuestionRepository(
-                session, self._user_id
-            ).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(session, self._user_id).knowledge_base(
                 knowledge_base_id
             )
             if entity is None:
@@ -307,9 +303,7 @@ class QuestionGenerationStateService:
 
     async def try_mark_processing(self, knowledge_base_id: int, task_id: str) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(
-                session, self._user_id
-            ).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(session, self._user_id).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -331,9 +325,7 @@ class QuestionGenerationStateService:
 
     async def mark_failed(self, knowledge_base_id: int, task_id: str) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(
-                session, self._user_id
-            ).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(session, self._user_id).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -422,9 +414,7 @@ class QuestionGenerationStateService:
         target: str,
     ) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(
-                session, self._user_id
-            ).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(session, self._user_id).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -444,9 +434,7 @@ class QuestionGenerationStateService:
         threshold: datetime,
     ) -> bool:
         async with self._sessions() as session, session.begin():
-            entity = await KnowledgeBaseQuestionRepository(
-                session, self._user_id
-            ).knowledge_base(
+            entity = await KnowledgeBaseQuestionRepository(session, self._user_id).knowledge_base(
                 knowledge_base_id,
                 for_update=True,
             )
@@ -736,7 +724,7 @@ class KnowledgeBaseQuestionGenerationService:
     def __init__(
         self,
         sessions: async_sessionmaker[AsyncSession],
-        registry: LlmProviderRegistry,
+        registry: ProviderRegistry,
         adapter: LlmAdapter,
         structured: StructuredOutputInvoker,
         prompts: PromptRepository,

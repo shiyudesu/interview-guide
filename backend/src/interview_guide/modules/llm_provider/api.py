@@ -5,9 +5,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from starlette.responses import Response
 
+from interview_guide.common.ai.user_providers import UserProviderRepository
 from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
+from interview_guide.modules.auth.dependencies import current_actor
 from interview_guide.modules.llm_provider.models import (
     AsrConfigRequest,
     AsrConfigResponse,
@@ -22,15 +24,18 @@ from interview_guide.modules.llm_provider.models import (
     UpdateProviderRequest,
 )
 from interview_guide.modules.llm_provider.service import LlmProviderService
+from interview_guide.modules.llm_provider.voice import VoiceConfigService
 
 router = APIRouter(prefix="/api/llm-provider", responses=STANDARD_ERROR_RESPONSES)
 
 
 async def provider_service(request: Request) -> LlmProviderService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
+    repository = UserProviderRepository(infrastructure.database.sessions, actor.user_id)
     return LlmProviderService(
-        infrastructure.provider_repository,
-        infrastructure.provider_registry,
+        repository,
+        infrastructure.provider_resolver.for_user(actor.user_id),
         infrastructure.api_key_encryption,
         request.app.state.settings,
         infrastructure.redis.client,
@@ -41,47 +46,57 @@ async def provider_service(request: Request) -> LlmProviderService:
 ServiceDependency = Annotated[LlmProviderService, Depends(provider_service)]
 
 
+def scoped_voice_service(request: Request) -> VoiceConfigService:
+    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
+    repository = UserProviderRepository(infrastructure.database.sessions, actor.user_id)
+    return VoiceConfigService(
+        repository,
+        infrastructure.provider_resolver.for_user(actor.user_id),
+        infrastructure.api_key_encryption,
+        infrastructure.provider_outbound_policy,
+    )
+
+
+VoiceServiceDependency = Annotated[VoiceConfigService, Depends(scoped_voice_service)]
+
+
 @router.get("/list", response_model=list[ProviderResponse])
 async def list_providers(service: ServiceDependency) -> Response:
     return result_response(Result.ok(await service.list()))
 
 
 @router.get("/voice/asr", response_model=AsrConfigResponse)
-async def get_asr_config(request: Request) -> Response:
-    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    return result_response(Result.ok(await infrastructure.voice_config.asr()))
+async def get_asr_config(service: VoiceServiceDependency) -> Response:
+    return result_response(Result.ok(await service.asr()))
 
 
 @router.put("/voice/asr", status_code=204)
 async def update_asr_config(
     payload: AsrConfigRequest,
-    request: Request,
+    service: VoiceServiceDependency,
 ) -> Response:
-    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    await infrastructure.voice_config.update_asr(payload)
+    await service.update_asr(payload)
     return result_response(Result.ok())
 
 
 @router.get("/voice/tts", response_model=TtsConfigResponse)
-async def get_tts_config(request: Request) -> Response:
-    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    return result_response(Result.ok(await infrastructure.voice_config.tts()))
+async def get_tts_config(service: VoiceServiceDependency) -> Response:
+    return result_response(Result.ok(await service.tts()))
 
 
 @router.put("/voice/tts", status_code=204)
 async def update_tts_config(
     payload: TtsConfigRequest,
-    request: Request,
+    service: VoiceServiceDependency,
 ) -> Response:
-    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    await infrastructure.voice_config.update_tts(payload)
+    await service.update_tts(payload)
     return result_response(Result.ok())
 
 
 @router.post("/voice/asr/test", response_model=ProviderTestResult)
-async def test_asr_config(request: Request) -> Response:
-    infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
-    return result_response(Result.ok(await infrastructure.voice_config.test_asr()))
+async def test_asr_config(service: VoiceServiceDependency) -> Response:
+    return result_response(Result.ok(await service.test_asr()))
 
 
 @router.post("/reload", status_code=204)

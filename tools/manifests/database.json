@@ -201,6 +201,11 @@
       "file": "backend/alembic/versions/0002_add_auth_and_ownership.py",
       "sha256": "b0926f491ab3c66831aac07caf83a350e9cbdf6dc0f880bafc03f7a14ee19952",
       "statementTerminatorCount": 0
+    },
+    {
+      "file": "backend/alembic/versions/0003_add_user_providers.py",
+      "sha256": "cc85ee2a964e80dd9783bf2b8ced5fb171d60c82a297d9f5a284141416b0c669",
+      "statementTerminatorCount": 0
     }
   ],
   "schemaVersion": 1,
@@ -209,7 +214,7 @@
     "alterationCount": 1,
     "extensionCount": 3,
     "indexCount": 17,
-    "migrationCount": 3,
+    "migrationCount": 4,
     "tableCount": 17
   },
   "tables": [

@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 55
+    "testFileCount": 56
   },
   "tests": [
     {
@@ -571,7 +571,12 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/integration/test_tenant_isolation_integration.py",
-      "sha256": "d89e27a8bd6d2a42ae688dc2a2c15bac618fa034d41d340d79536e6ff6e6dd41"
+      "sha256": "fc899834a6a3b00cfbb0ad413eebb2324335473045d8d9a8cc5770d2820063a7"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/integration/test_user_provider_integration.py",
+      "sha256": "a792fbf13d7c06d4f0ed1b4078e25d9755f906ae5e0b60541fbd7fa03b7a388d"
     },
     {
       "disabledMarkers": 0,
@@ -596,7 +601,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_database_schema.py",
-      "sha256": "0dda62af60d858879fa2f9291389cfd240cb6c042f7a45fbcc0931c61bdf9b30"
+      "sha256": "bc16813378241fc7454e3cc69336a918bf03b2046b52a16c11177454b89f207d"
     },
     {
       "disabledMarkers": 0,
@@ -651,7 +656,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_llm_provider_service.py",
-      "sha256": "c7ab12de93463ab19154d431d6040e38ed87fd8177fe05f377078cce03db0fd9"
+      "sha256": "0c1131b15892420a30b3756abf2f065ee91868d750eda29d750323835c466b4f"
     },
     {
       "disabledMarkers": 0,
@@ -726,7 +731,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_voice_config_store.py",
-      "sha256": "7d9c03b50e44adba5f03282ea0149dfbe9154736a3717e472fc80a32fc57577b"
+      "sha256": "1a7a0a25c4804d60cb289eb83191e30f7fe273f39795ce4eb1a9e7cd538dc1a4"
     },
     {
       "disabledMarkers": 0,

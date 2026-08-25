@@ -69,9 +69,10 @@ def knowledge_base_query_service(
 ) -> KnowledgeBaseQueryService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
+    registry = infrastructure.provider_resolver.for_user(actor.user_id)
     return KnowledgeBaseQueryService(
         KnowledgeBaseQueryRepository(infrastructure.database.sessions, actor.user_id),
-        infrastructure.provider_registry,
+        registry,
         infrastructure.llm_adapter,
         PromptRepository(RESOURCES),
         QueryConfiguration.from_settings(request.app.state.settings),

@@ -22,7 +22,7 @@
       "alterationCount": 1,
       "extensionCount": 3,
       "indexCount": 17,
-      "migrationCount": 3,
+      "migrationCount": 4,
       "tableCount": 17
     },
     "redis.json": {
@@ -40,7 +40,7 @@
         "redis-script": 1,
         "skill": 66
       },
-      "testFileCount": 55
+      "testFileCount": 56
     }
   },
   "schemaVersion": 1

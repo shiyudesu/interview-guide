@@ -59,8 +59,9 @@ ServiceDependency = Annotated[
 
 async def parse_service(request: Request) -> InterviewParseService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
+    actor = current_actor(request)
     return InterviewParseService(
-        infrastructure.provider_registry,
+        infrastructure.provider_resolver.for_user(actor.user_id),
         infrastructure.llm_adapter,
         infrastructure.prompt_sanitizer,
         schedule_now(),

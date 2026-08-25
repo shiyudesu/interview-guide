@@ -217,7 +217,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 118
+        "line": 119
       },
       "transport": "rest"
     },
@@ -252,7 +252,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 91
+        "line": 92
       },
       "transport": "rest"
     },
@@ -287,7 +287,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 100
+        "line": 101
       },
       "transport": "rest"
     },
@@ -322,7 +322,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 146
+        "line": 147
       },
       "transport": "rest"
     },
@@ -357,7 +357,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 109
+        "line": 110
       },
       "transport": "rest"
     },
@@ -396,7 +396,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 133
+        "line": 134
       },
       "transport": "rest"
     },
@@ -435,7 +435,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 167
+        "line": 168
       },
       "transport": "rest"
     },
@@ -464,7 +464,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-        "line": 176
+        "line": 177
       },
       "transport": "rest"
     },
@@ -507,7 +507,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 126
+        "line": 128
       },
       "transport": "rest"
     },
@@ -546,7 +546,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 144
+        "line": 146
       },
       "transport": "rest"
     },
@@ -581,7 +581,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 164
+        "line": 166
       },
       "transport": "rest"
     },
@@ -616,7 +616,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 253
+        "line": 255
       },
       "transport": "rest"
     },
@@ -651,7 +651,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 172
+        "line": 174
       },
       "transport": "rest"
     },
@@ -686,7 +686,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 203
+        "line": 205
       },
       "transport": "rest"
     },
@@ -721,7 +721,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 229
+        "line": 231
       },
       "transport": "rest"
     },
@@ -756,7 +756,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 237
+        "line": 239
       },
       "transport": "rest"
     },
@@ -791,7 +791,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 180
+        "line": 182
       },
       "transport": "rest"
     },
@@ -826,7 +826,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 212
+        "line": 214
       },
       "transport": "rest"
     },
@@ -851,7 +851,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 220
+        "line": 222
       },
       "transport": "rest"
     },
@@ -894,7 +894,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 188
+        "line": 190
       },
       "transport": "rest"
     },
@@ -1056,7 +1056,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 202
+        "line": 203
       },
       "transport": "rest"
     },
@@ -1091,7 +1091,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 207
+        "line": 208
       },
       "transport": "rest"
     },
@@ -1142,7 +1142,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 128
+        "line": 129
       },
       "transport": "rest"
     },
@@ -1181,7 +1181,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 156
+        "line": 157
       },
       "transport": "rest"
     },
@@ -1220,7 +1220,7 @@
       "produces": "text/event-stream",
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 167
+        "line": 168
       },
       "transport": "sse"
     },
@@ -1368,7 +1368,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 220
+        "line": 221
       },
       "transport": "rest"
     },
@@ -1399,7 +1399,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 228
+        "line": 229
       },
       "transport": "rest"
     },
@@ -1430,7 +1430,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 215
+        "line": 216
       },
       "transport": "rest"
     },
@@ -1473,7 +1473,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 185
+        "line": 186
       },
       "transport": "rest"
     },
@@ -1508,7 +1508,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 261
+        "line": 262
       },
       "transport": "rest"
     },
@@ -1543,7 +1543,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 270
+        "line": 271
       },
       "transport": "rest"
     },
@@ -1582,7 +1582,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 233
+        "line": 234
       },
       "transport": "rest"
     },
@@ -1617,7 +1617,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 243
+        "line": 244
       },
       "transport": "rest"
     },
@@ -1906,7 +1906,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 252
+        "line": 253
       },
       "transport": "rest"
     },
@@ -1941,7 +1941,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 101
+        "line": 116
       },
       "transport": "rest"
     },
@@ -1976,7 +1976,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 124
+        "line": 139
       },
       "transport": "rest"
     },
@@ -2007,7 +2007,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 110
+        "line": 125
       },
       "transport": "rest"
     },
@@ -2042,7 +2042,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 115
+        "line": 130
       },
       "transport": "rest"
     },
@@ -2073,7 +2073,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 44
+        "line": 64
       },
       "transport": "rest"
     },
@@ -2108,7 +2108,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 93
+        "line": 108
       },
       "transport": "rest"
     },
@@ -2139,7 +2139,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 87
+        "line": 102
       },
       "transport": "rest"
     },
@@ -2162,15 +2162,15 @@
       "httpMethod": "GET",
       "parameters": [
         {
-          "annotation": "Request",
-          "name": "request"
+          "annotation": "VoiceServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider/voice/asr",
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 49
+        "line": 69
       },
       "transport": "rest"
     },
@@ -2197,15 +2197,15 @@
           "name": "payload"
         },
         {
-          "annotation": "Request",
-          "name": "request"
+          "annotation": "VoiceServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider/voice/asr",
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 55
+        "line": 74
       },
       "transport": "rest"
     },
@@ -2228,15 +2228,15 @@
       "httpMethod": "POST",
       "parameters": [
         {
-          "annotation": "Request",
-          "name": "request"
+          "annotation": "VoiceServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider/voice/asr/test",
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 81
+        "line": 97
       },
       "transport": "rest"
     },
@@ -2259,15 +2259,15 @@
       "httpMethod": "GET",
       "parameters": [
         {
-          "annotation": "Request",
-          "name": "request"
+          "annotation": "VoiceServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider/voice/tts",
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 65
+        "line": 83
       },
       "transport": "rest"
     },
@@ -2294,15 +2294,15 @@
           "name": "payload"
         },
         {
-          "annotation": "Request",
-          "name": "request"
+          "annotation": "VoiceServiceDependency",
+          "name": "service"
         }
       ],
       "path": "/api/llm-provider/voice/tts",
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 71
+        "line": 88
       },
       "transport": "rest"
     },
@@ -2337,7 +2337,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 159
+        "line": 174
       },
       "transport": "rest"
     },
@@ -2372,7 +2372,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 133
+        "line": 148
       },
       "transport": "rest"
     },
@@ -2411,7 +2411,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 149
+        "line": 164
       },
       "transport": "rest"
     },
@@ -2446,7 +2446,7 @@
       "produces": null,
       "source": {
         "file": "backend/src/interview_guide/modules/llm_provider/api.py",
-        "line": 141
+        "line": 156
       },
       "transport": "rest"
     },
@@ -4298,7 +4298,7 @@
         "path": "/api/interview-schedule/{schedule_id}/status",
         "source": {
           "file": "backend/src/interview_guide/modules/interview_schedule/api.py",
-          "line": 176
+          "line": 177
         }
       },
       {
@@ -4306,7 +4306,7 @@
         "path": "/api/interview/sessions/{session_id}/report",
         "source": {
           "file": "backend/src/interview_guide/modules/interview/api.py",
-          "line": 220
+          "line": 222
         }
       },
       {

@@ -213,8 +213,9 @@ REST API 成功时直接返回业务 JSON；无响应体操作返回 HTTP 204。
 
 ## Provider 和模型
 
-系统只内置百炼 Provider，也可以在设置页添加任意 OpenAI 兼容 Provider。百炼种子只在
-Provider 表为空时写入，且不包含 API Key；系统启动后，数据库和设置页中的配置是实际数据源。
+每个账号只内置一条不带 API Key 的百炼 Provider，也可以在设置页添加任意 OpenAI 兼容
+Provider。Provider alias、默认聊天/Embedding 模型以及 ASR/TTS 配置全部按用户隔离；系统启动后，
+当前用户在数据库和设置页中的配置是实际数据源，不会回退到管理员或其他用户的 Key。
 
 当前默认模型：
 

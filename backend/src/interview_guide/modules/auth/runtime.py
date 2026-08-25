@@ -21,7 +21,7 @@ class AuthRuntime:
         executor: BlockingExecutor,
         settings: Settings,
     ) -> None:
-        self.repository = AuthRepository(sessions)
+        self.repository = AuthRepository(sessions, settings)
         self.passwords = PasswordService(executor)
         self.sessions = AuthSessionStore(
             redis,

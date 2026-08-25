@@ -136,9 +136,7 @@ class RagChatRepository:
             )
             if self._user_id is not None:
                 statement = statement.where(RagChatSession.user_id == self._user_id)
-            rows = list(
-                (await session.execute(statement)).all()
-            )
+            rows = list((await session.execute(statement)).all())
             if not rows:
                 raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
             entity = cast(RagChatSession, rows[0][0])
@@ -280,9 +278,7 @@ class RagChatRepository:
             )
             if self._user_id is not None:
                 statement = statement.where(RagChatSession.user_id == self._user_id)
-            rows = (
-                await session.execute(statement)
-            ).all()
+            rows = (await session.execute(statement)).all()
             if not rows:
                 raise BusinessException(ErrorCode.NOT_FOUND, "会话不存在")
             knowledge_base_ids = tuple(
