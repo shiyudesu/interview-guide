@@ -118,9 +118,12 @@ sudo "$DEPLOY_TMP/install.sh" \
   --namespace "$GHCR_NAMESPACE" \
   --channel main \
   --domain interview.example.com \
-  --email admin@example.com \
   --external-caddy
 ```
+
+`--external-caddy` 模式不要求 `--email`：现有宿主机 Caddy 已经自行管理 ACME 账号和证书联系
+信息。本项目中的管理员登录邮箱在安装完成后运行 `interview-guide-create-admin` 时另行设置；两者
+不是同一个配置。
 
 该模式不会启动 Compose `gateway`，也不会占用宿主机 80/443；应用前端只监听
 `127.0.0.1:18073`。证书申请、续期和 HTTP 跳转 HTTPS 全部由现有宿主机 Caddy 完成。安装和后续

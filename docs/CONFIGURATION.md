@@ -67,6 +67,7 @@ FRONTEND_BIND_ADDRESS=127.0.0.1
 - 服务器已有共享宿主机 Caddy 时，部署安装器使用 `--external-caddy`。它会设置
   `EXTERNAL_CADDY=true`、清空 `COMPOSE_PROFILES`，让前端只监听 `127.0.0.1:18073`；宿主机
   Caddy 负责自动证书和反向代理，部署更新通过本机 443 继续验证真实 HTTPS。
+  该模式不要求安装器提供 `--email`，因为宿主机 Caddy 已经独立管理 ACME 联系信息。
 - `FRONTEND_PORT` 在 HTTPS 模式下只作为服务器本机诊断入口，不应建立公网转发。
 - 生产环境不允许把 `TLS_HTTP_PORT` 改成无法由公网 80 到达的端口，也不允许把
   `TLS_HTTPS_PORT` 改成无法由公网 443 到达的端口；使用 NAT 时可以保持公网端口为 80/443，

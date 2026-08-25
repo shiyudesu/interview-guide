@@ -78,8 +78,10 @@ if [[ "$external_caddy" == true ]]; then
 fi
 if [[ "$https_enabled" == true ]]; then
   public_domain="$(deploy_env_value "$env_file" PUBLIC_DOMAIN)"
-  acme_email="$(deploy_env_value "$env_file" ACME_EMAIL)"
   deploy_validate_domain "$public_domain"
+fi
+if [[ "$bundled_https" == true ]]; then
+  acme_email="$(deploy_env_value "$env_file" ACME_EMAIL)"
   deploy_validate_email "$acme_email"
 fi
 

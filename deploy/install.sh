@@ -53,7 +53,9 @@ deploy_validate_root "$deploy_root"
 deploy_validate_namespace "$namespace"
 deploy_validate_tag "$channel"
 deploy_validate_domain "$domain"
-deploy_validate_email "$acme_email"
+if [[ "$external_caddy" != true ]]; then
+  deploy_validate_email "$acme_email"
+fi
 command -v docker >/dev/null 2>&1 || deploy_die "未找到 Docker。"
 command -v systemctl >/dev/null 2>&1 || deploy_die "未找到 systemctl；主动拉取安装器要求 systemd。"
 docker compose version >/dev/null 2>&1 || deploy_die "未找到 Docker Compose v2。"
@@ -87,7 +89,9 @@ if [[ ! -f "$env_file" ]]; then
     deploy_replace_env_value "$env_file" EXTERNAL_CADDY false
   fi
   deploy_replace_env_value "$env_file" PUBLIC_DOMAIN "$domain"
-  deploy_replace_env_value "$env_file" ACME_EMAIL "$acme_email"
+  if [[ -n "$acme_email" ]]; then
+    deploy_replace_env_value "$env_file" ACME_EMAIL "$acme_email"
+  fi
   deploy_replace_env_value "$env_file" APP_AUTH_PUBLIC_URL "https://${domain}"
   deploy_replace_env_value "$env_file" FRONTEND_BIND_ADDRESS 127.0.0.1
   deploy_replace_env_value "$env_file" POSTGRES_PASSWORD "$(deploy_random_secret)"
@@ -108,7 +112,9 @@ else
     deploy_replace_env_value "$env_file" EXTERNAL_CADDY false
   fi
   deploy_replace_env_value "$env_file" PUBLIC_DOMAIN "$domain"
-  deploy_replace_env_value "$env_file" ACME_EMAIL "$acme_email"
+  if [[ -n "$acme_email" ]]; then
+    deploy_replace_env_value "$env_file" ACME_EMAIL "$acme_email"
+  fi
   deploy_replace_env_value "$env_file" APP_AUTH_PUBLIC_URL "https://${domain}"
   deploy_replace_env_value "$env_file" FRONTEND_BIND_ADDRESS 127.0.0.1
   [[ -n "$(deploy_env_value "$env_file" POSTGRES_PASSWORD)" ]] \

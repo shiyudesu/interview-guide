@@ -205,6 +205,7 @@ class LifecycleScriptsTest(unittest.TestCase):
         self.assertIn("deploy_validate_email", install)
         self.assertIn("--external-caddy", install)
         self.assertIn("EXTERNAL_CADDY", install)
+        self.assertIn('if [[ "$external_caddy" != true ]]', install)
         update = (REPOSITORY_ROOT / "deploy/update.sh").read_text(encoding="utf-8")
         self.assertIn("verify_external_https", update)
         self.assertIn("--resolve", update)
