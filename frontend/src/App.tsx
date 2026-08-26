@@ -37,8 +37,16 @@ const InterviewDetailPanel = lazy(() => import('./components/InterviewDetailPane
 
 // Loading component
 const Loading = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
-    <div className="w-10 h-10 border-3 border-slate-200 border-t-primary-500 rounded-full animate-spin" />
+  <div
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+    className="flex min-h-[50vh] items-center justify-center"
+  >
+    <div className="text-center">
+      <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-3 border-slate-200 border-t-primary-500" />
+      <p className="text-sm text-slate-500 dark:text-slate-400">页面加载中，请稍候...</p>
+    </div>
   </div>
 );
 
@@ -171,10 +179,15 @@ function InterviewWrapper() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        className="flex items-center justify-center min-h-screen"
+      >
         <div className="text-center">
           <div className="w-10 h-10 border-3 border-slate-200 border-t-primary-500 rounded-full mx-auto mb-4 animate-spin" />
-          <p className="text-slate-500">加载中...</p>
+          <p className="text-slate-500 dark:text-slate-400">正在准备面试，请稍候...</p>
         </div>
       </div>
     );

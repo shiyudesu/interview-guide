@@ -57,7 +57,9 @@ export default function Interview({
   const [answer, setAnswer] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
+  // 首次渲染时请求尚未由 useEffect 发起，也必须立即展示等待状态，
+  // 避免在“开始面试”与生成提示之间短暂返回空白页面。
+  const [isCreating, setIsCreating] = useState(true);
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
   const startedRef = useRef(false);
   const pendingTurnRef = useRef<{
@@ -249,10 +251,16 @@ export default function Interview({
   // 加载中
   if (isCreating) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="w-10 h-10 border-3 border-slate-200 border-t-primary-500 rounded-full mx-auto mb-4 animate-spin" />
-          <p className="text-slate-500 dark:text-slate-400">{loadingText}</p>
+      <div
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        className="flex min-h-[50vh] items-center justify-center"
+      >
+        <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white px-8 py-10 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="mx-auto mb-5 h-11 w-11 animate-spin rounded-full border-3 border-slate-200 border-t-primary-500 dark:border-slate-700 dark:border-t-primary-400" />
+          <p className="font-medium text-slate-700 dark:text-slate-200">{loadingText}</p>
+          <p className="mt-2 text-sm text-slate-400 dark:text-slate-500">AI 正在准备本次面试，请耐心等待</p>
         </div>
       </div>
     );
