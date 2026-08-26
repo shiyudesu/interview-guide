@@ -15,6 +15,23 @@ CI 辅助脚本：
 - `scripts/detect_ci_changes.py`：按改动路径选择后端、前端、模型代理和生产集成 Job。
 - `scripts/check_docs.py`：检查 Markdown 链接、行尾空格和文档环境变量。
 
+## CI 变更选择
+
+`CI` 先运行 `scripts/detect_ci_changes.py`，再按路径选择检查：
+
+| 改动 | 运行内容 |
+| --- | --- |
+| 仅 Markdown 文档 | 文档、提交规范、工具测试、`CI gate` |
+| 后端单元测试 | 后端检查、仓库清单、`CI gate` |
+| 后端运行代码或集成测试 | 后端检查、生产 Compose 集成、`CI gate` |
+| 前端运行代码 | 前端 lint、单元测试、无真实后端 Playwright、构建、生产 Compose 集成、`CI gate` |
+| 模型诊断代理 | Model Proxy 测试、`CI gate` |
+| Compose、Docker、锁文件或工作流 | 全量 CI |
+
+工作流文件和变更分类脚本本身的修改始终强制全量运行。手动触发和每日定时任务执行全量 CI。
+前端 Job 运行不依赖真实后端的 Playwright；生产 Compose 集成只执行 `@real-backend` 用例。
+仓库 API 清单同时比较 REST 路径和 HTTP 方法，任何 frontend-only 调用都会使检查失败。
+
 ## 仓库清单
 
 重新生成：

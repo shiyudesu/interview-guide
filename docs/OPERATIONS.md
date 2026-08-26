@@ -57,6 +57,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\stop.ps1
 - `worker`、`scheduler`、`frontend` 为 running
 - HTTPS profile 启用时，`gateway` 为 healthy，`http://域名` 跳转到 `https://域名`
 
+健康检查和日志：
+
+```bash
+curl http://127.0.0.1:5173/health
+docker compose logs migrate
+docker compose logs -f app worker scheduler
+```
+
 ## 临时 HTTP 验收部署
 
 该入口用于 NAT 服务器、高端口和多项目共存时的短期部署验收，不修改普通 `.env` 或默认 Compose
@@ -103,7 +111,14 @@ WebSocket 路由，不能完成真实麦克风录音验收；该项必须改用 
 
 普通本机模式只检查 `FRONTEND_PORT`。HTTPS profile 启用后，启动脚本还会检查
 `TLS_HTTP_PORT` 和 `TLS_HTTPS_PORT`，并在 Compose 仍因端口竞争失败时再次解析错误。提示会直接
-列出占用进程和建议修改项，例如：
+列出占用进程和建议修改项。也可以手工检查：
+
+```bash
+ss -ltnp
+docker ps --format 'table {{.Names}}\t{{.Ports}}'
+```
+
+修改前端宿主机映射时，在 `.env` 设置：
 
 ```env
 FRONTEND_PORT=5174
@@ -111,6 +126,17 @@ FRONTEND_PORT=5174
 
 只修改宿主机映射变量即可，不要修改容器内部端口。修改 `FRONTEND_PORT` 后，访问地址也要带上
 新端口，例如 <http://localhost:5174>。
+
+API、PostgreSQL、Redis 和 MinIO 只使用 Compose 内部网络。需要从宿主机运行集成测试时，显式
+叠加 `docker-compose.test.yml`；该文件只绑定 `127.0.0.1`，不得用于公网部署：
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build --wait
+```
+
+生产前端通过 Docker DNS 动态解析 `app`，后端容器重建后不需要重启前端。前端健康检查会经由
+Nginx 请求 `/health`；若前端显示正常但 API 返回 502，检查 `frontend` 和 `app` 是否在同一
+Compose 网络，并运行 `docker compose logs frontend app`。
 
 正式公网 ACME 验证仍要求公网 80/443 可达。宿主机 TLS 端口变化时，必须同步调整 NAT，使公网
 80/443 分别转发到 `TLS_HTTP_PORT`、`TLS_HTTPS_PORT`。
@@ -163,7 +189,13 @@ docker compose restart gateway
 ## 管理员创建与登录状态
 
 账号启用但尚未创建管理员时，健康检查仍可访问，所有业务 API 返回 HTTP 401。管理员必须通过镜像
-内的 `interview-guide-create-admin` 命令创建，密码从 TTY 交互读取。完整命令见
+内的 `interview-guide-create-admin` 命令创建，密码从 TTY 交互读取。源码 Compose 使用：
+
+```bash
+docker compose run --rm app interview-guide-create-admin --email admin@example.com
+```
+
+无源码服务器使用当前不可变镜像 tag，完整命令见
 [GHCR 主动拉取部署](DEPLOYMENT.md#首次安装)。
 
 排查 Redis Session：
@@ -275,22 +307,6 @@ docker compose up -d --build --wait
 启动脚本会识别常见的 Docker Hub/DNS/超时错误并显示以上入口，但不会自动修改 DNS、代理或
 Docker daemon，也不会默认使用来源不明的公共镜像站。
 
-健康检查：
-
-```bash
-curl http://127.0.0.1:8080/health
-curl http://127.0.0.1:8080/info
-```
-
-日志：
-
-```bash
-docker compose logs migrate
-docker compose logs -f app
-docker compose logs -f worker
-docker compose logs -f scheduler
-```
-
 ## 更新部署
 
 ```bash
@@ -377,32 +393,6 @@ env | grep '^APP_AI_CONFIG_ENCRYPTION_KEY='
 
 模型出现在列表中不代表一定有调用权限、余额或地区可用性，最终仍以连接测试和厂商控制台为准。
 
-## 端口被占用
-
-生产部署只需要检查前端入口：
-
-```bash
-ss -ltnp | grep -E ':5173\b'
-docker ps --format 'table {{.Names}}\t{{.Ports}}'
-```
-
-可以在 `.env` 中修改前端宿主机映射：
-
-```env
-FRONTEND_PORT=5174
-```
-
-API、PostgreSQL、Redis 和 MinIO 只使用 Compose 内部网络。需要从宿主机运行集成测试时，显式
-叠加 `docker-compose.test.yml`；该文件只绑定 `127.0.0.1`，不得用于公网部署：
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build --wait
-```
-
-生产前端通过 Docker DNS 动态解析 `app`，后端容器重建后不需要重启前端。前端健康检查会经由
-Nginx 请求 `/health`；若前端显示正常但 API 返回 502，检查 `frontend` 和 `app` 是否在
-同一 Compose 网络，并运行 `docker compose logs frontend app`。
-
 ## 数据库初始化
 
 Migrate 会把空数据库直接创建为当前 schema。执行 `docker compose up -d --build --wait` 后，
@@ -432,8 +422,8 @@ docker compose ps minio createbuckets
 docker compose logs minio createbuckets
 ```
 
-生产 Compose 会创建 `APP_STORAGE_BUCKET` 并设置公开读取。上传失败时确认 endpoint、access key、
-secret key 和 bucket 名在所有后端进程中一致。
+生产 Compose 会创建 `APP_STORAGE_BUCKET` 并关闭匿名读取。上传失败时确认 endpoint、access key、
+secret key 和 bucket 名在所有后端进程中一致；文件和报告下载必须通过完成所有权校验的 API。
 
 ## 查看 Redis Stream
 
@@ -467,24 +457,3 @@ docker compose down -v
 ```
 
 第二条命令不可恢复本地 PostgreSQL、Redis 和对象存储内容。
-
-## CI 变更选择
-
-`CI` 会先运行 `tools/scripts/detect_ci_changes.py`，再按路径选择检查：
-
-| 改动 | 运行内容 |
-| --- | --- |
-| 仅 Markdown 文档 | 文档、提交规范、工具测试、`CI gate` |
-| 后端单元测试 | 后端检查、仓库清单、`CI gate` |
-| 后端运行代码或集成测试 | 后端检查、生产 Compose 集成、`CI gate` |
-| 前端运行代码 | 前端 lint、单元测试、无真实后端 Playwright、构建、生产 Compose 集成、`CI gate` |
-| 模型诊断代理 | Model Proxy 测试、`CI gate` |
-| Compose、Docker、锁文件或工作流 | 全量 CI |
-
-工作流文件和变更分类脚本本身的修改始终强制全量运行。需要手动完整验收时，在 GitHub
-Actions 中运行 `CI` 的 `workflow_dispatch`。仓库还会每天定时执行一次全量 CI。
-
-前端 Job 会启动 Vite 并执行不依赖真实后端的 Playwright 用例；生产 Compose 集成只执行
-`@real-backend` 用例。浏览器失败时会上传 `frontend-browser-tests`，其中包含 Playwright 报告、
-截图、视频和 trace。仓库 API 清单同时比较 REST 路径和 HTTP 方法，任何 frontend-only 调用都会
-使仓库工具测试失败。
