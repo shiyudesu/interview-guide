@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { User } from 'lucide-react';
+import { Sparkles, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export type InterviewMessageRole = 'interviewer' | 'user';
@@ -11,6 +11,7 @@ interface InterviewMessageBubbleProps {
   highlight?: boolean;
   italic?: boolean;
   suffix?: ReactNode;
+  appearance?: 'bubble' | 'conversation';
 }
 
 export default function InterviewMessageBubble({
@@ -20,8 +21,43 @@ export default function InterviewMessageBubble({
   highlight = false,
   italic = false,
   suffix,
+  appearance = 'bubble',
 }: InterviewMessageBubbleProps) {
   if (role === 'interviewer') {
+    if (appearance === 'conversation') {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-3 sm:gap-4"
+        >
+          <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 ring-1 ring-primary-100 dark:bg-primary-950/70 dark:text-primary-300 dark:ring-primary-800/70">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">面试官</span>
+              {category && (
+                <span className="rounded-full bg-primary-50 px-2 py-0.5 text-xs text-primary-600 dark:bg-primary-900/30 dark:text-primary-300">
+                  {category}
+                </span>
+              )}
+            </div>
+            <div
+              className={`whitespace-pre-wrap break-words text-[15px] leading-7 text-slate-800 dark:text-slate-200 ${
+                highlight
+                  ? 'rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-primary-200/70 dark:bg-slate-800/80 dark:ring-primary-800/60'
+                  : ''
+              } ${italic ? 'italic' : ''}`}
+            >
+              {text}
+              {suffix}
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
+
     return (
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -50,6 +86,25 @@ export default function InterviewMessageBubble({
             {text}
             {suffix}
           </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (appearance === 'conversation') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-end"
+      >
+        <div
+          className={`max-w-[88%] whitespace-pre-wrap break-words rounded-[20px] rounded-br-md bg-slate-100 px-4 py-3 text-[15px] leading-7 text-slate-800 sm:max-w-[78%] dark:bg-slate-700 dark:text-slate-100 ${
+            highlight ? 'ring-1 ring-primary-300/70 dark:ring-primary-600/60' : ''
+          } ${italic ? 'italic' : ''}`}
+        >
+          {text}
+          {suffix}
         </div>
       </motion.div>
     );
