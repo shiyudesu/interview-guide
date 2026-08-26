@@ -268,7 +268,7 @@
       "name": "SESSION_CACHE_KEY_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 40
+        "line": 41
       },
       "valueExpression": "\"voice:interview:session:\""
     },
@@ -276,7 +276,7 @@
       "name": "SESSION_CACHE_TTL_SECONDS",
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 41
+        "line": 42
       },
       "valueExpression": "60 * 60"
     }
@@ -299,14 +299,14 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/user_providers.py",
-        "line": 327
+        "line": 335
       },
       "value": "{user_id}:{version}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/common/ai/user_providers.py",
-        "line": 426
+        "line": 434
       },
       "value": "provider-key:v{version}:{user_id}:{provider_id}"
     },
@@ -544,14 +544,14 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 40
+        "line": 41
       },
       "value": "voice:interview:session:"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/voice_interview/service.py",
-        "line": 388
+        "line": 385
       },
       "value": "{SESSION_CACHE_KEY_PREFIX}{owner}:{session_id}"
     },
