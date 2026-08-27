@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { llmProviderApi } from '../api/llmProvider';
 import ConfirmDialog from '../components/ConfirmDialog';
+import ProviderDropdown from '../components/ProviderDropdown';
 import type {
   ProviderItem, CreateProviderRequest, UpdateProviderRequest,
   ProviderTestResult, ProviderModelList, AsrConfig, TtsConfig, AsrConfigRequest, TtsConfigRequest,
@@ -401,6 +402,9 @@ export default function SettingsPage() {
   };
 
   const handleSetDefault = async (providerId: string) => {
+    if (!providerId || providerId === defaultProviderId) {
+      return;
+    }
     setPendingDefaultProviderId(providerId);
   };
 
@@ -426,6 +430,9 @@ export default function SettingsPage() {
   };
 
   const handleSetEmbeddingDefault = async (provider: ProviderItem) => {
+    if (provider.id === defaultEmbeddingProviderId) {
+      return;
+    }
     if (!provider.supportsEmbedding || !provider.embeddingModel) {
       showToast('该 Provider 不支持 Embedding，不能作为知识库向量服务', 'error');
       return;
@@ -582,6 +589,72 @@ export default function SettingsPage() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
           >
+              <div className="mb-6 rounded-2xl border border-primary-100 bg-gradient-to-br from-primary-50/90 to-indigo-50/70 p-5 dark:border-primary-900/50 dark:from-primary-900/20 dark:to-slate-800">
+                <div className="mb-4">
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">默认模型服务</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    新建面试和知识库任务默认使用这里的配置；面试开始前仍可单次更换聊天 Provider。
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-xl border border-white/80 bg-white/80 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/80">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-white">
+                      <Plug className="h-4 w-4 text-primary-500" />
+                      默认聊天 Provider
+                    </p>
+                    <div className="mt-3">
+                      <ProviderDropdown
+                        ariaLabel="默认聊天 Provider"
+                        value={defaultProviderId}
+                        options={providers.map(provider => ({
+                          value: provider.id,
+                          name: provider.id,
+                          description: provider.model,
+                          badge: provider.hasApiKey ? (provider.id === defaultProviderId ? '当前默认' : undefined) : '未配置 Key',
+                        }))}
+                        onChange={providerId => void handleSetDefault(providerId)}
+                        disabled={settingDefault || providers.length === 0}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      用于简历分析、文字/语音面试推理和知识库问答。
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-white/80 bg-white/80 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/80">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-white">
+                      <Database className="h-4 w-4 text-emerald-500" />
+                      默认向量 Provider
+                    </p>
+                    <div className="mt-3">
+                      <ProviderDropdown
+                        ariaLabel="默认向量 Provider"
+                        value={defaultEmbeddingProviderId}
+                        options={providers
+                          .filter(provider => provider.supportsEmbedding && provider.embeddingModel)
+                          .map(provider => ({
+                            value: provider.id,
+                            name: provider.id,
+                            description: `${provider.embeddingModel} · ${provider.embeddingDimensions ?? 1024} 维`,
+                            badge: provider.id === defaultEmbeddingProviderId ? '当前默认' : undefined,
+                          }))}
+                        onChange={providerId => {
+                          const provider = providers.find(item => item.id === providerId);
+                          if (provider) {
+                            void handleSetEmbeddingDefault(provider);
+                          }
+                        }}
+                        disabled={settingEmbeddingDefault || !providers.some(provider => provider.supportsEmbedding && provider.embeddingModel)}
+                        tone="emerald"
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      用于知识库文档向量化；修改不会改变聊天模型。
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Provider header */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-slate-800 dark:text-white">
@@ -718,19 +791,19 @@ export default function SettingsPage() {
                           onClick={() => handleSetDefault(provider.id)}
                           disabled={isGlobalDefault || settingDefault}
                           className={`${ACTION_BUTTON_CLASS} text-primary-600 hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-900/20 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent`}
-                          title="设为默认文字服务"
+                          title="设为默认聊天 Provider"
                         >
                           <Plug className="w-3.5 h-3.5" />
-                          设为文字
+                          设为默认聊天
                         </button>
                         <button
                           onClick={() => handleSetEmbeddingDefault(provider)}
                           disabled={!canUseEmbedding || isEmbeddingDefault || settingEmbeddingDefault}
                           className={`${ACTION_BUTTON_CLASS} text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent`}
-                          title={canUseEmbedding ? '设为默认向量服务' : '该 Provider 不支持 Embedding'}
+                          title={canUseEmbedding ? '设为默认向量 Provider' : '该 Provider 不支持 Embedding'}
                         >
                           <Database className="w-3.5 h-3.5" />
-                          设为向量
+                          设为默认向量
                         </button>
                         <button
                           onClick={() => setDeleteConfirmId(provider.id)}

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useInterviewConfig, CUSTOM_SKILL_ID, DIFFICULTY_OPTIONS, type InterviewMode, type Difficulty } from '../hooks/useInterviewConfig';
 import { getSkillIcon } from '../utils/skillIcons';
+import InterviewProviderSelector from './InterviewProviderSelector';
 
 export interface UnifiedInterviewConfig {
   mode: InterviewMode;
@@ -58,6 +59,7 @@ export default function UnifiedInterviewModal({
       }
       config.loadSkills();
       config.loadResumes();
+      config.loadProviders();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, defaultMode, defaultResumeId]);
@@ -341,6 +343,14 @@ export default function UnifiedInterviewModal({
                     })}
                   </div>
                 </div>
+
+                <InterviewProviderSelector
+                  providers={config.providers}
+                  defaultProviderId={config.defaultProviderId}
+                  value={config.llmProvider}
+                  loading={config.loadingProviders}
+                  onChange={config.setLlmProvider}
+                />
 
                 {/* 更多选项 */}
                 <button

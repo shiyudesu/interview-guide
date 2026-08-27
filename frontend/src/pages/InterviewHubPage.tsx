@@ -19,6 +19,7 @@ import {
   DIFFICULTY_OPTIONS,
 } from '../hooks/useInterviewConfig';
 import {ROUTES} from '../constants/routes';
+import InterviewProviderSelector from '../components/InterviewProviderSelector';
 
 // 统一的面试记录项
 interface RecentInterviewItem {
@@ -79,10 +80,14 @@ export default function InterviewHubPage() {
     }
   }, []);
 
-  // 初始加载：skills 和 resumes 并行，再用 skills 加载面试记录
+  // 初始加载：skills、resumes 和 Provider 并行，再用 skills 加载面试记录
   useEffect(() => {
     const init = async () => {
-      const [skills] = await Promise.all([config.loadSkills(), config.loadResumes()]);
+      const [skills] = await Promise.all([
+        config.loadSkills(),
+        config.loadResumes(),
+        config.loadProviders(),
+      ]);
       await loadRecentInterviews(skills);
     };
     init();
@@ -346,6 +351,14 @@ export default function InterviewHubPage() {
               })}
             </div>
           </div>
+
+          <InterviewProviderSelector
+            providers={config.providers}
+            defaultProviderId={config.defaultProviderId}
+            value={config.llmProvider}
+            loading={config.loadingProviders}
+            onChange={config.setLlmProvider}
+          />
 
           {/* 更多选项 */}
           <button

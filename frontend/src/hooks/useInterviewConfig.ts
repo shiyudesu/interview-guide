@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { skillApi, type SkillDTO, type CategoryDTO } from '../api/skill';
 import { historyApi, type ResumeListItem } from '../api/history';
+import { llmProviderApi } from '../api/llmProvider';
+import type { ProviderItem } from '../types/llmProvider';
 import { getSkillIcon } from '../utils/skillIcons';
 
 export type InterviewMode = 'text' | 'voice';
@@ -27,6 +29,9 @@ export interface InterviewConfigState {
   resumeId: number | undefined;
   resumes: ResumeListItem[];
   llmProvider: string;
+  providers: ProviderItem[];
+  defaultProviderId: string;
+  loadingProviders: boolean;
   questionCount: number;
   plannedDuration: number;
   customJdText: string;
@@ -55,6 +60,9 @@ export function useInterviewConfig(options?: {
   const [questionCount, setQuestionCount] = useState<number>(6);
   const [plannedDuration, setPlannedDuration] = useState(30);
   const [llmProvider, setLlmProvider] = useState(DEFAULT_LLM_PROVIDER);
+  const [providers, setProviders] = useState<ProviderItem[]>([]);
+  const [defaultProviderId, setDefaultProviderId] = useState('');
+  const [loadingProviders, setLoadingProviders] = useState(false);
   const [customJdText, setCustomJdText] = useState('');
   const [parsedCustomJdText, setParsedCustomJdText] = useState('');
   const [customCategories, setCustomCategories] = useState<CategoryDTO[]>([]);
@@ -88,6 +96,24 @@ export function useInterviewConfig(options?: {
     }
   };
 
+  const loadProviders = async () => {
+    setLoadingProviders(true);
+    try {
+      const [providerList, defaultProvider] = await Promise.all([
+        llmProviderApi.list(),
+        llmProviderApi.getDefaultProvider(),
+      ]);
+      setProviders(providerList);
+      setDefaultProviderId(defaultProvider.defaultProvider);
+      return providerList;
+    } catch (err) {
+      console.error('Failed to load providers:', err);
+      return [];
+    } finally {
+      setLoadingProviders(false);
+    }
+  };
+
   const handleParseJd = async () => {
     if (!customJdText || customJdText.length < MIN_JD_LENGTH) {
       alert(`JD 内容太少（至少 ${MIN_JD_LENGTH} 字），请补充后重试`);
@@ -112,8 +138,7 @@ export function useInterviewConfig(options?: {
         setResumeId(defaultResumeId);
         setShowMore(true);
       }
-      loadSkills();
-      loadResumes();
+      void Promise.all([loadSkills(), loadResumes(), loadProviders()]);
     }
   }, [autoLoad, defaultMode, defaultResumeId]);
 
@@ -130,6 +155,9 @@ export function useInterviewConfig(options?: {
     questionCount, setQuestionCount,
     plannedDuration, setPlannedDuration,
     llmProvider, setLlmProvider,
+    providers,
+    defaultProviderId,
+    loadingProviders,
     customJdText, setCustomJdText,
     parsedCustomJdText,
     customCategories,
@@ -140,6 +168,7 @@ export function useInterviewConfig(options?: {
     // Actions
     loadSkills,
     loadResumes,
+    loadProviders,
     handleParseJd,
     // Helpers
     getSkillIcon,
