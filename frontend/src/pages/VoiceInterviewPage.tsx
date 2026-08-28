@@ -781,7 +781,7 @@ export default function VoiceInterviewPage() {
   if (!autoStartRef.current && !presetVoiceConfig && !resumeSessionId) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-8 text-center max-w-md w-full">
+        <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-8">
           <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
           <p className="text-slate-700 dark:text-slate-200 text-lg font-semibold mb-2">未检测到语音面试配置</p>
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">请从面试记录或"语音面试"入口开始</p>
@@ -797,8 +797,8 @@ export default function VoiceInterviewPage() {
   }
 
   return (
-    <div className="pb-10">
-      <div className="max-w-7xl mx-auto">
+    <div className="pb-4 sm:pb-10">
+      <div className="mx-auto max-w-7xl">
         <InterviewPageHeader
           title="语音模拟面试"
           subtitle="实时语音对话，面试官会根据你的回答持续追问"
@@ -812,21 +812,22 @@ export default function VoiceInterviewPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                <div className="flex items-center gap-3">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3 xl:gap-6">
+          <div className="space-y-4 xl:col-span-2 xl:space-y-6">
+            <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 sm:mb-6">
+                <div className="flex min-w-0 items-center gap-3">
                   <button
                     onClick={() => navigate('/interviews')}
-                    className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center"
+                    aria-label="返回面试记录"
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                     title="返回面试记录"
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </button>
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{templateName || effectiveSkillId}</h2>
-                    <div className="flex items-center gap-2 mt-1">
+                  <div className="min-w-0">
+                    <h2 className="truncate text-base font-semibold text-slate-900 dark:text-white sm:text-lg">{templateName || effectiveSkillId}</h2>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
                       <span className="text-xs px-2 py-0.5 bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-300 rounded-full">
                         {getPhaseLabel(currentPhase)}
                       </span>
@@ -845,20 +846,20 @@ export default function VoiceInterviewPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center py-6">
+              <div className="flex flex-col items-center justify-center py-3 sm:py-6">
                 <motion.div
                   animate={isAiSpeaking ? { scale: [1, 1.05, 1] } : {}}
                   transition={{ repeat: Infinity, duration: 2 }}
-                  className={`w-32 h-32 rounded-full border-4 flex items-center justify-center mb-6 transition-colors
+                  className={`mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 transition-colors sm:mb-6 sm:h-32 sm:w-32
                     ${isAiSpeaking
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                       : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60'
                     }`}
                 >
-                  <Bot className={`w-14 h-14 ${isAiSpeaking ? 'text-primary-500' : 'text-slate-400 dark:text-slate-500'}`} />
+                  <Bot className={`h-11 w-11 sm:h-14 sm:w-14 ${isAiSpeaking ? 'text-primary-500' : 'text-slate-400 dark:text-slate-500'}`} />
                 </motion.div>
 
-                <div className="w-full max-w-2xl min-h-[130px] rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 px-6 py-5 text-center flex items-center justify-center">
+                <div className="flex min-h-[110px] w-full max-w-2xl items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center dark:border-slate-700 dark:bg-slate-900/60 sm:min-h-[130px] sm:px-6 sm:py-5">
                   <AnimatePresence mode="wait">
                     {isAiSpeaking || aiText ? (
                       <motion.p
@@ -897,15 +898,15 @@ export default function VoiceInterviewPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
-              <div className="flex items-center justify-center gap-6">
+            <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-5">
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
                 <button
                   onClick={() => {
                     const choice = window.confirm('暂停面试？\n确定 = 短暂停（5分钟）\n取消 = 离开并保存');
                     handlePause(choice ? 'short' : 'long');
                   }}
                   disabled={connectionStatus !== 'connected'}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
+                  className="min-h-11 rounded-xl bg-slate-100 px-4 py-2 text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                   title="暂停"
                 >
                   暂停
@@ -924,7 +925,7 @@ export default function VoiceInterviewPage() {
                   data-testid="voice-submit-answer"
                   onClick={handleSubmitAnswer}
                   disabled={!canSubmit}
-                  className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                  className={`min-h-11 rounded-xl px-4 py-2.5 text-sm font-medium transition-all sm:px-5 ${
                     canSubmit
                       ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-md shadow-primary-500/30'
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
@@ -941,7 +942,7 @@ export default function VoiceInterviewPage() {
                   data-testid="voice-end-interview"
                   onClick={handleEndInterview}
                   disabled={connectionStatus !== 'connected'}
-                  className="px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
+                  className="min-h-11 rounded-xl bg-red-50 px-4 py-2 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
                   title="结束面试"
                 >
                   <span className="inline-flex items-center gap-1">
@@ -956,7 +957,7 @@ export default function VoiceInterviewPage() {
             </div>
           </div>
 
-          <div className="h-[520px] md:h-[560px] xl:h-[calc(100vh-240px)] xl:max-h-[760px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div className="h-[380px] overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:h-[500px] md:h-[560px] xl:h-[calc(100dvh-240px)] xl:max-h-[760px]">
             <RealtimeSubtitle
               messages={messages}
               userText={userText}

@@ -73,3 +73,31 @@
 .dark .rbc-today {
   background: rgba(59, 130, 246, 0.1) !important;
 }
+
+@media (max-width: 767px) {
+  .rbc-header {
+    padding: 8px 2px !important;
+    font-size: 11px !important;
+  }
+
+  .rbc-month-row {
+    min-height: 76px !important;
+  }
+
+  .rbc-date-cell {
+    padding-right: 3px !important;
+    font-size: 11px !important;
+  }
+
+  .rbc-month-view .rbc-event {
+    padding: 1px 2px !important;
+    font-size: 10px !important;
+  }
+
+  .rbc-time-header-gutter,
+  .rbc-time-gutter {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+  }
+}

@@ -306,25 +306,25 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
   return (
     <div className="max-w-7xl mx-auto">
       {/* 页面标题 */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
             <Database className="w-7 h-7 text-primary-500" />
             知识库管理
           </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1">管理您的知识库文件，查看使用统计</p>
         </div>
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:flex">
           <button
             onClick={onUpload}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-white transition-colors hover:bg-primary-600"
           >
             <Upload className="w-4 h-4" />
             上传知识库
           </button>
           <button
             onClick={onChat}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
           >
             <MessageSquare className="w-4 h-4" />
             问答助手
@@ -333,7 +333,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
       </div>
       {/* 统计卡片 */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
           <StatCard
             icon={Database}
             label="知识库总数"
@@ -358,9 +358,9 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
       {/* 搜索和筛选栏 */}
         <div
             className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
           {/* 搜索框 */}
-          <form onSubmit={handleSearch} className="flex-1 min-w-[200px]">
+          <form onSubmit={handleSearch} className="min-w-0 flex-1 sm:min-w-[200px]">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
@@ -374,7 +374,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
           </form>
 
           {/* 排序选择 */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={sortBy}
               onChange={(e) => {
@@ -382,7 +382,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                 setSearchKeyword('');
                 setSelectedCategory(null);
               }}
-              className="appearance-none pl-4 pr-10 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white cursor-pointer"
+              className="min-h-11 w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-10 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white sm:w-auto"
             >
               <option value="time">按时间排序</option>
               <option value="size">按大小排序</option>
@@ -393,14 +393,14 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
           </div>
 
           {/* 分类筛选 */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={selectedCategory || ''}
               onChange={(e) => {
                 setSelectedCategory(e.target.value || null);
                 setSearchKeyword('');
               }}
-              className="appearance-none pl-4 pr-10 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white cursor-pointer"
+              className="min-h-11 w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-4 pr-10 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white sm:w-auto"
             >
               <option value="">全部分类</option>
               {categories.map((cat) => (
@@ -433,7 +433,98 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
             </button>
           </div>
         ) : (
-          <table className="w-full">
+          <>
+            <div className="space-y-3 bg-slate-50/60 p-3 dark:bg-slate-900/20 lg:hidden" data-testid="knowledgebase-mobile-list">
+              {knowledgeBases.map((kb, index) => (
+                <motion.article
+                  key={kb.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.04 }}
+                  className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-500 dark:bg-primary-900/30 dark:text-primary-400">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="break-words font-semibold text-slate-800 dark:text-white">{kb.name}</p>
+                      <p className="mt-1 break-all text-xs text-slate-400 dark:text-slate-500">{kb.originalFilename}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-xl bg-slate-50 p-3 dark:bg-slate-900/40">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs text-slate-400">分类</span>
+                      {editingCategoryId === kb.id ? (
+                        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+                          <input
+                            autoFocus
+                            value={editingCategoryValue}
+                            onChange={(event) => setEditingCategoryValue(event.target.value)}
+                            onKeyDown={(event) => handleCategoryKeyDown(event, kb.id)}
+                            placeholder="输入分类"
+                            list="category-suggestions-mobile"
+                            className="min-w-0 flex-1 rounded-lg border border-primary-300 bg-white px-3 py-2 text-slate-900 dark:border-primary-600 dark:bg-slate-700 dark:text-white"
+                            disabled={savingCategory}
+                          />
+                          <datalist id="category-suggestions-mobile">
+                            {categories.map(category => <option key={category} value={category} />)}
+                          </datalist>
+                          <button type="button" onClick={() => handleSaveCategory(kb.id)} disabled={savingCategory} aria-label="保存分类" className="touch-target flex items-center justify-center rounded-lg text-emerald-600">
+                            {savingCategory ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                          </button>
+                          <button type="button" onClick={handleCancelEditCategory} aria-label="取消编辑分类" className="touch-target flex items-center justify-center rounded-lg text-slate-500">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleStartEditCategory(kb)}
+                          className="flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                        >
+                          {kb.category || '未分类'} <Edit3 className="h-4 w-4 text-slate-400" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-3 border-t border-slate-200/70 pt-3 text-sm dark:border-slate-700">
+                      <div>
+                        <p className="text-xs text-slate-400">向量状态</p>
+                        <div className="mt-1 flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                          <StatusIcon status={kb.vectorStatus} />
+                          <span>{getStatusText(kb.vectorStatus)}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400">文件大小</p>
+                        <p className="mt-1 text-slate-700 dark:text-slate-200">{formatFileSize(kb.fileSize)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400">提问次数</p>
+                        <p className="mt-1 text-slate-700 dark:text-slate-200">{kb.questionCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400">上传时间</p>
+                        <p className="mt-1 text-slate-700 dark:text-slate-200">{formatDate(kb.uploadedAt)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => handleDownload(kb)} className="min-h-11 flex-1 rounded-xl bg-primary-50 px-3 py-2 text-sm font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-300">下载</button>
+                    {kb.vectorStatus === 'FAILED' && (
+                      <button type="button" onClick={() => handleRevectorize(kb.id)} disabled={revectorizing === kb.id} className="min-h-11 rounded-xl border border-amber-100 px-3 py-2 text-sm text-amber-600 disabled:opacity-50 dark:border-amber-900/50 dark:text-amber-400">
+                        {revectorizing === kb.id ? '处理中…' : '重新向量化'}
+                      </button>
+                    )}
+                    <button type="button" onClick={() => setDeleteItem(kb)} className="min-h-11 rounded-xl border border-red-100 px-3 py-2 text-sm text-red-500 dark:border-red-900/50">删除</button>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+
+            <table className="hidden w-full lg:table">
               <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-100 dark:border-slate-600">
               <tr>
                   <th className="text-left px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -602,7 +693,8 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                 </motion.tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </>
         )}
       </div>
 

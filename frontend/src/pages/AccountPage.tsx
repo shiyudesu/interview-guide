@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { KeyRound, Loader2, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { getErrorMessage } from '../api/request';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function AccountPage() {
   const { user, authenticationEnabled, changePassword, revokeSessions } = useAuth();
@@ -13,6 +14,7 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [revoking, setRevoking] = useState(false);
   const [error, setError] = useState('');
+  const [revokeConfirmOpen, setRevokeConfirmOpen] = useState(false);
 
   const submitPassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,11 +35,11 @@ export default function AccountPage() {
   };
 
   const revokeAll = async () => {
-    if (!window.confirm('确定撤销该账号的全部登录 Session 吗？当前设备也会退出。')) return;
     setRevoking(true);
     setError('');
     try {
       await revokeSessions();
+      setRevokeConfirmOpen(false);
       navigate('/login', { replace: true, state: { message: '全部 Session 已撤销，请重新登录' } });
     } catch (caught) {
       setError(getErrorMessage(caught));
@@ -55,7 +57,7 @@ export default function AccountPage() {
         </div>
       </div>
 
-      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-5 w-5 text-emerald-500" />
           <div>
@@ -72,24 +74,34 @@ export default function AccountPage() {
       ) : (
         <>
           {error && <div role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-          <form onSubmit={submitPassword} className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <form onSubmit={submitPassword} className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
             <div className="mb-5 flex items-center gap-2"><KeyRound className="h-5 w-5 text-primary-500" /><h2 className="font-semibold text-slate-800 dark:text-white">修改密码</h2></div>
             <div className="grid gap-4 md:grid-cols-3">
               <label className="block"><span className="mb-1.5 block text-sm text-slate-600 dark:text-slate-300">当前密码</span><input type="password" required autoComplete="current-password" value={currentPassword} onChange={event => setCurrentPassword(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900 dark:text-white" /></label>
               <label className="block"><span className="mb-1.5 block text-sm text-slate-600 dark:text-slate-300">新密码</span><input type="password" required minLength={6} maxLength={128} autoComplete="new-password" value={newPassword} onChange={event => setNewPassword(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900 dark:text-white" /></label>
               <label className="block"><span className="mb-1.5 block text-sm text-slate-600 dark:text-slate-300">确认新密码</span><input type="password" required minLength={6} maxLength={128} autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900 dark:text-white" /></label>
             </div>
-            <button type="submit" disabled={saving} className="mt-5 flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">{saving && <Loader2 className="h-4 w-4 animate-spin" />}修改密码并退出</button>
+            <button type="submit" disabled={saving} className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 sm:w-auto">{saving && <Loader2 className="h-4 w-4 animate-spin" />}修改密码并退出</button>
           </form>
 
-          <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm dark:border-red-900/60 dark:bg-slate-800">
-            <div className="flex items-start justify-between gap-5">
+          <section className="rounded-2xl border border-red-200 bg-white p-4 shadow-sm dark:border-red-900/60 dark:bg-slate-800 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
               <div><div className="flex items-center gap-2"><LogOut className="h-5 w-5 text-red-500" /><h2 className="font-semibold text-slate-800 dark:text-white">撤销全部 Session</h2></div><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">使所有设备上的登录立即失效，适用于怀疑账号泄露时。</p></div>
-              <button type="button" onClick={revokeAll} disabled={revoking} className="flex shrink-0 items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:text-red-300">{revoking && <Loader2 className="h-4 w-4 animate-spin" />}全部退出</button>
+              <button type="button" onClick={() => setRevokeConfirmOpen(true)} disabled={revoking} className="flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:text-red-300 sm:w-auto">{revoking && <Loader2 className="h-4 w-4 animate-spin" />}全部退出</button>
             </div>
           </section>
         </>
       )}
+      <ConfirmDialog
+        open={revokeConfirmOpen}
+        title="撤销全部 Session"
+        message="确定撤销该账号的全部登录 Session 吗？当前设备也会退出。"
+        confirmText="全部退出"
+        confirmVariant="danger"
+        loading={revoking}
+        onConfirm={revokeAll}
+        onCancel={() => setRevokeConfirmOpen(false)}
+      />
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  X, Sparkles, FileText, Mic,
+  Sparkles, FileText, Mic,
   FileStack, ChevronDown, ChevronUp, Loader2
 } from 'lucide-react';
 import { useInterviewConfig, CUSTOM_SKILL_ID, DIFFICULTY_OPTIONS, type InterviewMode, type Difficulty } from '../hooks/useInterviewConfig';
 import { getSkillIcon } from '../utils/skillIcons';
 import InterviewProviderSelector from './InterviewProviderSelector';
+import ResponsiveDialog from './ResponsiveDialog';
 
 export interface UnifiedInterviewConfig {
   mode: InterviewMode;
@@ -90,58 +91,53 @@ export default function UnifiedInterviewModal({
 
   if (!isOpen) return null;
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/25">
-                      <Sparkles className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                        {title}
-                      </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {subtitle}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
+  const footer = (
+    <div className="flex flex-col-reverse gap-3 sm:flex-row">
+      <motion.button
+        onClick={onClose}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="min-h-11 flex-1 rounded-xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700 transition-all hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+      >
+        取消
+      </motion.button>
+      <motion.button
+        onClick={handleStart}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        disabled={config.isCustomStartDisabled}
+        className="min-h-11 flex-1 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-500/25 transition-all hover:from-primary-600 hover:to-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {startButtonText}
+      </motion.button>
+    </div>
+  );
 
-              {/* Content */}
-              <div className="px-6 py-5 space-y-5">
+  return (
+    <ResponsiveDialog
+      open={isOpen}
+      onClose={onClose}
+      size="lg"
+      title={(
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/25">
+            <Sparkles className="h-5 w-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-lg font-bold text-slate-900 dark:text-white">{title}</h2>
+            <p className="truncate text-xs font-normal text-slate-500 dark:text-slate-400">{subtitle}</p>
+          </div>
+        </div>
+      )}
+      footer={footer}
+    >
+      <div className="space-y-5">
                 {!hideModeSwitch && (
                   <div>
                     <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
                       面试模式
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {([
                         {
                           value: 'text' as InterviewMode,
@@ -200,7 +196,7 @@ export default function UnifiedInterviewModal({
                       <span className="text-sm">加载中...</span>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {config.skills.map(skill => {
                         const selected = config.skillId === skill.id;
                         const IconComponent = getSkillIcon(skill.id);
@@ -321,7 +317,7 @@ export default function UnifiedInterviewModal({
                   <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
                     难度
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     {DIFFICULTY_OPTIONS.map(opt => {
                       const selected = config.difficulty === opt.value;
                       return (
@@ -444,38 +440,7 @@ export default function UnifiedInterviewModal({
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50 rounded-b-2xl">
-                <div className="flex gap-3">
-                  <motion.button
-                    onClick={onClose}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex-1 px-5 py-3 border border-slate-200 dark:border-slate-700
-                      text-slate-700 dark:text-slate-300 rounded-xl font-medium text-sm
-                      hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
-                  >
-                    取消
-                  </motion.button>
-                  <motion.button
-                    onClick={handleStart}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    disabled={config.isCustomStartDisabled}
-                    className="flex-1 px-5 py-3 rounded-xl font-semibold text-sm transition-all
-                      bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700
-                      text-white shadow-lg shadow-primary-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {startButtonText}
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </>
-      )}
-    </AnimatePresence>
+      </div>
+    </ResponsiveDialog>
   );
 }

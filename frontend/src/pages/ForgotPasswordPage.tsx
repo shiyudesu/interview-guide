@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <form onSubmit={submit} className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl dark:bg-slate-900">
+      <form onSubmit={submit} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900 sm:p-8">
         <div className="mb-5 flex items-center gap-3">
           <div className="rounded-xl bg-primary-100 p-3 text-primary-600"><Mail className="h-5 w-5" /></div>
           <div><h1 className="text-xl font-bold text-slate-900 dark:text-white">找回密码</h1><p className="text-sm text-slate-500">输入注册邮箱获取重置链接</p></div>

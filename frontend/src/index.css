@@ -28,6 +28,7 @@
 @layer base {
   html, body, #root {
     @apply h-full m-0 p-0;
+    max-width: 100%;
   }
 
   body {
@@ -35,10 +36,21 @@
     font-family: var(--font-sans);
     @apply bg-gradient-to-br from-slate-50 via-white to-indigo-50 text-slate-900;
     @apply dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 dark:text-slate-50;
+    overflow-x: hidden;
   }
 
   #root {
-    @apply min-h-screen;
+    min-height: 100dvh;
+  }
+
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (max-width: 767px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -98,6 +110,19 @@
 
 /* 自定义滚动条 */
 @layer utilities {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .touch-target {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 0.5rem;
     height: 0.5rem;

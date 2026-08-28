@@ -8,7 +8,9 @@ import {ragChatApi, type RagChatSessionListItem} from '../api/ragChat';
 import {formatDateOnly} from '../utils/date';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
 import CodeBlock from '../components/CodeBlock';
-import {ChevronLeft, ChevronRight, Edit, MessageSquare, Pin, Plus, Trash2,} from 'lucide-react';
+import ResponsiveDialog from '../components/ResponsiveDialog';
+import {BookOpen, ChevronLeft, ChevronRight, Edit, History, MessageSquare, Pin, Plus, Trash2, X,} from 'lucide-react';
+import {useMediaQuery} from '../hooks/useMediaQuery';
 
 interface KnowledgeBaseQueryPageProps {
   onBack: () => void;
@@ -29,6 +31,7 @@ interface CategoryGroup {
 }
 
 export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBaseQueryPageProps) {
+  const isCompact = useMediaQuery('(max-width: 1023px)');
   // 知识库状态
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBaseItem[]>([]);
   const [selectedKbIds, setSelectedKbIds] = useState<Set<number>>(new Set());
@@ -40,7 +43,10 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['未分类']));
 
   // 右侧面板状态
-  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(() => (
+    typeof window === 'undefined' || !window.matchMedia('(max-width: 1023px)').matches
+  ));
+  const [leftPanelOpen, setLeftPanelOpen] = useState(false);
 
   // 会话状态
   const [sessions, setSessions] = useState<RagChatSessionListItem[]>([]);
@@ -154,6 +160,25 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
     }
   }, [loadKnowledgeBases, searchKeyword]);
 
+  useEffect(() => {
+    if (isCompact) {
+      setRightPanelOpen(false);
+      setLeftPanelOpen(false);
+    } else {
+      setRightPanelOpen(true);
+      setLeftPanelOpen(false);
+    }
+  }, [isCompact]);
+
+  useEffect(() => {
+    if (!isCompact || (!leftPanelOpen && !rightPanelOpen)) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isCompact, leftPanelOpen, rightPanelOpen]);
+
   const handleToggleKb = (kbId: number) => {
     setSelectedKbIds(prev => {
       const newSet = new Set(prev);
@@ -175,6 +200,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
     setCurrentSessionId(null);
     setCurrentSessionTitle('');
     setMessages([]);
+    if (isCompact) setLeftPanelOpen(false);
   };
 
   const handleLoadSession = async (sessionId: number) => {
@@ -189,6 +215,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
         content: m.content,
         timestamp: new Date(m.createdAt),
       })));
+      if (isCompact) setLeftPanelOpen(false);
     } catch (err) {
       console.error('加载会话失败', err);
     }
@@ -357,17 +384,17 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
   };
 
   return (
-    <div className="max-w-7xl mx-auto pt-8 pb-10 px-4">
+    <div className="mx-auto max-w-7xl pb-4 pt-0 sm:pb-8 lg:px-4 lg:pb-10 lg:pt-8">
       {/* 头部 */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">问答助手</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm">选择知识库，向 AI 提问</p>
         </div>
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:flex">
           <motion.button
             onClick={onUpload}
-            className="px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+            className="min-h-11 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -375,7 +402,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
           </motion.button>
           <motion.button
             onClick={onBack}
-            className="px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+            className="min-h-11 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -384,23 +411,64 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
         </div>
       </div>
 
-      <div className="flex gap-4 h-[calc(100vh-10rem)]">
+      <div className="mb-3 grid grid-cols-2 gap-2 lg:hidden">
+        <button
+          type="button"
+          onClick={() => { setRightPanelOpen(false); setLeftPanelOpen(true); }}
+          className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+        >
+          <History className="h-4 w-4" /> 对话历史
+        </button>
+        <button
+          type="button"
+          onClick={() => { setLeftPanelOpen(false); setRightPanelOpen(true); }}
+          className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-3 text-sm font-medium text-primary-700 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300"
+        >
+          <BookOpen className="h-4 w-4" /> 知识库（{selectedKbIds.size}）
+        </button>
+      </div>
+
+      {isCompact && (leftPanelOpen || rightPanelOpen) && (
+        <button
+          type="button"
+          aria-label="关闭辅助面板"
+          onClick={() => { setLeftPanelOpen(false); setRightPanelOpen(false); }}
+          className="fixed inset-0 z-[60] h-full w-full bg-black/50 backdrop-blur-sm"
+        />
+      )}
+
+      <div className="relative flex h-[calc(100dvh-14rem)] min-h-[480px] gap-4 lg:h-[calc(100dvh-10rem)]">
         {/* 左侧：对话历史 */}
-        <div className="w-64 flex-shrink-0">
+        <div
+          role={isCompact ? 'dialog' : undefined}
+          aria-modal={isCompact ? 'true' : undefined}
+          aria-label={isCompact ? '对话历史' : undefined}
+          className={isCompact
+          ? `fixed inset-2 z-[65] ${leftPanelOpen ? 'block' : 'hidden'}`
+          : 'w-64 flex-shrink-0'}
+        >
           <div
               className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm h-full flex flex-col border border-slate-100 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-slate-800 dark:text-white">对话历史</h2>
-              <motion.button
-                onClick={handleNewSession}
-                disabled={selectedKbIds.size === 0}
-                className="p-1.5 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                title="新建对话"
-              >
-                <Plus className="w-5 h-5" />
-              </motion.button>
+              <div className="flex items-center gap-1">
+                <motion.button
+                  onClick={handleNewSession}
+                  disabled={selectedKbIds.size === 0}
+                  className="flex h-11 w-11 items-center justify-center rounded-lg text-primary-500 transition-colors hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-primary-900/30"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="新建对话"
+                  aria-label="新建对话"
+                >
+                  <Plus className="w-5 h-5" />
+                </motion.button>
+                {isCompact && (
+                  <button type="button" onClick={() => setLeftPanelOpen(false)} aria-label="关闭对话历史" className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -439,7 +507,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
                             {session.messageCount} 条消息 · {formatTimeAgo(session.updatedAt)}
                           </p>
                         </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                        <div className="flex items-center gap-1 opacity-100 transition-all lg:opacity-0 lg:group-hover:opacity-100">
                           <button
                             onClick={(e) => handleTogglePin(session.id, e)}
                             className={`p-1 rounded transition-colors ${session.isPinned
@@ -483,7 +551,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
         {/* 中间：聊天区域 */}
         <div className="flex-1 min-w-0">
           <div
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex flex-col h-full border border-slate-100 dark:border-slate-700">
+              className="flex h-full flex-col rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
             {selectedKbIds.size > 0 ? (
               <>
                 {/* 会话信息 */}
@@ -529,7 +597,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
                             className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                           >
                             <div
-                              className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${msg.type === 'user'
+                              className={`max-w-[92%] rounded-2xl p-3 shadow-sm sm:max-w-[85%] sm:p-4 ${msg.type === 'user'
                                 ? 'bg-primary-600 text-white'
                                   : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-600 text-slate-800 dark:text-slate-100'
                               }`}
@@ -582,21 +650,21 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
                 </div>
 
                 {/* 输入区域 */}
-                <div className="p-4 border-t border-slate-200 dark:border-slate-600">
-                  <div className="flex gap-3">
+                <div className="safe-area-bottom border-t border-slate-200 p-3 dark:border-slate-600 sm:p-4">
+                  <div className="flex gap-2 sm:gap-3">
                     <input
                       type="text"
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmitQuestion()}
                       placeholder="输入您的问题..."
-                      className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400"
+                      className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 placeholder-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white sm:px-4"
                       disabled={loading}
                     />
                     <motion.button
                       onClick={handleSubmitQuestion}
                       disabled={!question.trim() || selectedKbIds.size === 0 || loading}
-                      className="px-5 py-2.5 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="min-h-11 rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                       whileHover={{ scale: loading ? 1 : 1.02 }}
                       whileTap={{ scale: loading ? 1 : 0.98 }}
                     >
@@ -611,7 +679,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
                   <svg className="w-12 h-12 mx-auto mb-3 opacity-50" viewBox="0 0 24 24" fill="none">
                     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <p className="text-sm">请先在右侧选择知识库</p>
+                  <p className="text-sm">请先选择知识库</p>
                 </div>
               </div>
             )}
@@ -622,21 +690,25 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
         <AnimatePresence>
           {rightPanelOpen && (
             <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 280, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
+              role={isCompact ? 'dialog' : undefined}
+              aria-modal={isCompact ? 'true' : undefined}
+              aria-label={isCompact ? '选择知识库' : undefined}
+              initial={isCompact ? { x: '100%', opacity: 0 } : { width: 0, opacity: 0 }}
+              animate={isCompact ? { x: 0, opacity: 1 } : { width: 280, opacity: 1 }}
+              exit={isCompact ? { x: '100%', opacity: 0 } : { width: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="flex-shrink-0 overflow-hidden"
+              className={isCompact ? 'fixed inset-2 z-[65] overflow-hidden' : 'flex-shrink-0 overflow-hidden'}
             >
               <div
-                  className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm h-full flex flex-col w-[280px] border border-slate-100 dark:border-slate-700">
+                  className="flex h-full w-full flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:w-[280px]">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-base font-semibold text-slate-800 dark:text-white">选择知识库</h2>
                   <button
                     onClick={() => setRightPanelOpen(false)}
-                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded"
+                    aria-label="关闭知识库选择"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    {isCompact ? <X className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                   </button>
                 </div>
 
@@ -761,7 +833,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
         </AnimatePresence>
 
         {/* 收起状态下的展开按钮 */}
-        {!rightPanelOpen && (
+        {!rightPanelOpen && !isCompact && (
           <button
             onClick={() => setRightPanelOpen(true)}
             className="flex-shrink-0 w-10 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
@@ -781,61 +853,44 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
         onCancel={() => setSessionDeleteConfirm(null)}
       />
 
-      {/* 编辑会话标题弹窗 */}
-      <AnimatePresence>
-        {editingSessionTitle && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+      <ResponsiveDialog
+        open={editingSessionTitle !== null}
+        onClose={() => {
+          setEditingSessionTitle(null);
+          setNewSessionTitle('');
+        }}
+        title="编辑标题"
+        size="sm"
+        mobileMode="compact"
+        footer={(
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
               onClick={() => {
                 setEditingSessionTitle(null);
                 setNewSessionTitle('');
               }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100 dark:border-slate-700"
-              >
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">编辑标题</h3>
-                <input
-                  type="text"
-                  value={newSessionTitle}
-                  onChange={(e) => setNewSessionTitle(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSaveSessionTitle()}
-                  placeholder="请输入新标题"
-                  className="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400"
-                  autoFocus
-                />
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => {
-                      setEditingSessionTitle(null);
-                      setNewSessionTitle('');
-                    }}
-                    className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-                  >
-                    取消
-                  </button>
-                  <button
-                    onClick={handleSaveSessionTitle}
-                    disabled={!newSessionTitle.trim()}
-                    className="px-4 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
-                  >
-                    保存
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          </>
+              className="min-h-11 rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600 dark:border-slate-600 dark:text-slate-300"
+            >取消</button>
+            <button
+              type="button"
+              onClick={handleSaveSessionTitle}
+              disabled={!newSessionTitle.trim()}
+              className="min-h-11 rounded-xl bg-primary-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            >保存</button>
+          </div>
         )}
-      </AnimatePresence>
+      >
+        <input
+          type="text"
+          value={newSessionTitle}
+          onChange={(e) => setNewSessionTitle(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSaveSessionTitle()}
+          placeholder="请输入新标题"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+          autoFocus
+        />
+      </ResponsiveDialog>
     </div>
   );
 }

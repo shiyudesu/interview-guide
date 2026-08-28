@@ -450,10 +450,10 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
             维护题干、答案、追问与状态
           </p>
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:flex lg:shrink-0">
           <button
             onClick={() => navigate(`/knowledgebase-interview/${knowledgeBaseIdNum}/interviews`)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 shadow-sm shadow-indigo-500/20 whitespace-nowrap"
+            className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-500/20 hover:bg-indigo-600"
           >
             <BarChart3 className="w-4 h-4" />
             查看面试记录
@@ -461,7 +461,7 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
           <button
             onClick={() => setGenerateOpen(true)}
             disabled={generationActive}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-primary-200 dark:border-primary-800 text-primary-600 dark:text-primary-400 text-sm font-medium hover:bg-primary-50 dark:hover:bg-primary-900/20 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+            className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-primary-200 px-4 py-2.5 text-sm font-medium text-primary-600 hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-primary-800 dark:text-primary-400 dark:hover:bg-primary-900/20"
           >
             {generationActive
               ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -470,7 +470,7 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
           </button>
           <button
             onClick={openCreateForm}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 whitespace-nowrap"
+            className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-600"
           >
             <Plus className="w-4 h-4" />
             手动新增
@@ -478,7 +478,7 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {STATUS_TABS.map(tab => {
           const count = tab.value === ''
             ? allQuestions.length
@@ -534,7 +534,7 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
-          <div className="flex gap-2">
+                <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <button
               onClick={() => setFilters(EMPTY_FILTERS)}
               className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 whitespace-nowrap"
@@ -756,7 +756,7 @@ function Pagination({
   const to = Math.min((page + 1) * pageSize, total);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mt-4 px-1 text-sm">
+      <div className="mt-4 flex flex-col gap-3 px-1 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
         <span>
           第 <span className="font-semibold text-slate-700 dark:text-slate-200">{from}-{to}</span> /
@@ -774,7 +774,7 @@ function Pagination({
           ))}
         </select>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-center gap-1">
         <PaginationButton
           disabled={page === 0}
           onClick={() => onPageChange(0)}

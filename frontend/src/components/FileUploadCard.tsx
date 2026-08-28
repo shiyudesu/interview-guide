@@ -97,15 +97,15 @@ export default function FileUploadCard({
 
   return (
     <motion.div
-      className="max-w-3xl mx-auto pt-16"
+      className="mx-auto max-w-3xl pt-4 sm:pt-10 lg:pt-16"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       {/* 标题 */}
-      <div className="text-center mb-12">
+      <div className="mb-6 text-center sm:mb-12">
         <motion.h1
-            className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight"
+            className="mb-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:mb-4 md:text-5xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -113,7 +113,7 @@ export default function FileUploadCard({
           {title}
         </motion.h1>
         <motion.p
-            className="text-lg text-slate-500 dark:text-slate-400"
+            className="text-base text-slate-500 dark:text-slate-400 sm:text-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -124,7 +124,7 @@ export default function FileUploadCard({
 
       {/* 上传区域 */}
       <motion.div
-          className={`relative bg-white dark:bg-slate-800 rounded-2xl p-12 cursor-pointer transition-all duration-300
+          className={`relative cursor-pointer rounded-2xl bg-white p-5 transition-all duration-300 dark:bg-slate-800 sm:p-8 lg:p-12
           ${dragOver ? 'scale-[1.02] shadow-xl' : 'shadow-lg hover:shadow-xl dark:shadow-slate-900/50'}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -166,13 +166,14 @@ export default function FileUploadCard({
                   <FileText className="w-10 h-10 text-primary-600 dark:text-primary-400"/>
                 </div>
                 <div
-                    className="flex items-center justify-center gap-4 bg-slate-50 dark:bg-slate-700/50 px-6 py-4 rounded-xl max-w-md mx-auto">
+                    className="mx-auto flex max-w-md items-center justify-center gap-3 rounded-xl bg-slate-50 px-3 py-4 dark:bg-slate-700/50 sm:gap-4 sm:px-6">
                   <div className="text-left flex-1 min-w-0">
                     <p className="font-semibold text-slate-900 dark:text-white truncate">{selectedFile.name}</p>
                     <p className="text-sm text-slate-500 dark:text-slate-400">{formatFileSize(selectedFile.size)}</p>
                   </div>
                   <button
-                      className="w-8 h-8 bg-red-100 dark:bg-red-900/50 text-red-500 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/70 transition-colors flex items-center justify-center"
+                      aria-label="移除文件"
+                      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-500 transition-colors hover:bg-red-200 dark:bg-red-900/50 dark:text-red-400 dark:hover:bg-red-900/70"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedFile(null);
@@ -204,7 +205,7 @@ export default function FileUploadCard({
                   </p>
                 </div>
                 <motion.button
-                  className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-3.5 rounded-xl font-semibold shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all"
+                  className="min-h-11 w-full rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-primary-500/30 transition-all hover:shadow-xl hover:shadow-primary-500/40 sm:w-auto"
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={(e) => {
@@ -223,7 +224,7 @@ export default function FileUploadCard({
       {/* 名称输入框 */}
       {showNameInput && selectedFile && (
         <motion.div
-            className="mt-6 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg dark:shadow-slate-900/50"
+            className="mt-6 rounded-2xl bg-white p-4 shadow-lg dark:bg-slate-800 dark:shadow-slate-900/50 sm:p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -256,11 +257,11 @@ export default function FileUploadCard({
       </AnimatePresence>
 
       {/* 操作按钮 */}
-      <div className="mt-8 flex gap-4 justify-center">
+      <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center sm:gap-4">
         {onBack && (
           <motion.button
             onClick={onBack}
-            className="px-6 py-3 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+            className="min-h-11 w-full rounded-xl border border-slate-200 px-6 py-3 font-medium text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 sm:w-auto"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -271,7 +272,7 @@ export default function FileUploadCard({
           <motion.button
             onClick={handleUpload}
             disabled={uploading}
-            className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             whileHover={{ scale: uploading ? 1 : 1.02 }}
             whileTap={{ scale: uploading ? 1 : 0.98 }}
           >

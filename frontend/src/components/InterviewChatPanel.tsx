@@ -81,9 +81,9 @@ export default function InterviewChatPanel({
   return (
     <section
       data-testid="interview-workspace"
-      className="mx-auto flex h-[calc(100dvh-5rem)] min-h-[560px] w-full max-w-6xl flex-col overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-xl shadow-slate-200/50 dark:border-slate-700 dark:bg-slate-900 dark:shadow-slate-950/40"
+      className="-m-4 mx-auto flex h-[calc(100dvh-4rem)] min-h-0 w-[calc(100%+2rem)] max-w-6xl flex-col overflow-hidden border-y border-slate-200/80 bg-white shadow-none sm:m-0 sm:h-[calc(100dvh-7rem)] sm:w-full sm:rounded-[28px] sm:border sm:shadow-xl sm:shadow-slate-200/50 xl:h-[calc(100dvh-5rem)] dark:border-slate-700 dark:bg-slate-900 dark:sm:shadow-slate-950/40"
     >
-      <header className="relative flex flex-shrink-0 items-center justify-between gap-4 border-b border-slate-100 bg-white/95 px-5 py-4 sm:px-7 dark:border-slate-800 dark:bg-slate-900/95">
+      <header className="relative flex flex-shrink-0 items-center justify-between gap-2 border-b border-slate-100 bg-white/95 px-4 py-3 sm:gap-4 sm:px-7 sm:py-4 dark:border-slate-800 dark:bg-slate-900/95">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white shadow-sm shadow-primary-500/25">
             <Sparkles className="h-5 w-5" />
@@ -113,7 +113,8 @@ export default function InterviewChatPanel({
             type="button"
             onClick={() => onShowCompleteConfirm(true)}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+          aria-label="提前交卷"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
           >
             <CheckCircle2 className="h-4 w-4" />
             <span className="hidden sm:inline">提前交卷</span>
@@ -156,14 +157,14 @@ export default function InterviewChatPanel({
             onClick={scrollToLatest}
             aria-label="回到最新消息"
             title="回到最新消息"
-            className="absolute bottom-3 left-1/2 z-10 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-lg transition hover:text-primary-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className="absolute bottom-3 left-1/2 z-10 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-lg transition hover:text-primary-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             <ArrowDown className="h-4 w-4" />
           </button>
         )}
       </div>
 
-      <footer className="flex-shrink-0 bg-gradient-to-t from-white via-white to-white/90 px-4 pb-4 pt-2 sm:px-8 sm:pb-6 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900/90">
+      <footer className="safe-area-bottom flex-shrink-0 bg-gradient-to-t from-white via-white to-white/90 px-3 pb-3 pt-2 sm:px-8 sm:pb-6 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900/90">
         <div className="mx-auto max-w-4xl">
           {error && (
             <div className="mb-2 flex items-center gap-2 px-2 text-sm text-red-600 dark:text-red-400" role="alert">
@@ -197,7 +198,7 @@ export default function InterviewChatPanel({
                 disabled={!answer.trim() || isSubmitting}
                 aria-label={isSubmitting ? '正在提交回答' : '提交回答'}
                 title={isSubmitting ? '正在提交回答' : '提交回答'}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-600 text-white shadow-sm transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-600 text-white shadow-sm transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
                 whileHover={{ scale: isSubmitting || !answer.trim() ? 1 : 1.02 }}
                 whileTap={{ scale: isSubmitting || !answer.trim() ? 1 : 0.98 }}
               >

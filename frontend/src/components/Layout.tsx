@@ -1,8 +1,8 @@
 import {Link, Outlet, useLocation, useNavigate} from 'react-router-dom';
 import {motion} from 'framer-motion';
-import {BookOpen, Calendar, ChevronRight, Database, FileStack, LogOut, MessageSquare, Moon, Settings, Sparkles, Sun, UserRound, Users,} from 'lucide-react';
+import {BookOpen, Calendar, ChevronRight, Database, FileStack, LogOut, Menu, MessageSquare, Moon, Settings, Sparkles, Sun, UserRound, Users, X,} from 'lucide-react';
 import {useTheme} from '../hooks/useTheme';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import UnifiedInterviewModal, {UnifiedInterviewConfig} from './UnifiedInterviewModal';
 import {ROUTES} from '../constants/routes';
 import {useAuth} from '../auth/AuthContext';
@@ -28,6 +28,9 @@ export default function Layout() {
   const navigate = useNavigate();
   const {user, logout, authenticationEnabled} = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileCloseButtonRef = useRef<HTMLButtonElement>(null);
   const [interviewModalPreset, setInterviewModalPreset] = useState<{
     defaultMode: 'text' | 'voice';
     defaultResumeId?: number;
@@ -135,133 +138,214 @@ export default function Layout() {
     return currentPath.startsWith(path);
   };
 
-  return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
-      {/* 左侧边栏 */}
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-700 fixed h-screen left-0 top-0 z-50 flex flex-col">
-        {/* Logo */}
-        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <Link to="/history" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-lg font-bold text-slate-800 dark:text-white tracking-tight block">AI Interview</span>
-              <span className="text-xs text-slate-400 dark:text-slate-500">智能面试助手</span>
-            </div>
-          </Link>
-        </div>
+  const activeNavItem = navGroups
+    .flatMap(group => group.items)
+    .find(item => isActive(item.path));
 
-        {/* 主题切换按钮 */}
-        <div className="px-4 pb-2">
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [currentPath]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const menuButton = mobileMenuButtonRef.current;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => mobileCloseButtonRef.current?.focus(), 0);
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileNavOpen(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = previousOverflow;
+      menuButton?.focus();
+    };
+  }, [mobileNavOpen]);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+      navigate('/login', {replace: true});
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  const renderNavigationContent = (mobile = false) => (
+    <>
+      <div className="flex items-center justify-between border-b border-slate-100 p-5 dark:border-slate-700">
+        <Link to="/history" className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="block truncate text-lg font-bold tracking-tight text-slate-800 dark:text-white">AI Interview</span>
+            <span className="block truncate text-xs text-slate-400 dark:text-slate-500">智能面试助手</span>
+          </div>
+        </Link>
+        {mobile && (
           <button
-            onClick={toggleTheme}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            ref={mobileCloseButtonRef}
+            type="button"
+            onClick={() => setMobileNavOpen(false)}
+            aria-label="关闭导航"
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
           >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="w-4 h-4" />
-                <span className="text-sm font-medium">浅色模式</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-4 h-4" />
-                <span className="text-sm font-medium">深色模式</span>
-              </>
-            )}
+            <X className="h-5 w-5" />
           </button>
-        </div>
+        )}
+      </div>
 
-        {/* 导航菜单 */}
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-6">
-            {navGroups.map((group) => (
-              <div key={group.id}>
-                <div className="px-3 mb-2">
-                  <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                    {group.title}
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  {group.items.map((item) => {
-                    const active = isActive(item.path);
+      <div className="px-4 pb-2 pt-3">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+        >
+          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          <span className="text-sm font-medium">{theme === 'dark' ? '浅色模式' : '深色模式'}</span>
+        </button>
+      </div>
 
-                    return (
-                      <Link
-                        key={item.id}
-                        to={item.path}
-                        className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
-                          ${active
-                            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                          }`}
-                      >
-                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors
-                          ${active
-                            ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-white'
-                          }`}
-                        >
-                          <item.icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <span className={`text-sm block ${active ? 'font-semibold' : 'font-medium'}`}>
-                            {item.label}
-                          </span>
-                          {item.description && (
-                            <span className="text-xs text-slate-400 dark:text-slate-500 truncate block">
-                              {item.description}
-                            </span>
-                          )}
-                        </div>
-                        {active && <ChevronRight className="w-4 h-4 text-primary-400" />}
-                      </Link>
-                    );
-                  })}
-                </div>
+      <nav className="flex-1 overflow-y-auto p-4" aria-label="主导航">
+        <div className="space-y-6">
+          {navGroups.map((group) => (
+            <div key={group.id}>
+              <div className="mb-2 px-3">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  {group.title}
+                </span>
               </div>
-            ))}
-          </div>
-        </nav>
-
-        {/* 当前账号 */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-700">
-          <div className="rounded-xl bg-gradient-to-r from-primary-50 to-indigo-50 px-3 py-3 dark:from-primary-900/30 dark:to-slate-800">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-primary-300">
-                <UserRound className="h-4 w-4" />
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const active = isActive(item.path);
+                  return (
+                    <Link
+                      key={item.id}
+                      to={item.path}
+                      aria-current={active ? 'page' : undefined}
+                      className={`group relative flex min-h-12 items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 ${active
+                        ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+                      }`}
+                    >
+                      <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-colors ${active
+                        ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400'
+                        : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 dark:group-hover:text-white'
+                      }`}>
+                        <item.icon className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className={`block text-sm ${active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
+                        {item.description && (
+                          <span className="block truncate text-xs text-slate-400 dark:text-slate-500">{item.description}</span>
+                        )}
+                      </div>
+                      {active && <ChevronRight className="h-4 w-4 flex-shrink-0 text-primary-400" />}
+                    </Link>
+                  );
+                })}
               </div>
-              <Link to="/account" className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{user?.displayName || user?.email}</p>
-                <p className="truncate text-[11px] text-slate-400 dark:text-slate-500">{user?.email}</p>
-              </Link>
-              {authenticationEnabled && (
-                <button
-                  type="button"
-                  disabled={loggingOut}
-                  onClick={async () => {
-                    setLoggingOut(true);
-                    try {
-                      await logout();
-                      navigate('/login', {replace: true});
-                    } finally {
-                      setLoggingOut(false);
-                    }
-                  }}
-                  aria-label="退出登录"
-                  title="退出登录"
-                  className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-red-500 disabled:opacity-50 dark:hover:bg-slate-700"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              )}
             </div>
+          ))}
+        </div>
+      </nav>
+
+      <div className="safe-area-bottom border-t border-slate-100 p-4 dark:border-slate-700">
+        <div className="rounded-xl bg-gradient-to-r from-primary-50 to-indigo-50 px-3 py-3 dark:from-primary-900/30 dark:to-slate-800">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-primary-300">
+              <UserRound className="h-4 w-4" />
+            </div>
+            <Link to="/account" className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{user?.displayName || user?.email}</p>
+              <p className="truncate text-[11px] text-slate-400 dark:text-slate-500">{user?.email}</p>
+            </Link>
+            {authenticationEnabled && (
+              <button
+                type="button"
+                disabled={loggingOut}
+                onClick={handleLogout}
+                aria-label="退出登录"
+                title="退出登录"
+                className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white hover:text-red-500 disabled:opacity-50 dark:hover:bg-slate-700"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-[100dvh] bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
+      <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-slate-100 bg-white dark:border-slate-700 dark:bg-slate-900 xl:flex">
+        {renderNavigationContent()}
       </aside>
 
-      {/* 主内容区 */}
-      <main className="flex-1 ml-64 p-10 min-h-screen overflow-y-auto">
+      <header className="safe-area-top sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 xl:hidden">
+        <div className="flex min-h-16 items-center gap-3 px-4 sm:px-6">
+          <button
+            ref={mobileMenuButtonRef}
+            type="button"
+            onClick={() => setMobileNavOpen(true)}
+            aria-label="打开导航"
+            aria-expanded={mobileNavOpen}
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <Link to="/history" className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-md shadow-primary-500/25">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-slate-800 dark:text-white">{activeNavItem?.label ?? 'AI Interview'}</p>
+              <p className="truncate text-xs text-slate-400 dark:text-slate-500">智能面试助手</p>
+            </div>
+          </Link>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? '切换为浅色模式' : '切换为深色模式'}
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+        </div>
+      </header>
+
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-[60] xl:hidden">
+          <button
+            type="button"
+            aria-label="关闭导航遮罩"
+            onClick={() => setMobileNavOpen(false)}
+            className="absolute inset-0 h-full w-full bg-black/50 backdrop-blur-sm"
+          />
+          <motion.aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="移动导航"
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'tween', duration: 0.2 }}
+            className="absolute inset-y-0 left-0 flex w-[min(86vw,320px)] flex-col border-r border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+          >
+            {renderNavigationContent(true)}
+          </motion.aside>
+        </div>
+      )}
+
+      <main className="min-h-[calc(100dvh-4rem)] min-w-0 overflow-x-hidden p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 xl:ml-64 xl:min-h-screen xl:p-10">
         <motion.div
           key={currentPath}
           initial={{ opacity: 0, y: 20 }}
@@ -273,7 +357,6 @@ export default function Layout() {
         </motion.div>
       </main>
 
-      {/* 统一面试弹窗 */}
       <UnifiedInterviewModal
         isOpen={interviewModalPreset !== null}
         onClose={() => setInterviewModalPreset(null)}

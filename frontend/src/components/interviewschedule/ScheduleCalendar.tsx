@@ -22,6 +22,7 @@ interface ScheduleCalendarProps {
   onDateChange: (date: Date) => void;
   onEventDrop?: (data: EventInteractionArgs<object>) => void;
   onEventResize?: (data: EventInteractionArgs<object>) => void;
+  interactionEnabled?: boolean;
 }
 
 export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
@@ -33,6 +34,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   onDateChange,
   onEventDrop,
   onEventResize,
+  interactionEnabled = true,
 }) => {
   // Filter out invalid interviews and convert to events
   const events = interviews
@@ -128,9 +130,10 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50"
+      className="overflow-x-auto rounded-2xl border border-slate-200/50 bg-white p-2 shadow-xl shadow-slate-200/50 backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/50 dark:shadow-slate-900/50 sm:p-4 lg:p-6"
     >
-      <DnDCalendar
+      <div className="min-w-0">
+        <DnDCalendar
           localizer={localizer}
           events={events}
           view={view}
@@ -143,7 +146,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
           max={finalMaxTime}
           step={30}
           timeslots={2}
-          style={{ height: 800 }}
+          style={{ height: 800, minWidth: view === 'week' ? 720 : undefined }}
           eventPropGetter={eventStyleGetter}
           components={{
             event: InterviewEvent as any,
@@ -165,11 +168,13 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
             event: '事件',
             noEventsInRange: '在此范围内没有面试',
           }}
-          onEventDrop={onEventDrop}
-          onEventResize={onEventResize}
-          resizable
+          onEventDrop={interactionEnabled ? onEventDrop : undefined}
+          onEventResize={interactionEnabled ? onEventResize : undefined}
+          draggableAccessor={() => interactionEnabled}
+          resizable={interactionEnabled}
           selectable
         />
+      </div>
       </motion.div>
   );
 };

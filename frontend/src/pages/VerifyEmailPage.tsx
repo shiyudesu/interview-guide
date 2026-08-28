@@ -41,7 +41,7 @@ export default function VerifyEmailPage() {
 function AuthActionCard({ icon, title, message, success }: { icon: ReactNode; title: string; message: string; success: boolean }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl dark:bg-slate-900">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900 sm:p-8">
         <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${success ? 'bg-emerald-100 text-emerald-600' : 'bg-primary-100 text-primary-600'}`}>{icon}</div>
         <MailCheck className="mx-auto mb-2 h-5 w-5 text-slate-400" />
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h1>

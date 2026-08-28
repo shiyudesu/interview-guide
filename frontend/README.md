@@ -59,6 +59,11 @@ Playwright 默认启动 `127.0.0.1:4173` 的 Vite 服务。CI 中的 `@real-back
 `REAL_BACKEND_URL` 指向生产 Compose API。前端 CI Job 运行其余使用浏览器路由 mock 的用例，
 生产 Compose 集成只运行 `@real-backend` 用例。
 
+前端响应式布局以 `360px` 手机为最低自动化基线，同时覆盖 `390px` 手机和 `768px` 平板
+视口。`mobile-chrome` 项目只运行移动端专项用例，检查抽屉导航、卡片列表、日程、知识库
+辅助面板和长表单弹窗；桌面 Chromium 项目继续运行原有业务用例。iPhone Safari 需要在正式
+HTTPS 环境人工检查安全区、软键盘和麦克风权限。
+
 这台开发机需要人工浏览器验收时，使用 Windows Chrome：
 
 ```text

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Loader2, Sparkles, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Loader2, Sparkles } from 'lucide-react';
 import {
   CATEGORY_LIMIT_OPTIONS,
   DEFAULT_CATEGORY_LIMIT,
@@ -10,6 +10,7 @@ import {
   GENERATE_COUNT_OPTIONS,
   INPUT_CLASS,
 } from '../../constants/knowledgebaseInterview';
+import ResponsiveDialog from '../ResponsiveDialog';
 
 export interface GenerateQuestionsConfig {
   difficulty: string;
@@ -55,47 +56,39 @@ export default function GenerateKnowledgeBaseQuestionsModal({
     }
   }, [open, defaultDifficulty, defaultCategoryLimit, initialConfig]);
 
-  return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full"
-            >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary-500" />
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">生成题目</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={submitting}
-                  className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+  const footer = (
+    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <button type="button" onClick={onClose} disabled={submitting} className="min-h-11 rounded-xl border border-slate-200 px-5 py-2.5 font-medium text-slate-600 disabled:opacity-50 dark:border-slate-600 dark:text-slate-300">取消</button>
+      <motion.button
+        type="button"
+        onClick={() => onSubmit({ difficulty, questionCount, followUpCount, categoryLimit })}
+        disabled={submitting}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-2.5 font-semibold text-white shadow-lg transition-all disabled:opacity-50"
+      >
+        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+        {submitting ? '提交中…' : '开始生成'}
+      </motion.button>
+    </div>
+  );
 
-              <div className="px-6 py-5 space-y-4">
+  return (
+    <ResponsiveDialog
+      open={open}
+      onClose={onClose}
+      closeDisabled={submitting}
+      title={<span className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary-500" />生成题目</span>}
+      size="sm"
+      footer={footer}
+    >
+      <div className="space-y-4">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   基于知识库 <span className="font-semibold text-slate-700 dark:text-slate-200">{knowledgeBaseName}</span> 的内容，
                   按难度和方向生成草稿题。面试方向由模型基于知识库内容自动归类，并优先复用已有方向。
                 </p>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="block">
                     <span className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">难度</span>
                     <select
@@ -122,7 +115,7 @@ export default function GenerateKnowledgeBaseQuestionsModal({
                   </label>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="block">
                     <span className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                       方向上限
@@ -154,33 +147,7 @@ export default function GenerateKnowledgeBaseQuestionsModal({
                 </div>
 
                 {error && <p className="text-sm text-red-500">{error}</p>}
-              </div>
-
-              <div className="flex gap-3 justify-end px-6 py-4 border-t border-slate-100 dark:border-slate-700">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={submitting}
-                  className="px-5 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
-                >
-                  取消
-                </button>
-                <motion.button
-                  type="button"
-                  onClick={() => onSubmit({ difficulty, questionCount, followUpCount, categoryLimit })}
-                  disabled={submitting}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-5 py-2.5 inline-flex items-center gap-2 text-white rounded-xl font-semibold shadow-lg bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {submitting ? '提交中…' : '开始生成'}
-                </motion.button>
-              </div>
-            </motion.div>
-          </div>
-        </>
-      )}
-    </AnimatePresence>
+      </div>
+    </ResponsiveDialog>
   );
 }

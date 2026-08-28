@@ -1,6 +1,6 @@
 // frontend/src/pages/InterviewSchedulePage.tsx
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import { useInterviewSchedule } from '../hooks/useInterviewSchedule';
@@ -11,8 +11,11 @@ import { InterviewFormModal } from '../components/interviewschedule/InterviewFor
 import { CalendarErrorBoundary } from '../components/interviewschedule/CalendarErrorBoundary';
 import ConfirmDialog from '../components/ConfirmDialog';
 import type { InterviewSchedule, InterviewFormData, InterviewStatus } from '../types/interviewSchedule';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 export const InterviewSchedulePage: React.FC = () => {
+  const isPhone = useMediaQuery('(max-width: 767px)');
+  const isCoarsePointer = useMediaQuery('(pointer: coarse)');
   const {
     interviews,
     loading,
@@ -23,7 +26,9 @@ export const InterviewSchedulePage: React.FC = () => {
     updateStatus,
   } = useInterviewSchedule();
 
-  const [view, setView] = useState<'day' | 'week' | 'month' | 'list'>('week');
+  const [view, setView] = useState<'day' | 'week' | 'month' | 'list'>(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'list' : 'week'
+  ));
   const [date, setDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
@@ -32,6 +37,10 @@ export const InterviewSchedulePage: React.FC = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [interviewToDelete, setInterviewToDelete] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (isPhone && view === 'week') setView('list');
+  }, [isPhone, view]);
 
   const handleAddClick = useCallback(() => {
     setModalMode('create');
@@ -162,13 +171,14 @@ export const InterviewSchedulePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="mx-auto max-w-7xl p-0 sm:p-2 lg:p-6">
       <ScheduleHeader
         view={view}
         onViewChange={setView}
         date={date}
         onDateChange={setDate}
         onAddClick={handleAddClick}
+        compact={isPhone}
       />
 
       {view === 'list' ? (
@@ -189,6 +199,7 @@ export const InterviewSchedulePage: React.FC = () => {
             onDateChange={setDate}
             onEventDrop={handleEventDrop}
             onEventResize={handleEventResize}
+            interactionEnabled={!isCoarsePointer}
           />
         </CalendarErrorBoundary>
       )}

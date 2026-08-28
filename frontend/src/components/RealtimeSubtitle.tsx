@@ -39,7 +39,7 @@ export default function RealtimeSubtitle({
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-800 overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
+      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/80 sm:px-5 sm:py-4">
         <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200 tracking-wide">对话实录</h4>
         <div className="flex items-center gap-3">
           {isAiSpeaking && (
@@ -60,7 +60,7 @@ export default function RealtimeSubtitle({
       {/* Chat History */}
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5 scroll-smooth"
+        className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4 scroll-smooth sm:p-5"
       >
         <AnimatePresence initial={false}>
           {/* History Messages */}

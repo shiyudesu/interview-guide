@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, ChevronRight, ChevronLeft, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 import type { InterviewFormData, ParseResponse, InterviewType } from '../../types/interviewSchedule';
 import { interviewScheduleApi } from '../../api/interviewSchedule';
 import dayjs from 'dayjs';
+import ResponsiveDialog from '../ResponsiveDialog';
 
 interface InterviewFormModalProps {
   isOpen: boolean;
@@ -149,7 +150,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
         <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -384,7 +385,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">第几轮面试</label>
           <input
@@ -424,7 +425,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
         </div>
       )}
 
-      <div className="flex justify-between pt-5 gap-3">
+      <div className="sticky bottom-0 -mx-4 mt-5 flex flex-col gap-3 border-t border-slate-100 bg-white/95 px-4 pb-1 pt-4 backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 sm:-mx-6 sm:flex-row sm:justify-between sm:px-6">
         {mode === 'create' && step !== 'text' ? (
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -447,13 +448,13 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             删除
           </motion.button>
         ) : null}
-        <div className="flex gap-3 ml-auto">
+        <div className="flex w-full flex-col-reverse gap-3 sm:ml-auto sm:w-auto sm:flex-row">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all"
+            className="min-h-11 flex-1 rounded-xl px-5 py-2.5 font-medium text-slate-700 transition-all hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             取消
           </motion.button>
@@ -462,7 +463,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={submitting}
-            className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-500 dark:to-primary-400 text-white rounded-xl font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="min-h-11 flex-1 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-6 py-2.5 font-medium text-white shadow-lg transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 dark:from-primary-500 dark:to-primary-400"
           >
             {submitting ? '保存中...' : '保存'}
           </motion.button>
@@ -472,39 +473,16 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+    <ResponsiveDialog
+      open={isOpen}
+      onClose={onClose}
+      title={mode === 'edit' ? '编辑面试' : '添加面试'}
+      size="lg"
+      closeDisabled={parsing || submitting}
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ duration: 0.2 }}
-        className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200/50 dark:border-slate-700/50"
-      >
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white">
-            {mode === 'edit' ? '编辑面试' : '添加面试'}
-          </h2>
-          <motion.button
-            whileHover={{ scale: 1.1, rotate: 90 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
-          >
-            <X className="w-5 h-5" />
-          </motion.button>
-        </div>
-
-        <div className="p-6">
-          {step === 'text' && renderTextInput()}
-          {step === 'parse-result' && renderParseResult()}
-          {step === 'form' && renderForm()}
-        </div>
-      </motion.div>
-    </motion.div>
+      {step === 'text' && renderTextInput()}
+      {step === 'parse-result' && renderParseResult()}
+      {step === 'form' && renderForm()}
+    </ResponsiveDialog>
   );
 };

@@ -90,7 +90,7 @@ function ScoreCard({
   strokeDashoffset: number;
 }) {
   return (
-    <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 rounded-2xl p-8 text-white">
+    <div className="rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-5 text-white sm:p-8">
       <div className="flex flex-col items-center text-center">
         {/* 圆环进度条 */}
         <div className="relative w-32 h-32 mb-6">
@@ -143,7 +143,7 @@ function ScoreCard({
 function StrengthsSection({ strengths }: { strengths: string[] }) {
   return (
       <motion.div
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm"
+          className="rounded-2xl bg-white p-4 shadow-sm dark:bg-slate-800 sm:p-6"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -171,7 +171,7 @@ function StrengthsSection({ strengths }: { strengths: string[] }) {
 function ImprovementsSection({ improvements }: { improvements: string[] }) {
   return (
       <motion.div
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm"
+          className="rounded-2xl bg-white p-4 shadow-sm dark:bg-slate-800 sm:p-6"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
@@ -251,10 +251,10 @@ function QuestionCard({
     >
       {/* 问题头部 */}
         <div
-            className="px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            className="flex cursor-pointer flex-col gap-3 px-4 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 sm:flex-row sm:items-center sm:justify-between sm:px-5"
         onClick={onToggle}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <span
               className="w-8 h-8 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center text-sm font-semibold">
             {index + 1}

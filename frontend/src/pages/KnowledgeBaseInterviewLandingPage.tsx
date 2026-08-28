@@ -189,17 +189,17 @@ export default function KnowledgeBaseInterviewLandingPage() {
             选择知识库进入面试，或维护题库
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex">
           <button
             onClick={loadKnowledgeBases}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 whitespace-nowrap"
+            className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             <RefreshCw className="w-4 h-4" />
             刷新
           </button>
           <button
             onClick={() => navigate('/knowledgebase/upload')}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 whitespace-nowrap"
+            className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-600"
           >
             <Plus className="w-4 h-4" />
             上传知识库

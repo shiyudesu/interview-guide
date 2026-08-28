@@ -24,6 +24,15 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: /mobile-responsive\.spec\.ts/,
+    },
+    {
+      name: 'mobile-chrome',
+      testMatch: /mobile-responsive\.spec\.ts/,
+      use: {
+        ...devices['Pixel 5'],
+        viewport: { width: 360, height: 800 },
+      },
     },
   ],
   webServer: {

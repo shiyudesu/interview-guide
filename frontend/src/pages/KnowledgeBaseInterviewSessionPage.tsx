@@ -98,7 +98,7 @@ export default function KnowledgeBaseInterviewSessionPage() {
   if (awaitingEvaluation) {
     return (
       <div className="max-w-xl mx-auto min-h-[55vh] flex items-center justify-center">
-        <div className="w-full rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center shadow-sm">
+        <div className="w-full rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-8">
           {evaluationError && !evaluationError.includes('继续重试') ? (
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
           ) : (

@@ -8,6 +8,7 @@ import {
 import { llmProviderApi } from '../api/llmProvider';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ProviderDropdown from '../components/ProviderDropdown';
+import ResponsiveDialog from '../components/ResponsiveDialog';
 import type {
   ProviderItem, CreateProviderRequest, UpdateProviderRequest,
   ProviderTestResult, ProviderModelList, AsrConfig, TtsConfig, AsrConfigRequest, TtsConfigRequest,
@@ -40,7 +41,7 @@ type StatusBadgeProps = {
 };
 
 const CARD_CLASS = `flex h-full min-h-[330px] flex-col rounded-xl border border-slate-200
-  bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700
+  bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 sm:p-5
   dark:bg-slate-800`;
 
 const ICON_WRAP_CLASS = `flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg
@@ -52,7 +53,7 @@ const DETAILS_CLASS = `mb-4 flex-1 space-y-1 rounded-lg border border-slate-100 
 const ACTION_BAR_CLASS = `mt-auto flex min-h-12 flex-wrap items-center gap-2 border-t
   border-slate-100 pt-3 dark:border-slate-700`;
 
-const ACTION_BUTTON_CLASS = `inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs
+const ACTION_BUTTON_CLASS = `inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs
   font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50`;
 
 function StatusBadge({ icon, children }: StatusBadgeProps) {
@@ -67,13 +68,13 @@ function StatusBadge({ icon, children }: StatusBadgeProps) {
 function ConfigRow({ label, value, title, monospace = false, emphasis = false }: ConfigRowProps) {
   return (
     <div
-      className={`grid grid-cols-[108px_minmax(0,1fr)] items-start gap-3 rounded-md px-2 py-2 text-xs ${
+      className={`grid grid-cols-1 items-start gap-1 rounded-md px-2 py-2 text-xs sm:grid-cols-[108px_minmax(0,1fr)] sm:gap-3 ${
         emphasis ? 'bg-white shadow-sm ring-1 ring-slate-100 dark:bg-slate-800/80 dark:ring-slate-700' : ''
       }`}
     >
       <dt className="whitespace-nowrap text-slate-500 dark:text-slate-400">{label}</dt>
       <dd
-        className={`min-w-0 truncate text-right font-medium text-slate-700 dark:text-slate-200 ${
+        className={`min-w-0 break-all text-left font-medium text-slate-700 dark:text-slate-200 sm:truncate sm:text-right ${
           monospace ? 'font-mono' : ''
         }`}
         title={title}
@@ -551,7 +552,7 @@ export default function SettingsPage() {
 
   // --- Render ---
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl">
       {/* Page header */}
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-2">
@@ -656,7 +657,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Provider header */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="text-lg font-bold text-slate-800 dark:text-white">
                   模型服务
                 </h2>
@@ -664,7 +665,7 @@ export default function SettingsPage() {
                   onClick={openCreateModal}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm
+                  className="flex min-h-11 w-full items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm sm:w-auto
                     bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25
                     hover:from-primary-600 hover:to-primary-700 transition-all"
                 >
@@ -957,30 +958,14 @@ export default function SettingsPage() {
         </AnimatePresence>
       )}
 
-      {/* Create / Edit Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={closeModal}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6"
-              >
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-5">
-                  {editingProvider ? '编辑 Provider' : '新增 Provider'}
-                </h3>
-
-                <div className="space-y-4">
+      <ResponsiveDialog
+        open={showModal}
+        onClose={closeModal}
+        closeDisabled={saving}
+        title={editingProvider ? '编辑 Provider' : '新增 Provider'}
+        size="md"
+      >
+        <div className="space-y-4">
                   {/* Provider ID */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
@@ -1285,11 +1270,11 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Modal actions */}
-                <div className="flex gap-3 justify-end mt-6">
+                <div className="sticky bottom-0 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 bg-white/95 px-4 pb-1 pt-4 backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
                   <motion.button
                     onClick={closeModal}
                     disabled={saving}
-                    className="px-5 py-2.5 border border-slate-200 dark:border-slate-600
+                    className="min-h-11 px-5 py-2.5 border border-slate-200 dark:border-slate-600
                       text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm
                       hover:bg-slate-50 dark:hover:bg-slate-700 transition-all
                       disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1301,7 +1286,7 @@ export default function SettingsPage() {
                   <motion.button
                     onClick={handleSaveModal}
                     disabled={saving}
-                    className="px-5 py-2.5 text-white rounded-xl font-semibold text-sm
+                    className="min-h-11 px-5 py-2.5 text-white rounded-xl font-semibold text-sm
                       bg-gradient-to-r from-primary-500 to-primary-600
                       shadow-lg shadow-primary-500/25
                       hover:from-primary-600 hover:to-primary-700
@@ -1319,35 +1304,16 @@ export default function SettingsPage() {
                     )}
                   </motion.button>
                 </div>
-              </motion.div>
-            </div>
-          </>
-        )}
-      </AnimatePresence>
+      </ResponsiveDialog>
 
       {/* Voice Edit Modal */}
-      <AnimatePresence>
-        {showVoiceModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowVoiceModal(null)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto"
-              >
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-5">
-                  {showVoiceModal === 'asr' ? '编辑 ASR 语音识别' : '编辑 TTS 语音合成'}
-                </h3>
-
+      <ResponsiveDialog
+        open={showVoiceModal !== null}
+        onClose={() => setShowVoiceModal(null)}
+        closeDisabled={voiceSaving}
+        title={showVoiceModal === 'asr' ? '编辑 ASR 语音识别' : '编辑 TTS 语音合成'}
+        size="md"
+      >
                 {showVoiceModal === 'asr' ? (
                   <div className="space-y-4">
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">连接配置</p>
@@ -1363,7 +1329,7 @@ export default function SettingsPage() {
                       <input type="text" value={asrForm.url || ''} onChange={(e) => setAsrForm(f => ({ ...f, url: e.target.value }))}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow" />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Model</label>
                         <input type="text" value={asrForm.model || ''} onChange={(e) => setAsrForm(f => ({ ...f, model: e.target.value }))}
@@ -1383,7 +1349,7 @@ export default function SettingsPage() {
                     </div>
 
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">音频参数</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Format</label>
                         <input type="text" value={asrForm.format || ''} onChange={(e) => setAsrForm(f => ({ ...f, format: e.target.value }))}
@@ -1397,7 +1363,7 @@ export default function SettingsPage() {
                     </div>
 
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">VAD 参数</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Turn Detection</label>
                         <select value={asrForm.enableTurnDetection ? 'true' : 'false'} onChange={(e) => setAsrForm(f => ({ ...f, enableTurnDetection: e.target.value === 'true' }))}
@@ -1412,7 +1378,7 @@ export default function SettingsPage() {
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Threshold</label>
                         <input type="number" step="0.1" value={asrForm.turnDetectionThreshold || 0} onChange={(e) => setAsrForm(f => ({ ...f, turnDetectionThreshold: Number(e.target.value) }))}
@@ -1440,7 +1406,7 @@ export default function SettingsPage() {
                       <input type="text" value={ttsForm.url || ''} onChange={(e) => setTtsForm(f => ({ ...f, url: e.target.value }))}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow" />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Model</label>
                         <input type="text" value={ttsForm.model || ''} onChange={(e) => setTtsForm(f => ({ ...f, model: e.target.value }))}
@@ -1455,7 +1421,7 @@ export default function SettingsPage() {
                     </div>
 
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">语音参数</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Voice</label>
                         <input type="text" value={ttsForm.voice || ''} onChange={(e) => setTtsForm(f => ({ ...f, voice: e.target.value }))}
@@ -1467,7 +1433,7 @@ export default function SettingsPage() {
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-400 transition-shadow" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Sample Rate</label>
                         <input type="number" value={ttsForm.sampleRate || 0} onChange={(e) => setTtsForm(f => ({ ...f, sampleRate: Number(e.target.value) }))}
@@ -1486,7 +1452,7 @@ export default function SettingsPage() {
                     </div>
 
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">输出控制</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Speech Rate</label>
                         <input type="number" step="0.1" value={ttsForm.speechRate || 0} onChange={(e) => setTtsForm(f => ({ ...f, speechRate: Number(e.target.value) }))}
@@ -1502,11 +1468,11 @@ export default function SettingsPage() {
                 )}
 
                 {/* Modal actions */}
-                <div className="flex gap-3 justify-end mt-6">
+                <div className="sticky bottom-0 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 bg-white/95 px-4 pb-1 pt-4 backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
                   <motion.button
                     onClick={() => setShowVoiceModal(null)}
                     disabled={voiceSaving}
-                    className="px-5 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-h-11 px-5 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -1515,7 +1481,7 @@ export default function SettingsPage() {
                   <motion.button
                     onClick={showVoiceModal === 'asr' ? handleSaveAsr : handleSaveTts}
                     disabled={voiceSaving}
-                    className="px-5 py-2.5 text-white rounded-xl font-semibold text-sm bg-gradient-to-r from-primary-500 to-primary-600 shadow-lg shadow-primary-500/25 hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-h-11 px-5 py-2.5 text-white rounded-xl font-semibold text-sm bg-gradient-to-r from-primary-500 to-primary-600 shadow-lg shadow-primary-500/25 hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -1529,11 +1495,7 @@ export default function SettingsPage() {
                     )}
                   </motion.button>
                 </div>
-              </motion.div>
-            </div>
-          </>
-        )}
-      </AnimatePresence>
+      </ResponsiveDialog>
 
       <ConfirmDialog
         open={pendingDefaultProviderId !== null}
@@ -1565,70 +1527,16 @@ export default function SettingsPage() {
         }}
       />
 
-      {/* Delete confirmation dialog */}
-      <AnimatePresence>
-        {deleteConfirmId && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDeleteConfirmId(null)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6"
-              >
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
-                  删除 Provider
-                </h3>
-                <p className="text-slate-600 dark:text-slate-300 mb-6">
-                  确定要删除 Provider &ldquo;{deleteConfirmId}&rdquo; 吗？删除后无法恢复。
-                  如果有模块正在使用此 Provider，请先切换到其他 Provider。
-                </p>
-                <div className="flex gap-3 justify-end">
-                  <motion.button
-                    onClick={() => setDeleteConfirmId(null)}
-                    disabled={deleting}
-                    className="px-5 py-2.5 border border-slate-200 dark:border-slate-600
-                      text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm
-                      hover:bg-slate-50 dark:hover:bg-slate-700 transition-all
-                      disabled:opacity-50 disabled:cursor-not-allowed"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    取消
-                  </motion.button>
-                  <motion.button
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="px-5 py-2.5 text-white rounded-xl font-semibold text-sm
-                      bg-gradient-to-r from-red-500 to-red-600
-                      hover:from-red-600 hover:to-red-700
-                      transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {deleting ? (
-                      <span className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        删除中...
-                      </span>
-                    ) : (
-                      '确定删除'
-                    )}
-                  </motion.button>
-                </div>
-              </motion.div>
-            </div>
-          </>
-        )}
-      </AnimatePresence>
+      <ConfirmDialog
+        open={deleteConfirmId !== null}
+        title="删除 Provider"
+        message={`确定要删除 Provider “${deleteConfirmId ?? ''}” 吗？删除后无法恢复。如果有模块正在使用此 Provider，请先切换到其他 Provider。`}
+        confirmText="确定删除"
+        confirmVariant="danger"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
 
       {/* Toast notification */}
       <AnimatePresence>
@@ -1637,7 +1545,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 50, x: '-50%' }}
             animate={{ opacity: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, y: 50, x: '-50%' }}
-            className={`fixed bottom-6 left-1/2 px-5 py-3 rounded-xl shadow-lg text-sm font-medium
+            className={`fixed bottom-6 left-1/2 max-w-[calc(100vw-2rem)] px-5 py-3 rounded-xl shadow-lg text-center text-sm font-medium
               flex items-center gap-2 z-[60] ${
                 toast.type === 'success'
                   ? 'bg-emerald-600 text-white'

@@ -68,7 +68,7 @@ export default function InterviewPanel({
 
   if (interviews.length === 0) {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center">
+        <div className="rounded-2xl bg-white p-6 text-center dark:bg-slate-800 sm:p-12">
           <div
               className="w-16 h-16 mx-auto mb-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
           <Mic className="w-8 h-8 text-slate-400" />
@@ -92,11 +92,11 @@ export default function InterviewPanel({
       {/* 面试表现趋势图 */}
       {chartData.length > 0 && (
           <motion.div
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6"
+              className="rounded-2xl bg-white p-4 dark:bg-slate-800 sm:p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary-500" />
               <span className="font-semibold text-slate-800 dark:text-white">面试表现趋势</span>
@@ -145,7 +145,7 @@ export default function InterviewPanel({
 
       {/* 历史面试场次 */}
       <motion.div
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6"
+          className="rounded-2xl bg-white p-4 dark:bg-slate-800 sm:p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -226,7 +226,7 @@ function InterviewItemCard({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.1 }}
       onClick={onView}
-      className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors group"
+      className="group flex cursor-pointer flex-col gap-3 rounded-xl bg-slate-50 p-4 transition-colors hover:bg-slate-100 dark:bg-slate-700/50 dark:hover:bg-slate-700 sm:flex-row sm:items-center sm:gap-4"
     >
       {/* 得分 */}
       <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg ${
@@ -242,7 +242,7 @@ function InterviewItemCard({
         <p className="font-medium text-slate-800 dark:text-white truncate">
           模拟面试 #{total - index}
         </p>
-        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+        <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400 sm:gap-4">
           <span className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
             {formatDateOnly(interview.createdAt)}
@@ -255,12 +255,13 @@ function InterviewItemCard({
       </div>
 
       {/* 操作按钮 */}
-      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+      <div className="flex items-center gap-2 self-end opacity-100 sm:self-auto lg:opacity-0 lg:group-hover:opacity-100">
       {/* 导出按钮 */}
       <motion.button
         onClick={(e) => { e.stopPropagation(); onExport(); }}
         disabled={exporting}
-        className="px-3 py-2 text-slate-400 hover:text-primary-500 hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-all"
+        aria-label="导出面试报告"
+        className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-white hover:text-primary-500 dark:hover:bg-slate-600"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -271,7 +272,7 @@ function InterviewItemCard({
         <button
           onClick={onDelete}
           disabled={deleting}
-          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/30"
           title="删除面试记录"
         >
           {deleting ? (

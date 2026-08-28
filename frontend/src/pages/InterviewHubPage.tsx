@@ -148,14 +148,14 @@ export default function InterviewHubPage() {
       </div>
 
       {/* 配置区域 */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 mb-8">
+      <div className="mb-8 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
         <div className="space-y-6">
           {/* 面试模式 */}
           <div>
             <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
               面试模式
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {([
                 {
                   value: 'text' as InterviewMode,
@@ -329,7 +329,7 @@ export default function InterviewHubPage() {
             <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
               难度
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {DIFFICULTY_OPTIONS.map(opt => {
                 const selected = config.difficulty === opt.value;
                 return (
@@ -471,7 +471,7 @@ export default function InterviewHubPage() {
       </div>
 
       {/* 最近面试记录 */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
+      <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-slate-800 dark:text-white">最近面试记录</h2>
           <Link
@@ -508,7 +508,7 @@ export default function InterviewHubPage() {
                       navigate(`/voice-interview/${item.voiceSessionId}/evaluation`);
                     }
                   }}
-                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group"
+                  className="group flex cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 sm:gap-4 sm:p-4"
                 >
                   {/* 类型图标 */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${

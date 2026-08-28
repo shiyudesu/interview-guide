@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 px-4 py-12">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 px-4 py-8 sm:py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center text-white">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500 shadow-xl shadow-primary-500/30">
@@ -48,7 +48,7 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-slate-300">你的简历、面试记录和 API Key 仅属于当前账号</p>
         </div>
 
-        <form onSubmit={submit} className="rounded-2xl border border-white/10 bg-white p-7 shadow-2xl dark:bg-slate-900">
+        <form onSubmit={submit} className="rounded-2xl border border-white/10 bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-7">
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-xl bg-primary-50 p-2.5 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300">
               <LockKeyhole className="h-5 w-5" />
