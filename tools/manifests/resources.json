@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 59
+    "testFileCount": 60
   },
   "tests": [
     {
@@ -752,6 +752,11 @@
       "disabledMarkers": 0,
       "file": "frontend/e2e/interview-loading.spec.ts",
       "sha256": "642cccbd870016c5499cc5bb210908df5cd089eb59b2203b17df2969d62eef8d"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/e2e/mobile-responsive.spec.ts",
+      "sha256": "bbfa75531d72b3f8194a9364a311d523940b5873b6228d3b8a220be2b436cae1"
     },
     {
       "disabledMarkers": 0,
