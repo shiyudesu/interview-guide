@@ -63,7 +63,9 @@ test.describe('模拟面试加载状态', () => {
   });
 
   test('聊天工作区占满可用高度，并将输入区固定在底部', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+    // 1279px 位于桌面侧栏收起的断点边缘，此时工作区达到最大宽度后仍应居中，
+    // 避免所有剩余空间都堆在右侧。
+    await page.setViewportSize({ width: 1279, height: 900 });
     await page.route('**/api/auth/config', route => route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({ authEnabled: false, registrationEnabled: false }),
@@ -130,6 +132,9 @@ test.describe('模拟面试加载状态', () => {
     expect(workspaceBox).not.toBeNull();
     expect(messageListBox).not.toBeNull();
     expect(composerBox).not.toBeNull();
+    const leftGap = workspaceBox!.x;
+    const rightGap = 1279 - workspaceBox!.x - workspaceBox!.width;
+    expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(1);
     expect(workspaceBox!.height).toBeGreaterThan(780);
     expect(messageListBox!.height).toBeGreaterThan(430);
     expect(composerBox!.y + composerBox!.height).toBeLessThanOrEqual(workspaceBox!.y + workspaceBox!.height);
