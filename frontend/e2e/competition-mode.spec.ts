@@ -40,7 +40,33 @@ async function installCompetitionApi(page: Page) {
     }
     if (path === '/api/resumes') return json(route, []);
     if (path === '/api/interview/skills') return json(route, []);
-    if (path === '/api/interview/sessions') return json(route, []);
+    if (path === '/api/interview/sessions') {
+      if (route.request().method() === 'POST') {
+        return json(route, {
+          sessionId: 'campus-http-session',
+          channel: 'TEXT',
+          status: 'IN_PROGRESS',
+          currentQuestion: {
+            questionId: 'question-1',
+            kind: 'MAIN',
+            parentQuestionId: null,
+            question: '请介绍一个你解决过的技术问题。',
+            type: 'TECHNICAL',
+            category: '项目经验',
+          },
+          turns: [],
+          progress: {
+            completedMainQuestions: 0,
+            plannedMainQuestions: 6,
+            followUpsUsedForCurrentMain: 0,
+            maxFollowUpsPerMain: 2,
+          },
+          knowledgeBaseId: null,
+          interviewCategory: null,
+        });
+      }
+      return json(route, []);
+    }
     if (path === '/api/knowledgebase/stats') {
       return json(route, {
         totalCount: 1,
@@ -88,5 +114,32 @@ test.describe('OpenTrek 校园赛版', () => {
     await expect(page.getByRole('button', { name: '删除' })).toHaveCount(0);
     await expect(page.getByTitle('编辑分类')).toHaveCount(0);
     await expect(page.getByRole('button', { name: '下载' })).toBeVisible();
+  });
+
+  test('明文校园网 HTTP 缺少 randomUUID 时仍可开始文字面试', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        configurable: true,
+        value: undefined,
+      });
+    });
+    await installCompetitionApi(page);
+
+    await page.goto('/interview-hub');
+    await expect(page.getByText('OpenTrek 校园赛版').first()).toBeVisible({ timeout: 15_000 });
+    await expect.poll(() => page.evaluate(() => typeof crypto.randomUUID)).toBe('undefined');
+
+    const createRequestPromise = page.waitForRequest(request => (
+      request.method() === 'POST'
+      && new URL(request.url()).pathname === '/api/interview/sessions'
+    ));
+    await page.getByRole('button', { name: '开始文字面试' }).click();
+
+    const createRequest = await createRequestPromise;
+    const payload = createRequest.postDataJSON() as { requestId?: string };
+    expect(payload.requestId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+    await expect(page).toHaveURL(/\/interview\/session\/campus-http-session$/);
   });
 });

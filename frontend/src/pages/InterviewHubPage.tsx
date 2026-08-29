@@ -21,6 +21,7 @@ import {
 import {ROUTES} from '../constants/routes';
 import InterviewProviderSelector from '../components/InterviewProviderSelector';
 import { useAuth } from '../auth/AuthContext';
+import {createRequestId} from '../utils/requestId';
 
 // 统一的面试记录项
 interface RecentInterviewItem {
@@ -107,7 +108,7 @@ export default function InterviewHubPage() {
     }
 
     if (competitionMode || config.mode === 'text') {
-      navigate(ROUTES.interviewCreate(crypto.randomUUID()), {
+      navigate(ROUTES.interviewCreate(createRequestId()), {
         state: {
           resumeId: config.resumeId,
           interviewConfig: {

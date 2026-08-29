@@ -8,6 +8,7 @@ import type { Difficulty } from '../hooks/useInterviewConfig';
 import type {CategoryDTO} from '../api/skill';
 import { CUSTOM_SKILL_ID } from '../hooks/useInterviewConfig';
 import {resolveInterviewEntry} from './interviewEntry';
+import {createRequestId} from '../utils/requestId';
 
 interface Message {
   type: 'interviewer' | 'user';
@@ -179,7 +180,7 @@ export default function Interview({
         : {
             questionId: currentQuestion.questionId,
             answer: submittedAnswer,
-            requestId: crypto.randomUUID(),
+            requestId: createRequestId(),
           };
     pendingTurnRef.current = turnRequest;
     setMessages(prev => {

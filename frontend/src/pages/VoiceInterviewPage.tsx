@@ -13,6 +13,7 @@ import {
   VoiceInterviewWebSocket,
 } from '../api/voiceInterview';
 import { resolveVoiceWebSocketUrl } from '../api/voiceWebSocketUrl';
+import {createRequestId} from '../utils/requestId';
 
 type VoiceConfig = {
   skillId: string;
@@ -370,7 +371,7 @@ export default function VoiceInterviewPage() {
     setSubmitting(true);
     const text = userText.trim();
     const pending = pendingTurnRef.current;
-    const requestId = pending?.text === text ? pending.requestId : crypto.randomUUID();
+    const requestId = pending?.text === text ? pending.requestId : createRequestId();
     pendingTurnRef.current = {text, requestId};
     setMessages(prev => [
       ...prev,
@@ -580,7 +581,7 @@ export default function VoiceInterviewPage() {
         plannedDuration: config.plannedDuration,
         resumeId: config.resumeId,
         llmProvider: config.llmProvider,
-        requestId: crypto.randomUUID(),
+        requestId: createRequestId(),
       });
 
       setSessionId(session.sessionId);

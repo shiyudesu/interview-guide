@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 import { ROUTE_PATTERNS, ROUTES } from './constants/routes';
 import { AuthProvider } from './auth/AuthContext';
 import { AnonymousRoute, ProtectedRoute, StandardModeRoute } from './auth/RouteGuards';
+import {createRequestId} from './utils/requestId';
 
 // Lazy load components
 const UploadPage = lazy(() => import('./pages/UploadPage'));
@@ -170,7 +171,7 @@ function InterviewWrapper() {
   if (!requestId && !activeSessionId && !entryState.sessionIdToResume) {
     return (
       <Navigate
-        to={ROUTES.interviewCreate(crypto.randomUUID())}
+        to={ROUTES.interviewCreate(createRequestId())}
         replace
         state={{ ...entryState, resumeId: effectiveResumeId }}
       />
