@@ -81,7 +81,7 @@ export default function InterviewChatPanel({
   return (
     <section
       data-testid="interview-workspace"
-      className="-m-4 mx-auto flex h-[calc(100dvh-4rem)] min-h-0 w-[calc(100%+2rem)] max-w-6xl flex-col overflow-hidden border-y border-slate-200/80 bg-white shadow-none sm:m-0 sm:h-[calc(100dvh-7rem)] sm:w-full sm:rounded-[28px] sm:border sm:shadow-xl sm:shadow-slate-200/50 xl:h-[calc(100dvh-5rem)] dark:border-slate-700 dark:bg-slate-900 dark:sm:shadow-slate-950/40"
+      className="-mx-4 -my-4 flex h-[calc(100dvh-4rem)] min-h-0 w-[calc(100%+2rem)] max-w-6xl flex-col overflow-hidden border-y border-slate-200/80 bg-white shadow-none sm:mx-auto sm:my-0 sm:h-[calc(100dvh-7rem)] sm:w-full sm:rounded-[28px] sm:border sm:shadow-xl sm:shadow-slate-200/50 xl:h-[calc(100dvh-5rem)] dark:border-slate-700 dark:bg-slate-900 dark:sm:shadow-slate-950/40"
     >
       <header className="relative flex flex-shrink-0 items-center justify-between gap-2 border-b border-slate-100 bg-white/95 px-4 py-3 sm:gap-4 sm:px-7 sm:py-4 dark:border-slate-800 dark:bg-slate-900/95">
         <div className="flex min-w-0 items-center gap-3">
