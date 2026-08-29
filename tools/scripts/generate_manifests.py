@@ -683,6 +683,7 @@ def extract_configuration(root: Path) -> dict[str, Any]:
     for env_path in (
         root / ".env.example",
         root / ".env.http.example",
+        root / ".env.campus.example",
         root / "deploy/.env.example",
     ):
         for line_number, line in enumerate(

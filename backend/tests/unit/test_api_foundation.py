@@ -55,6 +55,7 @@ def test_public_auth_config_exposes_only_feature_switches() -> None:
     assert response.json() == {
         "authEnabled": True,
         "registrationEnabled": False,
+        "competitionMode": False,
     }
 
 

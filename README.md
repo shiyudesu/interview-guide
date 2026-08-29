@@ -65,6 +65,7 @@ docker compose run --rm app interview-guide-create-admin --email admin@example.c
 | 场景 | 入口 | 说明 |
 | --- | --- | --- |
 | 本地使用或源码构建 | `scripts/start.sh` | 只发布前端入口，其他服务保留在 Compose 网络内 |
+| OpenTrek 校园赛 | `scripts/start-campus.sh` | 独立数据卷、只读知识库和文字面试，校园网 HTTP |
 | 正式服务器 | [GHCR 主动拉取部署](docs/DEPLOYMENT.md) | 使用备案域名和 HTTPS，服务器无需克隆仓库 |
 | NAT 高端口临时验收 | `scripts/start-http.sh` | 使用独立配置和数据卷，仅用于短期明文验收 |
 
@@ -126,6 +127,9 @@ docker-compose.test.yml 集成测试回环端口覆盖
 - [GHCR 主动拉取部署](docs/DEPLOYMENT.md)
 - [统一自适应面试](docs/ADAPTIVE_INTERVIEW.md)
 - [多租户账号与 BYOK](docs/MULTI_TENANT_BYOK.md)
+- [OpenTrek 迁移与校园部署计划](docs/plans/OPENTREK_MIGRATION_PLAN.md)
+- [OpenTrek 校园赛配置](docs/CONFIGURATION.md#opentrek-校园赛模式)
+- [OpenTrek 校园赛运维](docs/OPERATIONS.md#opentrek-校园赛部署)
 - [普通面试参考资料来源](docs/REFERENCE_SOURCES.md)
 
 文档、代码或部署行为变更后，可运行：

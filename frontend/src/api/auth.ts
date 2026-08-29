@@ -3,6 +3,7 @@ import request from './request';
 export interface AuthConfig {
   authEnabled: boolean;
   registrationEnabled: boolean;
+  competitionMode: boolean;
 }
 
 export interface AuthUser {

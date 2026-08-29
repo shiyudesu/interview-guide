@@ -137,11 +137,16 @@ async def generate_questions(
     service: QuestionServiceDependency,
 ) -> Response:
     await enforce_generation_rate_limit(request)
+    effective_payload = (
+        payload.model_copy(update={"follow_up_count": 0})
+        if request.app.state.settings.competition_mode
+        else payload
+    )
     return result_response(
         Result.ok(
             await service.submit_generation_task(
                 knowledge_base_id,
-                payload,
+                effective_payload,
             )
         )
     )

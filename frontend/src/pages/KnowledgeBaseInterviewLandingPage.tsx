@@ -22,6 +22,7 @@ import GenerateKnowledgeBaseQuestionsModal, {
 } from '../components/knowledgebaseInterview/GenerateKnowledgeBaseQuestionsModal';
 import KnowledgeBaseCard from '../components/knowledgebaseInterview/KnowledgeBaseCard';
 import { isQuestionGenerationActive } from './questionGenerationStatus';
+import { useAuth } from '../auth/AuthContext';
 
 type SortKey = 'time' | 'name' | 'question';
 
@@ -33,6 +34,7 @@ const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
 
 export default function KnowledgeBaseInterviewLandingPage() {
   const navigate = useNavigate();
+  const { competitionMode } = useAuth();
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBaseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState('');
@@ -197,13 +199,15 @@ export default function KnowledgeBaseInterviewLandingPage() {
             <RefreshCw className="w-4 h-4" />
             刷新
           </button>
-          <button
-            onClick={() => navigate('/knowledgebase/upload')}
-            className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-600"
-          >
-            <Plus className="w-4 h-4" />
-            上传知识库
-          </button>
+          {!competitionMode && (
+            <button
+              onClick={() => navigate('/knowledgebase/upload')}
+              className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-600"
+            >
+              <Plus className="w-4 h-4" />
+              上传知识库
+            </button>
+          )}
         </div>
       </div>
 
@@ -239,7 +243,11 @@ export default function KnowledgeBaseInterviewLandingPage() {
         <div className="flex flex-col items-center justify-center min-h-[320px] rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 text-slate-400 gap-3">
           <Database className="w-10 h-10" />
           <p className="text-sm">
-            {keyword.trim() ? '没有匹配的知识库' : '暂无已完成知识库，先上传并等待向量化完成'}
+            {keyword.trim()
+              ? '没有匹配的知识库'
+              : competitionMode
+                ? '暂无可用的 OpenTrek 预置知识库，请联系比赛管理员'
+                : '暂无已完成知识库，先上传并等待向量化完成'}
           </p>
         </div>
       ) : (

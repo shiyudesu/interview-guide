@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, Request
 from starlette.responses import Response
 
+from interview_guide.common.ai.opentrek import OpenTrekCapability
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
@@ -72,7 +73,7 @@ async def parse_jd(request: Request, payload: ParseJdRequest) -> Response:
         now_ms=time.time_ns() // 1_000_000,
     )
     parser = JdParseService(
-        infrastructure.provider_resolver.for_user(actor.user_id),
+        infrastructure.provider_registry_for(actor.user_id, OpenTrekCapability.INTERVIEWER),
         StructuredOutputInvoker(infrastructure.llm_adapter),
         prompts,
         infrastructure.prompt_sanitizer,

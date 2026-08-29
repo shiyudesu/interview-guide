@@ -46,6 +46,7 @@ async def auth_config(request: Request) -> AuthConfigResponse:
     return AuthConfigResponse(
         auth_enabled=settings.auth_enabled,
         registration_enabled=settings.auth_registration_enabled,
+        competition_mode=settings.competition_mode,
     )
 
 

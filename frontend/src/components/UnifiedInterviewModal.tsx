@@ -8,6 +8,7 @@ import { useInterviewConfig, CUSTOM_SKILL_ID, DIFFICULTY_OPTIONS, type Interview
 import { getSkillIcon } from '../utils/skillIcons';
 import InterviewProviderSelector from './InterviewProviderSelector';
 import ResponsiveDialog from './ResponsiveDialog';
+import { useAuth } from '../auth/AuthContext';
 
 export interface UnifiedInterviewConfig {
   mode: InterviewMode;
@@ -49,11 +50,16 @@ export default function UnifiedInterviewModal({
   subtitle = '选择面试模式和主题，快速开始',
   startButtonText = '开始面试',
 }: UnifiedInterviewModalProps) {
-  const config = useInterviewConfig({ defaultMode, defaultResumeId, autoLoad: false });
+  const { competitionMode } = useAuth();
+  const config = useInterviewConfig({
+    defaultMode: competitionMode ? 'text' : defaultMode,
+    defaultResumeId,
+    autoLoad: false,
+  });
 
   useEffect(() => {
     if (isOpen) {
-      config.setMode(defaultMode);
+      config.setMode(competitionMode ? 'text' : defaultMode);
       if (defaultResumeId != null) {
         config.setResumeId(defaultResumeId);
         config.setShowMore(true);
@@ -146,13 +152,13 @@ export default function UnifiedInterviewModal({
                           desc: '推荐：更稳定，更适合系统化练习',
                           recommended: true,
                         },
-                        {
+                        ...(!competitionMode ? [{
                           value: 'voice' as InterviewMode,
                           label: '语音面试',
                           icon: Mic,
                           desc: '实时语音对话，偏临场模拟',
                           recommended: false,
-                        },
+                        }] : []),
                       ]).map(opt => {
                         const Icon = opt.icon;
                         const selected = config.mode === opt.value;
@@ -340,13 +346,15 @@ export default function UnifiedInterviewModal({
                   </div>
                 </div>
 
-                <InterviewProviderSelector
-                  providers={config.providers}
-                  defaultProviderId={config.defaultProviderId}
-                  value={config.llmProvider}
-                  loading={config.loadingProviders}
-                  onChange={config.setLlmProvider}
-                />
+                {!competitionMode && (
+                  <InterviewProviderSelector
+                    providers={config.providers}
+                    defaultProviderId={config.defaultProviderId}
+                    value={config.llmProvider}
+                    loading={config.loadingProviders}
+                    onChange={config.setLlmProvider}
+                  />
+                )}
 
                 {/* 更多选项 */}
                 <button

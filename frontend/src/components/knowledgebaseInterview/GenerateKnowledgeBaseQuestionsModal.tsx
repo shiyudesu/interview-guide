@@ -25,6 +25,7 @@ interface GenerateKnowledgeBaseQuestionsModalProps {
   defaultDifficulty?: string;
   defaultCategoryLimit?: number;
   initialConfig?: GenerateQuestionsConfig | null;
+  fixedFollowUpCount?: number;
   submitting: boolean;
   error: string;
   onClose: () => void;
@@ -37,6 +38,7 @@ export default function GenerateKnowledgeBaseQuestionsModal({
   defaultDifficulty = DEFAULT_DIFFICULTY,
   defaultCategoryLimit = DEFAULT_CATEGORY_LIMIT,
   initialConfig,
+  fixedFollowUpCount,
   submitting,
   error,
   onClose,
@@ -51,10 +53,10 @@ export default function GenerateKnowledgeBaseQuestionsModal({
     if (open) {
       setDifficulty(initialConfig?.difficulty || defaultDifficulty);
       setQuestionCount(initialConfig?.questionCount || 5);
-      setFollowUpCount(initialConfig?.followUpCount ?? 2);
+      setFollowUpCount(fixedFollowUpCount ?? initialConfig?.followUpCount ?? 2);
       setCategoryLimit(initialConfig?.categoryLimit || defaultCategoryLimit);
     }
-  }, [open, defaultDifficulty, defaultCategoryLimit, initialConfig]);
+  }, [open, defaultDifficulty, defaultCategoryLimit, initialConfig, fixedFollowUpCount]);
 
   const footer = (
     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -136,6 +138,7 @@ export default function GenerateKnowledgeBaseQuestionsModal({
                     </span>
                     <select
                       value={followUpCount}
+                      disabled={fixedFollowUpCount !== undefined}
                       onChange={event => setFollowUpCount(parseInt(event.target.value, 10))}
                       className={INPUT_CLASS}
                     >
@@ -143,6 +146,11 @@ export default function GenerateKnowledgeBaseQuestionsModal({
                         <option key={count} value={count}>{count} 个</option>
                       ))}
                     </select>
+                    {fixedFollowUpCount === 0 && (
+                      <span className="mt-1 block text-xs text-slate-500">
+                        校园赛版由面试 Turn 模型动态追问，预生成题库不附带固定追问。
+                      </span>
+                    )}
                   </label>
                 </div>
 

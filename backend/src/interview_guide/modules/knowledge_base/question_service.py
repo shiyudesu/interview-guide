@@ -11,7 +11,11 @@ from typing import Any, Protocol, cast
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from interview_guide.common.ai.adapter import LlmAdapter
+from interview_guide.common.ai.adapter import LlmAdapter, ProviderConfig
+from interview_guide.common.ai.opentrek import (
+    OpenTrekProviderConfig,
+    opentrek_provider_for_kb_question_generation,
+)
 from interview_guide.common.ai.prompts import (
     DATA_BOUNDARY_INSTRUCTION,
     PromptRepository,
@@ -36,6 +40,7 @@ from interview_guide.modules.interview.models import (
     PlannedInterviewQuestion,
 )
 from interview_guide.modules.interview.service import InterviewService
+from interview_guide.modules.knowledge_base.query_service import QueryRetriever
 from interview_guide.modules.knowledge_base.question_models import (
     CategoryCount,
     CreateKnowledgeBaseInterviewRequest,
@@ -733,6 +738,7 @@ class KnowledgeBaseQuestionGenerationService:
         sanitizer: PromptSanitizer,
         state: QuestionGenerationStateService,
         *,
+        context_retriever_factory: Callable[[uuid.UUID], QueryRetriever | None] | None = None,
         now: Callable[[], datetime] = datetime.now,
     ) -> None:
         self._sessions = sessions
@@ -742,6 +748,7 @@ class KnowledgeBaseQuestionGenerationService:
         self._prompts = prompts
         self._sanitizer = sanitizer
         self._state = state
+        self._context_retriever_factory = context_retriever_factory
         self._now = now
 
     async def execute(
@@ -817,19 +824,33 @@ class KnowledgeBaseQuestionGenerationService:
         registry: ProviderRegistry,
     ) -> str:
         query_repository = KnowledgeBaseQueryRepository(self._sessions, user_id)
-        provider = await registry.get_embedding(provider_alias)
+        retriever = (
+            self._context_retriever_factory(user_id)
+            if self._context_retriever_factory is not None
+            else None
+        )
+        provider = await registry.get_embedding(provider_alias) if retriever is None else None
         texts: list[str] = []
         seen: set[str] = set()
         for query in GENERATION_QUERIES:
-            embeddings = await self._adapter.embed(provider, [query])
-            if not embeddings:
-                continue
-            hits = await query_repository.similarity_search(
-                [knowledge_base_id],
-                embeddings[0],
-                RETRIEVAL_QUERY_TOP_K,
-                0,
-            )
+            if retriever is not None:
+                hits = await retriever.retrieve(
+                    [knowledge_base_id],
+                    query,
+                    RETRIEVAL_QUERY_TOP_K,
+                    0,
+                )
+            else:
+                assert provider is not None
+                embeddings = await self._adapter.embed(provider, [query])
+                if not embeddings:
+                    continue
+                hits = await query_repository.similarity_search(
+                    [knowledge_base_id],
+                    embeddings[0],
+                    RETRIEVAL_QUERY_TOP_K,
+                    0,
+                )
             for hit in hits:
                 value = hit.content
                 normalized = value.strip()
@@ -882,6 +903,83 @@ class KnowledgeBaseQuestionGenerationService:
             )
             or "暂无已有题目"
         )
+        provider = await registry.get_chat(
+            None if provider_id in {None, "", "default"} else provider_id
+        )
+        effective_follow_up_count = (
+            0 if isinstance(provider, OpenTrekProviderConfig) else follow_up_count
+        )
+        if isinstance(provider, OpenTrekProviderConfig) and question_count > 1:
+            generated: list[GeneratedQuestion | None] = []
+            keys: set[str] = set()
+            attempts = 0
+            max_attempts = question_count * 2
+            batch_contexts = split_question_generation_context(context, question_count)
+            while len(generated) < question_count and attempts < max_attempts:
+                attempts += 1
+                target_index = len(generated)
+                previous = [
+                    item.question.strip()
+                    for item in generated
+                    if item is not None and item.question is not None and item.question.strip()
+                ]
+                batch = await self._invoke_generation_batch(
+                    provider,
+                    knowledge_base_name,
+                    difficulty,
+                    1,
+                    effective_follow_up_count,
+                    category_limit,
+                    existing_categories,
+                    "\n".join((existing_questions, *(f"- {item}" for item in previous))),
+                    batch_contexts[target_index],
+                )
+                candidate = next(
+                    (
+                        item
+                        for item in batch.questions or []
+                        if item is not None and item.question is not None and item.question.strip()
+                    ),
+                    None,
+                )
+                if candidate is None:
+                    continue
+                key = self._question_key(candidate.question or "")
+                if key in keys:
+                    continue
+                keys.add(key)
+                generated.append(candidate)
+            if len(generated) < question_count:
+                raise BusinessException(
+                    ErrorCode.INTERVIEW_QUESTION_GENERATION_FAILED,
+                    f"OpenTrek 仅生成 {len(generated)}/{question_count} 道不重复题目",
+                )
+            return GeneratedQuestionList(questions=generated)
+        return await self._invoke_generation_batch(
+            provider,
+            knowledge_base_name,
+            difficulty,
+            question_count,
+            effective_follow_up_count,
+            category_limit,
+            existing_categories,
+            existing_questions,
+            context,
+        )
+
+    async def _invoke_generation_batch(
+        self,
+        provider: ProviderConfig,
+        knowledge_base_name: str,
+        difficulty: str,
+        question_count: int,
+        follow_up_count: int,
+        category_limit: int,
+        existing_categories: str,
+        existing_questions: str,
+        context: str,
+    ) -> GeneratedQuestionList:
+        provider = opentrek_provider_for_kb_question_generation(provider)
         system = (
             self._prompts.render("knowledgebase-question-generation-system.st")
             + "\n\n"
@@ -905,9 +1003,6 @@ class KnowledgeBaseQuestionGenerationService:
                     sanitized_context,
                 ),
             },
-        )
-        provider = await registry.get_chat(
-            None if provider_id in {None, "", "default"} else provider_id
         )
         return await self._structured.invoke(
             provider,
@@ -989,6 +1084,17 @@ class KnowledgeBaseQuestionGenerationService:
     def _question_key(value: str) -> str:
         normalized = unicodedata.normalize("NFC", value).lower()
         return "".join(character for character in normalized if character.isalnum())
+
+
+def split_question_generation_context(context: str, question_count: int) -> list[str]:
+    sections = [
+        section.strip()
+        for section in context.replace("\r\n", "\n").split("\n## ")
+        if len(section.strip()) >= 80
+    ]
+    if len(sections) < question_count:
+        return [context] * question_count
+    return [sections[index] for index in range(question_count)]
 
 
 class QuestionGenPayload:

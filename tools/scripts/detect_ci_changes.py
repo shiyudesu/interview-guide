@@ -79,6 +79,7 @@ def classify_paths(paths: Iterable[str], *, force_full: bool = False) -> ChangeA
     manifests = any(
         path in {
             ".env.example",
+            ".env.campus.example",
             ".env.http.example",
             "docker-compose.dev.yml",
             "docker-compose.test.yml",
@@ -106,6 +107,7 @@ def classify_paths(paths: Iterable[str], *, force_full: bool = False) -> ChangeA
     deployment = any(
         path in {
             ".env.example",
+            ".env.campus.example",
             ".env.http.example",
             "backend/Dockerfile",
             "backend/pyproject.toml",
@@ -118,9 +120,11 @@ def classify_paths(paths: Iterable[str], *, force_full: bool = False) -> ChangeA
             "frontend/package.json",
             "frontend/pnpm-lock.yaml",
             "scripts/start.ps1",
+            "scripts/start-campus.sh",
             "scripts/start-http.sh",
             "scripts/start.sh",
             "scripts/stop.ps1",
+            "scripts/stop-campus.sh",
             "scripts/stop-http.sh",
             "scripts/stop.sh",
             "start.cmd",

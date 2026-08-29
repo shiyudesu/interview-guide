@@ -23,6 +23,7 @@ interface AuthContextValue {
   loading: boolean;
   authenticationEnabled: boolean;
   registrationEnabled: boolean;
+  competitionMode: boolean;
   login: (payload: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<RegistrationResult>;
   logout: () => Promise<void>;
@@ -46,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authenticationEnabled, setAuthenticationEnabled] = useState(true);
   const [registrationEnabled, setRegistrationEnabled] = useState(false);
+  const [competitionMode, setCompetitionMode] = useState(false);
 
   const applySession = useCallback((session: AuthSession) => {
     setCsrfToken(session.csrfToken);
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const enabled = config.authEnabled;
         setAuthenticationEnabled(enabled);
         setRegistrationEnabled(config.registrationEnabled);
+        setCompetitionMode(config.competitionMode);
         if (!enabled) {
           setCsrfToken(null);
           setUser(LEGACY_USER);
@@ -126,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     authenticationEnabled,
     registrationEnabled,
+    competitionMode,
     login,
     register,
     logout,
@@ -136,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     authenticationEnabled,
     registrationEnabled,
+    competitionMode,
     login,
     register,
     logout,

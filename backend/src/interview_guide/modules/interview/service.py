@@ -10,6 +10,7 @@ from pathlib import Path
 from uuid import UUID
 
 from interview_guide.common.ai.adapter import ProviderConfig
+from interview_guide.common.ai.opentrek import opentrek_provider_with_skills
 from interview_guide.common.ai.providers import ProviderRegistry
 from interview_guide.common.ai.user_providers import normalize_provider_alias
 from interview_guide.common.api.models import compact_json_text
@@ -803,6 +804,7 @@ class InterviewEvaluateHandler:
         provider = await self._registry_factory(aggregate.session.user_id).get_chat(
             normalize_provider_alias(aggregate.session.llm_provider)
         )
+        provider = opentrek_provider_with_skills(provider, aggregate.session.skill_id)
         report = await self._evaluation.evaluate(provider, aggregate)
         await self._repository.save_report(payload.session_id, report)
 

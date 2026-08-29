@@ -8,6 +8,7 @@ from typing import TypeVar
 from pydantic import BaseModel, ValidationError
 
 from interview_guide.common.ai.adapter import ChatResult, LlmAdapter, ProviderConfig
+from interview_guide.common.ai.opentrek import OpenTrekProviderConfig
 from interview_guide.common.ai.prompts import ANTI_INJECTION_INSTRUCTION
 from interview_guide.common.errors import BusinessException, ErrorCode
 
@@ -157,13 +158,20 @@ class StructuredOutputInvoker:
         *,
         tools: Sequence[dict[str, object]] | None = None,
     ) -> StructuredInvocation[T]:
-        secured_system_prompt = system_prompt_with_format.rstrip("\n") + ANTI_INJECTION_INSTRUCTION
-        format_start = system_prompt_with_format.find(OUTPUT_FORMAT_PREFIX)
-        formatted_user_prompt = (
-            user_prompt + "\n" + system_prompt_with_format[format_start:]
-            if format_start >= 0
-            else user_prompt
+        append_security_boundary = (
+            not isinstance(provider, OpenTrekProviderConfig)
+            or provider.structured_security_boundary
         )
+        secured_system_prompt = system_prompt_with_format.rstrip("\n")
+        if append_security_boundary:
+            secured_system_prompt += ANTI_INJECTION_INSTRUCTION
+        format_start = system_prompt_with_format.find(OUTPUT_FORMAT_PREFIX)
+        formatted_user_prompt = user_prompt
+        duplicate_schema = (
+            not isinstance(provider, OpenTrekProviderConfig) or provider.structured_duplicate_schema
+        )
+        if format_start >= 0 and duplicate_schema:
+            formatted_user_prompt += "\n" + system_prompt_with_format[format_start:]
         last_error: Exception | None = None
         for attempt in range(1, self._max_attempts + 1):
             system_prompt = (

@@ -177,6 +177,14 @@
       "valueExpression": "("
     },
     {
+      "name": "SCHEMA_BLOCK_PREFIX",
+      "source": {
+        "file": "backend/src/interview_guide/infrastructure/opentrek/client.py",
+        "line": 43
+      },
+      "valueExpression": "\"Here is the JSON Schema instance your output must adhere to:\\n```\""
+    },
+    {
       "name": "CREATE_LOCK_PREFIX",
       "source": {
         "file": "backend/src/interview_guide/modules/interview/cache.py",
@@ -313,7 +321,7 @@
     {
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 464
+        "line": 608
       },
       "value": "{self.postgres_host}:{self.postgres_port}/{database}"
     },
@@ -397,14 +405,14 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 156
+        "line": 160
       },
       "value": "interview:create"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 202
+        "line": 206
       },
       "value": "interview:submit-turn"
     },
@@ -467,28 +475,28 @@
     {
       "source": {
         "file": "backend/src/interview_guide/modules/interview_skill/api.py",
-        "line": 65
+        "line": 66
       },
       "value": "interview-skill:parse-jd"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 127
+        "line": 137
       },
       "value": "data:{line}\\n"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 169
+        "line": 179
       },
       "value": "knowledge-base:query"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 180
+        "line": 190
       },
       "value": "knowledge-base:query-stream"
     },
@@ -558,28 +566,28 @@
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 81
+        "line": 82
       },
       "value": "{RESUME_ANALYZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 97
+        "line": 101
       },
       "value": "{KB_VECTORIZE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 119
+        "line": 123
       },
       "value": "{KB_QUESTION_GEN.consumer_prefix}{str(uuid.uuid4())[:8]}"
     },
     {
       "source": {
         "file": "backend/src/interview_guide/worker.py",
-        "line": 142
+        "line": 150
       },
       "value": "{INTERVIEW_EVALUATE.consumer_prefix}{str(uuid.uuid4())[:8]}"
     }
@@ -647,7 +655,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview/api.py",
-        "line": 121
+        "line": 125
       }
     },
     {
@@ -655,7 +663,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/interview_skill/api.py",
-        "line": 64
+        "line": 65
       }
     },
     {
@@ -663,7 +671,7 @@
       "method": null,
       "source": {
         "file": "backend/src/interview_guide/modules/knowledge_base/api.py",
-        "line": 112
+        "line": 122
       }
     },
     {
@@ -711,7 +719,7 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "constantCount": 35,
+    "constantCount": 36,
     "rateLimitRuleCount": 4,
     "scheduledMethodCount": 4,
     "streamCount": 4

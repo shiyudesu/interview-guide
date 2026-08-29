@@ -15,6 +15,8 @@ class LifecycleScriptsTest(unittest.TestCase):
             "scripts/stop.sh",
             "scripts/start-http.sh",
             "scripts/stop-http.sh",
+            "scripts/start-campus.sh",
+            "scripts/stop-campus.sh",
             "deploy/install.sh",
             "deploy/lib.sh",
             "deploy/refresh.sh",
@@ -32,6 +34,7 @@ class LifecycleScriptsTest(unittest.TestCase):
             "scripts/start.sh",
             "scripts/start.ps1",
             "scripts/start-http.sh",
+            "scripts/start-campus.sh",
         ):
             with self.subTest(relative=relative):
                 content = (REPOSITORY_ROOT / relative).read_text(encoding="utf-8")
@@ -57,6 +60,7 @@ class LifecycleScriptsTest(unittest.TestCase):
             "scripts/stop.sh",
             "scripts/stop.ps1",
             "scripts/stop-http.sh",
+            "scripts/stop-campus.sh",
             "deploy/stop.sh",
         ):
             with self.subTest(relative=relative):
@@ -64,6 +68,21 @@ class LifecycleScriptsTest(unittest.TestCase):
                 self.assertIn("compose down --remove-orphans", content)
                 self.assertNotIn("down -v", content)
                 self.assertNotIn("--volumes", content)
+
+    def test_campus_scripts_use_isolated_project_and_read_only_mode(self) -> None:
+        start = (REPOSITORY_ROOT / "scripts/start-campus.sh").read_text(encoding="utf-8")
+        stop = (REPOSITORY_ROOT / "scripts/stop-campus.sh").read_text(encoding="utf-8")
+        example = (REPOSITORY_ROOT / ".env.campus.example").read_text(encoding="utf-8")
+
+        for content in (start, stop):
+            self.assertIn("interview-guide-campus", content)
+            self.assertIn(".env.campus", content)
+        self.assertIn("APP_COMPETITION_MODE=true", example)
+        self.assertIn("APP_AUTH_REGISTRATION_ENABLED=false", example)
+        self.assertIn("APP_AUTH_COOKIE_SECURE=false", example)
+        self.assertIn("APP_OPENTREK_ENABLED=true", example)
+        self.assertIn("FRONTEND_BIND_ADDRESS=0.0.0.0", example)
+        self.assertNotIn("down -v", stop)
 
     def test_windows_entrypoints_call_matching_powershell_scripts(self) -> None:
         start = (REPOSITORY_ROOT / "start.cmd").read_text(encoding="utf-8")

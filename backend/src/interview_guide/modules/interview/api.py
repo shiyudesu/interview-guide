@@ -10,6 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Request
 from starlette.responses import Response
 
+from interview_guide.common.ai.opentrek import OpenTrekCapability
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
@@ -60,7 +61,10 @@ def build_interview_service(
     metrics: ApplicationMetrics | None = None,
     user_id: uuid.UUID | None = None,
 ) -> InterviewService:
-    registry = infrastructure.provider_resolver.for_user(user_id or LEGACY_OWNER_ID)
+    registry = infrastructure.provider_registry_for(
+        user_id or LEGACY_OWNER_ID,
+        OpenTrekCapability.INTERVIEWER,
+    )
     repository = InterviewRepository(
         infrastructure.database.sessions,
         now=datetime.now,

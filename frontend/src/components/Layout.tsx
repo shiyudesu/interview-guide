@@ -26,7 +26,7 @@ export default function Layout() {
   const currentPath = location.pathname;
   const {theme, toggleTheme} = useTheme();
   const navigate = useNavigate();
-  const {user, logout, authenticationEnabled} = useAuth();
+  const {user, logout, authenticationEnabled, competitionMode} = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -51,7 +51,7 @@ export default function Layout() {
 
   const handleInterviewStart = (config: UnifiedInterviewConfig) => {
     setInterviewModalPreset(null);
-    if (config.mode === 'text') {
+    if (competitionMode || config.mode === 'text') {
       navigate(ROUTES.interviewCreate(crypto.randomUUID()), {
         state: {
           resumeId: config.resumeId,
@@ -93,7 +93,13 @@ export default function Layout() {
       title: '面试准备',
       items: [
         { id: 'resumes', path: '/history', label: '简历管理', icon: FileStack, description: '管理简历，AI 分析' },
-        { id: 'interview-hub', path: '/interview-hub', label: '模拟面试', icon: Sparkles, description: '文字/语音面试练习' },
+        {
+          id: 'interview-hub',
+          path: '/interview-hub',
+          label: '模拟面试',
+          icon: Sparkles,
+          description: competitionMode ? 'OpenTrek 文字面试练习' : '文字/语音面试练习',
+        },
         { id: 'interviews', path: '/interviews', label: '面试记录', icon: Users, description: '查看面试历史' },
         { id: 'interview-schedule', path: '/interview-schedule', label: '面试日程', icon: Calendar, description: '管理面试安排' },
       ],
@@ -111,7 +117,9 @@ export default function Layout() {
       id: 'system',
       title: '系统',
       items: [
-        { id: 'settings', path: '/settings', label: '设置', icon: Settings, description: '管理模型和语音服务' },
+        ...(!competitionMode
+          ? [{ id: 'settings', path: '/settings', label: '设置', icon: Settings, description: '管理模型和语音服务' }]
+          : []),
         { id: 'account', path: '/account', label: '账号与安全', icon: UserRound, description: '密码和登录设备' },
       ],
     },
@@ -184,8 +192,12 @@ export default function Layout() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <span className="block truncate text-lg font-bold tracking-tight text-slate-800 dark:text-white">AI Interview</span>
-            <span className="block truncate text-xs text-slate-400 dark:text-slate-500">智能面试助手</span>
+            <span className="block truncate text-lg font-bold tracking-tight text-slate-800 dark:text-white">
+              {competitionMode ? 'OpenTrek 校园赛版' : 'AI Interview'}
+            </span>
+            <span className="block truncate text-xs text-slate-400 dark:text-slate-500">
+              {competitionMode ? 'InterviewGuide × OpenTrek' : '智能面试助手'}
+            </span>
           </div>
         </Link>
         {mobile && (
@@ -308,7 +320,9 @@ export default function Layout() {
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-slate-800 dark:text-white">{activeNavItem?.label ?? 'AI Interview'}</p>
-              <p className="truncate text-xs text-slate-400 dark:text-slate-500">智能面试助手</p>
+              <p className="truncate text-xs text-slate-400 dark:text-slate-500">
+                {competitionMode ? 'OpenTrek 校园赛版' : '智能面试助手'}
+              </p>
             </div>
           </Link>
           <button
@@ -346,6 +360,11 @@ export default function Layout() {
       )}
 
       <main className="min-h-[calc(100dvh-4rem)] min-w-0 overflow-x-hidden p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 xl:ml-64 xl:min-h-screen xl:p-10">
+        {competitionMode && (
+          <div className="mx-auto mb-4 max-w-7xl rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-700 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-200">
+            OpenTrek 校园赛版：模型调用和预置知识库检索由学校 OpenTrek 平台提供。
+          </div>
+        )}
         <motion.div
           key={currentPath}
           initial={{ opacity: 0, y: 20 }}
@@ -363,7 +382,7 @@ export default function Layout() {
         onStart={handleInterviewStart}
         defaultMode={interviewModalPreset?.defaultMode || 'text'}
         defaultResumeId={interviewModalPreset?.defaultResumeId}
-        hideModeSwitch={interviewModalPreset?.defaultResumeId == null}
+        hideModeSwitch={competitionMode || interviewModalPreset?.defaultResumeId == null}
         title={interviewModalPreset?.title || '开始模拟面试'}
         subtitle={interviewModalPreset?.subtitle || '选择面试模式和主题，快速开始'}
         startButtonText={interviewModalPreset?.startButtonText || '开始面试'}

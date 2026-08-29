@@ -49,6 +49,11 @@ def build_service(
 
 
 async def service_dependency(request: Request) -> VoiceInterviewService:
+    if request.app.state.settings.competition_mode:
+        raise BusinessException(
+            ErrorCode.FORBIDDEN,
+            "OpenTrek 校园赛版未启用语音面试",
+        )
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
     return build_service(

@@ -94,6 +94,7 @@ class AuthSessionResponse(CamelModel):
 class AuthConfigResponse(CamelModel):
     auth_enabled: bool
     registration_enabled: bool
+    competition_mode: bool
 
 
 class RegistrationResponse(CamelModel):

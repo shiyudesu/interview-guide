@@ -33,6 +33,25 @@ def create_admin_main() -> None:
     )
 
 
+def create_user_main() -> None:
+    parser = argparse.ArgumentParser(description="创建已验证的 InterviewGuide 普通用户")
+    parser.add_argument("--email", required=True)
+    parser.add_argument("--display-name")
+    arguments = parser.parse_args()
+    password = getpass.getpass("用户密码: ")
+    confirmation = getpass.getpass("再次输入用户密码: ")
+    if password != confirmation:
+        raise SystemExit("两次输入的密码不一致。")
+    validate_password_length(password)
+    asyncio.run(
+        create_user(
+            normalized_email(arguments.email),
+            arguments.display_name,
+            password,
+        )
+    )
+
+
 async def create_admin(email: str, display_name: str | None, password: str) -> None:
     settings = get_settings()
     database = Database(settings)
@@ -53,6 +72,31 @@ async def create_admin(email: str, display_name: str | None, password: str) -> N
             email_verified=True,
         )
         print(f"管理员已创建: {user.email} ({user.id})")
+    finally:
+        await database.close()
+        await executor.shutdown()
+
+
+async def create_user(email: str, display_name: str | None, password: str) -> None:
+    settings = get_settings()
+    database = Database(settings)
+    executor = BlockingExecutor(settings.blocking_worker_count)
+    try:
+        repository = AuthRepository(database.sessions, settings)
+        existing = await repository.get_user_by_email(email)
+        if existing is not None:
+            raise SystemExit(f"用户已存在: {email}")
+        password_hash = await PasswordService(executor).hash(password)
+        user = await repository.create_human_user(
+            email=email,
+            display_name=display_name,
+            password_hash=password_hash,
+            role="USER",
+            status="ACTIVE",
+            now=utc_now(),
+            email_verified=True,
+        )
+        print(f"普通用户已创建: {user.email} ({user.id})")
     finally:
         await database.close()
         await executor.shutdown()

@@ -99,6 +99,16 @@ class QueryLlmAdapter(Protocol):
     ) -> list[list[float]]: ...
 
 
+class QueryRetriever(Protocol):
+    async def retrieve(
+        self,
+        knowledge_base_ids: Sequence[int],
+        query: str,
+        top_k: int,
+        min_score: float,
+    ) -> list[VectorSearchHit]: ...
+
+
 @dataclass(frozen=True)
 class QueryConfiguration:
     rewrite_enabled: bool = True
@@ -144,6 +154,7 @@ class KnowledgeBaseQueryService:
         prompts: PromptRepository,
         configuration: QueryConfiguration,
         tools: Sequence[dict[str, Any]] = (),
+        retriever: QueryRetriever | None = None,
     ) -> None:
         self._repository = repository
         self._registry = registry
@@ -151,6 +162,7 @@ class KnowledgeBaseQueryService:
         self._prompts = prompts
         self._configuration = configuration
         self._tools = list(tools)
+        self._retriever = retriever
 
     async def query(self, request: QueryRequest) -> QueryResponse:
         answer = await self.answer_question(
@@ -298,6 +310,19 @@ class KnowledgeBaseQueryService:
         context: QueryContext,
         knowledge_base_ids: Sequence[int],
     ) -> list[VectorSearchHit]:
+        if self._retriever is not None:
+            for candidate in context.candidate_queries:
+                if not candidate:
+                    continue
+                documents = await self._retriever.retrieve(
+                    knowledge_base_ids,
+                    candidate,
+                    context.search.top_k,
+                    context.search.min_score,
+                )
+                if documents:
+                    return documents
+            return []
         for candidate in context.candidate_queries:
             if not candidate:
                 continue

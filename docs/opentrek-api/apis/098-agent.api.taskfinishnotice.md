@@ -1,0 +1,101 @@
+# 工具异步回调
+
+- 文档序号：098
+- 分类：应用集成类 / 智能体 / 工具异步回调
+- 唯一编码：sfm.api.agent.agent.api.taskfinishnotice
+- 请求方法：POST
+- 调用地址：http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/taskFinishNotice
+- 文档版本：1787280869697
+
+## 接口概述
+
+您可以通过调用该接口实现在工具箱中注册异步API工具，当智能体执行过程中调用您注册工具时会在header(key=idx-agent-task-id)中下发任务唯一标识，在您执行完成任务后，可以通过这个异步回调的接口完成工具调用
+
+先进入菜单[主页->点击头像->APP_KEY]创建APP_KEY;然后调用'创建session'接口获取返回值 uniqueCode
+
+## 请求参数
+
+### Header传参
+
+| 字段 | 类型 | 必填 | 位置 | 描述 | 示例 |
+| --- | --- | --- | --- | --- | --- |
+| Authorization | String | 是 | header | APP_KEY | Bearer YOUR_APP_KEY |
+| Content-Type | String | 是 | header | Content-Type | application/json |
+
+### Body传参
+
+| 字段 | 类型 | 必填 | 位置 | 描述 | 示例 |
+| --- | --- | --- | --- | --- | --- |
+| success | boolean | 是 | body | 是否成功 | true |
+| taskId | string | 是 | body | 任务id | de454297-c547-440f-ae55-057a83a2d121 调用工具header(key=idx-agent-task-id)的值 |
+| data | string | 是 | body | 任务结果 | 必须是json字符串格式,例如：{"reslut":"一步接口调用成功"} |
+| errorCode | string | 否 | body | 错误信息code | 错误信息code |
+| errorMsg | string | 否 | body | 错误信息 | 错误信息 |
+
+## 响应参数
+
+| 字段 | 类型 | 必填 | 位置 | 描述 | 示例 |
+| --- | --- | --- | --- | --- | --- |
+| success | boolean | 是 | body | 是否成功 | true |
+
+
+## 请求示例
+
+#### curl命令示例
+
+```bash
+curl -X 'POST' http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/taskFinishNotice \
+-H 'Authorization: Bearer YOUR_APP_KEY' \
+-H 'Content-Type: application/json' \
+-d '{
+    "taskId": "de454297-c547-440f-ae55-057a83a2d121"
+  ,"success": true
+  ,"data": "{"reslut":"一步接口调用成功"}"
+ }'
+```
+
+
+## 响应示例
+
+#### 输出
+
+```json
+{
+  "success": true
+}
+```
+
+
+## 状态码说明
+
+#### 网关异常状态码说明
+
+| HTTP 状态码 | 错误描述 | 错误释义 |
+| --- | --- | --- |
+| 401 | GATEWAY APP_KEY MISSING! | 网关必填参数缺失 |
+| 401 | GATEWAY APP_KEY WRONG! | 鉴权失败,无效 APP_KEY |
+| 401 | GATEWAY APP_KEY ALREADY EXPIRED! | 鉴权失败,APP_KEY 已过期 |
+| 401 | GATEWAY ROLE NOT MATCH! | 鉴权失败,当前 APP_KEY 归属用户对应的角色不匹配 |
+| 401 | GATEWAY ROLE HAS EXPIRED! | 鉴权失败,当前 APP_KEY 归属用户对应的角色已过期 |
+| 403 | GATEWAY APP_PATH NOT FOUND! | 无效的服务调用路径 |
+| 403 | GATEWAY APP_PATH NOT REGISTER! | 当前服务调用路径未注册 |
+| 429 | GATEWAY LIMIT ! | 服务触发限流,请稍后再试 |
+| 429 | GATEWAY LIMIT CURRENT CALL TYPE ! | 服务触发限流,请稍后再试 |
+| 403 | GATEWAY HEADER PARAMETER MISSING! | 业务所需必填参数缺失 |
+| 403 | GATEWAY PARAMETER WORKSPACE NO MATCH! | 传递的工作空间编码与APP_KEY归属用户关联的工作空间编码不匹配 |
+| 401 | GATEWAY AUTH_TYPE WRONG! | 鉴权失败,不支持的鉴权方式 |
+| 401 | GATEWAY AUTH_USER NOT MATCH WRONG! | 鉴权失败,AK用户信息不匹配 |
+| 401 | GATEWAY AUTH_USER_ROLE WRONG! | 鉴权失败,用户角色不匹配 |
+| 404 | GATEWAY ROUTE URL NOT FOUND! | 无效的目标服务地址 |
+| 401 | GATEWAY LIMIT ! | 服务链接已达上限,请稍后再试 |
+| 500 | TARGET_SERVICE_ERROR_CONNECTION_REFUSE_EXCEPTION | 目标服务拒绝连接 |
+| 500 | TARGET_SERVICE_ERROR_NO_RESPONSE_EXCEPTION | 目标服务无响应 |
+
+
+
+## 原始文档标识
+
+- apiCode：agent.api.taskfinishnotice
+- groupCode：AGENT
+- catalogCode：DEFAULT
+- serviceRegion：tenant

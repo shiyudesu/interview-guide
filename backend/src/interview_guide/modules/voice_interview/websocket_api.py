@@ -16,6 +16,9 @@ async def voice_interview_websocket(
     sessionId: str,
 ) -> None:
     settings = websocket.app.state.settings
+    if settings.competition_mode:
+        await websocket.close(code=1008, reason="Voice interview disabled in competition mode")
+        return
     if not request_origin_allowed(websocket.headers, websocket.scope, settings):
         await websocket.close(code=1008, reason="Origin not allowed")
         return

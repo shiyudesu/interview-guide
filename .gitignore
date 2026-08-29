@@ -9,6 +9,8 @@ build
 # Environment variables
 .env
 .env.http
+.env.campus
+/account.md
 test-output.txt
 # IDEA code analysis
 qodana.yaml

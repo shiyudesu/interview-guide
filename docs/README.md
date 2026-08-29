@@ -13,6 +13,7 @@
 | 在服务器安装、主动更新或回滚 GHCR 镜像 | [GHCR 主动拉取部署](DEPLOYMENT.md) |
 | 理解文字、知识库和语音面试的统一 Turn 模型 | [统一自适应面试](ADAPTIVE_INTERVIEW.md) |
 | 理解账号隔离、BYOK、安全和迁移边界 | [多租户账号与 BYOK](MULTI_TENANT_BYOK.md) |
+| 将项目迁移到学校 OpenTrek 并在校园 Linux 主机部署 | [OpenTrek 迁移与校园部署计划](plans/OPENTREK_MIGRATION_PLAN.md) |
 | 维护普通面试参考资料及来源追踪 | [普通面试参考资料来源](REFERENCE_SOURCES.md) |
 | 开发后端 | [后端开发](../backend/README.md) |
 | 开发前端 | [前端开发](../frontend/README.md) |

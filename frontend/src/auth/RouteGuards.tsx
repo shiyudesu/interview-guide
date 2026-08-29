@@ -32,3 +32,11 @@ export function AnonymousRoute() {
   }
   return <Outlet />;
 }
+
+export function StandardModeRoute() {
+  const { competitionMode, loading } = useAuth();
+
+  if (loading) return <FullPageLoading />;
+  if (competitionMode) return <Navigate to="/interview-hub" replace />;
+  return <Outlet />;
+}

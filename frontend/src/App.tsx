@@ -8,7 +8,7 @@ import type { CategoryDTO } from './api/skill';
 import { Loader2 } from 'lucide-react';
 import { ROUTE_PATTERNS, ROUTES } from './constants/routes';
 import { AuthProvider } from './auth/AuthContext';
-import { AnonymousRoute, ProtectedRoute } from './auth/RouteGuards';
+import { AnonymousRoute, ProtectedRoute, StandardModeRoute } from './auth/RouteGuards';
 
 // Lazy load components
 const UploadPage = lazy(() => import('./pages/UploadPage'));
@@ -253,11 +253,13 @@ function App() {
             {/* 进行中的文本面试，刷新时按会话 ID 恢复 */}
             <Route path={ROUTE_PATTERNS.interviewSession} element={<InterviewWrapper />} />
 
-            {/* 语音面试 */}
-            <Route path="voice-interview" element={<VoiceInterviewPageWrapper />} />
+            <Route element={<StandardModeRoute />}>
+              {/* 语音面试 */}
+              <Route path="voice-interview" element={<VoiceInterviewPageWrapper />} />
 
-            {/* 语音面试评估报告 */}
-            <Route path="voice-interview/:sessionId/evaluation" element={<VoiceInterviewEvaluationPage />} />
+              {/* 语音面试评估报告 */}
+              <Route path="voice-interview/:sessionId/evaluation" element={<VoiceInterviewEvaluationPage />} />
+            </Route>
 
             {/* 知识库管理 */}
             <Route path="knowledgebase" element={<KnowledgeBaseManagePageWrapper />} />
@@ -269,14 +271,18 @@ function App() {
             <Route path="knowledgebase-interview/:knowledgeBaseId/interviews/:sessionId" element={<InterviewDetailPageWrapper />} />
             <Route path="knowledgebase-interview/:sessionId" element={<KnowledgeBaseInterviewSessionPage />} />
 
-            {/* 知识库上传 */}
-            <Route path="knowledgebase/upload" element={<KnowledgeBaseUploadPageWrapper />} />
+            <Route element={<StandardModeRoute />}>
+              {/* 知识库上传 */}
+              <Route path="knowledgebase/upload" element={<KnowledgeBaseUploadPageWrapper />} />
+            </Route>
 
             {/* 面试日程管理 */}
             <Route path="interview-schedule" element={<InterviewSchedulePage />} />
 
-            {/* 设置 */}
-            <Route path="settings" element={<SettingsPage />} />
+            <Route element={<StandardModeRoute />}>
+              {/* 设置 */}
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
 
             {/* 当前账号 */}
             <Route path="account" element={<AccountPage />} />

@@ -14,6 +14,7 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 
 from interview_guide.common.ai.adapter import ProviderConfig
+from interview_guide.common.ai.opentrek import opentrek_provider_with_skills
 from interview_guide.common.ai.prompts import (
     DATA_BOUNDARY_INSTRUCTION,
     PromptRepository,
@@ -604,6 +605,7 @@ class InterviewQuestionService:
         value = state["generation_input"]
         skill = state["skill"]
         provider = await self._registry.get_chat(value.provider_id)
+        provider = opentrek_provider_with_skills(provider, skill.skill_id)
         if not value.resume_text or not value.resume_text.strip():
             questions = await self._generate_direction(
                 provider,

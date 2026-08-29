@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import {knowledgeBaseApi, KnowledgeBaseItem, KnowledgeBaseStats, SortOption, VectorStatus,} from '../api/knowledgebase';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
+import {useAuth} from '../auth/AuthContext';
 
 interface KnowledgeBaseManagePageProps {
   onUpload: () => void;
@@ -113,6 +114,7 @@ function StatCard({
 }
 
 export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeBaseManagePageProps) {
+  const {competitionMode} = useAuth();
   const [stats, setStats] = useState<KnowledgeBaseStats | null>(null);
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBaseItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -315,13 +317,15 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
             <p className="text-slate-500 dark:text-slate-400 mt-1">管理您的知识库文件，查看使用统计</p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:flex">
-          <button
-            onClick={onUpload}
-            className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-white transition-colors hover:bg-primary-600"
-          >
-            <Upload className="w-4 h-4" />
-            上传知识库
-          </button>
+          {!competitionMode && (
+            <button
+              onClick={onUpload}
+              className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-white transition-colors hover:bg-primary-600"
+            >
+              <Upload className="w-4 h-4" />
+              上传知识库
+            </button>
+          )}
           <button
             onClick={onChat}
             className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
@@ -425,12 +429,14 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
           <div className="text-center py-20">
             <HardDrive className="w-16 h-16 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-500 dark:text-slate-400">暂无知识库</p>
-            <button
-              onClick={onUpload}
-              className="mt-4 text-primary-500 hover:text-primary-600"
-            >
-              上传第一个知识库
-            </button>
+            {!competitionMode && (
+              <button
+                onClick={onUpload}
+                className="mt-4 text-primary-500 hover:text-primary-600"
+              >
+                上传第一个知识库
+              </button>
+            )}
           </div>
         ) : (
           <>
@@ -456,7 +462,11 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                   <div className="mt-4 rounded-xl bg-slate-50 p-3 dark:bg-slate-900/40">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-xs text-slate-400">分类</span>
-                      {editingCategoryId === kb.id ? (
+                      {competitionMode ? (
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                          {kb.category || '未分类'}
+                        </span>
+                      ) : editingCategoryId === kb.id ? (
                         <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
                           <input
                             autoFocus
@@ -513,12 +523,14 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button type="button" onClick={() => handleDownload(kb)} className="min-h-11 flex-1 rounded-xl bg-primary-50 px-3 py-2 text-sm font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-300">下载</button>
-                    {kb.vectorStatus === 'FAILED' && (
+                    {!competitionMode && kb.vectorStatus === 'FAILED' && (
                       <button type="button" onClick={() => handleRevectorize(kb.id)} disabled={revectorizing === kb.id} className="min-h-11 rounded-xl border border-amber-100 px-3 py-2 text-sm text-amber-600 disabled:opacity-50 dark:border-amber-900/50 dark:text-amber-400">
                         {revectorizing === kb.id ? '处理中…' : '重新向量化'}
                       </button>
                     )}
-                    <button type="button" onClick={() => setDeleteItem(kb)} className="min-h-11 rounded-xl border border-red-100 px-3 py-2 text-sm text-red-500 dark:border-red-900/50">删除</button>
+                    {!competitionMode && (
+                      <button type="button" onClick={() => setDeleteItem(kb)} className="min-h-11 rounded-xl border border-red-100 px-3 py-2 text-sm text-red-500 dark:border-red-900/50">删除</button>
+                    )}
                   </div>
                 </motion.article>
               ))}
@@ -570,7 +582,11 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                   </td>
                   <td className="px-6 py-4">
                     <AnimatePresence mode="wait">
-                      {editingCategoryId === kb.id ? (
+                      {competitionMode ? (
+                        <span className="rounded bg-slate-100 px-2 py-1 text-sm text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                          {kb.category || '未分类'}
+                        </span>
+                      ) : editingCategoryId === kb.id ? (
                         <motion.div
                           key="editing"
                           initial={{ opacity: 0 }}
@@ -670,7 +686,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                         <Download className="w-4 h-4" />
                       </button>
                       {/* 重新向量化按钮（仅 FAILED 状态显示） */}
-                      {kb.vectorStatus === 'FAILED' && (
+                      {!competitionMode && kb.vectorStatus === 'FAILED' && (
                         <button
                           onClick={() => handleRevectorize(kb.id)}
                           disabled={revectorizing === kb.id}
@@ -681,13 +697,15 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                         </button>
                       )}
                       {/* 删除按钮 */}
-                      <button
-                        onClick={() => setDeleteItem(kb)}
-                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                        title="删除"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!competitionMode && (
+                        <button
+                          onClick={() => setDeleteItem(kb)}
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                          title="删除"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </motion.tr>
@@ -699,14 +717,16 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
       </div>
 
       {/* 删除确认对话框 */}
-      <DeleteConfirmDialog
-        open={deleteItem !== null}
-        item={deleteItem}
-        itemType="知识库"
-        loading={deleting}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteItem(null)}
-      />
+      {!competitionMode && (
+        <DeleteConfirmDialog
+          open={deleteItem !== null}
+          item={deleteItem}
+          itemType="知识库"
+          loading={deleting}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteItem(null)}
+        />
+      )}
     </div>
   );
 }

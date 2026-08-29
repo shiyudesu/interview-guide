@@ -107,6 +107,95 @@ HTTP 验收实例和普通 Compose 项目使用不同的项目名及数据卷，
 浏览器只允许安全上下文访问麦克风，所以通过公网普通 HTTP 可以验收文字面试、管理、文件和
 WebSocket 路由，不能完成真实麦克风录音验收；该项必须改用 HTTPS。
 
+## OpenTrek 校园赛部署
+
+该模式用于校园网内的 Ubuntu/Debian x86_64 主机，使用独立 Compose 项目
+`interview-guide-campus` 和独立数据卷，只发布前端入口。它是比赛期间的明文内网部署方式，不能
+替代正式 HTTPS；不要上传真实简历或使用个人密码，浏览器麦克风也不可用。
+
+首次准备配置：
+
+```bash
+cp .env.campus.example .env.campus
+chmod 600 .env.campus
+```
+
+先在浏览器登录 OpenTrek 管理站，并把有效 Cookie Header 或 Playwright `storageState` 保存到仓库
+外的受保护临时文件。不要把 OpenTrek 账号密码、Cookie 或该文件提交到仓库。然后执行：
+
+```bash
+cd backend
+uv run interview-guide-provision-opentrek \
+  --env-file ../.env.campus \
+  --cookie-file /path/outside/repository/opentrek-state.json \
+  --workspace-code YOUR_WORKSPACE_CODE \
+  --knowledge-file /path/to/approved-competition-material.md
+cd ..
+```
+
+命令幂等复用同名资源；已发布版本的模型配置不可原地修改，资源定义变化时应在代码中提升
+`AGENT_VERSION_NAME`，创建新版本后再发布。Skill 必须通过平台扫描，Kortex 文件必须达到状态
+`200`，任何一步失败都会以非零状态退出。`--no-skills` 只用于诊断或重复验证 Agent/Kortex，不是
+首次配置的替代方案。
+
+启动和停止：
+
+```bash
+./scripts/start-campus.sh
+./scripts/stop-campus.sh
+```
+
+启动脚本检查 Docker、Compose、x86_64、前端宿主机端口、`.env.campus` 必填项，以及宿主机、
+`app` 和 `worker` 到 OpenTrek 的连通性。它只在首次遇到空值时生成 PostgreSQL/MinIO 随机密码，
+不会覆盖已有配置或删除卷。若默认 18073 被占用，按错误提示只修改 `FRONTEND_PORT`，不要修改容器
+内部端口。后端镜像的 `uv` 依赖层使用 BuildKit 持久缓存和 600 秒 HTTP 超时，弱网络失败后重试
+不会丢失已经下载的 wheel。
+
+完整栈启动后，至少创建一个管理员和两个普通评委账号。密码由终端交互读取，使用比赛专用一次性
+密码：
+
+```bash
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml exec app interview-guide-create-admin
+
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml exec app interview-guide-create-user
+```
+
+每个评委账号需要独立的本地影子知识库记录，但可以映射到同一个只读 Kortex `kbCode`。先把已审核
+资料复制进容器，再逐个账号执行：
+
+```bash
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml cp /path/to/approved-material.md app:/tmp/approved-material.md
+
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml exec app interview-guide-seed-opentrek-kb \
+  --user-email judge1@example.invalid \
+  --file /tmp/approved-material.md \
+  --kb-code YOUR_KB_CODE \
+  --skip-env-update
+```
+
+Compose 容器已经从 `.env.campus` 读取 Kortex 映射，因此容器内命令使用 `--skip-env-update`；主机
+`.env.campus` 中的映射由 provisioning 命令维护。对第二个评委重复 seed。
+完成后从两台真实校园网设备并发登录，验证数据隔离、文字面试和知识库链路；再重启 Docker/主机
+验证卷持久化。缺少目标 Linux 主机 IP、两台真实校园设备或重启权限时，不得把这些现场门禁标记为
+已通过。
+
+排查顺序：
+
+```bash
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml ps
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml logs migrate app worker scheduler frontend
+```
+
+OpenTrek 返回 401 时检查 OpenTrek应用密钥；403 时检查工作空间与 OpenTrek应用密钥 归属；Agent 报“模型配置缺失”时
+确认已发布版本使用平台模型服务 UUID，而不是显示名称；Kortex 失败时检查文件状态和
+`APP_OPENTREK_KB_MAPPINGS_JSON`，不得改用本地 pgvector 结果伪装成功。
+
 ## 端口占用
 
 普通本机模式只检查 `FRONTEND_PORT`。HTTPS profile 启用后，启动脚本还会检查

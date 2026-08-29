@@ -9,6 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, File, Form, Query, Request, UploadFile
 from starlette.responses import Response, StreamingResponse
 
+from interview_guide.common.ai.opentrek import OpenTrekCapability
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
@@ -46,7 +47,7 @@ async def knowledge_base_service(
 ) -> AsyncIterator[KnowledgeBaseService]:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
-    registry = infrastructure.provider_resolver.for_user(actor.user_id)
+    registry = infrastructure.provider_registry_for(actor.user_id, OpenTrekCapability.RAG)
     async with infrastructure.database.sessions() as session:
         yield KnowledgeBaseService(
             session,
@@ -72,14 +73,15 @@ def knowledge_base_query_service(
 ) -> KnowledgeBaseQueryService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
-    registry = infrastructure.provider_resolver.for_user(actor.user_id)
+    registry = infrastructure.provider_registry_for(actor.user_id, OpenTrekCapability.RAG)
     return KnowledgeBaseQueryService(
         KnowledgeBaseQueryRepository(infrastructure.database.sessions, actor.user_id),
         registry,
         infrastructure.llm_adapter,
         PromptRepository(RESOURCES),
         QueryConfiguration.from_settings(request.app.state.settings),
-        QUERY_TOOLS,
+        () if request.app.state.settings.competition_mode else QUERY_TOOLS,
+        retriever=infrastructure.knowledge_retriever_for(actor.user_id),
     )
 
 
@@ -87,6 +89,14 @@ QueryServiceDependency = Annotated[
     KnowledgeBaseQueryService,
     Depends(knowledge_base_query_service),
 ]
+
+
+def require_knowledge_base_writes(request: Request) -> None:
+    if request.app.state.settings.competition_mode:
+        raise BusinessException(
+            ErrorCode.FORBIDDEN,
+            "OpenTrek 校园赛版的知识库为预置只读资源",
+        )
 
 
 def client_ip(request: Request) -> str:
@@ -191,11 +201,13 @@ async def query_knowledge_base_stream(
 
 @router.post("/upload", response_model=UploadKnowledgeBaseResponse, status_code=201)
 async def upload_knowledge_base(
+    request: Request,
     service: ServiceDependency,
     file: Annotated[UploadFile, File()],
     name: Annotated[str | None, Form()] = None,
     category: Annotated[str | None, Form()] = None,
 ) -> Response:
+    require_knowledge_base_writes(request)
     result = await service.upload(
         await file.read(),
         file.filename,
@@ -240,9 +252,11 @@ async def statistics(service: ServiceDependency) -> Response:
 @router.put("/{knowledge_base_id}/category", status_code=204)
 async def update_category(
     knowledge_base_id: int,
+    request: Request,
     service: ServiceDependency,
     payload: Annotated[dict[str, str | None], Body()],
 ) -> Response:
+    require_knowledge_base_writes(request)
     await service.update_category(knowledge_base_id, payload.get("category"))
     return result_response(Result.ok())
 
@@ -259,8 +273,10 @@ async def download_knowledge_base(
 @router.post("/{knowledge_base_id}/revectorize", status_code=204)
 async def revectorize_knowledge_base(
     knowledge_base_id: int,
+    request: Request,
     service: ServiceDependency,
 ) -> Response:
+    require_knowledge_base_writes(request)
     await service.revectorize(knowledge_base_id)
     return result_response(Result.ok())
 
@@ -268,8 +284,10 @@ async def revectorize_knowledge_base(
 @router.delete("/{knowledge_base_id}", status_code=204)
 async def delete_knowledge_base(
     knowledge_base_id: int,
+    request: Request,
     service: ServiceDependency,
 ) -> Response:
+    require_knowledge_base_writes(request)
     await service.delete(knowledge_base_id)
     return result_response(Result.ok())
 

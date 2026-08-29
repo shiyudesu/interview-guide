@@ -20,6 +20,7 @@ import {
 } from '../hooks/useInterviewConfig';
 import {ROUTES} from '../constants/routes';
 import InterviewProviderSelector from '../components/InterviewProviderSelector';
+import { useAuth } from '../auth/AuthContext';
 
 // 统一的面试记录项
 interface RecentInterviewItem {
@@ -35,6 +36,7 @@ interface RecentInterviewItem {
 
 export default function InterviewHubPage() {
   const navigate = useNavigate();
+  const { competitionMode } = useAuth();
 
   const config = useInterviewConfig({ autoLoad: false });
 
@@ -47,7 +49,9 @@ export default function InterviewHubPage() {
     try {
       const [textSessions, voiceSessions] = await Promise.all([
         interviewApi.listSessions().catch(() => [] as TextSessionMeta[]),
-        voiceInterviewApi.getAllSessions().catch(() => [] as SessionMeta[]),
+        competitionMode
+          ? Promise.resolve([] as SessionMeta[])
+          : voiceInterviewApi.getAllSessions().catch(() => [] as SessionMeta[]),
       ]);
 
       const items: RecentInterviewItem[] = [
@@ -78,7 +82,7 @@ export default function InterviewHubPage() {
     } finally {
       setLoadingRecent(false);
     }
-  }, []);
+  }, [competitionMode]);
 
   // 初始加载：skills、resumes 和 Provider 并行，再用 skills 加载面试记录
   useEffect(() => {
@@ -102,7 +106,7 @@ export default function InterviewHubPage() {
       return;
     }
 
-    if (config.mode === 'text') {
+    if (competitionMode || config.mode === 'text') {
       navigate(ROUTES.interviewCreate(crypto.randomUUID()), {
         state: {
           resumeId: config.resumeId,
@@ -164,13 +168,13 @@ export default function InterviewHubPage() {
                   desc: '推荐：更稳定，更适合系统化刷题与复盘',
                   recommended: true,
                 },
-                {
+                ...(!competitionMode ? [{
                   value: 'voice' as InterviewMode,
                   label: '语音面试',
                   icon: Mic,
                   desc: '实时语音对话，更偏临场模拟',
                   recommended: false,
-                },
+                }] : []),
               ]).map(opt => {
                 const Icon = opt.icon;
                 const selected = config.mode === opt.value;
@@ -352,13 +356,15 @@ export default function InterviewHubPage() {
             </div>
           </div>
 
-          <InterviewProviderSelector
-            providers={config.providers}
-            defaultProviderId={config.defaultProviderId}
-            value={config.llmProvider}
-            loading={config.loadingProviders}
-            onChange={config.setLlmProvider}
-          />
+          {!competitionMode && (
+            <InterviewProviderSelector
+              providers={config.providers}
+              defaultProviderId={config.defaultProviderId}
+              value={config.llmProvider}
+              loading={config.loadingProviders}
+              onChange={config.setLlmProvider}
+            />
+          )}
 
           {/* 更多选项 */}
           <button

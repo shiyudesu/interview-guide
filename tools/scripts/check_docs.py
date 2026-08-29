@@ -64,6 +64,7 @@ def documented_environment_variables(root: Path) -> set[str]:
     paths.extend(sorted((root / "tools").glob("**/*.md")))
     paths.append(root / ".env.example")
     paths.append(root / ".env.http.example")
+    paths.append(root / ".env.campus.example")
     paths.append(root / "deploy/.env.example")
     values: set[str] = set()
     for path in paths:
@@ -79,6 +80,7 @@ def source_environment_variables(root: Path) -> set[str]:
         root / "docker-compose.dev.yml",
         root / "docker-compose.test.yml",
         root / ".env.http.example",
+        root / ".env.campus.example",
         root / "deploy/compose.yml",
         root / "deploy/.env.example",
         root / "frontend/vite.config.ts",

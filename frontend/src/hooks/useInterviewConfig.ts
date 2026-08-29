@@ -4,6 +4,7 @@ import { historyApi, type ResumeListItem } from '../api/history';
 import { llmProviderApi } from '../api/llmProvider';
 import type { ProviderItem } from '../types/llmProvider';
 import { getSkillIcon } from '../utils/skillIcons';
+import { useAuth } from '../auth/AuthContext';
 
 export type InterviewMode = 'text' | 'voice';
 export type Difficulty = 'junior' | 'mid' | 'senior';
@@ -48,6 +49,7 @@ export function useInterviewConfig(options?: {
   autoLoad?: boolean;
 }) {
   const { defaultMode = 'text', defaultResumeId, autoLoad = true } = options ?? {};
+  const { competitionMode } = useAuth();
 
   const [mode, setMode] = useState<InterviewMode>(defaultMode);
   const [skillId, setSkillId] = useState(DEFAULT_SKILL_ID);
@@ -97,6 +99,11 @@ export function useInterviewConfig(options?: {
   };
 
   const loadProviders = async () => {
+    if (competitionMode) {
+      setProviders([]);
+      setDefaultProviderId('');
+      return [];
+    }
     setLoadingProviders(true);
     try {
       const [providerList, defaultProvider] = await Promise.all([
@@ -140,7 +147,12 @@ export function useInterviewConfig(options?: {
       }
       void Promise.all([loadSkills(), loadResumes(), loadProviders()]);
     }
-  }, [autoLoad, defaultMode, defaultResumeId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoLoad, competitionMode, defaultMode, defaultResumeId]);
+
+  useEffect(() => {
+    if (competitionMode && mode !== 'text') setMode('text');
+  }, [competitionMode, mode]);
 
   return {
     // State

@@ -69,12 +69,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 )
                 await infrastructure.start()
                 app.state.infrastructure = infrastructure
-                voice_runtime = create_voice_websocket_runtime(
-                    infrastructure,
-                    resolved_settings,
-                    metrics,
-                )
-                app.state.voice_websocket_runtime = voice_runtime
+                if not resolved_settings.competition_mode:
+                    voice_runtime = create_voice_websocket_runtime(
+                        infrastructure,
+                        resolved_settings,
+                        metrics,
+                    )
+                    app.state.voice_websocket_runtime = voice_runtime
             yield
         finally:
             app.state.accepting_tasks = False

@@ -1,0 +1,1990 @@
+{
+  "sourceUrl": "http://10.128.203.200:30226/agent/index.html#/arrange/apiDoc",
+  "capturedAt": "2026-08-28T13:26:23.646Z",
+  "categoryCount": 2,
+  "apiCount": 127,
+  "downloadedCount": 127,
+  "failedCount": 0,
+  "entries": [
+    {
+      "index": 1,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "账号管理",
+        "账号存在判断"
+      ],
+      "apiName": "账号存在判断",
+      "apiCode": "system.api.v1.account.checkExist",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.account.checkExist",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/account/checkExist",
+      "version": "1787280869992",
+      "markdownFile": "apis/001-system.api.v1.account.checkexist.md"
+    },
+    {
+      "index": 2,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "账号管理",
+        "创建账号"
+      ],
+      "apiName": "创建账号",
+      "apiCode": "system.api.v1.account.create",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.account.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/account/create",
+      "version": "1787280869998",
+      "markdownFile": "apis/002-system.api.v1.account.create.md"
+    },
+    {
+      "index": 3,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "账号管理",
+        "获取账号信息"
+      ],
+      "apiName": "获取账号信息",
+      "apiCode": "system.api.v1.account.getByAccount",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.account.getByAccount",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/account/getByAccount",
+      "version": "1787280870004",
+      "markdownFile": "apis/003-system.api.v1.account.getbyaccount.md"
+    },
+    {
+      "index": 4,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "用户授权",
+        "新增用户授权"
+      ],
+      "apiName": "新增用户授权",
+      "apiCode": "system.api.v1.permUserAuth.addUserAuth",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.permUserAuth.addUserAuth",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/permUserAuth/addUserAuth",
+      "version": "1787280870021",
+      "markdownFile": "apis/004-system.api.v1.permuserauth.adduserauth.md"
+    },
+    {
+      "index": 5,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "用户授权",
+        "删除用户授权"
+      ],
+      "apiName": "删除用户授权",
+      "apiCode": "system.api.v1.permUserAuth.removeUserAuth",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.permUserAuth.removeUserAuth",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/permUserAuth/removeUserAuth",
+      "version": "1787280870027",
+      "markdownFile": "apis/005-system.api.v1.permuserauth.removeuserauth.md"
+    },
+    {
+      "index": 6,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "用户授权",
+        "查询账号授权信息"
+      ],
+      "apiName": "查询账号授权信息",
+      "apiCode": "system.api.v1.permUserAuth.pageUserAuthDetail",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.permUserAuth.pageUserAuthDetail",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/permUserAuth/pageUserAuthDetail",
+      "version": "1787280870032",
+      "markdownFile": "apis/006-system.api.v1.permuserauth.pageuserauthdetail.md"
+    },
+    {
+      "index": 7,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "空间管理",
+        "创建工作空间"
+      ],
+      "apiName": "创建工作空间",
+      "apiCode": "system.api.v1.workspace.create",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.workspace.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/workspace/create",
+      "version": "1787280870046",
+      "markdownFile": "apis/007-system.api.v1.workspace.create.md"
+    },
+    {
+      "index": 8,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "空间管理",
+        "修改工作空间"
+      ],
+      "apiName": "修改工作空间",
+      "apiCode": "system.api.v1.workspace.update",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.workspace.update",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/workspace/update",
+      "version": "1787280870052",
+      "markdownFile": "apis/008-system.api.v1.workspace.update.md"
+    },
+    {
+      "index": 9,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "空间管理",
+        "工作空间添加用户"
+      ],
+      "apiName": "工作空间添加用户",
+      "apiCode": "system.api.v1.workspace.authorizeUser",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.workspace.authorizeUser",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/workspace/authorizeUser",
+      "version": "1787280870059",
+      "markdownFile": "apis/009-system.api.v1.workspace.authorizeuser.md"
+    },
+    {
+      "index": 10,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "空间管理",
+        "更改空间授权"
+      ],
+      "apiName": "更改空间授权",
+      "apiCode": "system.api.v1.workspace.updateUser",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.workspace.updateUser",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/workspace/updateUser",
+      "version": "1787280870068",
+      "markdownFile": "apis/010-system.api.v1.workspace.updateuser.md"
+    },
+    {
+      "index": 11,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "空间管理",
+        "查询空间中的用户"
+      ],
+      "apiName": "查询空间中的用户",
+      "apiCode": "system.api.v1.workspace.pageQueryUser",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.workspace.pageQueryUser",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/workspace/pageQueryUser",
+      "version": "1787280870073",
+      "markdownFile": "apis/011-system.api.v1.workspace.pagequeryuser.md"
+    },
+    {
+      "index": 12,
+      "categoryPath": [
+        "平台功能类",
+        "系统管理",
+        "空间管理",
+        "移除空间用户"
+      ],
+      "apiName": "移除空间用户",
+      "apiCode": "system.api.v1.workspace.removeUser",
+      "apiUniqueCode": "sfm.api.system-openapi.system.api.v1.workspace.removeUser",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/system/api/v1/workspace/removeUser",
+      "version": "1787280870079",
+      "markdownFile": "apis/012-system.api.v1.workspace.removeuser.md"
+    },
+    {
+      "index": 13,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "查询智能体列表"
+      ],
+      "apiName": "查询智能体列表",
+      "apiCode": "agent.openapi.agent.pagequery",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.pagequery",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/pageQuery",
+      "version": "1787280870096",
+      "markdownFile": "apis/013-agent.openapi.agent.pagequery.md"
+    },
+    {
+      "index": 14,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "创建智能体"
+      ],
+      "apiName": "创建智能体",
+      "apiCode": "agent.openapi.agent.create",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/create",
+      "version": "1787280870103",
+      "markdownFile": "apis/014-agent.openapi.agent.create.md"
+    },
+    {
+      "index": 15,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "编辑智能体"
+      ],
+      "apiName": "编辑智能体",
+      "apiCode": "agent.openapi.agent.update",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.update",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/update",
+      "version": "1787280870108",
+      "markdownFile": "apis/015-agent.openapi.agent.update.md"
+    },
+    {
+      "index": 16,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "删除智能体"
+      ],
+      "apiName": "删除智能体",
+      "apiCode": "agent.openapi.agent.delete",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/delete",
+      "version": "1787280870118",
+      "markdownFile": "apis/016-agent.openapi.agent.delete.md"
+    },
+    {
+      "index": 17,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "查询智能体版本列表"
+      ],
+      "apiName": "查询智能体版本列表",
+      "apiCode": "agent.openapi.agent.version.pagequery",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.version.pagequery",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/version/pageQuery",
+      "version": "1787280870124",
+      "markdownFile": "apis/017-agent.openapi.agent.version.pagequery.md"
+    },
+    {
+      "index": 18,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "创建智能体版本"
+      ],
+      "apiName": "创建智能体版本",
+      "apiCode": "agent.openapi.agent.version.create",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.version.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/version/create",
+      "version": "1787280870136",
+      "markdownFile": "apis/018-agent.openapi.agent.version.create.md"
+    },
+    {
+      "index": 19,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "编辑智能体版本"
+      ],
+      "apiName": "编辑智能体版本",
+      "apiCode": "agent.openapi.agent.version.update",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.version.update",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/version/update",
+      "version": "1787280870143",
+      "markdownFile": "apis/019-agent.openapi.agent.version.update.md"
+    },
+    {
+      "index": 20,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "删除智能体版本"
+      ],
+      "apiName": "删除智能体版本",
+      "apiCode": "agent.openapi.agent.version.delete",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.agent.version.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/agent/version/delete",
+      "version": "1787280870149",
+      "markdownFile": "apis/020-agent.openapi.agent.version.delete.md"
+    },
+    {
+      "index": 21,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体",
+        "写入记忆分区内容"
+      ],
+      "apiName": "写入记忆分区内容",
+      "apiCode": "agent.openapi.memory.longterm.partition.add",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.memory.longterm.partition.add",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/memory/longTerm/partition/add",
+      "version": "1787280870155",
+      "markdownFile": "apis/021-agent.openapi.memory.longterm.partition.add.md"
+    },
+    {
+      "index": 22,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "工具",
+        "查询工具列表"
+      ],
+      "apiName": "查询工具列表",
+      "apiCode": "agent.openapi.tool.pagequery",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.tool.pagequery",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/tool/pageQuery",
+      "version": "1787280870170",
+      "markdownFile": "apis/022-agent.openapi.tool.pagequery.md"
+    },
+    {
+      "index": 23,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "工具",
+        "创建工具"
+      ],
+      "apiName": "创建工具",
+      "apiCode": "agent.openapi.tool.create",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.tool.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/tool/create",
+      "version": "1787280870176",
+      "markdownFile": "apis/023-agent.openapi.tool.create.md"
+    },
+    {
+      "index": 24,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "工具",
+        "编辑工具"
+      ],
+      "apiName": "编辑工具",
+      "apiCode": "agent.openapi.tool.update",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.tool.update",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/tool/update",
+      "version": "1787280870182",
+      "markdownFile": "apis/024-agent.openapi.tool.update.md"
+    },
+    {
+      "index": 25,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "工具",
+        "查询工具详情"
+      ],
+      "apiName": "查询工具详情",
+      "apiCode": "agent.openapi.tool.getone",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.tool.getone",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/tool/getOne",
+      "version": "1787280870188",
+      "markdownFile": "apis/025-agent.openapi.tool.getone.md"
+    },
+    {
+      "index": 26,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "工具",
+        "删除工具"
+      ],
+      "apiName": "删除工具",
+      "apiCode": "agent.openapi.tool.delete",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.tool.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/tool/delete",
+      "version": "1787280870194",
+      "markdownFile": "apis/026-agent.openapi.tool.delete.md"
+    },
+    {
+      "index": 27,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "查询Skill列表"
+      ],
+      "apiName": "查询Skill列表",
+      "apiCode": "agent.api.skill.querypage",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.querypage",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/queryPage",
+      "version": "1787280870217",
+      "markdownFile": "apis/027-agent.api.skill.querypage.md"
+    },
+    {
+      "index": 28,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "查询Skill详情"
+      ],
+      "apiName": "查询Skill详情",
+      "apiCode": "agent.api.skill.getone",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.getone",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/getOne",
+      "version": "1787280870223",
+      "markdownFile": "apis/028-agent.api.skill.getone.md"
+    },
+    {
+      "index": 29,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "查询Skill版本列表"
+      ],
+      "apiName": "查询Skill版本列表",
+      "apiCode": "agent.api.skill.listversions",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.listversions",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/listVersions",
+      "version": "1787280870229",
+      "markdownFile": "apis/029-agent.api.skill.listversions.md"
+    },
+    {
+      "index": 30,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "扫描Skill ZIP包"
+      ],
+      "apiName": "扫描Skill ZIP包",
+      "apiCode": "agent.api.skill.scanzip",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.scanzip",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/scanZip",
+      "version": "1787280870236",
+      "markdownFile": "apis/030-agent.api.skill.scanzip.md"
+    },
+    {
+      "index": 31,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "创建Skill"
+      ],
+      "apiName": "创建Skill",
+      "apiCode": "agent.api.skill.create",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/create",
+      "version": "1787280870243",
+      "markdownFile": "apis/031-agent.api.skill.create.md"
+    },
+    {
+      "index": 32,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "更新Skill"
+      ],
+      "apiName": "更新Skill",
+      "apiCode": "agent.api.skill.update",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.update",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/update",
+      "version": "1787280870248",
+      "markdownFile": "apis/032-agent.api.skill.update.md"
+    },
+    {
+      "index": 33,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "删除Skill"
+      ],
+      "apiName": "删除Skill",
+      "apiCode": "agent.api.skill.delete",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/delete",
+      "version": "1787280870254",
+      "markdownFile": "apis/033-agent.api.skill.delete.md"
+    },
+    {
+      "index": 34,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "分享Skill"
+      ],
+      "apiName": "分享Skill",
+      "apiCode": "agent.api.skill.share",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.share",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/share",
+      "version": "1787280870260",
+      "markdownFile": "apis/034-agent.api.skill.share.md"
+    },
+    {
+      "index": 35,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "安装已分享的Skill"
+      ],
+      "apiName": "安装已分享的Skill",
+      "apiCode": "agent.api.skill.installshared",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.installshared",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/installShared",
+      "version": "1787280870265",
+      "markdownFile": "apis/035-agent.api.skill.installshared.md"
+    },
+    {
+      "index": 36,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "SKILL HUB",
+        "生成Skill MD"
+      ],
+      "apiName": "生成Skill MD",
+      "apiCode": "agent.api.skill.generateskillmd",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.api.skill.generateskillmd",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/api/skill/generateSkillMD",
+      "version": "1787280870271",
+      "markdownFile": "apis/036-agent.api.skill.generateskillmd.md"
+    },
+    {
+      "index": 37,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体模版",
+        "查询智能体模版列表"
+      ],
+      "apiName": "查询智能体模版列表",
+      "apiCode": "agent.openapi.template.pagequery",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.template.pagequery",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/template/pageQuery",
+      "version": "1787280870288",
+      "markdownFile": "apis/037-agent.openapi.template.pagequery.md"
+    },
+    {
+      "index": 38,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "智能体模版",
+        "查询智能体模版详情"
+      ],
+      "apiName": "查询智能体模版详情",
+      "apiCode": "agent.openapi.template.getone",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.template.getone",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/template/getOne",
+      "version": "1787280870295",
+      "markdownFile": "apis/038-agent.openapi.template.getone.md"
+    },
+    {
+      "index": 39,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "提示词模版",
+        "查询提示词模版列表"
+      ],
+      "apiName": "查询提示词模版列表",
+      "apiCode": "agent.openapi.prompt.pagequery",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.prompt.pagequery",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/prompt/pageQuery",
+      "version": "1787280870309",
+      "markdownFile": "apis/039-agent.openapi.prompt.pagequery.md"
+    },
+    {
+      "index": 40,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "提示词模版",
+        "查询提示词分类"
+      ],
+      "apiName": "查询提示词分类",
+      "apiCode": "agent.openapi.prompt.queryprompttypes",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.prompt.queryprompttypes",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/prompt/queryPromptTypes",
+      "version": "1787280870315",
+      "markdownFile": "apis/040-agent.openapi.prompt.queryprompttypes.md"
+    },
+    {
+      "index": 41,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "提示词模版",
+        "创建/更新提示词模版"
+      ],
+      "apiName": "创建/更新提示词模版",
+      "apiCode": "agent.openapi.prompt.save",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.prompt.save",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/prompt/save",
+      "version": "1787280870320",
+      "markdownFile": "apis/041-agent.openapi.prompt.save.md"
+    },
+    {
+      "index": 42,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "提示词模版",
+        "发布提示词模版"
+      ],
+      "apiName": "发布提示词模版",
+      "apiCode": "agent.openapi.prompt.deploy",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.prompt.deploy",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/prompt/deploy",
+      "version": "1787280870325",
+      "markdownFile": "apis/042-agent.openapi.prompt.deploy.md"
+    },
+    {
+      "index": 43,
+      "categoryPath": [
+        "平台功能类",
+        "智能体管理",
+        "提示词模版",
+        "删除提示词模版"
+      ],
+      "apiName": "删除提示词模版",
+      "apiCode": "agent.openapi.prompt.delete",
+      "apiUniqueCode": "sfm.api.openapi-agent.agent.openapi.prompt.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/agent/openapi/prompt/delete",
+      "version": "1787280870331",
+      "markdownFile": "apis/043-agent.openapi.prompt.delete.md"
+    },
+    {
+      "index": 44,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库列表查询"
+      ],
+      "apiName": "知识库列表查询",
+      "apiCode": "kortex.api.kb.list",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.list",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/list",
+      "version": "1787280870349",
+      "markdownFile": "apis/044-kortex.api.kb.list.md"
+    },
+    {
+      "index": 45,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "共享知识库列表查询"
+      ],
+      "apiName": "共享知识库列表查询",
+      "apiCode": "kortex.api.kb.share.sharedlist",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.share.sharedlist",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/share/sharedlist",
+      "version": "1787280870355",
+      "markdownFile": "apis/045-kortex.api.kb.share.sharedlist.md"
+    },
+    {
+      "index": 46,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库创建"
+      ],
+      "apiName": "知识库创建",
+      "apiCode": "kortex.api.kb.create",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/create",
+      "version": "1787280870360",
+      "markdownFile": "apis/046-kortex.api.kb.create.md"
+    },
+    {
+      "index": 47,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库元数据更新"
+      ],
+      "apiName": "知识库元数据更新",
+      "apiCode": "kortex.api.kb.updatematedata",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.updatematedata",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/updateMateData",
+      "version": "1787280870367",
+      "markdownFile": "apis/047-kortex.api.kb.updatematedata.md"
+    },
+    {
+      "index": 48,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库停用"
+      ],
+      "apiName": "知识库停用",
+      "apiCode": "kortex.api.kb.disable",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.disable",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/disable",
+      "version": "1787280870372",
+      "markdownFile": "apis/048-kortex.api.kb.disable.md"
+    },
+    {
+      "index": 49,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库启用"
+      ],
+      "apiName": "知识库启用",
+      "apiCode": "kortex.api.kb.enable",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.enable",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/enable",
+      "version": "1787280870378",
+      "markdownFile": "apis/049-kortex.api.kb.enable.md"
+    },
+    {
+      "index": 50,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库删除"
+      ],
+      "apiName": "知识库删除",
+      "apiCode": "kortex.api.kb.delete",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/delete",
+      "version": "1787280870384",
+      "markdownFile": "apis/050-kortex.api.kb.delete.md"
+    },
+    {
+      "index": 51,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库详情查询"
+      ],
+      "apiName": "知识库详情查询",
+      "apiCode": "kortex.api.kb.mono.detail",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.mono.detail",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/mono/detail",
+      "version": "1787280870389",
+      "markdownFile": "apis/051-kortex.api.kb.mono.detail.md"
+    },
+    {
+      "index": 52,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库数据变更"
+      ],
+      "apiName": "知识库数据变更",
+      "apiCode": "kortex.api.kb.data.consumebulk",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.data.consumebulk",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/data/consumeBulk",
+      "version": "1787280870395",
+      "markdownFile": "apis/052-kortex.api.kb.data.consumebulk.md"
+    },
+    {
+      "index": 53,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库数据查询"
+      ],
+      "apiName": "知识库数据查询",
+      "apiCode": "kortex.api.kb.submodel.data.list",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.submodel.data.list",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/submodel/data/list",
+      "version": "1787280870400",
+      "markdownFile": "apis/053-kortex.api.kb.submodel.data.list.md"
+    },
+    {
+      "index": 54,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "知识库文件上传"
+      ],
+      "apiName": "知识库文件上传",
+      "apiCode": "kortex.api.kb.file.data.sync",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.file.data.sync",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/file/data/sync",
+      "version": "1787280870406",
+      "markdownFile": "apis/054-kortex.api.kb.file.data.sync.md"
+    },
+    {
+      "index": 55,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文档知识库文件列表查询"
+      ],
+      "apiName": "文档知识库文件列表查询",
+      "apiCode": "kortex.api.kb.doc.file.list",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.file.list",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/doc/file/list",
+      "version": "1787280870411",
+      "markdownFile": "apis/055-kortex.api.kb.doc.file.list.md"
+    },
+    {
+      "index": 56,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文件重新解析"
+      ],
+      "apiName": "文件重新解析",
+      "apiCode": "kortex.api.kb.doc.file.reprocess",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.file.reprocess",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/doc/file/reprocess",
+      "version": "1787280870416",
+      "markdownFile": "apis/056-kortex.api.kb.doc.file.reprocess.md"
+    },
+    {
+      "index": 57,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文档知识库删除文件"
+      ],
+      "apiName": "文档知识库删除文件",
+      "apiCode": "kortex.api.kb.doc.file.delete",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.file.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/doc/file/delete",
+      "version": "1787280870423",
+      "markdownFile": "apis/057-kortex.api.kb.doc.file.delete.md"
+    },
+    {
+      "index": 58,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文档知识库chunk明细列表查询"
+      ],
+      "apiName": "文档知识库chunk明细列表查询",
+      "apiCode": "kortex.api.kb.doc.chunk.list",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.chunk.list",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/doc/chunk/list",
+      "version": "1787280870428",
+      "markdownFile": "apis/058-kortex.api.kb.doc.chunk.list.md"
+    },
+    {
+      "index": 59,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文档知识库chunk内容修正"
+      ],
+      "apiName": "文档知识库chunk内容修正",
+      "apiCode": "kortex.api.kb.doc.chunk.edit",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.chunk.edit",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/kb/doc/chunk/edit",
+      "version": "1787280870438",
+      "markdownFile": "apis/059-kortex.api.kb.doc.chunk.edit.md"
+    },
+    {
+      "index": 60,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文档知识库资源用量-汇总KPI接口"
+      ],
+      "apiName": "文档知识库资源用量-汇总KPI接口",
+      "apiCode": "kortex.api.statistics.kpi",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.statistics.kpi",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/statistics/kpi",
+      "version": "1787280870444",
+      "markdownFile": "apis/060-kortex.api.statistics.kpi.md"
+    },
+    {
+      "index": 61,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文档知识库资源用量-图表趋势接口"
+      ],
+      "apiName": "文档知识库资源用量-图表趋势接口",
+      "apiCode": "kortex.api.statistics.trend",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.statistics.trend",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/statistics/trend",
+      "version": "1787280870449",
+      "markdownFile": "apis/061-kortex.api.statistics.trend.md"
+    },
+    {
+      "index": 62,
+      "categoryPath": [
+        "平台功能类",
+        "知识库管理",
+        "文档知识库资源用量-明细数据接口"
+      ],
+      "apiName": "文档知识库资源用量-明细数据接口",
+      "apiCode": "kortex.api.statistics.details",
+      "apiUniqueCode": "sfm.api.ctl-kortex.kortex.api.statistics.details",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/kortex/api/statistics/details",
+      "version": "1787280870455",
+      "markdownFile": "apis/062-kortex.api.statistics.details.md"
+    },
+    {
+      "index": 63,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取数据集列表"
+      ],
+      "apiName": "获取数据集列表",
+      "apiCode": "data-engine.api.v2.datasets.get",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.get",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets",
+      "version": "1787280870473",
+      "markdownFile": "apis/063-data-engine.api.v2.datasets.get.md"
+    },
+    {
+      "index": 64,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "新建数据集"
+      ],
+      "apiName": "新建数据集",
+      "apiCode": "data-engine.api.v2.datasets.Code.post",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.post",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets",
+      "version": "1787280870478",
+      "markdownFile": "apis/064-data-engine.api.v2.datasets.code.post.md"
+    },
+    {
+      "index": 65,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "更新数据集"
+      ],
+      "apiName": "更新数据集",
+      "apiCode": "data-engine.api.v2.datasets.Code.put",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.put",
+      "method": "PUT",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets",
+      "version": "1787280870484",
+      "markdownFile": "apis/065-data-engine.api.v2.datasets.code.put.md"
+    },
+    {
+      "index": 66,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "删除数据集"
+      ],
+      "apiName": "删除数据集",
+      "apiCode": "data-engine.api.v2.datasets.Code.delete",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.delete",
+      "method": "DELETE",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}",
+      "version": "1787280870490",
+      "markdownFile": "apis/066-data-engine.api.v2.datasets.code.delete.md"
+    },
+    {
+      "index": 67,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取数据集详情"
+      ],
+      "apiName": "获取数据集详情",
+      "apiCode": "data-engine.api.v2.datasets.Code.get",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.get",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}",
+      "version": "1787280870495",
+      "markdownFile": "apis/067-data-engine.api.v2.datasets.code.get.md"
+    },
+    {
+      "index": 68,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "通知数据集文件增加"
+      ],
+      "apiName": "通知数据集文件增加",
+      "apiCode": "data-engine.api.v2.datasets.Code.files.post",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.files.post",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/files",
+      "version": "1787280870501",
+      "markdownFile": "apis/068-data-engine.api.v2.datasets.code.files.post.md"
+    },
+    {
+      "index": 69,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "通知数据集文件删除"
+      ],
+      "apiName": "通知数据集文件删除",
+      "apiCode": "data-engine.api.v2.datasets.Code.files.delete",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.files.delete",
+      "method": "DELETE",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/files",
+      "version": "1787280870506",
+      "markdownFile": "apis/069-data-engine.api.v2.datasets.code.files.delete.md"
+    },
+    {
+      "index": 70,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取数据集文件列表"
+      ],
+      "apiName": "获取数据集文件列表",
+      "apiCode": "data-engine.api.v2.datasets.Code.files.get",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.files.get",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/files",
+      "version": "1787280870512",
+      "markdownFile": "apis/070-data-engine.api.v2.datasets.code.files.get.md"
+    },
+    {
+      "index": 71,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "新建数据子集"
+      ],
+      "apiName": "新建数据子集",
+      "apiCode": "data-engine.api.v2.datasets.Code.subsets.post",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.post",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/subsets",
+      "version": "1787280870517",
+      "markdownFile": "apis/071-data-engine.api.v2.datasets.code.subsets.post.md"
+    },
+    {
+      "index": 72,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "更新数据子集"
+      ],
+      "apiName": "更新数据子集",
+      "apiCode": "data-engine.api.v2.datasets.Code.subsets.put",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.put",
+      "method": "PUT",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/subsets",
+      "version": "1787280870523",
+      "markdownFile": "apis/072-data-engine.api.v2.datasets.code.subsets.put.md"
+    },
+    {
+      "index": 73,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "删除数据集子集"
+      ],
+      "apiName": "删除数据集子集",
+      "apiCode": "data-engine.api.v2.datasets.Code.subsets.subsetCode.delete",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.subsetCode.delete",
+      "method": "DELETE",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/subsets/{subsetCode}",
+      "version": "1787280870528",
+      "markdownFile": "apis/073-data-engine.api.v2.datasets.code.subsets.subsetcode.delete.md"
+    },
+    {
+      "index": 74,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "数据集子集列表"
+      ],
+      "apiName": "数据集子集列表",
+      "apiCode": "data-engine.api.v2.datasets.Code.subsets.get",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.get",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/subsets",
+      "version": "1787280870533",
+      "markdownFile": "apis/074-data-engine.api.v2.datasets.code.subsets.get.md"
+    },
+    {
+      "index": 75,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取数据集预览数据"
+      ],
+      "apiName": "获取数据集预览数据",
+      "apiCode": "data-engine.api.v2.datasets.Code.viewer",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.viewer",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/datasets/{code}/viewer",
+      "version": "1787280870539",
+      "markdownFile": "apis/075-data-engine.api.v2.datasets.code.viewer.md"
+    },
+    {
+      "index": 76,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取文件下载地址"
+      ],
+      "apiName": "获取文件下载地址",
+      "apiCode": "data-engine.api.v2.files.url.get",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.files.url.get",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/files/presigned/url",
+      "version": "1787280870545",
+      "markdownFile": "apis/076-data-engine.api.v2.files.url.get.md"
+    },
+    {
+      "index": 77,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取图片下载地址"
+      ],
+      "apiName": "获取图片下载地址",
+      "apiCode": "data-engine.api.v2.files.image.presigned.url",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.files.image.presigned.url",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/files/image/presigned/url",
+      "version": "1787280870550",
+      "markdownFile": "apis/077-data-engine.api.v2.files.image.presigned.url.md"
+    },
+    {
+      "index": 78,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "删除文件"
+      ],
+      "apiName": "删除文件",
+      "apiCode": "data-engine.api.v2.files.delete",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.files.delete",
+      "method": "DELETE",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/files",
+      "version": "1787280870555",
+      "markdownFile": "apis/078-data-engine.api.v2.files.delete.md"
+    },
+    {
+      "index": 79,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取文件上传授权凭证"
+      ],
+      "apiName": "获取文件上传授权凭证",
+      "apiCode": "data-engine.api.v2.files.upload.credential",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.files.upload.credential",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/files/upload/credential",
+      "version": "1787280870562",
+      "markdownFile": "apis/079-data-engine.api.v2.files.upload.credential.md"
+    },
+    {
+      "index": 80,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据管理",
+        "获取文件下载授权凭证"
+      ],
+      "apiName": "获取文件下载授权凭证",
+      "apiCode": "data-engine.api.v2.files.download.credential",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.files.download.credential",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/files/download/credential",
+      "version": "1787280870567",
+      "markdownFile": "apis/080-data-engine.api.v2.files.download.credential.md"
+    },
+    {
+      "index": 81,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "获取算子列表"
+      ],
+      "apiName": "获取算子列表",
+      "apiCode": "data-engine.api.v2.operators",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.operators",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/operators",
+      "version": "1787280870583",
+      "markdownFile": "apis/081-data-engine.api.v2.operators.md"
+    },
+    {
+      "index": 82,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "获取加工模版列表"
+      ],
+      "apiName": "获取加工模版列表",
+      "apiCode": "data-engine.api.v2.process.templates",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.templates",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/templates",
+      "version": "1787280870589",
+      "markdownFile": "apis/082-data-engine.api.v2.process.templates.md"
+    },
+    {
+      "index": 83,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "获取加工模版详情"
+      ],
+      "apiName": "获取加工模版详情",
+      "apiCode": "data-engine.api.v2.process.templates.byCode",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.templates.byCode",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/templates/{code}",
+      "version": "1787280870594",
+      "markdownFile": "apis/083-data-engine.api.v2.process.templates.bycode.md"
+    },
+    {
+      "index": 84,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "新建加工任务"
+      ],
+      "apiName": "新建加工任务",
+      "apiCode": "data-engine.api.v2.process.tasks",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks",
+      "version": "1787280870599",
+      "markdownFile": "apis/084-data-engine.api.v2.process.tasks.md"
+    },
+    {
+      "index": 85,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "更新加工任务"
+      ],
+      "apiName": "更新加工任务",
+      "apiCode": "data-engine.api.v2.process.tasks.put",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.put",
+      "method": "PUT",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks",
+      "version": "1787280870604",
+      "markdownFile": "apis/085-data-engine.api.v2.process.tasks.put.md"
+    },
+    {
+      "index": 86,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "删除加工任务"
+      ],
+      "apiName": "删除加工任务",
+      "apiCode": "data-engine.api.v2.process.tasks.Taskid",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid",
+      "method": "DELETE",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks/{taskId}",
+      "version": "1787280870609",
+      "markdownFile": "apis/086-data-engine.api.v2.process.tasks.taskid.md"
+    },
+    {
+      "index": 87,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "发布任务"
+      ],
+      "apiName": "发布任务",
+      "apiCode": "data-engine.api.v2.process.tasks.Taskid.publish",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.publish",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks/{taskId}/publish",
+      "version": "1787280870614",
+      "markdownFile": "apis/087-data-engine.api.v2.process.tasks.taskid.publish.md"
+    },
+    {
+      "index": 88,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "下线任务"
+      ],
+      "apiName": "下线任务",
+      "apiCode": "data-engine.api.v2.process.tasks.Taskid.unpublish",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.unpublish",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks/{taskId}/unpublish",
+      "version": "1787280870619",
+      "markdownFile": "apis/088-data-engine.api.v2.process.tasks.taskid.unpublish.md"
+    },
+    {
+      "index": 89,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "获取加工任务列表"
+      ],
+      "apiName": "获取加工任务列表",
+      "apiCode": "data-engine.api.v2.process.tasks.get",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.get",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks",
+      "version": "1787280870624",
+      "markdownFile": "apis/089-data-engine.api.v2.process.tasks.get.md"
+    },
+    {
+      "index": 90,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "获取加工任务详情"
+      ],
+      "apiName": "获取加工任务详情",
+      "apiCode": "data-engine.api.v2.process.tasks.Taskid.get",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.get",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks/{taskId}",
+      "version": "1787280870629",
+      "markdownFile": "apis/090-data-engine.api.v2.process.tasks.taskid.get.md"
+    },
+    {
+      "index": 91,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "运行加工任务"
+      ],
+      "apiName": "运行加工任务",
+      "apiCode": "data-engine.api.v2.process.tasks.Taskid.run",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.run",
+      "method": "POST",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks/{taskId}/run",
+      "version": "1787280870635",
+      "markdownFile": "apis/091-data-engine.api.v2.process.tasks.taskid.run.md"
+    },
+    {
+      "index": 92,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "获取任务运行实例信息"
+      ],
+      "apiName": "获取任务运行实例信息",
+      "apiCode": "data-engine.api.v2.process.tasks.Taskid.instances",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.instances",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks/{taskId}/instances",
+      "version": "1787280870640",
+      "markdownFile": "apis/092-data-engine.api.v2.process.tasks.taskid.instances.md"
+    },
+    {
+      "index": 93,
+      "categoryPath": [
+        "平台功能类",
+        "数据中心",
+        "数据加工",
+        "获取任务实例日志"
+      ],
+      "apiName": "获取任务实例日志",
+      "apiCode": "data-engine.api.v2.process.tasks.instances.Instancecode.log",
+      "apiUniqueCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.instances.Instancecode.log",
+      "method": "GET",
+      "url": "http://10.128.203.200:30226/gatectl/data-engine/api/v2/process/tasks/instances/{instanceCode}/log",
+      "version": "1787280870646",
+      "markdownFile": "apis/093-data-engine.api.v2.process.tasks.instances.instancecode.log.md"
+    },
+    {
+      "index": 94,
+      "categoryPath": [
+        "应用集成类",
+        "智能体",
+        "创建session"
+      ],
+      "apiName": "创建session",
+      "apiCode": "agent.api.createsession",
+      "apiUniqueCode": "sfm.api.agent.agent.api.createsession",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/createSession",
+      "version": "1787280869659",
+      "markdownFile": "apis/094-agent.api.createsession.md"
+    },
+    {
+      "index": 95,
+      "categoryPath": [
+        "应用集成类",
+        "智能体",
+        "发起agent调用"
+      ],
+      "apiName": "发起agent调用",
+      "apiCode": "agent.api.run",
+      "apiUniqueCode": "sfm.api.agent.agent.api.run",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/run",
+      "version": "1787280869673",
+      "markdownFile": "apis/095-agent.api.run.md"
+    },
+    {
+      "index": 96,
+      "categoryPath": [
+        "应用集成类",
+        "智能体",
+        "终止session"
+      ],
+      "apiName": "终止session",
+      "apiCode": "agent.api.clearsession",
+      "apiUniqueCode": "sfm.api.agent.agent.api.clearsession",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/clearSession",
+      "version": "1787280869682",
+      "markdownFile": "apis/096-agent.api.clearsession.md"
+    },
+    {
+      "index": 97,
+      "categoryPath": [
+        "应用集成类",
+        "智能体",
+        "删除session"
+      ],
+      "apiName": "删除session",
+      "apiCode": "agent.api.deletesession",
+      "apiUniqueCode": "sfm.api.agent.agent.api.deletesession",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/deleteSession",
+      "version": "1787280869690",
+      "markdownFile": "apis/097-agent.api.deletesession.md"
+    },
+    {
+      "index": 98,
+      "categoryPath": [
+        "应用集成类",
+        "智能体",
+        "工具异步回调"
+      ],
+      "apiName": "工具异步回调",
+      "apiCode": "agent.api.taskfinishnotice",
+      "apiUniqueCode": "sfm.api.agent.agent.api.taskfinishnotice",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/taskFinishNotice",
+      "version": "1787280869697",
+      "markdownFile": "apis/098-agent.api.taskfinishnotice.md"
+    },
+    {
+      "index": 99,
+      "categoryPath": [
+        "应用集成类",
+        "智能体",
+        "调用结果反馈"
+      ],
+      "apiName": "调用结果反馈",
+      "apiCode": "agent.api.feedback",
+      "apiUniqueCode": "sfm.api.agent.agent.api.feedback",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/api/feedback",
+      "version": "1787280869705",
+      "markdownFile": "apis/099-agent.api.feedback.md"
+    },
+    {
+      "index": 100,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "创建session"
+      ],
+      "apiName": "创建session",
+      "apiCode": "agent.auto.new.open.session.create",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.session.create",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/session/create",
+      "version": "1787280869733",
+      "markdownFile": "apis/100-agent.auto.new.open.session.create.md"
+    },
+    {
+      "index": 101,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "创建连接"
+      ],
+      "apiName": "创建连接",
+      "apiCode": "agent.auto.new.open.createnewchannel",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.createnewchannel",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/createNewChannel",
+      "version": "1787280869740",
+      "markdownFile": "apis/101-agent.auto.new.open.createnewchannel.md"
+    },
+    {
+      "index": 102,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "刷新channel心跳"
+      ],
+      "apiName": "刷新channel心跳",
+      "apiCode": "agent.auto.new.open.channelrefresh",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.channelrefresh",
+      "method": "GET",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/channelRefresh",
+      "version": "1787280869746",
+      "markdownFile": "apis/102-agent.auto.new.open.channelrefresh.md"
+    },
+    {
+      "index": 103,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "切换至指定session"
+      ],
+      "apiName": "切换至指定session",
+      "apiCode": "agent.auto.new.open.changetask",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.changetask",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/changeTask",
+      "version": "1787280869753",
+      "markdownFile": "apis/103-agent.auto.new.open.changetask.md"
+    },
+    {
+      "index": 104,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "发起一次对话"
+      ],
+      "apiName": "发起一次对话",
+      "apiCode": "agent.auto.new.open.run",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.run",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/run",
+      "version": "1787280869759",
+      "markdownFile": "apis/104-agent.auto.new.open.run.md"
+    },
+    {
+      "index": 105,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "停止当前对话"
+      ],
+      "apiName": "停止当前对话",
+      "apiCode": "agent.auto.new.open.stop",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.stop",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/stop",
+      "version": "1787280869766",
+      "markdownFile": "apis/105-agent.auto.new.open.stop.md"
+    },
+    {
+      "index": 106,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "获取会话列表"
+      ],
+      "apiName": "获取会话列表",
+      "apiCode": "agent.auto.new.open.task.list",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.task.list",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/task/list",
+      "version": "1787280869773",
+      "markdownFile": "apis/106-agent.auto.new.open.task.list.md"
+    },
+    {
+      "index": 107,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "查询单个任务详情"
+      ],
+      "apiName": "查询单个任务详情",
+      "apiCode": "agent.auto.new.open.task.desc",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.task.desc",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/task/desc",
+      "version": "1787280869779",
+      "markdownFile": "apis/107-agent.auto.new.open.task.desc.md"
+    },
+    {
+      "index": 108,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "删除任务"
+      ],
+      "apiName": "删除任务",
+      "apiCode": "agent.auto.new.open.task.delete",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.task.delete",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/task/delete",
+      "version": "1787280869786",
+      "markdownFile": "apis/108-agent.auto.new.open.task.delete.md"
+    },
+    {
+      "index": 109,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "更新任务信息"
+      ],
+      "apiName": "更新任务信息",
+      "apiCode": "agent.auto.new.open.task.update",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.task.update",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/task/update",
+      "version": "1787280869792",
+      "markdownFile": "apis/109-agent.auto.new.open.task.update.md"
+    },
+    {
+      "index": 110,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "统计任务状态"
+      ],
+      "apiName": "统计任务状态",
+      "apiCode": "agent.auto.new.open.task.statistic",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.task.statistic",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/task/statistic",
+      "version": "1787280869822",
+      "markdownFile": "apis/110-agent.auto.new.open.task.statistic.md"
+    },
+    {
+      "index": 111,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "分页查询历史消息"
+      ],
+      "apiName": "分页查询历史消息",
+      "apiCode": "agent.auto.new.open.pagelistlatestmsg",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.pagelistlatestmsg",
+      "method": "GET",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/pageListLatestMsg",
+      "version": "1787280869828",
+      "markdownFile": "apis/111-agent.auto.new.open.pagelistlatestmsg.md"
+    },
+    {
+      "index": 112,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "获取会话文件树"
+      ],
+      "apiName": "获取会话文件树",
+      "apiCode": "agent.auto.new.open.files.tree",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.files.tree",
+      "method": "GET",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/files/tree",
+      "version": "1787280869834",
+      "markdownFile": "apis/112-agent.auto.new.open.files.tree.md"
+    },
+    {
+      "index": 113,
+      "categoryPath": [
+        "应用集成类",
+        "TrekAgent",
+        "获取文件下载链接"
+      ],
+      "apiName": "获取文件下载链接",
+      "apiCode": "agent.auto.new.open.files.download",
+      "apiUniqueCode": "sfm.api.auto-agent.agent.auto.new.open.files.download",
+      "method": "GET",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/auto/new/open/files/download",
+      "version": "1787280869841",
+      "markdownFile": "apis/113-agent.auto.new.open.files.download.md"
+    },
+    {
+      "index": 114,
+      "categoryPath": [
+        "应用集成类",
+        "高码智能体",
+        "创建session"
+      ],
+      "apiName": "创建session",
+      "apiCode": "agent.highcode.createsession",
+      "apiUniqueCode": "sfm.api.highcodeagent.agent.highcode.createsession",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/highcode/createSession",
+      "version": "1787280869856",
+      "markdownFile": "apis/114-agent.highcode.createsession.md"
+    },
+    {
+      "index": 115,
+      "categoryPath": [
+        "应用集成类",
+        "高码智能体",
+        "发起agent调用"
+      ],
+      "apiName": "发起agent调用",
+      "apiCode": "agent.highcode.process",
+      "apiUniqueCode": "sfm.api.highcodeagent.agent.highcode.process",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/highcode/process",
+      "version": "1787280869863",
+      "markdownFile": "apis/115-agent.highcode.process.md"
+    },
+    {
+      "index": 116,
+      "categoryPath": [
+        "应用集成类",
+        "高码智能体",
+        "终止会话"
+      ],
+      "apiName": "终止会话",
+      "apiCode": "agent.highcode.abortsession",
+      "apiUniqueCode": "sfm.api.highcodeagent.agent.highcode.abortsession",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/highcode/abortSession",
+      "version": "1787280869870",
+      "markdownFile": "apis/116-agent.highcode.abortsession.md"
+    },
+    {
+      "index": 117,
+      "categoryPath": [
+        "应用集成类",
+        "高码智能体",
+        "清除会话"
+      ],
+      "apiName": "清除会话",
+      "apiCode": "agent.highcode.clearsession",
+      "apiUniqueCode": "sfm.api.highcodeagent.agent.highcode.clearsession",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/agent/highcode/clearSession",
+      "version": "1787280869875",
+      "markdownFile": "apis/117-agent.highcode.clearsession.md"
+    },
+    {
+      "index": 118,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "文件元数据批量标注"
+      ],
+      "apiName": "文件元数据批量标注",
+      "apiCode": "kortex.api.kb.metadata.annotatefilemetadata",
+      "apiUniqueCode": "sfm.api.kortex.kortex.api.kb.metadata.annotatefilemetadata",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/kortex/api/kb/metadata/annotateFileMetadata",
+      "version": "1787280869918",
+      "markdownFile": "apis/118-kortex.api.kb.metadata.annotatefilemetadata.md"
+    },
+    {
+      "index": 119,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "文件元数据过滤查询"
+      ],
+      "apiName": "文件元数据过滤查询",
+      "apiCode": "kortex.api.kb.metadata.filterfilecodes",
+      "apiUniqueCode": "sfm.api.kortex.kortex.api.kb.metadata.filterfilecodes",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/kortex/api/kb/metadata/filterFileCodes",
+      "version": "1787280869925",
+      "markdownFile": "apis/119-kortex.api.kb.metadata.filterfilecodes.md"
+    },
+    {
+      "index": 120,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "知识库检索"
+      ],
+      "apiName": "知识库检索",
+      "apiCode": "kortex.api.kb.mono.retrieve",
+      "apiUniqueCode": "sfm.api.kortex.kortex.api.kb.mono.retrieve",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/kortex/api/kb/mono/retrieve",
+      "version": "1787280869932",
+      "markdownFile": "apis/120-kortex.api.kb.mono.retrieve.md"
+    },
+    {
+      "index": 121,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "知识库批量检索"
+      ],
+      "apiName": "知识库批量检索",
+      "apiCode": "kortex.api.kb.mono.combination.retrieve",
+      "apiUniqueCode": "sfm.api.kortex.kortex.api.kb.mono.combination.retrieve",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/kortex/api/kb/mono/combination/retrieve",
+      "version": "1787280869939",
+      "markdownFile": "apis/121-kortex.api.kb.mono.combination.retrieve.md"
+    },
+    {
+      "index": 122,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "文档知识库检索"
+      ],
+      "apiName": "文档知识库检索",
+      "apiCode": "kortex.api.kb.doc.retrieve",
+      "apiUniqueCode": "sfm.api.kortex.kortex.api.kb.doc.retrieve",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/kortex/api/kb/doc/retrieve",
+      "version": "1787280869945",
+      "markdownFile": "apis/122-kortex.api.kb.doc.retrieve.md"
+    },
+    {
+      "index": 123,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "文档知识库批量检索"
+      ],
+      "apiName": "文档知识库批量检索",
+      "apiCode": "kortex.api.kb.doc.combination.retrieve",
+      "apiUniqueCode": "sfm.api.kortex.kortex.api.kb.doc.combination.retrieve",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/kortex/api/kb/doc/combination/retrieve",
+      "version": "1787280869951",
+      "markdownFile": "apis/123-kortex.api.kb.doc.combination.retrieve.md"
+    },
+    {
+      "index": 124,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "数据表知识库检索服务"
+      ],
+      "apiName": "数据表知识库检索服务",
+      "apiCode": "dext.api.retrieve.v1.search",
+      "apiUniqueCode": "sfm.api.kortex.dext.api.retrieve.v1.search",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/dext/api/retrieve/v1/search",
+      "version": "1787280869958",
+      "markdownFile": "apis/124-dext.api.retrieve.v1.search.md"
+    },
+    {
+      "index": 125,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "数据表知识库资源查询-表"
+      ],
+      "apiName": "数据表知识库资源查询-表",
+      "apiCode": "dext.api.dp.refres.schema.listtableswithrelatedinfo",
+      "apiUniqueCode": "sfm.api.kortex.dext.api.dp.refres.schema.listtableswithrelatedinfo",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/dext/api/dp/refRes/schema/listTablesWithRelatedInfo",
+      "version": "1787280869964",
+      "markdownFile": "apis/125-dext.api.dp.refres.schema.listtableswithrelatedinfo.md"
+    },
+    {
+      "index": 126,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "数据表知识库资源查询-字段"
+      ],
+      "apiName": "数据表知识库资源查询-字段",
+      "apiCode": "dext.api.dp.refres.schema.listcolumnswithrelatedinfo",
+      "apiUniqueCode": "sfm.api.kortex.dext.api.dp.refres.schema.listcolumnswithrelatedinfo",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/dext/api/dp/refRes/schema/listColumnsWithRelatedInfo",
+      "version": "1787280869970",
+      "markdownFile": "apis/126-dext.api.dp.refres.schema.listcolumnswithrelatedinfo.md"
+    },
+    {
+      "index": 127,
+      "categoryPath": [
+        "应用集成类",
+        "知识库检索",
+        "数据表知识库资源查询-专家知识"
+      ],
+      "apiName": "数据表知识库资源查询-专家知识",
+      "apiCode": "dext.api.dp.refres.flexext.list",
+      "apiUniqueCode": "sfm.api.kortex.dext.api.dp.refres.flexext.list",
+      "method": "POST",
+      "url": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway/dext/api/dp/refRes/flexExt/list",
+      "version": "1787280869976",
+      "markdownFile": "apis/127-dext.api.dp.refres.flexext.list.md"
+    }
+  ],
+  "failures": []
+}

@@ -507,7 +507,7 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "disabledTestMarkerCount": 1,
+    "disabledTestMarkerCount": 2,
     "resourceCount": 84,
     "resourceCountsByCategory": {
       "font": 1,
@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 60
+    "testFileCount": 67
   },
   "tests": [
     {
@@ -591,12 +591,17 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_api_foundation.py",
-      "sha256": "7fa47718dd000abe8a6486487881a9aafedd96e7d2826f97d297116fb2e4c482"
+      "sha256": "e7473209c0b507a6de941356f681affd04e653f06e10fbb093df8b376d46433a"
     },
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_auth.py",
       "sha256": "791de494aea048fb6f37909725d5c418280b5d75b3756eca9deaa294dc21f36f"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/unit/test_competition_mode.py",
+      "sha256": "7454e6e8e7cef725d899a7b25f6c226bf4382396638fd2bc2eab30e95aa36d11"
     },
     {
       "disabledMarkers": 0,
@@ -636,7 +641,7 @@
     {
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_knowledge_base_interview.py",
-      "sha256": "0df0479f618718030284d22c8d8774aff21529186d93dc05589090d0933a724c"
+      "sha256": "c7778dc92579320bec85052808c45dd60a24b2303daec26bddf27ecacda29cb0"
     },
     {
       "disabledMarkers": 0,
@@ -662,6 +667,26 @@
       "disabledMarkers": 0,
       "file": "backend/tests/unit/test_models.py",
       "sha256": "8a332071574d2c42ca8a9aeb3c8ddb88d838fa71c0fddbe5e287104069369893"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/unit/test_opentrek_client.py",
+      "sha256": "1ca20ddcae2981d272b482fd95200b36de7a3da984694cf96cfef91905fabf14"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/unit/test_opentrek_kortex.py",
+      "sha256": "a6c94e8bf853868d98b04ffeafbaa56b9a374479935284147280a174e026747d"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/unit/test_opentrek_provision.py",
+      "sha256": "f57f7bba50229e52e5783a35c5033193c32ae6f2c8b03c391e2510b07bb2a5e8"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "backend/tests/unit/test_opentrek_seed.py",
+      "sha256": "4ad89073aa12bba10c937ca7502a1dfd2f5ded29430ed20420d38dcff76bd515"
     },
     {
       "disabledMarkers": 0,
@@ -747,6 +772,16 @@
       "disabledMarkers": 0,
       "file": "frontend/e2e/auth.spec.ts",
       "sha256": "3ecdefcb1b0266287566904080ab29f9a78d0834f376f0e8e7b40779d3363817"
+    },
+    {
+      "disabledMarkers": 1,
+      "file": "frontend/e2e/campus-real-backend.spec.ts",
+      "sha256": "60d55f091734797c7575b6ef4b1b2772e017baf97704e140dbd8434373b1e01c"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/e2e/competition-mode.spec.ts",
+      "sha256": "1cf693aba02e3098df2a81f295e7934cec4fc181b1857c3df206e2e03a35f509"
     },
     {
       "disabledMarkers": 0,

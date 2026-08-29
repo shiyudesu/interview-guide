@@ -42,6 +42,7 @@ import {
   isQuestionGenerationActive,
   shouldRefreshGeneratedQuestions,
 } from './questionGenerationStatus';
+import { useAuth } from '../auth/AuthContext';
 
 interface QuestionFilters {
   status: KnowledgeBaseQuestionStatus | '';
@@ -70,6 +71,7 @@ interface LocationState {
 }
 
 export default function KnowledgeBaseInterviewQuestionsPage() {
+  const { competitionMode } = useAuth();
   const { knowledgeBaseId } = useParams<{ knowledgeBaseId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -288,7 +290,7 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
       const result = await knowledgeBaseApi.generateQuestions(knowledgeBaseIdNum, {
         difficulty: config.difficulty,
         questionCount: config.questionCount,
-        followUpCount: config.followUpCount,
+        followUpCount: competitionMode ? 0 : config.followUpCount,
         categoryLimit: config.categoryLimit,
       });
       setGenerateOpen(false);
@@ -696,6 +698,7 @@ export default function KnowledgeBaseInterviewQuestionsPage() {
         defaultDifficulty={DEFAULT_DIFFICULTY}
         defaultCategoryLimit={DEFAULT_CATEGORY_LIMIT}
         initialConfig={retryConfig}
+        fixedFollowUpCount={competitionMode ? 0 : undefined}
         submitting={submitting}
         error={generateError}
         onClose={() => {

@@ -2,17 +2,21 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from pathlib import Path
 from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
 
+from interview_guide.common.ai.opentrek import OpenTrekCapability, OpenTrekProviderConfig
+from interview_guide.common.ai.prompts import PromptRepository, PromptSanitizer
 from interview_guide.common.redis.streams import StreamMessage
 from interview_guide.modules.knowledge_base.question_models import (
     CreateKnowledgeBaseInterviewRequest,
     CreateKnowledgeBaseQuestionRequest,
     GeneratedQuestion,
     GeneratedQuestionFollowUp,
+    GeneratedQuestionList,
     GenerateKnowledgeBaseQuestionsRequest,
     KnowledgeBaseQuestionFollowUp,
 )
@@ -22,9 +26,57 @@ from interview_guide.modules.knowledge_base.question_service import (
     QuestionGenerationRecoveryService,
     QuestionGenStreamHandler,
     parse_follow_ups,
+    split_question_generation_context,
 )
 
 FIXED_NOW = datetime(2026, 8, 17, 8, 0)
+
+
+class EmptySessionContext:
+    def __call__(self) -> EmptySessionContext:
+        return self
+
+    async def __aenter__(self) -> object:
+        return object()
+
+    async def __aexit__(self, *args: object) -> None:
+        del args
+
+
+class EmptyQuestionRepository:
+    def __init__(self, session: object) -> None:
+        del session
+
+    async def categories(self, knowledge_base_id: int) -> list[object]:
+        del knowledge_base_id
+        return []
+
+    async def recent_questions(self, knowledge_base_id: int, difficulty: str) -> list[object]:
+        del knowledge_base_id, difficulty
+        return []
+
+
+class OpenTrekRegistryStub:
+    async def get_chat(self, provider_id: str | None = None) -> OpenTrekProviderConfig:
+        del provider_id
+        return OpenTrekProviderConfig(
+            provider_id="opentrek:evaluator",
+            base_url="http://10.128.203.200/gateway",
+            api_key="key",
+            model="agent",
+            capability=OpenTrekCapability.EVALUATOR,
+        )
+
+
+class RecordingStructuredInvoker:
+    def __init__(self) -> None:
+        self.users: list[str] = []
+
+    async def invoke(self, provider: object, system: str, user: str, *args: object) -> Any:
+        del provider, system, args
+        self.users.append(user)
+        index = len(self.users)
+        return GeneratedQuestionList(questions=[GeneratedQuestion(question=f"题目 {index}")])
 
 
 def test_requests_apply_defaults_and_validation_messages() -> None:
@@ -61,6 +113,58 @@ def test_requests_apply_defaults_and_validation_messages() -> None:
 def test_follow_up_parser_rejects_non_structured_items() -> None:
     value = json.dumps(["非结构化追问"])
     assert parse_follow_ups(value) == []
+
+
+def test_opentrek_question_context_uses_distinct_markdown_sections() -> None:
+    context = (
+        "# 资料\n\n## Redis\n" + "缓存穿透治理。" * 20 + "\n\n## PostgreSQL\n" + "事务隔离。" * 20
+    )
+
+    batches = split_question_generation_context(context, 2)
+
+    assert len(batches) == 2
+    assert "缓存穿透" in batches[0]
+    assert "事务隔离" in batches[1]
+
+
+async def test_opentrek_question_generation_batches_one_question_per_call(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "interview_guide.modules.knowledge_base.question_service.KnowledgeBaseQuestionRepository",
+        EmptyQuestionRepository,
+    )
+    structured = RecordingStructuredInvoker()
+    service = KnowledgeBaseQuestionGenerationService(
+        cast(Any, EmptySessionContext()),
+        cast(Any, None),
+        cast(Any, None),
+        cast(Any, structured),
+        PromptRepository(Path(__file__).resolve().parents[2] / "resources"),
+        PromptSanitizer(),
+        cast(Any, None),
+    )
+
+    result = await service._call_llm(
+        1,
+        "知识库",
+        "mid",
+        3,
+        1,
+        2,
+        None,
+        "技术上下文",
+        cast(Any, OpenTrekRegistryStub()),
+    )
+
+    assert [item.question for item in result.questions or [] if item is not None] == [
+        "题目 1",
+        "题目 2",
+        "题目 3",
+    ]
+    assert len(structured.users) == 3
+    assert all("生成 1 道面试题" in user for user in structured.users)
+    assert all("每道主问题配 0 个追问" in user for user in structured.users)
 
 
 def test_explicit_fake_generation_normalizes_duplicates_and_strict_followup_limit() -> None:

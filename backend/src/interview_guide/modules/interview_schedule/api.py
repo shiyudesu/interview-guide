@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
 
+from interview_guide.common.ai.opentrek import OpenTrekCapability
 from interview_guide.common.api.responses import STANDARD_ERROR_RESPONSES, result_response
 from interview_guide.common.infrastructure import RuntimeInfrastructure
 from interview_guide.common.result import Result
@@ -61,7 +62,7 @@ async def parse_service(request: Request) -> InterviewParseService:
     infrastructure: RuntimeInfrastructure = request.app.state.infrastructure
     actor = current_actor(request)
     return InterviewParseService(
-        infrastructure.provider_resolver.for_user(actor.user_id),
+        infrastructure.provider_registry_for(actor.user_id, OpenTrekCapability.GENERAL),
         infrastructure.llm_adapter,
         infrastructure.prompt_sanitizer,
         schedule_now(),

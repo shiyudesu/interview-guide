@@ -9,12 +9,16 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
 
 RUN pip install --no-cache-dir "uv==${UV_VERSION}"
 
+ENV UV_HTTP_TIMEOUT=600
+
 WORKDIR /workspace/backend
 COPY backend/pyproject.toml backend/uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN --mount=type=cache,id=interview-guide-uv,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
 
 COPY backend/ ./
-RUN uv sync --frozen --no-dev \
+RUN --mount=type=cache,id=interview-guide-uv,target=/root/.cache/uv \
+    uv sync --frozen --no-dev \
     && site_packages=/opt/venv/lib/python3.13/site-packages \
     && mkdir -p \
       /opt/venv-layers/a-f \

@@ -296,6 +296,21 @@
     {
       "environmentReferences": [
         {
+          "default": "-default",
+          "name": "INTERVIEW_GUIDE_BUILD_NETWORK",
+          "sensitive": false
+        }
+      ],
+      "property": "network",
+      "rawValue": "${INTERVIEW_GUIDE_BUILD_NETWORK:-default}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 4
+      }
+    },
+    {
+      "environmentReferences": [
+        {
           "default": "-docker.io",
           "name": "INTERVIEW_GUIDE_DOCKERHUB_REGISTRY",
           "sensitive": false
@@ -305,7 +320,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 5
+        "line": 6
       }
     },
     {
@@ -314,7 +329,7 @@
       "rawValue": "&backend-environment",
       "source": {
         "file": "docker-compose.yml",
-        "line": 7
+        "line": 8
       }
     },
     {
@@ -323,7 +338,7 @@
       "rawValue": "postgres",
       "source": {
         "file": "docker-compose.yml",
-        "line": 8
+        "line": 9
       }
     },
     {
@@ -332,7 +347,7 @@
       "rawValue": "5432",
       "source": {
         "file": "docker-compose.yml",
-        "line": 9
+        "line": 10
       }
     },
     {
@@ -347,7 +362,7 @@
       "rawValue": "${POSTGRES_DB:-interview_guide}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 10
+        "line": 11
       }
     },
     {
@@ -362,7 +377,7 @@
       "rawValue": "${POSTGRES_USER:-postgres}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 11
+        "line": 12
       }
     },
     {
@@ -377,7 +392,7 @@
       "rawValue": "${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 12
+        "line": 13
       }
     },
     {
@@ -392,7 +407,7 @@
       "rawValue": "${APP_DATABASE_POOL_SIZE:-10}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 13
+        "line": 14
       }
     },
     {
@@ -407,7 +422,7 @@
       "rawValue": "${APP_DATABASE_MAX_OVERFLOW:-0}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 14
+        "line": 15
       }
     },
     {
@@ -422,7 +437,7 @@
       "rawValue": "${APP_AUTH_ENABLED:-false}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 15
+        "line": 16
       }
     },
     {
@@ -437,7 +452,7 @@
       "rawValue": "${APP_AUTH_REGISTRATION_ENABLED:-false}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 16
+        "line": 17
       }
     },
     {
@@ -452,7 +467,7 @@
       "rawValue": "${APP_AUTH_COOKIE_SECURE:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 17
+        "line": 18
       }
     },
     {
@@ -467,7 +482,7 @@
       "rawValue": "${APP_AUTH_SESSION_IDLE_SECONDS:-86400}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 18
+        "line": 19
       }
     },
     {
@@ -482,7 +497,7 @@
       "rawValue": "${APP_AUTH_SESSION_ABSOLUTE_SECONDS:-604800}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 19
+        "line": 20
       }
     },
     {
@@ -497,7 +512,7 @@
       "rawValue": "${APP_AUTH_LOGIN_IP_LIMIT_PER_MINUTE:-20}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 20
+        "line": 21
       }
     },
     {
@@ -512,7 +527,7 @@
       "rawValue": "${APP_AUTH_LOGIN_ACCOUNT_LIMIT_PER_MINUTE:-8}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 21
+        "line": 22
       }
     },
     {
@@ -527,7 +542,7 @@
       "rawValue": "${APP_AUTH_REGISTRATION_IP_LIMIT_PER_HOUR:-5}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 22
+        "line": 23
       }
     },
     {
@@ -542,7 +557,7 @@
       "rawValue": "${APP_AUTH_EMAIL_VERIFICATION_REQUIRED:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 23
+        "line": 24
       }
     },
     {
@@ -557,7 +572,7 @@
       "rawValue": "${APP_AUTH_PUBLIC_URL:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 24
+        "line": 25
       }
     },
     {
@@ -572,7 +587,7 @@
       "rawValue": "${APP_AUTH_EMAIL_VERIFICATION_SECONDS:-86400}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 25
+        "line": 26
       }
     },
     {
@@ -587,7 +602,7 @@
       "rawValue": "${APP_AUTH_PASSWORD_RESET_SECONDS:-3600}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 26
+        "line": 27
       }
     },
     {
@@ -602,7 +617,7 @@
       "rawValue": "${APP_AUTH_EMAIL_REQUEST_LIMIT_PER_HOUR:-5}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 27
+        "line": 28
       }
     },
     {
@@ -617,7 +632,7 @@
       "rawValue": "${APP_AUTH_SMTP_HOST:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 28
+        "line": 29
       }
     },
     {
@@ -632,7 +647,7 @@
       "rawValue": "${APP_AUTH_SMTP_PORT:-587}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 29
+        "line": 30
       }
     },
     {
@@ -647,7 +662,7 @@
       "rawValue": "${APP_AUTH_SMTP_USERNAME:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 30
+        "line": 31
       }
     },
     {
@@ -662,7 +677,7 @@
       "rawValue": "${APP_AUTH_SMTP_PASSWORD:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 31
+        "line": 32
       }
     },
     {
@@ -677,7 +692,7 @@
       "rawValue": "${APP_AUTH_SMTP_STARTTLS:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 32
+        "line": 33
       }
     },
     {
@@ -692,7 +707,7 @@
       "rawValue": "${APP_AUTH_SMTP_SSL:-false}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 33
+        "line": 34
       }
     },
     {
@@ -707,7 +722,7 @@
       "rawValue": "${APP_AUTH_SMTP_FROM_EMAIL:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 34
+        "line": 35
       }
     },
     {
@@ -722,7 +737,7 @@
       "rawValue": "${APP_AUTH_SMTP_TIMEOUT_SECONDS:-10}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 35
+        "line": 36
       }
     },
     {
@@ -731,7 +746,7 @@
       "rawValue": "redis",
       "source": {
         "file": "docker-compose.yml",
-        "line": 36
+        "line": 37
       }
     },
     {
@@ -740,7 +755,7 @@
       "rawValue": "6379",
       "source": {
         "file": "docker-compose.yml",
-        "line": 37
+        "line": 38
       }
     },
     {
@@ -749,7 +764,7 @@
       "rawValue": "http://minio:9000",
       "source": {
         "file": "docker-compose.yml",
-        "line": 38
+        "line": 39
       }
     },
     {
@@ -764,7 +779,7 @@
       "rawValue": "${APP_STORAGE_ACCESS_KEY:?set APP_STORAGE_ACCESS_KEY in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 39
+        "line": 40
       }
     },
     {
@@ -779,7 +794,7 @@
       "rawValue": "${APP_STORAGE_SECRET_KEY:?set APP_STORAGE_SECRET_KEY in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 40
+        "line": 41
       }
     },
     {
@@ -794,7 +809,7 @@
       "rawValue": "${APP_STORAGE_BUCKET:-interview-guide}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 41
+        "line": 42
       }
     },
     {
@@ -809,7 +824,7 @@
       "rawValue": "${APP_STORAGE_REGION:-us-east-1}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 42
+        "line": 43
       }
     },
     {
@@ -818,7 +833,7 @@
       "rawValue": "\"false\"",
       "source": {
         "file": "docker-compose.yml",
-        "line": 43
+        "line": 44
       }
     },
     {
@@ -827,7 +842,7 @@
       "rawValue": "/var/lib/interview-guide/provider-encryption.key",
       "source": {
         "file": "docker-compose.yml",
-        "line": 44
+        "line": 45
       }
     },
     {
@@ -842,7 +857,7 @@
       "rawValue": "${APP_PROVIDER_OUTBOUND_ALLOWED_HOSTS:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 45
+        "line": 46
       }
     },
     {
@@ -857,7 +872,292 @@
       "rawValue": "${APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS:-}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 46
+        "line": 47
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-false",
+          "name": "APP_COMPETITION_MODE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_COMPETITION_MODE",
+      "rawValue": "${APP_COMPETITION_MODE:-false}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 48
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-false",
+          "name": "APP_OPENTREK_ENABLED",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_ENABLED",
+      "rawValue": "${APP_OPENTREK_ENABLED:-false}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 49
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway",
+          "name": "APP_OPENTREK_RUNTIME_BASE_URL",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_RUNTIME_BASE_URL",
+      "rawValue": "${APP_OPENTREK_RUNTIME_BASE_URL:-http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 50
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_APP_KEY",
+          "sensitive": true
+        }
+      ],
+      "property": "APP_OPENTREK_APP_KEY",
+      "rawValue": "${APP_OPENTREK_APP_KEY:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 51
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_WORKSPACE_CODE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_WORKSPACE_CODE",
+      "rawValue": "${APP_OPENTREK_WORKSPACE_CODE:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 52
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_GENERAL_AGENT_CODE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_GENERAL_AGENT_CODE",
+      "rawValue": "${APP_OPENTREK_GENERAL_AGENT_CODE:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 53
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_GENERAL_AGENT_VERSION",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_GENERAL_AGENT_VERSION",
+      "rawValue": "${APP_OPENTREK_GENERAL_AGENT_VERSION:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 54
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_INTERVIEWER_AGENT_CODE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_INTERVIEWER_AGENT_CODE",
+      "rawValue": "${APP_OPENTREK_INTERVIEWER_AGENT_CODE:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 55
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_INTERVIEWER_AGENT_VERSION",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_INTERVIEWER_AGENT_VERSION",
+      "rawValue": "${APP_OPENTREK_INTERVIEWER_AGENT_VERSION:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 56
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_EVALUATOR_AGENT_CODE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_EVALUATOR_AGENT_CODE",
+      "rawValue": "${APP_OPENTREK_EVALUATOR_AGENT_CODE:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 57
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_EVALUATOR_AGENT_VERSION",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_EVALUATOR_AGENT_VERSION",
+      "rawValue": "${APP_OPENTREK_EVALUATOR_AGENT_VERSION:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 58
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_RAG_AGENT_CODE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_RAG_AGENT_CODE",
+      "rawValue": "${APP_OPENTREK_RAG_AGENT_CODE:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 59
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_RAG_AGENT_VERSION",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_RAG_AGENT_VERSION",
+      "rawValue": "${APP_OPENTREK_RAG_AGENT_VERSION:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 60
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-[]",
+          "name": "APP_OPENTREK_KB_MAPPINGS_JSON",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_KB_MAPPINGS_JSON",
+      "rawValue": "${APP_OPENTREK_KB_MAPPINGS_JSON:-[]}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 61
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-10",
+          "name": "APP_OPENTREK_CONNECT_TIMEOUT_SECONDS",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_CONNECT_TIMEOUT_SECONDS",
+      "rawValue": "${APP_OPENTREK_CONNECT_TIMEOUT_SECONDS:-10}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 62
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-300",
+          "name": "APP_OPENTREK_READ_TIMEOUT_SECONDS",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_READ_TIMEOUT_SECONDS",
+      "rawValue": "${APP_OPENTREK_READ_TIMEOUT_SECONDS:-300}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 63
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-10",
+          "name": "APP_OPENTREK_KB_BATCH_SIZE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_KB_BATCH_SIZE",
+      "rawValue": "${APP_OPENTREK_KB_BATCH_SIZE:-10}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 64
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-",
+          "name": "APP_OPENTREK_AGENT_LOCK_FILE",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_AGENT_LOCK_FILE",
+      "rawValue": "${APP_OPENTREK_AGENT_LOCK_FILE:-}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 65
+      }
+    },
+    {
+      "environmentReferences": [
+        {
+          "default": "-0",
+          "name": "APP_OPENTREK_AGENT_MIN_INTERVAL_SECONDS",
+          "sensitive": false
+        }
+      ],
+      "property": "APP_OPENTREK_AGENT_MIN_INTERVAL_SECONDS",
+      "rawValue": "${APP_OPENTREK_AGENT_MIN_INTERVAL_SECONDS:-0}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 66
       }
     },
     {
@@ -872,7 +1172,7 @@
       "rawValue": "${APP_AI_RAG_REWRITE_ENABLED:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 47
+        "line": 67
       }
     },
     {
@@ -887,7 +1187,7 @@
       "rawValue": "${APP_AI_RAG_SHORT_QUERY_LENGTH:-4}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 48
+        "line": 68
       }
     },
     {
@@ -902,7 +1202,7 @@
       "rawValue": "${APP_AI_RAG_TOPK_SHORT:-20}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 49
+        "line": 69
       }
     },
     {
@@ -917,7 +1217,7 @@
       "rawValue": "${APP_AI_RAG_TOPK_MEDIUM:-12}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 50
+        "line": 70
       }
     },
     {
@@ -932,7 +1232,7 @@
       "rawValue": "${APP_AI_RAG_TOPK_LONG:-8}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 51
+        "line": 71
       }
     },
     {
@@ -947,7 +1247,7 @@
       "rawValue": "${APP_AI_RAG_MIN_SCORE_SHORT:-0.18}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 52
+        "line": 72
       }
     },
     {
@@ -962,7 +1262,7 @@
       "rawValue": "${APP_AI_RAG_MIN_SCORE_DEFAULT:-0.28}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 53
+        "line": 73
       }
     },
     {
@@ -977,7 +1277,7 @@
       "rawValue": "${APP_AI_RAG_HISTORY_ENABLED:-true}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 54
+        "line": 74
       }
     },
     {
@@ -992,7 +1292,7 @@
       "rawValue": "${APP_AI_RAG_HISTORY_MAX_MESSAGES:-10}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 55
+        "line": 75
       }
     },
     {
@@ -1007,7 +1307,7 @@
       "rawValue": "${APP_INTERVIEW_FOLLOW_UP_COUNT:-1}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 56
+        "line": 76
       }
     },
     {
@@ -1022,7 +1322,7 @@
       "rawValue": "${APP_INTERVIEW_TURN_CONFIDENCE_THRESHOLD:-0.65}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 57
+        "line": 77
       }
     },
     {
@@ -1037,7 +1337,7 @@
       "rawValue": "${APP_INTERVIEW_TURN_DECISION_TIMEOUT_SECONDS:-20}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 58
+        "line": 78
       }
     },
     {
@@ -1052,7 +1352,7 @@
       "rawValue": "${APP_INTERVIEW_TURN_LEASE_SECONDS:-30}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 59
+        "line": 79
       }
     },
     {
@@ -1067,7 +1367,7 @@
       "rawValue": "${APP_INTERVIEW_TURN_CONTEXT_MAX_CHARS:-12000}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 60
+        "line": 80
       }
     },
     {
@@ -1082,7 +1382,7 @@
       "rawValue": "${APP_INTERVIEW_TURN_RECENT_COUNT:-6}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 61
+        "line": 81
       }
     },
     {
@@ -1097,7 +1397,7 @@
       "rawValue": "${APP_VOICE_TURN_MIN_REMAINING_SECONDS:-30}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 62
+        "line": 82
       }
     },
     {
@@ -1112,7 +1412,7 @@
       "rawValue": "${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 63
+        "line": 83
       }
     },
     {
@@ -1127,7 +1427,7 @@
       "rawValue": "${LOG_LEVEL:-INFO}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 64
+        "line": 84
       }
     },
     {
@@ -1142,7 +1442,7 @@
       "rawValue": "${TZ:-Asia/Shanghai}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 65
+        "line": 85
       }
     },
     {
@@ -1151,7 +1451,7 @@
       "rawValue": "&backend-service",
       "source": {
         "file": "docker-compose.yml",
-        "line": 67
+        "line": 87
       }
     },
     {
@@ -1166,7 +1466,7 @@
       "rawValue": "interview-guide-python:${INTERVIEW_GUIDE_IMAGE_TAG:-local}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 68
+        "line": 88
       }
     },
     {
@@ -1175,7 +1475,7 @@
       "rawValue": "*backend-build",
       "source": {
         "file": "docker-compose.yml",
-        "line": 69
+        "line": 89
       }
     },
     {
@@ -1184,7 +1484,7 @@
       "rawValue": "*backend-environment",
       "source": {
         "file": "docker-compose.yml",
-        "line": 70
+        "line": 90
       }
     },
     {
@@ -1193,7 +1493,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 73
+        "line": 93
       }
     },
     {
@@ -1208,7 +1508,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
       "source": {
         "file": "docker-compose.yml",
-        "line": 77
+        "line": 97
       }
     },
     {
@@ -1223,7 +1523,7 @@
       "rawValue": "${POSTGRES_DB:-interview_guide}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 79
+        "line": 99
       }
     },
     {
@@ -1238,7 +1538,7 @@
       "rawValue": "${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 80
+        "line": 100
       }
     },
     {
@@ -1253,7 +1553,7 @@
       "rawValue": "${POSTGRES_USER:-postgres}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 81
+        "line": 101
       }
     },
     {
@@ -1262,7 +1562,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 88
+        "line": 108
       }
     },
     {
@@ -1271,7 +1571,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 89
+        "line": 109
       }
     },
     {
@@ -1280,7 +1580,7 @@
       "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 90
+        "line": 110
       }
     },
     {
@@ -1289,7 +1589,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 91
+        "line": 111
       }
     },
     {
@@ -1304,7 +1604,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/redis:7.4.2-alpine@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952",
       "source": {
         "file": "docker-compose.yml",
-        "line": 94
+        "line": 114
       }
     },
     {
@@ -1313,7 +1613,7 @@
       "rawValue": "[\"redis-server\", \"--appendonly\", \"yes\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 95
+        "line": 115
       }
     },
     {
@@ -1322,7 +1622,7 @@
       "rawValue": "[\"CMD\", \"redis-cli\", \"ping\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 99
+        "line": 119
       }
     },
     {
@@ -1331,7 +1631,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 100
+        "line": 120
       }
     },
     {
@@ -1340,7 +1640,7 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 101
+        "line": 121
       }
     },
     {
@@ -1349,7 +1649,7 @@
       "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 102
+        "line": 122
       }
     },
     {
@@ -1358,7 +1658,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 103
+        "line": 123
       }
     },
     {
@@ -1373,7 +1673,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/minio/minio:RELEASE.2024-12-18T13-15-44Z@sha256:1dce27c494a16bae114774f1cec295493f3613142713130c2d22dd5696be6ad3",
       "source": {
         "file": "docker-compose.yml",
-        "line": 106
+        "line": 126
       }
     },
     {
@@ -1382,7 +1682,7 @@
       "rawValue": "[\"server\", \"/data\", \"--console-address\", \":9001\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 107
+        "line": 127
       }
     },
     {
@@ -1397,7 +1697,7 @@
       "rawValue": "${APP_STORAGE_SECRET_KEY:?set APP_STORAGE_SECRET_KEY in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 109
+        "line": 129
       }
     },
     {
@@ -1412,7 +1712,7 @@
       "rawValue": "${APP_STORAGE_ACCESS_KEY:?set APP_STORAGE_ACCESS_KEY in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 110
+        "line": 130
       }
     },
     {
@@ -1421,7 +1721,7 @@
       "rawValue": "[\"CMD\", \"curl\", \"-f\", \"http://localhost:9000/minio/health/live\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 114
+        "line": 134
       }
     },
     {
@@ -1430,7 +1730,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 115
+        "line": 135
       }
     },
     {
@@ -1439,7 +1739,7 @@
       "rawValue": "3s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 116
+        "line": 136
       }
     },
     {
@@ -1448,7 +1748,7 @@
       "rawValue": "12",
       "source": {
         "file": "docker-compose.yml",
-        "line": 117
+        "line": 137
       }
     },
     {
@@ -1457,7 +1757,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 118
+        "line": 138
       }
     },
     {
@@ -1472,7 +1772,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/minio/mc:RELEASE.2024-11-21T17-21-54Z@sha256:993e8c454a7ec632923f7e3e61adf1d473261da6354cefd641aedd33a2cfe112",
       "source": {
         "file": "docker-compose.yml",
-        "line": 121
+        "line": 141
       }
     },
     {
@@ -1481,7 +1781,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 124
+        "line": 144
       }
     },
     {
@@ -1496,7 +1796,7 @@
       "rawValue": "${APP_STORAGE_BUCKET:-interview-guide}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 126
+        "line": 146
       }
     },
     {
@@ -1511,7 +1811,7 @@
       "rawValue": "${APP_STORAGE_SECRET_KEY:?set APP_STORAGE_SECRET_KEY in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 127
+        "line": 147
       }
     },
     {
@@ -1526,7 +1826,7 @@
       "rawValue": "${APP_STORAGE_ACCESS_KEY:?set APP_STORAGE_ACCESS_KEY in .env}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 128
+        "line": 148
       }
     },
     {
@@ -1535,7 +1835,7 @@
       "rawValue": "[\"interview-guide-migrate\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 140
+        "line": 160
       }
     },
     {
@@ -1544,7 +1844,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 143
+        "line": 163
       }
     },
     {
@@ -1553,7 +1853,7 @@
       "rawValue": "\"no\"",
       "source": {
         "file": "docker-compose.yml",
-        "line": 144
+        "line": 164
       }
     },
     {
@@ -1562,7 +1862,7 @@
       "rawValue": "[\"interview-guide-api\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 148
+        "line": 168
       }
     },
     {
@@ -1571,7 +1871,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 151
+        "line": 171
       }
     },
     {
@@ -1580,7 +1880,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 153
+        "line": 173
       }
     },
     {
@@ -1589,7 +1889,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 155
+        "line": 175
       }
     },
     {
@@ -1598,7 +1898,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 167
+        "line": 187
       }
     },
     {
@@ -1607,7 +1907,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 168
+        "line": 188
       }
     },
     {
@@ -1616,7 +1916,7 @@
       "rawValue": "24",
       "source": {
         "file": "docker-compose.yml",
-        "line": 169
+        "line": 189
       }
     },
     {
@@ -1625,7 +1925,7 @@
       "rawValue": "10s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 170
+        "line": 190
       }
     },
     {
@@ -1634,7 +1934,7 @@
       "rawValue": "[\"interview-guide-worker\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 174
+        "line": 194
       }
     },
     {
@@ -1643,7 +1943,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 177
+        "line": 197
       }
     },
     {
@@ -1652,7 +1952,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 179
+        "line": 199
       }
     },
     {
@@ -1661,7 +1961,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 181
+        "line": 201
       }
     },
     {
@@ -1670,7 +1970,7 @@
       "rawValue": "[\"interview-guide-scheduler\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 185
+        "line": 205
       }
     },
     {
@@ -1679,7 +1979,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 188
+        "line": 208
       }
     },
     {
@@ -1688,7 +1988,7 @@
       "rawValue": "service_completed_successfully",
       "source": {
         "file": "docker-compose.yml",
-        "line": 190
+        "line": 210
       }
     },
     {
@@ -1697,7 +1997,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 192
+        "line": 212
       }
     },
     {
@@ -1706,7 +2006,7 @@
       "rawValue": "./frontend",
       "source": {
         "file": "docker-compose.yml",
-        "line": 196
+        "line": 216
       }
     },
     {
@@ -1715,7 +2015,7 @@
       "rawValue": "Dockerfile",
       "source": {
         "file": "docker-compose.yml",
-        "line": 197
+        "line": 217
       }
     },
     {
@@ -1730,7 +2030,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 199
+        "line": 219
       }
     },
     {
@@ -1745,7 +2045,7 @@
       "rawValue": "interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-local}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 200
+        "line": 220
       }
     },
     {
@@ -1754,7 +2054,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 203
+        "line": 223
       }
     },
     {
@@ -1763,7 +2063,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 206
+        "line": 226
       }
     },
     {
@@ -1772,7 +2072,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 215
+        "line": 235
       }
     },
     {
@@ -1781,7 +2081,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 216
+        "line": 236
       }
     },
     {
@@ -1790,7 +2090,7 @@
       "rawValue": "24",
       "source": {
         "file": "docker-compose.yml",
-        "line": 217
+        "line": 237
       }
     },
     {
@@ -1799,7 +2099,7 @@
       "rawValue": "10s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 218
+        "line": 238
       }
     },
     {
@@ -1808,7 +2108,7 @@
       "rawValue": "[\"https\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 221
+        "line": 241
       }
     },
     {
@@ -1823,7 +2123,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
       "source": {
         "file": "docker-compose.yml",
-        "line": 222
+        "line": 242
       }
     },
     {
@@ -1832,7 +2132,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 225
+        "line": 245
       }
     },
     {
@@ -1847,7 +2147,7 @@
       "rawValue": "${ACME_EMAIL:-admin@example.invalid}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 227
+        "line": 247
       }
     },
     {
@@ -1862,7 +2162,7 @@
       "rawValue": "${PUBLIC_DOMAIN:-localhost}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 228
+        "line": 248
       }
     },
     {
@@ -1871,7 +2171,7 @@
       "rawValue": "[\"CMD\", \"wget\", \"--quiet\", \"--tries=1\", \"--spider\", \"http://127.0.0.1:2019/config/\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 241
+        "line": 261
       }
     },
     {
@@ -1880,7 +2180,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 242
+        "line": 262
       }
     },
     {
@@ -1889,7 +2189,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 243
+        "line": 263
       }
     },
     {
@@ -1898,7 +2198,7 @@
       "rawValue": "24",
       "source": {
         "file": "docker-compose.yml",
-        "line": 244
+        "line": 264
       }
     },
     {
@@ -1907,7 +2207,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 245
+        "line": 265
       }
     },
     {
@@ -1916,7 +2216,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 246
+        "line": 266
       }
     },
     {
@@ -4321,6 +4621,411 @@
       }
     },
     {
+      "default": "campus",
+      "name": "INTERVIEW_GUIDE_IMAGE_TAG",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 4
+      }
+    },
+    {
+      "default": "docker.io",
+      "name": "INTERVIEW_GUIDE_DOCKERHUB_REGISTRY",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 5
+      }
+    },
+    {
+      "default": "host",
+      "name": "INTERVIEW_GUIDE_BUILD_NETWORK",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 6
+      }
+    },
+    {
+      "default": "",
+      "name": "COMPOSE_PROFILES",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 7
+      }
+    },
+    {
+      "default": "0.0.0.0",
+      "name": "FRONTEND_BIND_ADDRESS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 8
+      }
+    },
+    {
+      "default": "18073",
+      "name": "FRONTEND_PORT",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 9
+      }
+    },
+    {
+      "default": "interview_guide",
+      "name": "POSTGRES_DB",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 11
+      }
+    },
+    {
+      "default": "postgres",
+      "name": "POSTGRES_USER",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 12
+      }
+    },
+    {
+      "default": "",
+      "name": "POSTGRES_PASSWORD",
+      "sensitive": true,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 13
+      }
+    },
+    {
+      "default": "10",
+      "name": "APP_DATABASE_POOL_SIZE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 14
+      }
+    },
+    {
+      "default": "0",
+      "name": "APP_DATABASE_MAX_OVERFLOW",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 15
+      }
+    },
+    {
+      "default": "interview-campus",
+      "name": "APP_STORAGE_ACCESS_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 17
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_STORAGE_SECRET_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 18
+      }
+    },
+    {
+      "default": "interview-guide-campus",
+      "name": "APP_STORAGE_BUCKET",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 19
+      }
+    },
+    {
+      "default": "us-east-1",
+      "name": "APP_STORAGE_REGION",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 20
+      }
+    },
+    {
+      "default": "true",
+      "name": "APP_COMPETITION_MODE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 22
+      }
+    },
+    {
+      "default": "true",
+      "name": "APP_AUTH_ENABLED",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 23
+      }
+    },
+    {
+      "default": "false",
+      "name": "APP_AUTH_REGISTRATION_ENABLED",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 24
+      }
+    },
+    {
+      "default": "false",
+      "name": "APP_AUTH_COOKIE_SECURE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 25
+      }
+    },
+    {
+      "default": "true",
+      "name": "APP_OPENTREK_ENABLED",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 27
+      }
+    },
+    {
+      "default": "http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway",
+      "name": "APP_OPENTREK_RUNTIME_BASE_URL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 28
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_APP_KEY",
+      "sensitive": true,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 29
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_WORKSPACE_CODE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 30
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_GENERAL_AGENT_CODE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 32
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_GENERAL_AGENT_VERSION",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 33
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_INTERVIEWER_AGENT_CODE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 34
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_INTERVIEWER_AGENT_VERSION",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 35
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_EVALUATOR_AGENT_CODE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 36
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_EVALUATOR_AGENT_VERSION",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 37
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_RAG_AGENT_CODE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 38
+      }
+    },
+    {
+      "default": "",
+      "name": "APP_OPENTREK_RAG_AGENT_VERSION",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 39
+      }
+    },
+    {
+      "default": "'[]'",
+      "name": "APP_OPENTREK_KB_MAPPINGS_JSON",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 41
+      }
+    },
+    {
+      "default": "10",
+      "name": "APP_OPENTREK_CONNECT_TIMEOUT_SECONDS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 42
+      }
+    },
+    {
+      "default": "300",
+      "name": "APP_OPENTREK_READ_TIMEOUT_SECONDS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 43
+      }
+    },
+    {
+      "default": "10",
+      "name": "APP_OPENTREK_KB_BATCH_SIZE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 44
+      }
+    },
+    {
+      "default": "/var/lib/interview-guide/opentrek-agent.lock",
+      "name": "APP_OPENTREK_AGENT_LOCK_FILE",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 45
+      }
+    },
+    {
+      "default": "1",
+      "name": "APP_OPENTREK_AGENT_MIN_INTERVAL_SECONDS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 46
+      }
+    },
+    {
+      "default": "false",
+      "name": "APP_AI_RAG_REWRITE_ENABLED",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 47
+      }
+    },
+    {
+      "default": "120",
+      "name": "APP_INTERVIEW_TURN_DECISION_TIMEOUT_SECONDS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 48
+      }
+    },
+    {
+      "default": "150",
+      "name": "APP_INTERVIEW_TURN_LEASE_SECONDS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 49
+      }
+    },
+    {
+      "default": "10.128.203.200",
+      "name": "APP_PROVIDER_OUTBOUND_ALLOWED_HOSTS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 51
+      }
+    },
+    {
+      "default": "10.128.203.200/32",
+      "name": "APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 52
+      }
+    },
+    {
+      "default": "http://localhost:18073,http://127.0.0.1:18073",
+      "name": "CORS_ALLOWED_ORIGINS",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 54
+      }
+    },
+    {
+      "default": "INFO",
+      "name": "LOG_LEVEL",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 55
+      }
+    },
+    {
+      "default": "Asia/Shanghai",
+      "name": "TZ",
+      "sensitive": false,
+      "source": {
+        "file": ".env.campus.example",
+        "line": 56
+      }
+    },
+    {
       "default": "ghcr.io",
       "name": "INTERVIEW_GUIDE_IMAGE_REGISTRY",
       "sensitive": false,
@@ -4778,7 +5483,7 @@
       "field": "app_environment",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 19
+        "line": 20
       }
     },
     {
@@ -4786,7 +5491,7 @@
       "field": "server_host",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 21
+        "line": 22
       }
     },
     {
@@ -4794,7 +5499,7 @@
       "field": "server_port",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 22
+        "line": 23
       }
     },
     {
@@ -4802,7 +5507,7 @@
       "field": "log_level",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 23
+        "line": 24
       }
     },
     {
@@ -4810,7 +5515,7 @@
       "field": "timezone",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 24
+        "line": 25
       }
     },
     {
@@ -4818,7 +5523,7 @@
       "field": "cors_allowed_origins",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 25
+        "line": 26
       }
     },
     {
@@ -4826,7 +5531,7 @@
       "field": "multipart_max_bytes",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 33
+        "line": 34
       }
     },
     {
@@ -4834,7 +5539,7 @@
       "field": "auth_enabled",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 37
+        "line": 38
       }
     },
     {
@@ -4842,7 +5547,7 @@
       "field": "auth_registration_enabled",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 38
+        "line": 39
       }
     },
     {
@@ -4850,7 +5555,7 @@
       "field": "auth_cookie_name",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 42
+        "line": 43
       }
     },
     {
@@ -4858,7 +5563,7 @@
       "field": "auth_cookie_secure",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 46
+        "line": 47
       }
     },
     {
@@ -4866,7 +5571,7 @@
       "field": "auth_session_idle_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 50
+        "line": 51
       }
     },
     {
@@ -4874,7 +5579,7 @@
       "field": "auth_session_absolute_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 55
+        "line": 56
       }
     },
     {
@@ -4882,7 +5587,7 @@
       "field": "auth_login_ip_limit_per_minute",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 60
+        "line": 61
       }
     },
     {
@@ -4890,7 +5595,7 @@
       "field": "auth_login_account_limit_per_minute",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 65
+        "line": 66
       }
     },
     {
@@ -4898,7 +5603,7 @@
       "field": "auth_registration_ip_limit_per_hour",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 70
+        "line": 71
       }
     },
     {
@@ -4906,7 +5611,7 @@
       "field": "auth_email_verification_required",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 75
+        "line": 76
       }
     },
     {
@@ -4914,7 +5619,7 @@
       "field": "auth_public_url",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 79
+        "line": 80
       }
     },
     {
@@ -4922,7 +5627,7 @@
       "field": "auth_email_verification_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 80
+        "line": 81
       }
     },
     {
@@ -4930,7 +5635,7 @@
       "field": "auth_password_reset_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 85
+        "line": 86
       }
     },
     {
@@ -4938,7 +5643,7 @@
       "field": "auth_email_request_limit_per_hour",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 90
+        "line": 91
       }
     },
     {
@@ -4946,7 +5651,7 @@
       "field": "auth_smtp_host",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 95
+        "line": 96
       }
     },
     {
@@ -4954,7 +5659,7 @@
       "field": "auth_smtp_port",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 96
+        "line": 97
       }
     },
     {
@@ -4962,7 +5667,7 @@
       "field": "auth_smtp_username",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 102
+        "line": 103
       }
     },
     {
@@ -4970,7 +5675,7 @@
       "field": "auth_smtp_password",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 106
+        "line": 107
       }
     },
     {
@@ -4978,7 +5683,7 @@
       "field": "auth_smtp_starttls",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 110
+        "line": 111
       }
     },
     {
@@ -4986,7 +5691,7 @@
       "field": "auth_smtp_ssl",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 114
+        "line": 115
       }
     },
     {
@@ -4994,7 +5699,7 @@
       "field": "auth_smtp_from_email",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 115
+        "line": 116
       }
     },
     {
@@ -5002,7 +5707,7 @@
       "field": "auth_smtp_timeout_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 119
+        "line": 120
       }
     },
     {
@@ -5010,7 +5715,7 @@
       "field": "blocking_worker_count",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 124
+        "line": 125
       }
     },
     {
@@ -5018,7 +5723,7 @@
       "field": "infrastructure_startup_enabled",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 147
+        "line": 148
       }
     },
     {
@@ -5026,7 +5731,7 @@
       "field": "document_worker_count",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 152
+        "line": 153
       }
     },
     {
@@ -5034,7 +5739,7 @@
       "field": "document_conversion_timeout_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 157
+        "line": 158
       }
     },
     {
@@ -5042,7 +5747,7 @@
       "field": "document_conversion_max_bytes",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 162
+        "line": 163
       }
     },
     {
@@ -5050,7 +5755,7 @@
       "field": "postgres_host",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 167
+        "line": 168
       }
     },
     {
@@ -5058,7 +5763,7 @@
       "field": "postgres_port",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 169
+        "line": 170
       }
     },
     {
@@ -5066,7 +5771,7 @@
       "field": "postgres_db",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 170
+        "line": 171
       }
     },
     {
@@ -5074,7 +5779,7 @@
       "field": "postgres_user",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 174
+        "line": 175
       }
     },
     {
@@ -5082,7 +5787,7 @@
       "field": "postgres_password",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 175
+        "line": 176
       }
     },
     {
@@ -5090,7 +5795,7 @@
       "field": "database_pool_size",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 179
+        "line": 180
       }
     },
     {
@@ -5098,7 +5803,7 @@
       "field": "database_max_overflow",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 184
+        "line": 185
       }
     },
     {
@@ -5106,7 +5811,7 @@
       "field": "redis_host",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 189
+        "line": 190
       }
     },
     {
@@ -5114,7 +5819,7 @@
       "field": "redis_port",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 191
+        "line": 192
       }
     },
     {
@@ -5122,7 +5827,7 @@
       "field": "redis_db",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 192
+        "line": 193
       }
     },
     {
@@ -5130,7 +5835,7 @@
       "field": "storage_endpoint",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 193
+        "line": 194
       }
     },
     {
@@ -5138,7 +5843,7 @@
       "field": "storage_access_key",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 198
+        "line": 199
       }
     },
     {
@@ -5146,7 +5851,7 @@
       "field": "storage_secret_key",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 202
+        "line": 203
       }
     },
     {
@@ -5154,7 +5859,7 @@
       "field": "storage_bucket",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 206
+        "line": 207
       }
     },
     {
@@ -5162,7 +5867,7 @@
       "field": "storage_region",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 210
+        "line": 211
       }
     },
     {
@@ -5170,7 +5875,7 @@
       "field": "storage_api_call_timeout_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 214
+        "line": 215
       }
     },
     {
@@ -5178,7 +5883,7 @@
       "field": "storage_api_call_attempt_timeout_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 219
+        "line": 220
       }
     },
     {
@@ -5186,7 +5891,7 @@
       "field": "storage_auto_create_bucket",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 224
+        "line": 225
       }
     },
     {
@@ -5194,7 +5899,7 @@
       "field": "ai_config_encryption_key",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 228
+        "line": 229
       }
     },
     {
@@ -5202,7 +5907,7 @@
       "field": "ai_config_encryption_key_file",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 233
+        "line": 234
       }
     },
     {
@@ -5210,7 +5915,7 @@
       "field": "ai_embedding_dimensions",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 237
+        "line": 238
       }
     },
     {
@@ -5218,7 +5923,7 @@
       "field": "provider_outbound_allowed_hosts",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 242
+        "line": 243
       }
     },
     {
@@ -5226,7 +5931,159 @@
       "field": "provider_outbound_allowed_networks",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 246
+        "line": 247
+      }
+    },
+    {
+      "environment": "APP_COMPETITION_MODE",
+      "field": "competition_mode",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 251
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_ENABLED",
+      "field": "opentrek_enabled",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 255
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_RUNTIME_BASE_URL",
+      "field": "opentrek_runtime_base_url",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 259
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_APP_KEY",
+      "field": "opentrek_app_key",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 263
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_WORKSPACE_CODE",
+      "field": "opentrek_workspace_code",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 267
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_GENERAL_AGENT_CODE",
+      "field": "opentrek_general_agent_code",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 271
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_GENERAL_AGENT_VERSION",
+      "field": "opentrek_general_agent_version",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 275
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_INTERVIEWER_AGENT_CODE",
+      "field": "opentrek_interviewer_agent_code",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 279
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_INTERVIEWER_AGENT_VERSION",
+      "field": "opentrek_interviewer_agent_version",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 283
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_EVALUATOR_AGENT_CODE",
+      "field": "opentrek_evaluator_agent_code",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 287
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_EVALUATOR_AGENT_VERSION",
+      "field": "opentrek_evaluator_agent_version",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 291
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_RAG_AGENT_CODE",
+      "field": "opentrek_rag_agent_code",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 295
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_RAG_AGENT_VERSION",
+      "field": "opentrek_rag_agent_version",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 299
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_KB_MAPPINGS_JSON",
+      "field": "opentrek_kb_mappings_json",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 303
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_CONNECT_TIMEOUT_SECONDS",
+      "field": "opentrek_connect_timeout_seconds",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 307
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_READ_TIMEOUT_SECONDS",
+      "field": "opentrek_read_timeout_seconds",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 312
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_KB_BATCH_SIZE",
+      "field": "opentrek_kb_batch_size",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 317
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_AGENT_LOCK_FILE",
+      "field": "opentrek_agent_lock_file",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 323
+      }
+    },
+    {
+      "environment": "APP_OPENTREK_AGENT_MIN_INTERVAL_SECONDS",
+      "field": "opentrek_agent_min_interval_seconds",
+      "source": {
+        "file": "backend/src/interview_guide/common/config/settings.py",
+        "line": 327
       }
     },
     {
@@ -5234,7 +6091,7 @@
       "field": "ai_rag_rewrite_enabled",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 250
+        "line": 333
       }
     },
     {
@@ -5242,7 +6099,7 @@
       "field": "ai_rag_short_query_length",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 254
+        "line": 337
       }
     },
     {
@@ -5250,7 +6107,7 @@
       "field": "ai_rag_topk_short",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 258
+        "line": 341
       }
     },
     {
@@ -5258,7 +6115,7 @@
       "field": "ai_rag_topk_medium",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 262
+        "line": 345
       }
     },
     {
@@ -5266,7 +6123,7 @@
       "field": "ai_rag_topk_long",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 266
+        "line": 349
       }
     },
     {
@@ -5274,7 +6131,7 @@
       "field": "ai_rag_min_score_short",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 270
+        "line": 353
       }
     },
     {
@@ -5282,7 +6139,7 @@
       "field": "ai_rag_min_score_default",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 274
+        "line": 357
       }
     },
     {
@@ -5290,7 +6147,7 @@
       "field": "ai_rag_history_enabled",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 278
+        "line": 361
       }
     },
     {
@@ -5298,7 +6155,7 @@
       "field": "ai_rag_history_max_messages",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 282
+        "line": 365
       }
     },
     {
@@ -5306,7 +6163,7 @@
       "field": "interview_follow_up_count",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 287
+        "line": 370
       }
     },
     {
@@ -5314,7 +6171,7 @@
       "field": "interview_turn_confidence_threshold",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 293
+        "line": 376
       }
     },
     {
@@ -5322,7 +6179,7 @@
       "field": "interview_turn_decision_timeout_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 299
+        "line": 382
       }
     },
     {
@@ -5330,7 +6187,7 @@
       "field": "interview_turn_lease_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 305
+        "line": 388
       }
     },
     {
@@ -5338,7 +6195,7 @@
       "field": "interview_turn_context_max_chars",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 311
+        "line": 394
       }
     },
     {
@@ -5346,7 +6203,7 @@
       "field": "interview_turn_recent_count",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 317
+        "line": 400
       }
     },
     {
@@ -5354,7 +6211,7 @@
       "field": "voice_turn_min_remaining_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 323
+        "line": 406
       }
     },
     {
@@ -5362,7 +6219,7 @@
       "field": "voice_asr_url",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 329
+        "line": 412
       }
     },
     {
@@ -5370,7 +6227,7 @@
       "field": "voice_asr_model",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 333
+        "line": 416
       }
     },
     {
@@ -5378,7 +6235,7 @@
       "field": "voice_asr_language",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 337
+        "line": 420
       }
     },
     {
@@ -5386,7 +6243,7 @@
       "field": "voice_asr_format",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 341
+        "line": 424
       }
     },
     {
@@ -5394,7 +6251,7 @@
       "field": "voice_asr_sample_rate",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 345
+        "line": 428
       }
     },
     {
@@ -5402,7 +6259,7 @@
       "field": "voice_asr_enable_turn_detection",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 349
+        "line": 432
       }
     },
     {
@@ -5410,7 +6267,7 @@
       "field": "voice_asr_turn_detection_type",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 353
+        "line": 436
       }
     },
     {
@@ -5418,7 +6275,7 @@
       "field": "voice_asr_turn_detection_threshold",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 357
+        "line": 440
       }
     },
     {
@@ -5426,7 +6283,7 @@
       "field": "voice_asr_silence_ms",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 361
+        "line": 444
       }
     },
     {
@@ -5434,7 +6291,7 @@
       "field": "voice_tts_model",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 365
+        "line": 448
       }
     },
     {
@@ -5442,7 +6299,7 @@
       "field": "voice_tts_url",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 369
+        "line": 452
       }
     },
     {
@@ -5450,7 +6307,7 @@
       "field": "voice_tts_voice",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 373
+        "line": 456
       }
     },
     {
@@ -5458,7 +6315,7 @@
       "field": "voice_tts_format",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 377
+        "line": 460
       }
     },
     {
@@ -5466,7 +6323,7 @@
       "field": "voice_tts_sample_rate",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 381
+        "line": 464
       }
     },
     {
@@ -5474,7 +6331,7 @@
       "field": "voice_tts_mode",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 385
+        "line": 468
       }
     },
     {
@@ -5482,7 +6339,7 @@
       "field": "voice_tts_language_type",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 389
+        "line": 472
       }
     },
     {
@@ -5490,7 +6347,7 @@
       "field": "voice_tts_speech_rate",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 393
+        "line": 476
       }
     },
     {
@@ -5498,7 +6355,7 @@
       "field": "voice_tts_volume",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 397
+        "line": 480
       }
     },
     {
@@ -5506,7 +6363,7 @@
       "field": "voice_tts_connect_timeout_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 401
+        "line": 484
       }
     },
     {
@@ -5514,7 +6371,7 @@
       "field": "voice_tts_timeout_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 406
+        "line": 489
       }
     },
     {
@@ -5522,7 +6379,7 @@
       "field": "voice_max_concurrent_tts_per_session",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 411
+        "line": 494
       }
     },
     {
@@ -5530,7 +6387,7 @@
       "field": "voice_ai_question_max_chars",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 416
+        "line": 499
       }
     },
     {
@@ -5538,7 +6395,7 @@
       "field": "voice_timeout_check_interval_seconds",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 421
+        "line": 504
       }
     },
     {
@@ -5546,7 +6403,7 @@
       "field": "otel_enabled",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 426
+        "line": 546
       }
     },
     {
@@ -5554,7 +6411,7 @@
       "field": "otel_service_name",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 428
+        "line": 548
       }
     },
     {
@@ -5562,16 +6419,16 @@
       "field": "otel_exporter_otlp_endpoint",
       "source": {
         "file": "backend/src/interview_guide/common/config/settings.py",
-        "line": 432
+        "line": 552
       }
     }
   ],
   "schemaVersion": 1,
   "summary": {
-    "configurationValueCount": 289,
-    "envExampleCount": 140,
+    "configurationValueCount": 309,
+    "envExampleCount": 185,
     "envReferencedButUndocumentedCount": 0,
-    "propertyBindingCount": 99
+    "propertyBindingCount": 118
   },
   "valueInjections": []
 }

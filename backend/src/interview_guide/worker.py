@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
+from interview_guide.common.ai.opentrek import OpenTrekCapability
 from interview_guide.common.ai.prompts import PromptRepository
 from interview_guide.common.ai.structured import StructuredOutputInvoker
 from interview_guide.common.config.settings import get_settings
@@ -83,7 +84,10 @@ async def run_worker(
                     infrastructure.database.sessions,
                     streams,
                     lambda user_id: ResumeGradingService(
-                        infrastructure.provider_resolver.for_user(user_id),
+                        infrastructure.provider_registry_for(
+                            user_id,
+                            OpenTrekCapability.GENERAL,
+                        ),
                         resume_structured,
                         resume_prompts,
                     ),
@@ -122,12 +126,16 @@ async def run_worker(
                     question_generation_producer,
                     KnowledgeBaseQuestionGenerationService(
                         infrastructure.database.sessions,
-                        infrastructure.provider_resolver.for_user,
+                        lambda user_id: infrastructure.provider_registry_for(
+                            user_id,
+                            OpenTrekCapability.EVALUATOR,
+                        ),
                         infrastructure.llm_adapter,
                         StructuredOutputInvoker(infrastructure.llm_adapter),
                         PromptRepository(resources),
                         infrastructure.prompt_sanitizer,
                         question_generation_state,
+                        context_retriever_factory=infrastructure.knowledge_retriever_for,
                         now=now_factory,
                     ),
                 ),
@@ -147,7 +155,10 @@ async def run_worker(
                     ),
                     streams,
                     unified_evaluation,
-                    infrastructure.provider_resolver.for_user,
+                    lambda user_id: infrastructure.provider_registry_for(
+                        user_id,
+                        OpenTrekCapability.EVALUATOR,
+                    ),
                 ),
             )
             await run_stream_consumers(

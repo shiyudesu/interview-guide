@@ -1,0 +1,770 @@
+{
+  "errorMessages": [],
+  "success": true,
+  "data": [
+    {
+      "groupCode": "APP_CTR",
+      "groupName": "平台功能类",
+      "childList": [
+        {
+          "groupCode": "SYSTEM-OPENAPI",
+          "groupName": "系统管理",
+          "childList": [
+            {
+              "groupCode": "ACCOUNT",
+              "groupName": "账号管理",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.account.checkExist",
+                  "groupName": "账号存在判断",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.account.create",
+                  "groupName": "创建账号",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.account.getByAccount",
+                  "groupName": "获取账号信息",
+                  "childList": []
+                }
+              ]
+            },
+            {
+              "groupCode": "USERAUTH",
+              "groupName": "用户授权",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.permUserAuth.addUserAuth",
+                  "groupName": "新增用户授权",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.permUserAuth.removeUserAuth",
+                  "groupName": "删除用户授权",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.permUserAuth.pageUserAuthDetail",
+                  "groupName": "查询账号授权信息",
+                  "childList": []
+                }
+              ]
+            },
+            {
+              "groupCode": "WORKSPACE",
+              "groupName": "空间管理",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.workspace.create",
+                  "groupName": "创建工作空间",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.workspace.update",
+                  "groupName": "修改工作空间",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.workspace.authorizeUser",
+                  "groupName": "工作空间添加用户",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.workspace.updateUser",
+                  "groupName": "更改空间授权",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.workspace.pageQueryUser",
+                  "groupName": "查询空间中的用户",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.system-openapi.system.api.v1.workspace.removeUser",
+                  "groupName": "移除空间用户",
+                  "childList": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "groupCode": "OPENAPI-AGENT",
+          "groupName": "智能体管理",
+          "childList": [
+            {
+              "groupCode": "AGENT-OPERATE",
+              "groupName": "智能体",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.pagequery",
+                  "groupName": "查询智能体列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.create",
+                  "groupName": "创建智能体",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.update",
+                  "groupName": "编辑智能体",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.delete",
+                  "groupName": "删除智能体",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.version.pagequery",
+                  "groupName": "查询智能体版本列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.version.create",
+                  "groupName": "创建智能体版本",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.version.update",
+                  "groupName": "编辑智能体版本",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.agent.version.delete",
+                  "groupName": "删除智能体版本",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.memory.longterm.partition.add",
+                  "groupName": "写入记忆分区内容",
+                  "childList": []
+                }
+              ]
+            },
+            {
+              "groupCode": "AGENT-TOOL",
+              "groupName": "工具",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.tool.pagequery",
+                  "groupName": "查询工具列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.tool.create",
+                  "groupName": "创建工具",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.tool.update",
+                  "groupName": "编辑工具",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.tool.getone",
+                  "groupName": "查询工具详情",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.tool.delete",
+                  "groupName": "删除工具",
+                  "childList": []
+                }
+              ]
+            },
+            {
+              "groupCode": "AGENT-SKILL",
+              "groupName": "SKILL HUB",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.querypage",
+                  "groupName": "查询Skill列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.getone",
+                  "groupName": "查询Skill详情",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.listversions",
+                  "groupName": "查询Skill版本列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.scanzip",
+                  "groupName": "扫描Skill ZIP包",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.create",
+                  "groupName": "创建Skill",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.update",
+                  "groupName": "更新Skill",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.delete",
+                  "groupName": "删除Skill",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.share",
+                  "groupName": "分享Skill",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.installshared",
+                  "groupName": "安装已分享的Skill",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.api.skill.generateskillmd",
+                  "groupName": "生成Skill MD",
+                  "childList": []
+                }
+              ]
+            },
+            {
+              "groupCode": "AGENT-TEMPLATE",
+              "groupName": "智能体模版",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.template.pagequery",
+                  "groupName": "查询智能体模版列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.template.getone",
+                  "groupName": "查询智能体模版详情",
+                  "childList": []
+                }
+              ]
+            },
+            {
+              "groupCode": "PROMPT",
+              "groupName": "提示词模版",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.prompt.pagequery",
+                  "groupName": "查询提示词模版列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.prompt.queryprompttypes",
+                  "groupName": "查询提示词分类",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.prompt.save",
+                  "groupName": "创建/更新提示词模版",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.prompt.deploy",
+                  "groupName": "发布提示词模版",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.openapi-agent.agent.openapi.prompt.delete",
+                  "groupName": "删除提示词模版",
+                  "childList": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "groupCode": "CTL-KORTEX",
+          "groupName": "知识库管理",
+          "childList": [
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.list",
+              "groupName": "知识库列表查询",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.share.sharedlist",
+              "groupName": "共享知识库列表查询",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.create",
+              "groupName": "知识库创建",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.updatematedata",
+              "groupName": "知识库元数据更新",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.disable",
+              "groupName": "知识库停用",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.enable",
+              "groupName": "知识库启用",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.delete",
+              "groupName": "知识库删除",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.mono.detail",
+              "groupName": "知识库详情查询",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.data.consumebulk",
+              "groupName": "知识库数据变更",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.submodel.data.list",
+              "groupName": "知识库数据查询",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.file.data.sync",
+              "groupName": "知识库文件上传",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.file.list",
+              "groupName": "文档知识库文件列表查询",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.file.reprocess",
+              "groupName": "文件重新解析",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.file.delete",
+              "groupName": "文档知识库删除文件",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.chunk.list",
+              "groupName": "文档知识库chunk明细列表查询",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.kb.doc.chunk.edit",
+              "groupName": "文档知识库chunk内容修正",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.statistics.kpi",
+              "groupName": "文档知识库资源用量-汇总KPI接口",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.statistics.trend",
+              "groupName": "文档知识库资源用量-图表趋势接口",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.ctl-kortex.kortex.api.statistics.details",
+              "groupName": "文档知识库资源用量-明细数据接口",
+              "childList": []
+            }
+          ]
+        },
+        {
+          "groupCode": "DATAPROCESS",
+          "groupName": "数据中心",
+          "childList": [
+            {
+              "groupCode": "DATASET",
+              "groupName": "数据管理",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.get",
+                  "groupName": "获取数据集列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.post",
+                  "groupName": "新建数据集",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.put",
+                  "groupName": "更新数据集",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.delete",
+                  "groupName": "删除数据集",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.get",
+                  "groupName": "获取数据集详情",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.files.post",
+                  "groupName": "通知数据集文件增加",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.files.delete",
+                  "groupName": "通知数据集文件删除",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.files.get",
+                  "groupName": "获取数据集文件列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.post",
+                  "groupName": "新建数据子集",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.put",
+                  "groupName": "更新数据子集",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.subsetCode.delete",
+                  "groupName": "删除数据集子集",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.subsets.get",
+                  "groupName": "数据集子集列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.datasets.Code.viewer",
+                  "groupName": "获取数据集预览数据",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.files.url.get",
+                  "groupName": "获取文件下载地址",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.files.image.presigned.url",
+                  "groupName": "获取图片下载地址",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.files.delete",
+                  "groupName": "删除文件",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.files.upload.credential",
+                  "groupName": "获取文件上传授权凭证",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.files.download.credential",
+                  "groupName": "获取文件下载授权凭证",
+                  "childList": []
+                }
+              ]
+            },
+            {
+              "groupCode": "OPERATORS",
+              "groupName": "数据加工",
+              "childList": [
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.operators",
+                  "groupName": "获取算子列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.templates",
+                  "groupName": "获取加工模版列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.templates.byCode",
+                  "groupName": "获取加工模版详情",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks",
+                  "groupName": "新建加工任务",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.put",
+                  "groupName": "更新加工任务",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid",
+                  "groupName": "删除加工任务",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.publish",
+                  "groupName": "发布任务",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.unpublish",
+                  "groupName": "下线任务",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.get",
+                  "groupName": "获取加工任务列表",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.get",
+                  "groupName": "获取加工任务详情",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.run",
+                  "groupName": "运行加工任务",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.Taskid.instances",
+                  "groupName": "获取任务运行实例信息",
+                  "childList": []
+                },
+                {
+                  "groupCode": "sfm.api.dataprocess.data-engine.api.v2.process.tasks.instances.Instancecode.log",
+                  "groupName": "获取任务实例日志",
+                  "childList": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "groupCode": "APP_TENANT",
+      "groupName": "应用集成类",
+      "childList": [
+        {
+          "groupCode": "AGENT",
+          "groupName": "智能体",
+          "childList": [
+            {
+              "groupCode": "sfm.api.agent.agent.api.createsession",
+              "groupName": "创建session",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.agent.agent.api.run",
+              "groupName": "发起agent调用",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.agent.agent.api.clearsession",
+              "groupName": "终止session",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.agent.agent.api.deletesession",
+              "groupName": "删除session",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.agent.agent.api.taskfinishnotice",
+              "groupName": "工具异步回调",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.agent.agent.api.feedback",
+              "groupName": "调用结果反馈",
+              "childList": []
+            }
+          ]
+        },
+        {
+          "groupCode": "AUTO-AGENT",
+          "groupName": "TrekAgent",
+          "childList": [
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.session.create",
+              "groupName": "创建session",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.createnewchannel",
+              "groupName": "创建连接",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.channelrefresh",
+              "groupName": "刷新channel心跳",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.changetask",
+              "groupName": "切换至指定session",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.run",
+              "groupName": "发起一次对话",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.stop",
+              "groupName": "停止当前对话",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.task.list",
+              "groupName": "获取会话列表",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.task.desc",
+              "groupName": "查询单个任务详情",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.task.delete",
+              "groupName": "删除任务",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.task.update",
+              "groupName": "更新任务信息",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.task.statistic",
+              "groupName": "统计任务状态",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.pagelistlatestmsg",
+              "groupName": "分页查询历史消息",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.files.tree",
+              "groupName": "获取会话文件树",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.auto-agent.agent.auto.new.open.files.download",
+              "groupName": "获取文件下载链接",
+              "childList": []
+            }
+          ]
+        },
+        {
+          "groupCode": "HighCodeAGENT",
+          "groupName": "高码智能体",
+          "childList": [
+            {
+              "groupCode": "sfm.api.highcodeagent.agent.highcode.createsession",
+              "groupName": "创建session",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.highcodeagent.agent.highcode.process",
+              "groupName": "发起agent调用",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.highcodeagent.agent.highcode.abortsession",
+              "groupName": "终止会话",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.highcodeagent.agent.highcode.clearsession",
+              "groupName": "清除会话",
+              "childList": []
+            }
+          ]
+        },
+        {
+          "groupCode": "KORTEX",
+          "groupName": "知识库检索",
+          "childList": [
+            {
+              "groupCode": "sfm.api.kortex.kortex.api.kb.metadata.annotatefilemetadata",
+              "groupName": "文件元数据批量标注",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.kortex.api.kb.metadata.filterfilecodes",
+              "groupName": "文件元数据过滤查询",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.kortex.api.kb.mono.retrieve",
+              "groupName": "知识库检索",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.kortex.api.kb.mono.combination.retrieve",
+              "groupName": "知识库批量检索",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.kortex.api.kb.doc.retrieve",
+              "groupName": "文档知识库检索",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.kortex.api.kb.doc.combination.retrieve",
+              "groupName": "文档知识库批量检索",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.dext.api.retrieve.v1.search",
+              "groupName": "数据表知识库检索服务",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.dext.api.dp.refres.schema.listtableswithrelatedinfo",
+              "groupName": "数据表知识库资源查询-表",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.dext.api.dp.refres.schema.listcolumnswithrelatedinfo",
+              "groupName": "数据表知识库资源查询-字段",
+              "childList": []
+            },
+            {
+              "groupCode": "sfm.api.kortex.dext.api.dp.refres.flexext.list",
+              "groupName": "数据表知识库资源查询-专家知识",
+              "childList": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errorCode": null,
+  "errorMsg": null,
+  "extraData": null,
+  "traceId": null,
+  "env": null,
+  "other": null,
+  "errorMessage": null,
+  "failure": false,
+  "firstErrorMessage": null
+}

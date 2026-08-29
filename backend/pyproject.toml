@@ -42,7 +42,10 @@ dependencies = [
 interview-guide-api = "interview_guide.main:run"
 interview-guide-claim-legacy-data = "interview_guide.modules.auth.cli:claim_legacy_data_main"
 interview-guide-create-admin = "interview_guide.modules.auth.cli:create_admin_main"
+interview-guide-create-user = "interview_guide.modules.auth.cli:create_user_main"
 interview-guide-migrate = "interview_guide.migrate:main"
+interview-guide-provision-opentrek = "interview_guide.opentrek_provision:main"
+interview-guide-seed-opentrek-kb = "interview_guide.modules.knowledge_base.opentrek_seed:main"
 interview-guide-scheduler = "interview_guide.scheduler:main"
 interview-guide-worker = "interview_guide.worker:main"
 

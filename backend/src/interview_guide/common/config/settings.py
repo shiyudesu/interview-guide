@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 from pathlib import Path
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlsplit
 
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -247,6 +248,88 @@ class Settings(BaseSettings):
         default="",
         validation_alias="APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS",
     )
+    competition_mode: bool = Field(
+        default=False,
+        validation_alias="APP_COMPETITION_MODE",
+    )
+    opentrek_enabled: bool = Field(
+        default=False,
+        validation_alias="APP_OPENTREK_ENABLED",
+    )
+    opentrek_runtime_base_url: str = Field(
+        default=("http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway"),
+        validation_alias="APP_OPENTREK_RUNTIME_BASE_URL",
+    )
+    opentrek_app_key: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias="APP_OPENTREK_APP_KEY",
+    )
+    opentrek_workspace_code: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_WORKSPACE_CODE",
+    )
+    opentrek_general_agent_code: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_GENERAL_AGENT_CODE",
+    )
+    opentrek_general_agent_version: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_GENERAL_AGENT_VERSION",
+    )
+    opentrek_interviewer_agent_code: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_INTERVIEWER_AGENT_CODE",
+    )
+    opentrek_interviewer_agent_version: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_INTERVIEWER_AGENT_VERSION",
+    )
+    opentrek_evaluator_agent_code: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_EVALUATOR_AGENT_CODE",
+    )
+    opentrek_evaluator_agent_version: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_EVALUATOR_AGENT_VERSION",
+    )
+    opentrek_rag_agent_code: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_RAG_AGENT_CODE",
+    )
+    opentrek_rag_agent_version: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_RAG_AGENT_VERSION",
+    )
+    opentrek_kb_mappings_json: str = Field(
+        default="[]",
+        validation_alias="APP_OPENTREK_KB_MAPPINGS_JSON",
+    )
+    opentrek_connect_timeout_seconds: float = Field(
+        default=10,
+        gt=0,
+        validation_alias="APP_OPENTREK_CONNECT_TIMEOUT_SECONDS",
+    )
+    opentrek_read_timeout_seconds: float = Field(
+        default=300,
+        gt=0,
+        validation_alias="APP_OPENTREK_READ_TIMEOUT_SECONDS",
+    )
+    opentrek_kb_batch_size: int = Field(
+        default=10,
+        ge=1,
+        le=10,
+        validation_alias="APP_OPENTREK_KB_BATCH_SIZE",
+    )
+    opentrek_agent_lock_file: str = Field(
+        default="",
+        validation_alias="APP_OPENTREK_AGENT_LOCK_FILE",
+    )
+    opentrek_agent_min_interval_seconds: float = Field(
+        default=0,
+        ge=0,
+        le=120,
+        validation_alias="APP_OPENTREK_AGENT_MIN_INTERVAL_SECONDS",
+    )
     ai_rag_rewrite_enabled: bool = Field(
         default=True,
         validation_alias="APP_AI_RAG_REWRITE_ENABLED",
@@ -424,6 +507,43 @@ class Settings(BaseSettings):
         validation_alias="APP_VOICE_TIMEOUT_CHECK_INTERVAL_SECONDS",
     )
 
+    @model_validator(mode="after")
+    def validate_competition_and_opentrek(self) -> Settings:
+        if self.competition_mode and self.auth_registration_enabled:
+            raise ValueError("比赛模式必须保持 APP_AUTH_REGISTRATION_ENABLED=false")
+        try:
+            mappings = json.loads(self.opentrek_kb_mappings_json)
+        except ValueError as error:
+            raise ValueError("APP_OPENTREK_KB_MAPPINGS_JSON 必须是合法 JSON") from error
+        if not isinstance(mappings, (list, dict)):
+            raise ValueError("APP_OPENTREK_KB_MAPPINGS_JSON 必须是数组或对象")
+        if not self.opentrek_enabled:
+            return self
+        parsed = urlsplit(self.opentrek_runtime_base_url.strip())
+        if (
+            parsed.scheme not in {"http", "https"}
+            or parsed.hostname != "10.128.203.200"
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise ValueError(
+                "APP_OPENTREK_RUNTIME_BASE_URL 只允许指向 10.128.203.200 的 HTTP(S) 地址"
+            )
+        required = {
+            "APP_OPENTREK_APP_KEY": self.opentrek_app_key.get_secret_value(),
+            "APP_OPENTREK_WORKSPACE_CODE": self.opentrek_workspace_code,
+            "APP_OPENTREK_GENERAL_AGENT_CODE": self.opentrek_general_agent_code,
+            "APP_OPENTREK_INTERVIEWER_AGENT_CODE": self.opentrek_interviewer_agent_code,
+            "APP_OPENTREK_EVALUATOR_AGENT_CODE": self.opentrek_evaluator_agent_code,
+            "APP_OPENTREK_RAG_AGENT_CODE": self.opentrek_rag_agent_code,
+        }
+        missing = [name for name, value in required.items() if not value.strip()]
+        if missing:
+            raise ValueError(f"启用 OpenTrek 前必须配置: {', '.join(missing)}")
+        return self
+
     otel_enabled: bool = Field(default=True, validation_alias="OTEL_ENABLED")
     otel_service_name: str = Field(
         default="interview-guide-api",
@@ -453,6 +573,30 @@ class Settings(BaseSettings):
             for network in self.provider_outbound_allowed_networks.split(",")
             if network.strip()
         )
+
+    @property
+    def opentrek_kb_mappings(self) -> dict[str, str]:
+        raw = json.loads(self.opentrek_kb_mappings_json)
+        if isinstance(raw, dict):
+            items = list(raw.items())
+        else:
+            items = [
+                (item.get("fileHash"), item.get("kbCode")) for item in raw if isinstance(item, dict)
+            ]
+        result: dict[str, str] = {}
+        for file_hash, kb_code in items:
+            normalized_hash = str(file_hash or "").strip().lower()
+            normalized_code = str(kb_code or "").strip()
+            if len(normalized_hash) != 64 or any(
+                character not in "0123456789abcdef" for character in normalized_hash
+            ):
+                raise ValueError("OpenTrek 知识库映射包含无效的 SHA-256")
+            if not normalized_code:
+                raise ValueError("OpenTrek 知识库映射包含空 kbCode")
+            if normalized_hash in result and result[normalized_hash] != normalized_code:
+                raise ValueError("同一文件 SHA-256 不能映射到多个 OpenTrek 知识库")
+            result[normalized_hash] = normalized_code
+        return result
 
     @property
     def sqlalchemy_url(self) -> str:

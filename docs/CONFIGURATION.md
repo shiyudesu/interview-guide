@@ -186,6 +186,93 @@ APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS=192.168.10.0/24
 `qwen3.7-text-embedding` 是有效的 Embedding 模型。不要把聊天模型名填到
 `embeddingModel`。
 
+## OpenTrek 校园赛模式
+
+OpenTrek 校园赛实例使用根目录 `.env.campus`，模板为 `.env.campus.example`。该文件包含比赛专用
+OpenTrek 应用密钥，已被 Git 忽略，必须保持 `0600` 权限；不要把它复制到聊天、Issue、CI 日志或提交中。
+校园实例与普通实例使用不同的 Compose 项目名和数据卷。
+
+| 环境变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `APP_COMPETITION_MODE` | `false` | 开启校园赛只读产品模式；校园模板固定为 `true` |
+| `APP_OPENTREK_ENABLED` | `false` | 启用 OpenTrek 能力路由；比赛模式要求为 `true` |
+| `APP_OPENTREK_RUNTIME_BASE_URL` | `http://10.128.203.200:80/sfm-agent-studio/sfm-api-gateway/gateway` | Agent/Kortex 运行时网关，只允许主机 `10.128.203.200` |
+| `APP_OPENTREK_APP_KEY` | 空 | 比赛工作空间专用应用密钥，仅由后端读取 |
+| `APP_OPENTREK_WORKSPACE_CODE` | 空 | 应用密钥所属工作空间编码 |
+| `APP_OPENTREK_GENERAL_AGENT_CODE` | 空 | 简历分析、日程解析 Agent |
+| `APP_OPENTREK_GENERAL_AGENT_VERSION` | 空 | General Agent 已发布版本 |
+| `APP_OPENTREK_INTERVIEWER_AGENT_CODE` | 空 | JD、出题和动态追问 Agent |
+| `APP_OPENTREK_INTERVIEWER_AGENT_VERSION` | 空 | Interviewer Agent 已发布版本 |
+| `APP_OPENTREK_EVALUATOR_AGENT_CODE` | 空 | 评估和知识库出题 Agent |
+| `APP_OPENTREK_EVALUATOR_AGENT_VERSION` | 空 | Evaluator Agent 已发布版本 |
+| `APP_OPENTREK_RAG_AGENT_CODE` | 空 | Kortex 问答 Agent |
+| `APP_OPENTREK_RAG_AGENT_VERSION` | 空 | RAG Agent 已发布版本 |
+| `APP_OPENTREK_KB_MAPPINGS_JSON` | `[]` | 本地文件 SHA-256 到只读 Kortex `kbCode` 的映射 |
+| `APP_OPENTREK_CONNECT_TIMEOUT_SECONDS` | `10` | OpenTrek TCP/连接池超时 |
+| `APP_OPENTREK_READ_TIMEOUT_SECONDS` | `300` | Agent 和 Kortex 响应超时 |
+| `APP_OPENTREK_KB_BATCH_SIZE` | `10` | Kortex combination retrieve 单批数量，最大 10 |
+| `APP_OPENTREK_AGENT_LOCK_FILE` | 空 | 跨进程 Agent 调用门禁文件；校园模板位于共享 `provider_key` 卷 |
+| `APP_OPENTREK_AGENT_MIN_INTERVAL_SECONDS` | `0` | 相邻 Agent 执行的最小间隔；校园模板为 1 秒 |
+
+校园模板还设置 `INTERVIEW_GUIDE_BUILD_NETWORK=host`，仅让受信任源码的 Docker 构建步骤复用 Linux
+宿主机网络，以降低学校代理或弱网络下 Python/npm 包下载失败率；普通和 CI 构建默认仍使用隔离的
+`default` build network。该变量只影响镜像构建，不改变运行中容器的网络或公开端口。
+
+校园模板将 `APP_INTERVIEW_TURN_DECISION_TIMEOUT_SECONDS` 提高到 `120`，并把
+`APP_INTERVIEW_TURN_LEASE_SECONDS` 配套设为 `150`。OpenTrek 校内 Agent 的复杂结构化响应明显
+慢于普通 OpenAI 兼容接口；租约必须长于决策超时，仍保持 Turn 只调用模型一次和原有确定性回退。
+校园模板同时设置 `APP_AI_RAG_REWRITE_ENABLED=false`：Kortex 已直接处理原始问题，省去一次额外
+Agent 调用；比赛模式也不向 RAG Agent 传递 OpenAI Tool 描述，因为检索已由受控 Kortex Facade
+完成。标准模式继续使用原有查询改写和 Tool 顺序。
+
+当前 OpenTrek Agent 对题库生成有两项实测限制：单次请求只能稳定生成 1 道题，且嵌套固定追问会
+返回无规划结果。比赛模式因此逐题顺序调用并聚合结果，预生成题库的 `followUpCount` 固定为 0；
+知识库面试过程中仍由统一 Turn 模型按回答动态追问。标准模式继续一次批量生成并支持固定追问。
+
+当前工作空间在不同 Agent 或进程连续执行时还需要冷却。校园 Compose 将门禁文件放在所有后端
+进程共享的 `provider_key` 卷中，以 `flock` 串行化 Agent 生命周期，并在释放前记录完成时间；下一
+次执行至少间隔 1 秒。门禁不作用于 Kortex 检索，不占用数据库连接，也不新增 Redis key。直接在
+主机运行 Python 且门禁路径不可写时会明确记录警告并退回进程内互斥。
+
+映射格式为：
+
+```dotenv
+APP_OPENTREK_KB_MAPPINGS_JSON='[{"fileHash":"64位小写SHA-256","kbCode":"Kortex编码"}]'
+```
+
+General、Interviewer、Evaluator 和 RAG 四类能力固定路由到各自 Agent，前端请求中的
+`llmProvider` 字段仍保留但不会改变实际出口。Interviewer/Evaluator 请求按 OpenTrek 的
+`message.metadata.skillList` 协议在主问题生成和评估时绑定当前面试方向对应的已发布 Skill；13 个
+岗位方向均已配置。Turn 决策继续使用仓库内已审核的 Skill reference 上下文，不向平台重复加载
+Skill，避免当前 OpenTrek 在短决策任务上进入长时间规划。
+平台不可用时明确失败，不回退用户
+Provider 或其他生成模型；Turn 仍保留原有确定性动作回退。
+
+校园模板还显式设置：
+
+```dotenv
+APP_PROVIDER_OUTBOUND_ALLOWED_HOSTS=10.128.203.200
+APP_PROVIDER_OUTBOUND_ALLOWED_NETWORKS=10.128.203.200/32
+```
+
+这是对固定校内平台的部署者级放行，不会放宽普通用户的 Provider 出站策略。OpenTrek Client 仍
+禁用重定向、环境代理和隐式重试，并在连接前执行 DNS/IP 校验。
+
+比赛模式强制开启账号认证、关闭自助注册，并在服务端禁止知识库上传、删除、分类修改、重新向量化
+和语音接口；前端同时隐藏对应入口、Provider 设置和模型选择。普通 `.env` 未开启比赛模式时，现有
+BYOK、知识库和语音行为保持不变。
+
+平台资源通过 `interview-guide-provision-opentrek` 幂等配置。命令会创建应用密钥、四个 Agent、
+发布版本、打包并扫描 13 个 Skill，以及创建文档 Kortex 知识库。当前校内平台创建文档知识库时，
+除 `text-embedding-v4` 外还要求文档解析 `visualModel`；命令自动发现 `qwen-vl-plus`，并为文本
+Embedding 选择 1024 维。管理 Cookie 与应用密钥分开使用，应用密钥立即原子写入
+`.env.campus`，不会输出到终端。
+
+当前实测稳定的能力级模型映射为：General、Interviewer、RAG 使用 `qwen3.6-plus`，Evaluator 使用
+`qwen3.6-flash`；两者均关闭思考并限制 4096 输出。Provisioning 的 `--agent-model` 仅用于诊断时
+显式覆盖全部能力，正常部署使用上述映射。非流式 OpenTrek 响应开启 `delta` 后可能把多个累计 JSON
+快照串联在一个文本字段中，Client 会严格解析连续 JSON 并只保留最后一个完整快照。
+
 ## 账号与 Session
 
 正式 Compose 通过以下配置启用账号底座，注册默认关闭：

@@ -13,10 +13,10 @@
       "webSocketEndpointCount": 1
     },
     "configuration.json": {
-      "configurationValueCount": 289,
-      "envExampleCount": 140,
+      "configurationValueCount": 309,
+      "envExampleCount": 185,
       "envReferencedButUndocumentedCount": 0,
-      "propertyBindingCount": 99
+      "propertyBindingCount": 118
     },
     "database.json": {
       "alterationCount": 1,
@@ -26,13 +26,13 @@
       "tableCount": 17
     },
     "redis.json": {
-      "constantCount": 35,
+      "constantCount": 36,
       "rateLimitRuleCount": 4,
       "scheduledMethodCount": 4,
       "streamCount": 4
     },
     "resources.json": {
-      "disabledTestMarkerCount": 1,
+      "disabledTestMarkerCount": 2,
       "resourceCount": 84,
       "resourceCountsByCategory": {
         "font": 1,
@@ -40,7 +40,7 @@
         "redis-script": 1,
         "skill": 66
       },
-      "testFileCount": 60
+      "testFileCount": 67
     }
   },
   "schemaVersion": 1

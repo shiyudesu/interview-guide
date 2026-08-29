@@ -79,6 +79,7 @@ class DetectCiChangesTest(unittest.TestCase):
         self.assertTrue(areas.production)
 
         for path in (
+            ".env.campus.example",
             ".env.http.example",
             "docker-compose.test.yml",
             "deploy/compose.yml",
@@ -93,9 +94,11 @@ class DetectCiChangesTest(unittest.TestCase):
     def test_startup_script_change_runs_deployment_validation(self) -> None:
         for path in (
             "scripts/start.sh",
+            "scripts/start-campus.sh",
             "scripts/start-http.sh",
             "scripts/start.ps1",
             "scripts/stop.sh",
+            "scripts/stop-campus.sh",
             "scripts/stop-http.sh",
             "scripts/stop.ps1",
             "start.cmd",
