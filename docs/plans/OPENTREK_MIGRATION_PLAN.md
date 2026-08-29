@@ -167,9 +167,10 @@ Evaluator 的出题/评估调用；JD 通用解析和无岗位上下文的调用
 - 不回退本地或其他外部生成模型。
 - Turn 模型不可用时继续使用当前确定性 NEXT_MAIN 或 COMPLETE 回退，并记录 FALLBACK。
 
-当前平台的 Agent 对知识库题库 Prompt 单次生成多题、或在题目中嵌套固定追问时会返回“无规划任务
-结果”。OpenTrek 模式保持相同 Prompt 模板和 JSON Schema，但每次只生成 1 题并顺序聚合；固定
-追问数设为 0，面试阶段继续由 Turn 模型动态追问。标准 Provider 的批量生成和固定追问行为不变。
+当前平台的 Agent 对知识库题库和普通面试出题 Prompt 单次生成多题、或在题目中嵌套固定追问时会
+返回“无规划任务结果”。OpenTrek 模式保持相同 Prompt 模板和 JSON Schema，压缩 Schema 的传输
+表示，并且每次只生成 1 题后顺序聚合；固定追问数设为 0，面试阶段继续由 Turn 模型动态追问。
+标准 Provider 的批量生成和固定追问行为不变。
 
 ### 4.4 预置 Kortex 知识库映射
 

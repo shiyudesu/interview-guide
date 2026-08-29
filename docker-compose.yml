@@ -215,6 +215,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      network: ${INTERVIEW_GUIDE_BUILD_NETWORK:-default}
       args:
         INTERVIEW_GUIDE_DOCKERHUB_REGISTRY: ${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}
     image: interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-local}

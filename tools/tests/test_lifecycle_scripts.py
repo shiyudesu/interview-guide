@@ -73,6 +73,7 @@ class LifecycleScriptsTest(unittest.TestCase):
         start = (REPOSITORY_ROOT / "scripts/start-campus.sh").read_text(encoding="utf-8")
         stop = (REPOSITORY_ROOT / "scripts/stop-campus.sh").read_text(encoding="utf-8")
         example = (REPOSITORY_ROOT / ".env.campus.example").read_text(encoding="utf-8")
+        compose = (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
         for content in (start, stop):
             self.assertIn("interview-guide-campus", content)
@@ -82,6 +83,10 @@ class LifecycleScriptsTest(unittest.TestCase):
         self.assertIn("APP_AUTH_COOKIE_SECURE=false", example)
         self.assertIn("APP_OPENTREK_ENABLED=true", example)
         self.assertIn("FRONTEND_BIND_ADDRESS=0.0.0.0", example)
+        self.assertEqual(
+            compose.count("network: ${INTERVIEW_GUIDE_BUILD_NETWORK:-default}"),
+            2,
+        )
         self.assertNotIn("down -v", stop)
 
     def test_windows_entrypoints_call_matching_powershell_scripts(self) -> None:

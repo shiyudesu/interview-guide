@@ -14,7 +14,11 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 
 from interview_guide.common.ai.adapter import ProviderConfig
-from interview_guide.common.ai.opentrek import opentrek_provider_with_skills
+from interview_guide.common.ai.opentrek import (
+    OpenTrekProviderConfig,
+    opentrek_provider_for_interview_question_generation,
+    opentrek_provider_with_skills,
+)
 from interview_guide.common.ai.prompts import (
     DATA_BOUNDARY_INSTRUCTION,
     PromptRepository,
@@ -691,6 +695,40 @@ class InterviewQuestionService:
         difficulty_description: str,
         historical_section: str,
     ) -> list[PlannedInterviewQuestion]:
+        if isinstance(provider, OpenTrekProviderConfig) and question_count > 1:
+            questions: list[PlannedInterviewQuestion] = []
+            for _ in range(question_count):
+                batch = await self._invoke_resume_batch(
+                    provider,
+                    resume_text,
+                    1,
+                    skill,
+                    difficulty_description,
+                    self._history_with_generated(historical_section, questions),
+                )
+                if not batch:
+                    break
+                questions.append(batch[0])
+            return questions
+        return await self._invoke_resume_batch(
+            provider,
+            resume_text,
+            question_count,
+            skill,
+            difficulty_description,
+            historical_section,
+        )
+
+    async def _invoke_resume_batch(
+        self,
+        provider: ProviderConfig,
+        resume_text: str,
+        question_count: int,
+        skill: ResolvedSkill,
+        difficulty_description: str,
+        historical_section: str,
+    ) -> list[PlannedInterviewQuestion]:
+        provider = opentrek_provider_for_interview_question_generation(provider)
         system = (
             self._prompts.render("interview-question-resume-system.st")
             + self._persona_section(skill)
@@ -728,40 +766,29 @@ class InterviewQuestionService:
     ) -> list[PlannedInterviewQuestion]:
         allocation = self._skills.allocation(skill.categories, question_count)
         try:
-            system = (
-                self._prompts.render("interview-question-skill-system.st")
-                + self._persona_section(skill)
-                + GENERIC_MODE_SYSTEM_APPEND
-                + QUESTION_OUTPUT_FORMAT
-            )
-            user = self._prompts.render(
-                "interview-question-skill-user.st",
-                {
-                    "questionCount": question_count,
-                    "difficultyDescription": difficulty_description,
-                    "skillName": skill.name,
-                    "skillDescription": skill.description or "",
-                    "allocationTable": self._skills.allocation_description(
-                        allocation,
-                        skill.categories,
-                    ),
-                    "historicalSection": historical_section,
-                    "referenceSection": self._skills.generation_reference_section(
+            if isinstance(provider, OpenTrekProviderConfig) and question_count > 1:
+                questions: list[PlannedInterviewQuestion] = []
+                for category_key in self._allocation_sequence(allocation):
+                    batch = await self._invoke_direction_batch(
+                        provider,
                         skill,
-                        allocation,
-                    ),
-                    "jdSection": self._jd_section(skill.source_jd),
-                },
-            )
-            result = await self._structured.invoke(
-                provider,
-                system,
-                user,
-                QuestionListOutput,
-                ErrorCode.INTERVIEW_QUESTION_GENERATION_FAILED,
-                "方向题生成失败：",
-            )
-            questions = self._convert(result)
+                        difficulty_description,
+                        1,
+                        OrderedDict(((category_key, 1),)),
+                        self._history_with_generated(historical_section, questions),
+                    )
+                    if not batch:
+                        break
+                    questions.append(batch[0])
+            else:
+                questions = await self._invoke_direction_batch(
+                    provider,
+                    skill,
+                    difficulty_description,
+                    question_count,
+                    allocation,
+                    historical_section,
+                )
             if not questions:
                 return self._fallback_questions(skill, question_count)
             return self._cap(questions, question_count)
@@ -770,6 +797,73 @@ class InterviewQuestionService:
         except Exception:
             logger.exception("direction question generation failed; using fallback")
             return self._fallback_questions(skill, question_count)
+
+    async def _invoke_direction_batch(
+        self,
+        provider: ProviderConfig,
+        skill: ResolvedSkill,
+        difficulty_description: str,
+        question_count: int,
+        allocation: OrderedDict[str, int],
+        historical_section: str,
+    ) -> list[PlannedInterviewQuestion]:
+        provider = opentrek_provider_for_interview_question_generation(provider)
+        system = (
+            self._prompts.render("interview-question-skill-system.st")
+            + self._persona_section(skill)
+            + GENERIC_MODE_SYSTEM_APPEND
+            + QUESTION_OUTPUT_FORMAT
+        )
+        user = self._prompts.render(
+            "interview-question-skill-user.st",
+            {
+                "questionCount": question_count,
+                "difficultyDescription": difficulty_description,
+                "skillName": skill.name,
+                "skillDescription": skill.description or "",
+                "allocationTable": self._skills.allocation_description(
+                    allocation,
+                    skill.categories,
+                ),
+                "historicalSection": historical_section,
+                "referenceSection": self._skills.generation_reference_section(
+                    skill,
+                    allocation,
+                ),
+                "jdSection": self._jd_section(skill.source_jd),
+            },
+        )
+        result = await self._structured.invoke(
+            provider,
+            system,
+            user,
+            QuestionListOutput,
+            ErrorCode.INTERVIEW_QUESTION_GENERATION_FAILED,
+            "方向题生成失败：",
+        )
+        return self._cap(self._convert(result), question_count)
+
+    @staticmethod
+    def _allocation_sequence(allocation: OrderedDict[str, int]) -> list[str]:
+        return [
+            category_key
+            for category_key, count in allocation.items()
+            for _ in range(count)
+        ]
+
+    @staticmethod
+    def _history_with_generated(
+        historical_section: str,
+        generated: Sequence[PlannedInterviewQuestion],
+    ) -> str:
+        questions = [item.question.strip() for item in generated if item.question.strip()]
+        if not questions:
+            return historical_section
+        return (
+            historical_section.rstrip()
+            + "\n本轮已生成的题目（避免重复）：\n"
+            + "\n".join(f"- {question}" for question in questions)
+        )
 
     def _convert(self, output: QuestionListOutput) -> list[PlannedInterviewQuestion]:
         questions: list[PlannedInterviewQuestion] = []

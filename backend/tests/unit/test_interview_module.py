@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -7,6 +8,10 @@ from pathlib import Path
 import pytest
 
 from interview_guide.common.ai.adapter import ChatResult, ProviderConfig
+from interview_guide.common.ai.opentrek import (
+    OpenTrekCapability,
+    OpenTrekProviderConfig,
+)
 from interview_guide.common.ai.prompts import PromptRepository, PromptSanitizer
 from interview_guide.common.ai.skills import SkillRepository
 from interview_guide.common.ai.structured import StructuredInvocation
@@ -25,7 +30,12 @@ from interview_guide.modules.interview.models import (
     TurnDecisionOutput,
     TurnEvaluationDTO,
 )
-from interview_guide.modules.interview.question import InterviewSkillLibrary
+from interview_guide.modules.interview.question import (
+    InterviewQuestionService,
+    InterviewSkillLibrary,
+    QuestionListOutput,
+    QuestionOutput,
+)
 from interview_guide.modules.interview.repository import SessionAggregate
 from interview_guide.modules.interview.turn import InterviewTurnDecisionService
 from interview_guide.modules.voice_interview.models import CreateVoiceSessionRequest
@@ -57,6 +67,47 @@ class ExplicitFakeStructured:
                 raw={},
             ),
         )
+
+
+class ExplicitFakeQuestionRegistry:
+    def __init__(self, provider: ProviderConfig) -> None:
+        self.provider = provider
+
+    async def get_chat(self, provider_id: str | None = None) -> ProviderConfig:
+        del provider_id
+        return self.provider
+
+
+class ExplicitFakeQuestionStructured:
+    def __init__(self) -> None:
+        self.calls: list[tuple[ProviderConfig, str]] = []
+        self.generated = 0
+
+    async def invoke(
+        self,
+        provider: ProviderConfig,
+        system: str,
+        user: str,
+        *args: object,
+        **kwargs: object,
+    ) -> QuestionListOutput:
+        del system, args, kwargs
+        self.calls.append((provider, user))
+        match = re.search(r"请生成共 (\d+) 个", user)
+        assert match is not None
+        count = int(match.group(1))
+        questions: list[QuestionOutput] = []
+        for _ in range(count):
+            self.generated += 1
+            questions.append(
+                QuestionOutput(
+                    question=f"题目 {self.generated}",
+                    type="JAVA_CORE",
+                    category="Java 核心",
+                    topicSummary=f"知识点 {self.generated}",
+                )
+            )
+        return QuestionListOutput(questions=questions)
 
 
 def settings() -> Settings:
@@ -172,6 +223,30 @@ def decision_service(structured: ExplicitFakeStructured) -> InterviewTurnDecisio
     )
 
 
+def question_service(
+    provider: ProviderConfig,
+    structured: ExplicitFakeQuestionStructured,
+) -> InterviewQuestionService:
+    return InterviewQuestionService(
+        ExplicitFakeQuestionRegistry(provider),  # type: ignore[arg-type]
+        structured,  # type: ignore[arg-type]
+        PromptRepository(RESOURCES),
+        PromptSanitizer(),
+        InterviewSkillLibrary(SkillRepository(RESOURCES), RESOURCES),
+    )
+
+
+def opentrek_interviewer_provider() -> OpenTrekProviderConfig:
+    return OpenTrekProviderConfig(
+        provider_id="opentrek:interviewer",
+        base_url="http://10.128.203.200/gateway",
+        api_key="explicit-fake",
+        model="interviewer-code",
+        capability=OpenTrekCapability.INTERVIEWER,
+        agent_version="123",
+    )
+
+
 @pytest.mark.asyncio
 async def test_follow_up_limit_skips_model_call() -> None:
     structured = ExplicitFakeStructured(
@@ -243,6 +318,84 @@ async def test_low_confidence_follow_up_becomes_next_main() -> None:
     assert result.action == TurnAction.NEXT_MAIN
     assert result.follow_up_question is None
     assert structured.calls == 1
+
+
+@pytest.mark.asyncio
+async def test_opentrek_direction_questions_are_generated_one_at_a_time() -> None:
+    structured = ExplicitFakeQuestionStructured()
+
+    questions = await question_service(
+        opentrek_interviewer_provider(),
+        structured,
+    ).generate(
+        provider_id=None,
+        skill_id="java-backend",
+        difficulty="mid",
+        resume_text=None,
+        question_count=3,
+        historical_questions=[],
+        custom_categories=None,
+        jd_text=None,
+    )
+
+    assert len(questions) == 3
+    assert len(structured.calls) == 3
+    assert all("请生成共 1 个主问题" in user for _, user in structured.calls)
+    assert all(
+        isinstance(provider, OpenTrekProviderConfig)
+        and provider.structured_compact_schema
+        for provider, _ in structured.calls
+    )
+    assert "本轮已生成的题目" not in structured.calls[0][1]
+    assert "题目 1" in structured.calls[1][1]
+
+
+@pytest.mark.asyncio
+async def test_standard_provider_keeps_batch_question_generation() -> None:
+    structured = ExplicitFakeQuestionStructured()
+
+    questions = await question_service(PROVIDER, structured).generate(
+        provider_id=None,
+        skill_id="java-backend",
+        difficulty="mid",
+        resume_text=None,
+        question_count=3,
+        historical_questions=[],
+        custom_categories=None,
+        jd_text=None,
+    )
+
+    assert len(questions) == 3
+    assert len(structured.calls) == 1
+    assert "请生成共 3 个主问题" in structured.calls[0][1]
+
+
+@pytest.mark.asyncio
+async def test_opentrek_resume_questions_are_generated_one_at_a_time() -> None:
+    structured = ExplicitFakeQuestionStructured()
+
+    questions = await question_service(
+        opentrek_interviewer_provider(),
+        structured,
+    ).generate(
+        provider_id=None,
+        skill_id="java-backend",
+        difficulty="mid",
+        resume_text="负责订单服务开发。",
+        question_count=3,
+        historical_questions=[],
+        custom_categories=None,
+        jd_text=None,
+    )
+
+    assert len(questions) == 3
+    assert len(structured.calls) == 3
+    assert all(re.search(r"请生成共 1 个", user) for _, user in structured.calls)
+    assert all(
+        isinstance(provider, OpenTrekProviderConfig)
+        and provider.structured_compact_schema
+        for provider, _ in structured.calls
+    )
 
 
 def test_request_and_voice_duration_validation() -> None:

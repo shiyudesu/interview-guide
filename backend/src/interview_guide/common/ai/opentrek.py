@@ -57,6 +57,14 @@ def opentrek_provider_for_kb_question_generation(
     )
 
 
+def opentrek_provider_for_interview_question_generation(
+    provider: ProviderConfig,
+) -> ProviderConfig:
+    if not isinstance(provider, OpenTrekProviderConfig):
+        return provider
+    return replace(provider, structured_compact_schema=True)
+
+
 def opentrek_agent_target(
     settings: Settings,
     capability: OpenTrekCapability,
