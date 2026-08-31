@@ -515,7 +515,7 @@
       "redis-script": 1,
       "skill": 66
     },
-    "testFileCount": 67
+    "testFileCount": 68
   },
   "tests": [
     {
@@ -781,12 +781,12 @@
     {
       "disabledMarkers": 0,
       "file": "frontend/e2e/competition-mode.spec.ts",
-      "sha256": "1cf693aba02e3098df2a81f295e7934cec4fc181b1857c3df206e2e03a35f509"
+      "sha256": "c514d8549dd866acc0ba8b47002d4defdf41548a18138ea76cb51be786437d1a"
     },
     {
       "disabledMarkers": 0,
       "file": "frontend/e2e/interview-loading.spec.ts",
-      "sha256": "642cccbd870016c5499cc5bb210908df5cd089eb59b2203b17df2969d62eef8d"
+      "sha256": "27e58064a4abe338b63a4676af2946396edeed9274ffd8a1f04035066b441138"
     },
     {
       "disabledMarkers": 0,
@@ -852,6 +852,11 @@
       "disabledMarkers": 0,
       "file": "frontend/src/pages/voiceEvaluationStatus.test.ts",
       "sha256": "7ef80b21d9abb81ef965f0275994c4ab9f4862a9143a88aaec2f43f7ea7dc9c4"
+    },
+    {
+      "disabledMarkers": 0,
+      "file": "frontend/src/utils/requestId.test.ts",
+      "sha256": "2cde9edd3316297c82b313aab53844e8bcd840844e8277c0dc80d691ae81e11d"
     }
   ]
 }
