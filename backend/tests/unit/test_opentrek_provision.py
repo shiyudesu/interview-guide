@@ -11,6 +11,7 @@ from interview_guide.common.errors import BusinessException, ErrorCode
 from interview_guide.infrastructure.opentrek.provision import (
     AGENT_DEFINITIONS,
     AGENT_VERSION_NAME,
+    DEFAULT_AGENT_MODELS,
     OpenTrekProvisionClient,
     OpenTrekProvisioner,
     agent_model_config,
@@ -52,6 +53,12 @@ async def test_provision_client_separates_cookie_and_app_key_auth() -> None:
     assert all(request.headers["x-sfm-workspacecode"] == "workspace-one" for request in requests)
     assert management.headers["projectcode"] == "workspace-one"
     assert management.headers["x-sfm-workspace"] == "workspace-one"
+
+
+def test_competition_v12_uses_glm_5_1_for_every_capability() -> None:
+    assert AGENT_VERSION_NAME == "competition-v12"
+    assert set(DEFAULT_AGENT_MODELS) == set(AGENT_DEFINITIONS)
+    assert set(DEFAULT_AGENT_MODELS.values()) == {"glm-5.1"}
 
 
 async def test_provision_client_rejects_redirected_login() -> None:
@@ -253,6 +260,13 @@ class FakeKortexProvisionClient:
         content_type: str = "application/octet-stream",
     ) -> None:
         self.uploads.append((url, content, content_type))
+
+
+async def test_provisioner_rejects_unstable_deepseek_agent_model() -> None:
+    provisioner = OpenTrekProvisioner(FakeProvisionClient())  # type: ignore[arg-type]
+
+    with pytest.raises(RuntimeError, match="无规划任务结果"):
+        await provisioner._selected_agent_model("deepseek-v4-pro")
 
 
 async def test_provisioner_creates_key_agents_versions_and_publishes() -> None:

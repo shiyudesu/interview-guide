@@ -4,14 +4,17 @@ import argparse
 import asyncio
 import json
 import os
+import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from sqlalchemy import func, select
+
 from interview_guide.common.ai.user_providers import UserProviderRepository
 from interview_guide.common.config.settings import Settings, get_settings
-from interview_guide.common.db.models import KnowledgeBase
+from interview_guide.common.db.models import KnowledgeBase, KnowledgeBaseQuestion
 from interview_guide.common.db.session import Database
 from interview_guide.common.runtime import BlockingExecutor
 from interview_guide.infrastructure.file.content_type import ContentTypeDetector
@@ -35,6 +38,11 @@ def main() -> None:
     parser.add_argument("--category")
     parser.add_argument("--env-file", type=Path, default=Path(".env.campus"))
     parser.add_argument("--replace-mapping", action="store_true")
+    parser.add_argument(
+        "--replace-existing",
+        action="store_true",
+        help="原地替换同一 Kortex kbCode 的唯一影子记录；存在题库题目时拒绝执行",
+    )
     parser.add_argument("--skip-env-update", action="store_true")
     arguments = parser.parse_args()
     asyncio.run(
@@ -47,6 +55,7 @@ def main() -> None:
             category=arguments.category,
             env_file=arguments.env_file,
             replace_mapping=arguments.replace_mapping,
+            replace_existing=arguments.replace_existing,
             update_mapping=not arguments.skip_env_update,
         )
     )
@@ -62,6 +71,7 @@ async def seed_opentrek_knowledge_base(
     category: str | None,
     env_file: Path,
     replace_mapping: bool,
+    replace_existing: bool = False,
     update_mapping: bool = True,
 ) -> None:
     resolved_kb_code = kb_code.strip()
@@ -79,12 +89,44 @@ async def seed_opentrek_knowledge_base(
         data = await executor.run(source_file.read_bytes)
         file_hash = sha256_bytes(data)
         detected_type = ContentTypeDetector().detect(data, source_file.name, None)
+        if not update_mapping and settings.opentrek_kb_mappings.get(file_hash) != resolved_kb_code:
+            raise SystemExit(
+                f"当前进程未加载文件 {file_hash} 到 {resolved_kb_code} 的 Kortex 映射；"
+                "请先更新 .env.campus 并重新创建 app 容器。"
+            )
         defaults = await UserProviderRepository(database.sessions, user.id).default_aliases()
         await storage.start()
+        old_storage_key: str | None = None
         async with database.sessions() as session:
             repository = KnowledgeBaseRepository(session, user.id)
             existing = await repository.get_by_hash(file_hash)
             if existing is None:
+                replacement_id: int | None = None
+                if replace_existing:
+                    candidates = [
+                        entity
+                        for entity in await repository.list_entities()
+                        if settings.opentrek_kb_mappings.get(entity.file_hash.lower())
+                        == resolved_kb_code
+                    ]
+                    if len(candidates) != 1:
+                        raise SystemExit(
+                            "--replace-existing 要求当前账号在该 kbCode 下恰好存在一个影子记录；"
+                            f"实际为 {len(candidates)} 个。"
+                        )
+                    replacement = candidates[0]
+                    replacement_id = replacement.id
+                    old_storage_key = replacement.storage_key
+                    generated_count = await session.scalar(
+                        select(func.count())
+                        .select_from(KnowledgeBaseQuestion)
+                        .where(KnowledgeBaseQuestion.knowledge_base_id == replacement.id)
+                    )
+                    if generated_count:
+                        raise SystemExit(
+                            f"知识库 {replacement.id} 已有 {generated_count} 道题目，"
+                            "拒绝替换文件；请先确认题目迁移策略。"
+                        )
                 await session.rollback()
                 storage_key = await storage.upload(
                     data,
@@ -95,33 +137,80 @@ async def seed_opentrek_knowledge_base(
                 timestamp = datetime.now()
                 try:
                     async with session.begin():
-                        entity = await repository.add(
-                            KnowledgeBase(
-                                access_count=1,
-                                category=normalized_optional(category),
-                                chunk_count=0,
-                                content_type=detected_type,
-                                embedding_provider_alias=defaults.default_embedding_provider_id,
-                                file_hash=file_hash,
-                                file_size=len(data),
-                                last_accessed_at=timestamp,
-                                name=normalized_optional(name) or source_file.stem or "预置知识库",
-                                original_filename=source_file.name,
-                                question_count=0,
-                                question_provider_alias=defaults.default_chat_provider_id,
-                                storage_key=storage_key,
-                                storage_url=storage.object_url(storage_key),
-                                uploaded_at=timestamp,
-                                vector_error=None,
-                                vector_status="COMPLETED",
-                                user_id=user.id,
+                        if replacement_id is None:
+                            entity = await repository.add(
+                                KnowledgeBase(
+                                    access_count=1,
+                                    category=normalized_optional(category),
+                                    chunk_count=0,
+                                    content_type=detected_type,
+                                    embedding_provider_alias=defaults.default_embedding_provider_id,
+                                    file_hash=file_hash,
+                                    file_size=len(data),
+                                    last_accessed_at=timestamp,
+                                    name=normalized_optional(name)
+                                    or source_file.stem
+                                    or "预置知识库",
+                                    original_filename=source_file.name,
+                                    question_count=0,
+                                    question_provider_alias=defaults.default_chat_provider_id,
+                                    storage_key=storage_key,
+                                    storage_url=storage.object_url(storage_key),
+                                    uploaded_at=timestamp,
+                                    vector_error=None,
+                                    vector_status="COMPLETED",
+                                    user_id=user.id,
+                                )
                             )
-                        )
+                        else:
+                            replacement_entity = await repository.get(replacement_id)
+                            if replacement_entity is None:
+                                raise RuntimeError(
+                                    f"待替换知识库不存在: {replacement_id}"
+                                )
+                            replacement_entity.access_count = 1
+                            replacement_entity.category = (
+                                normalized_optional(category)
+                                if category is not None
+                                else replacement_entity.category
+                            )
+                            replacement_entity.chunk_count = 0
+                            replacement_entity.content_type = detected_type
+                            replacement_entity.file_hash = file_hash
+                            replacement_entity.file_size = len(data)
+                            replacement_entity.last_accessed_at = timestamp
+                            replacement_entity.name = (
+                                normalized_optional(name) or replacement_entity.name
+                            )
+                            replacement_entity.original_filename = source_file.name
+                            replacement_entity.question_count = 0
+                            replacement_entity.question_gen_status = "NONE"
+                            replacement_entity.question_gen_error = None
+                            replacement_entity.question_gen_task_id = None
+                            replacement_entity.question_gen_config = None
+                            replacement_entity.question_gen_message = None
+                            replacement_entity.question_gen_saved_count = 0
+                            replacement_entity.question_gen_skipped_count = 0
+                            replacement_entity.question_gen_updated_at = None
+                            replacement_entity.storage_key = storage_key
+                            replacement_entity.storage_url = storage.object_url(storage_key)
+                            replacement_entity.uploaded_at = timestamp
+                            replacement_entity.vector_error = None
+                            replacement_entity.vector_status = "COMPLETED"
+                            entity = replacement_entity
                 except BaseException:
                     await storage.delete(storage_key)
                     raise
             else:
                 entity = existing
+        if old_storage_key is not None and old_storage_key != entity.storage_key:
+            try:
+                await storage.delete(old_storage_key)
+            except Exception as error:
+                print(
+                    f"警告：旧对象 {old_storage_key} 删除失败，需要人工清理：{error}",
+                    file=sys.stderr,
+                )
         if update_mapping:
             update_mapping_env_file(
                 env_file,
@@ -136,6 +225,7 @@ async def seed_opentrek_knowledge_base(
                     "userId": str(user.id),
                     "fileHash": file_hash,
                     "kbCode": resolved_kb_code,
+                    "replacedExisting": old_storage_key is not None,
                     "envFile": str(env_file) if update_mapping else None,
                 },
                 ensure_ascii=False,

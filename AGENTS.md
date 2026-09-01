@@ -17,7 +17,10 @@ Provider 出站防护、账号/Session/CSRF、管理员 CLI、`legacy-owner` 兼
 OpenTrek 校园赛接入已按 `docs/plans/OPENTREK_MIGRATION_PLAN.md` 实现：比赛模式固定路由四类
 Agent，通过运行时 `skillList` 选择当前方向对应的 13 个岗位 Skill 之一，知识库使用只读 Kortex
 哈希映射且失败不回退
-pgvector；平台资源由受保护的 provisioning CLI 配置。校园源码部署使用 `.env.campus`、独立
+pgvector；平台资源由受保护的 provisioning CLI 配置。四类 Agent 当前目标版本为
+`competition-v12`，统一使用真实规划探针 5/5 成功的 `glm-5.1`。`deepseek-v4-pro` 在当前
+OpenTrek Agent 模板中会随机返回无规划任务结果，provisioning 必须拒绝发布。校园源码部署使用
+`.env.campus`、独立
 `interview-guide-campus` Compose 项目和 `scripts/start-campus.sh`，仅公开前端 HTTP 入口并关闭
 语音及知识库写操作。目标 Linux 主机、两台真实校园设备和重启持久化仍属于现场验收门禁，未取得
 对应环境时不得宣称这些门禁已经通过。
@@ -117,6 +120,10 @@ OpenTrek 校园赛使用 `scripts/start-campus.sh` 和 `scripts/stop-campus.sh`�
 `interview-guide-provision-opentrek` 配置 OpenTrek应用密钥、四个已发布 Agent 版本、13 个扫描通过的 Skill
 和完成向量化的 Kortex 文档知识库。`.env.campus`、OpenTrek Cookie 和账号凭据不得提交。该模式
 只支持 Ubuntu/Debian x86_64 校园主机，HTTP 风险和麦克风不可用必须明确提示。
+替换预置知识库影子文件必须使用 `interview-guide-seed-opentrek-kb --replace-existing`，并在执行前
+把新文件哈希映射到同一 `kbCode`；存在题库题目或影子记录不唯一时必须拒绝替换。
+全部账号同步使用独立的 `scripts/sync-campus-kb.sh --yes`，必须先全量预检再修改 `.env.campus`、
+MinIO 和数据库；不得通过 Git hook 或普通 `git pull` 隐式执行有状态同步。
 
 Compose 和 Dockerfile 不得固定 `linux/amd64` 或声明全局 `container_name`。所有固定 digest 必须
 指向同时包含 `linux/amd64`、`linux/arm64` 的 manifest list；启动脚本应拒绝完整栈不支持的其他

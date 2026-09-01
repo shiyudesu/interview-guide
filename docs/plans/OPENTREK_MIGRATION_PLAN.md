@@ -8,7 +8,11 @@ Ubuntu/Debian x86_64 Linux 主机上提供比赛访问。
 实施记录（2026-08-29）：仓库实现、四类能力路由、比赛模式、校园脚本、资源 provisioning、
 13 个 Skill、Kortex 建库/上传/真实召回、四个 Agent 非流式调用和 RAG 流式调用已经在真实
 OpenTrek 工作空间验证。当前已发布资源版本为 `competition-v9`；General、Interviewer、RAG 使用
-`qwen3.6-plus`，Evaluator 使用 `qwen3.6-flash`，均关闭思考并限制 4096 输出。目标比赛 Linux
+`qwen3.6-plus`，Evaluator 使用 `qwen3.6-flash`，均关闭思考并限制 4096 输出。后续升级为
+`competition-v12`，四类 Agent 统一切换到真实规划探针 5/5 成功的 `glm-5.1`。曾按需求验证
+`deepseek-v4-pro`，但多组参数下仍随机返回“无规划任务结果”，最好仅 2/3、正式配置为 1/5，不能
+用于比赛运行时。必须先在目标工作空间唯一发现模型，再使用管理 Cookie 创建、配置和发布新版本。
+目标比赛 Linux
 主机 IP/SSH、
 两台真实校园网设备并发访问及主机重启持久化尚未提供，因此这些现场门禁仍保持未通过；本记录不
 把本地 WSL/Compose 验证等同于目标服务器验收。

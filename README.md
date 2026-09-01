@@ -69,6 +69,9 @@ docker compose run --rm app interview-guide-create-admin --email admin@example.c
 | 正式服务器 | [GHCR 主动拉取部署](docs/DEPLOYMENT.md) | 使用备案域名和 HTTPS，服务器无需克隆仓库 |
 | NAT 高端口临时验收 | `scripts/start-http.sh` | 使用独立配置和数据卷，仅用于短期明文验收 |
 
+校园赛拉取新代码后，如需把仓库内完整资料同步到全部尚未生成题目的评委影子知识库，显式运行
+`./scripts/sync-campus-kb.sh --yes`；普通 `git pull` 不会隐式修改 `.env.campus` 或数据卷。
+
 临时 HTTP 模式不能替代正式 HTTPS，也无法在非本机页面完成浏览器麦克风录音。详细边界和停止命令
 见 [临时 HTTP 验收部署](docs/OPERATIONS.md#临时-http-验收部署)。
 

@@ -268,9 +268,13 @@ BYOK、知识库和语音行为保持不变。
 Embedding 选择 1024 维。管理 Cookie 与应用密钥分开使用，应用密钥立即原子写入
 `.env.campus`，不会输出到终端。
 
-当前实测稳定的能力级模型映射为：General、Interviewer、RAG 使用 `qwen3.6-plus`，Evaluator 使用
-`qwen3.6-flash`；两者均关闭思考并限制 4096 输出。Provisioning 的 `--agent-model` 仅用于诊断时
-显式覆盖全部能力，正常部署使用上述映射。非流式 OpenTrek 响应开启 `delta` 后可能把多个累计 JSON
+Provisioning 当前目标版本为 `competition-v12`，General、Interviewer、Evaluator、RAG 均使用
+`glm-5.1`。真实 Agent 规划探针中 `glm-5.1` 和 `kimi-k2.6` 均为 5/5 成功；用户指定的
+`deepseek-v4-pro` 在多组思考、token 和温度配置下仍随机返回“无规划任务结果”，最好仅 2/3，正式
+配置为 1/5，因此 provisioning 明确拒绝将其发布到当前 OpenTrek Agent 模板。目标工作空间必须
+唯一发现目标模型后才能创建并发布新版本。Provisioning 的
+`--agent-model` 仅用于诊断时显式覆盖全部能力，正常部署使用上述映射。非流式 OpenTrek 响应开启
+`delta` 后可能把多个累计 JSON
 快照串联在一个文本字段中，Client 会严格解析连续 JSON 并只保留最后一个完整快照。
 
 ## 账号与 Session

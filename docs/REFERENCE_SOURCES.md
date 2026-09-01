@@ -80,6 +80,17 @@ python3 tools/scripts/reference_sources.py --root . collect \
 Skill 或 reference 文件。为了避免一次意外下载全部远端来源，`collect` 默认要求至少传一个
 `--source`；确需采集全部启用来源时必须显式传入 `--all-enabled`。
 
+OpenTrek 校园赛需要把全部已审核资料合并为单个文档时，运行：
+
+```bash
+python3 tools/scripts/build_campus_knowledge.py --root . \
+  --output .artifacts/opentrek-campus-full-knowledge.md
+```
+
+生成器会汇总 13 个岗位 Skill、去重后的 reference、按岗位整理的场景问题索引，以及
+`catalog.json`/`provenance.json` 中的来源和使用边界。生成文件属于部署制品，不提交仓库；上传前
+仍需人工抽查，并通过 `interview-guide-provision-opentrek --knowledge-file` 写入 Kortex。
+
 ## 整理流程
 
 1. 在 `taxonomy.json` 中维护细粒度搜索词，不使用“Java 面试题”之类过宽查询替代分类设计。

@@ -179,6 +179,40 @@ docker compose --project-name interview-guide-campus --env-file .env.campus \
 
 Compose 容器已经从 `.env.campus` 读取 Kortex 映射，因此容器内命令使用 `--skip-env-update`；主机
 `.env.campus` 中的映射由 provisioning 命令维护。对第二个评委重复 seed。
+
+若 Kortex 已追加完整资料，但原影子记录仍指向早期小文件，可在确认该账号尚未生成题库题目后原地
+替换下载文件。先把新文件 SHA-256 到同一 `kbCode` 的映射加入宿主机 `.env.campus`，重新创建
+`app` 容器使映射生效，再执行：
+
+```bash
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml cp /path/to/opentrek-campus-full-knowledge.md \
+  app:/tmp/opentrek-campus-full-knowledge.md
+
+docker compose --project-name interview-guide-campus --env-file .env.campus \
+  -f docker-compose.yml exec app interview-guide-seed-opentrek-kb \
+  --user-email judge@example.invalid \
+  --file /tmp/opentrek-campus-full-knowledge.md \
+  --kb-code YOUR_KB_CODE \
+  --name "OpenTrek 校园技术资料" \
+  --replace-existing \
+  --skip-env-update
+```
+
+该操作保留知识库 ID，并替换文件哈希、文件名、大小和 MinIO 对象；若同一 `kbCode` 下不是恰好一个
+影子记录，或已经存在题库题目，命令会拒绝执行，避免误覆盖或产生内容与题目不一致。
+
+需要同步全部已映射账号时，优先使用一键入口：
+
+```bash
+./scripts/sync-campus-kb.sh --yes
+```
+
+该脚本先执行全量只读预检；任一账号存在题库题目、影子记录不唯一、映射包含多个 `kbCode` 或服务
+未运行时，都会在修改 `.env.campus`、MinIO 和数据库前退出。预检通过后，脚本生成完整资料、原子
+追加哈希映射、调用校园启动脚本重建服务，并为全部已映射激活账号原地替换影子文件。Git 拉取本身
+不会自动运行仓库脚本，部署者必须显式执行带 `--yes` 的同步入口。
+
 完成后从两台真实校园网设备并发登录，验证数据隔离、文字面试和知识库链路；再重启 Docker/主机
 验证卷持久化。缺少目标 Linux 主机 IP、两台真实校园设备或重启权限时，不得把这些现场门禁标记为
 已通过。

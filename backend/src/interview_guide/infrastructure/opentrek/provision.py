@@ -21,7 +21,7 @@ from interview_guide.modules.knowledge_base.opentrek_seed import atomic_write
 
 OPENTREK_HOST = "10.128.203.200"
 DEFAULT_AGENT_TEMPLATE_CODE = "3b8628cc51544996908b6ea55ae07bc2"
-AGENT_VERSION_NAME = "competition-v9"
+AGENT_VERSION_NAME = "competition-v12"
 AGENT_DEFINITIONS = {
     "GENERAL": ("general", "简历分析和日程文本解析"),
     "INTERVIEWER": ("intv-v2", "JD 解析、问题生成和动态追问"),
@@ -31,10 +31,10 @@ AGENT_DEFINITIONS = {
 BASE_AGENT_ROLE_PROMPT = "你是 InterviewGuide 的受控任务执行节点，负责直接完成用户消息中的任务。"
 AGENT_ROLE_PROMPTS = {capability: BASE_AGENT_ROLE_PROMPT for capability in AGENT_DEFINITIONS}
 DEFAULT_AGENT_MODELS = {
-    "GENERAL": "qwen3.6-plus",
-    "INTERVIEWER": "qwen3.6-plus",
-    "EVALUATOR": "qwen3.6-flash",
-    "RAG": "qwen3.6-plus",
+    "GENERAL": "glm-5.1",
+    "INTERVIEWER": "glm-5.1",
+    "EVALUATOR": "glm-5.1",
+    "RAG": "glm-5.1",
 }
 AGENT_CONSTRAINT_PROMPT = (
     "直接执行用户消息中按角色分隔的完整任务，不要自行改写任务或要求补充信息。"
@@ -743,6 +743,11 @@ class OpenTrekProvisioner:
             )
 
     async def _selected_agent_model(self, model_name: str) -> dict[str, Any]:
+        if model_name == "deepseek-v4-pro":
+            raise RuntimeError(
+                "deepseek-v4-pro 与当前 OpenTrek Agent 规划模板不兼容；"
+                "真实探针会随机返回无规划任务结果，拒绝发布"
+            )
         data = required_dict(
             await self._client.management(
                 "POST",
