@@ -65,6 +65,19 @@ def opentrek_provider_for_interview_question_generation(
     return replace(provider, structured_compact_schema=True)
 
 
+def opentrek_provider_for_kb_evaluation(
+    provider: ProviderConfig,
+) -> ProviderConfig:
+    if not isinstance(provider, OpenTrekProviderConfig):
+        return provider
+    return replace(
+        provider,
+        skill_names=(),
+        structured_duplicate_schema=False,
+        structured_compact_schema=True,
+    )
+
+
 def opentrek_agent_target(
     settings: Settings,
     capability: OpenTrekCapability,

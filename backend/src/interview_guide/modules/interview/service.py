@@ -10,7 +10,10 @@ from pathlib import Path
 from uuid import UUID
 
 from interview_guide.common.ai.adapter import ProviderConfig
-from interview_guide.common.ai.opentrek import opentrek_provider_with_skills
+from interview_guide.common.ai.opentrek import (
+    opentrek_provider_for_kb_evaluation,
+    opentrek_provider_with_skills,
+)
 from interview_guide.common.ai.providers import ProviderRegistry
 from interview_guide.common.ai.user_providers import normalize_provider_alias
 from interview_guide.common.api.models import compact_json_text
@@ -769,6 +772,16 @@ class EvaluatePayload:
         self.session_id = session_id
 
 
+def evaluation_provider(
+    provider: ProviderConfig,
+    channel: str | InterviewChannel,
+    skill_id: str | None,
+) -> ProviderConfig:
+    if channel == InterviewChannel.KNOWLEDGE_BASE:
+        return opentrek_provider_for_kb_evaluation(provider)
+    return opentrek_provider_with_skills(provider, skill_id)
+
+
 class InterviewEvaluateHandler:
     def __init__(
         self,
@@ -804,7 +817,11 @@ class InterviewEvaluateHandler:
         provider = await self._registry_factory(aggregate.session.user_id).get_chat(
             normalize_provider_alias(aggregate.session.llm_provider)
         )
-        provider = opentrek_provider_with_skills(provider, aggregate.session.skill_id)
+        provider = evaluation_provider(
+            provider,
+            aggregate.session.channel,
+            aggregate.session.skill_id,
+        )
         report = await self._evaluation.evaluate(provider, aggregate)
         await self._repository.save_report(payload.session_id, report)
 

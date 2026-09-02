@@ -2021,6 +2021,21 @@
     {
       "environmentReferences": [
         {
+          "default": "-default",
+          "name": "INTERVIEW_GUIDE_BUILD_NETWORK",
+          "sensitive": false
+        }
+      ],
+      "property": "services.frontend.build.network",
+      "rawValue": "${INTERVIEW_GUIDE_BUILD_NETWORK:-default}",
+      "source": {
+        "file": "docker-compose.yml",
+        "line": 218
+      }
+    },
+    {
+      "environmentReferences": [
+        {
           "default": "-docker.io",
           "name": "INTERVIEW_GUIDE_DOCKERHUB_REGISTRY",
           "sensitive": false
@@ -2030,7 +2045,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 219
+        "line": 220
       }
     },
     {
@@ -2045,7 +2060,7 @@
       "rawValue": "interview-guide-frontend:${INTERVIEW_GUIDE_IMAGE_TAG:-local}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 220
+        "line": 221
       }
     },
     {
@@ -2054,7 +2069,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 223
+        "line": 224
       }
     },
     {
@@ -2063,7 +2078,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 226
+        "line": 227
       }
     },
     {
@@ -2072,7 +2087,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 235
+        "line": 236
       }
     },
     {
@@ -2081,7 +2096,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 236
+        "line": 237
       }
     },
     {
@@ -2090,7 +2105,7 @@
       "rawValue": "24",
       "source": {
         "file": "docker-compose.yml",
-        "line": 237
+        "line": 238
       }
     },
     {
@@ -2099,7 +2114,7 @@
       "rawValue": "10s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 238
+        "line": 239
       }
     },
     {
@@ -2108,7 +2123,7 @@
       "rawValue": "[\"https\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 241
+        "line": 242
       }
     },
     {
@@ -2123,7 +2138,7 @@
       "rawValue": "${INTERVIEW_GUIDE_DOCKERHUB_REGISTRY:-docker.io}/library/caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
       "source": {
         "file": "docker-compose.yml",
-        "line": 242
+        "line": 243
       }
     },
     {
@@ -2132,7 +2147,7 @@
       "rawValue": "service_healthy",
       "source": {
         "file": "docker-compose.yml",
-        "line": 245
+        "line": 246
       }
     },
     {
@@ -2147,7 +2162,7 @@
       "rawValue": "${ACME_EMAIL:-admin@example.invalid}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 247
+        "line": 248
       }
     },
     {
@@ -2162,7 +2177,7 @@
       "rawValue": "${PUBLIC_DOMAIN:-localhost}",
       "source": {
         "file": "docker-compose.yml",
-        "line": 248
+        "line": 249
       }
     },
     {
@@ -2171,7 +2186,7 @@
       "rawValue": "[\"CMD\", \"wget\", \"--quiet\", \"--tries=1\", \"--spider\", \"http://127.0.0.1:2019/config/\"]",
       "source": {
         "file": "docker-compose.yml",
-        "line": 261
+        "line": 262
       }
     },
     {
@@ -2180,7 +2195,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 262
+        "line": 263
       }
     },
     {
@@ -2189,7 +2204,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 263
+        "line": 264
       }
     },
     {
@@ -2198,7 +2213,7 @@
       "rawValue": "24",
       "source": {
         "file": "docker-compose.yml",
-        "line": 264
+        "line": 265
       }
     },
     {
@@ -2207,7 +2222,7 @@
       "rawValue": "5s",
       "source": {
         "file": "docker-compose.yml",
-        "line": 265
+        "line": 266
       }
     },
     {
@@ -2216,7 +2231,7 @@
       "rawValue": "unless-stopped",
       "source": {
         "file": "docker-compose.yml",
-        "line": 266
+        "line": 267
       }
     },
     {
@@ -6425,7 +6440,7 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "configurationValueCount": 309,
+    "configurationValueCount": 310,
     "envExampleCount": 185,
     "envReferencedButUndocumentedCount": 0,
     "propertyBindingCount": 118

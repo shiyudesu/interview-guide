@@ -172,6 +172,10 @@ Evaluator 的出题/评估调用；JD 通用解析和无岗位上下文的调用
 表示，并且每次只生成 1 题后顺序聚合；固定追问数设为 0，面试阶段继续由 Turn 模型动态追问。
 标准 Provider 的批量生成和固定追问行为不变。
 
+知识库专项面试的会话仍保留兼容用的 `skill_id=knowledge-base`，但它不是 OpenTrek 已发布岗位
+Skill，评估调用不得把它写入 `message.metadata.skillList`。Evaluator 继续使用完整反注入边界，
+同时关闭重复 Schema 并使用紧凑 Schema 传输，避免较长知识库评估 Prompt 触发“无规划任务结果”。
+
 ### 4.4 预置 Kortex 知识库映射
 
 不增加数据库字段。新增运维命令 interview-guide-seed-opentrek-kb：

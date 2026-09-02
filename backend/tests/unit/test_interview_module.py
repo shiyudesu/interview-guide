@@ -24,6 +24,7 @@ from interview_guide.common.db.models import (
 from interview_guide.modules.interview.models import (
     CategoryScore,
     CreateInterviewRequest,
+    InterviewChannel,
     InterviewReportDTO,
     QuestionGroupEvaluationDTO,
     TurnAction,
@@ -37,6 +38,7 @@ from interview_guide.modules.interview.question import (
     QuestionOutput,
 )
 from interview_guide.modules.interview.repository import SessionAggregate
+from interview_guide.modules.interview.service import evaluation_provider
 from interview_guide.modules.interview.turn import InterviewTurnDecisionService
 from interview_guide.modules.voice_interview.models import CreateVoiceSessionRequest
 from interview_guide.modules.voice_interview.service import VoiceInterviewService
@@ -47,6 +49,14 @@ PROVIDER = ProviderConfig(
     base_url="http://127.0.0.1",
     api_key="explicit-fake",
     model="explicit-fake",
+)
+OPENTREK_EVALUATOR = OpenTrekProviderConfig(
+    provider_id="opentrek:evaluator",
+    base_url="http://10.128.203.200/gateway",
+    api_key="protected-test-key",
+    model="evaluator-agent",
+    capability=OpenTrekCapability.EVALUATOR,
+    agent_version="competition-test",
 )
 
 
@@ -245,6 +255,29 @@ def opentrek_interviewer_provider() -> OpenTrekProviderConfig:
         capability=OpenTrekCapability.INTERVIEWER,
         agent_version="123",
     )
+
+
+def test_knowledge_base_evaluation_does_not_bind_synthetic_skill() -> None:
+    knowledge_base = evaluation_provider(
+        OPENTREK_EVALUATOR,
+        InterviewChannel.KNOWLEDGE_BASE,
+        "knowledge-base",
+    )
+    text = evaluation_provider(
+        OPENTREK_EVALUATOR,
+        InterviewChannel.TEXT,
+        "python-backend",
+    )
+
+    assert isinstance(knowledge_base, OpenTrekProviderConfig)
+    assert knowledge_base.skill_names == ()
+    assert knowledge_base.structured_security_boundary is True
+    assert knowledge_base.structured_duplicate_schema is False
+    assert knowledge_base.structured_compact_schema is True
+    assert isinstance(text, OpenTrekProviderConfig)
+    assert text.skill_names == ("python-backend",)
+    assert text.structured_duplicate_schema is True
+    assert text.structured_compact_schema is False
 
 
 @pytest.mark.asyncio
