@@ -146,4 +146,85 @@ test.describe('模拟面试加载状态', () => {
     expect(expandedHeight).toBeGreaterThan(initialHeight);
     expect(expandedHeight).toBeLessThanOrEqual(200);
   });
+
+  test('提交回答等待 AI 决策时显示聊天内思考状态', async ({ page }) => {
+    await page.route('**/api/auth/config', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ authEnabled: false, registrationEnabled: false }),
+    }));
+
+    const sessionId = 'session-thinking-indicator';
+    const currentQuestion = {
+      questionId: 'question-thinking-1',
+      kind: 'MAIN',
+      parentQuestionId: null,
+      question: '你会如何治理缓存击穿？',
+      type: 'REDIS',
+      category: 'Redis',
+    };
+    const nextQuestion = {
+      ...currentQuestion,
+      questionId: 'question-thinking-2',
+      question: '如何验证治理方案有效？',
+    };
+    const session = {
+      sessionId,
+      channel: 'TEXT',
+      status: 'IN_PROGRESS',
+      currentQuestion,
+      turns: [],
+      progress: {
+        completedMainQuestions: 0,
+        plannedMainQuestions: 2,
+        followUpsUsedForCurrentMain: 0,
+        maxFollowUpsPerMain: 1,
+      },
+      knowledgeBaseId: null,
+      interviewCategory: null,
+    };
+    let releaseTurn: (() => void) | undefined;
+    const turnPending = new Promise<void>(resolve => {
+      releaseTurn = resolve;
+    });
+
+    await page.route(`**/api/interview/sessions/${sessionId}**`, async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(session) });
+        return;
+      }
+      await turnPending;
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          turnId: 'turn-thinking-1',
+          action: 'NEXT_MAIN',
+          acknowledgement: '好的，我们继续下一题。',
+          nextQuestion,
+          completed: false,
+          progress: {
+            ...session.progress,
+            completedMainQuestions: 1,
+          },
+        }),
+      });
+    });
+
+    try {
+      await page.goto(`/interview/session/${sessionId}`);
+      await page.getByPlaceholder('输入你的回答...').fill('使用互斥锁控制热点 key 的重建。');
+      await page.getByRole('button', { name: '提交回答' }).click();
+
+      const thinking = page.getByTestId('ai-thinking-indicator');
+      await expect(thinking).toBeVisible();
+      await expect(thinking).toContainText('正在理解你的回答并准备下一步');
+      await expect(
+        page.getByTestId('interview-message-list').getByText('使用互斥锁控制热点 key 的重建。'),
+      ).toBeVisible();
+    } finally {
+      releaseTurn?.();
+    }
+
+    await expect(page.getByText(nextQuestion.question)).toBeVisible();
+    await expect(page.getByTestId('ai-thinking-indicator')).toBeHidden();
+  });
 });

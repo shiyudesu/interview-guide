@@ -3,6 +3,7 @@ import {motion} from 'framer-motion';
 import {Virtuoso, type VirtuosoHandle} from 'react-virtuoso';
 import type {InterviewQuestion, InterviewSession} from '../types/interview';
 import {AlertCircle, ArrowDown, CheckCircle2, Send, Sparkles} from 'lucide-react';
+import AiThinkingIndicator from './AiThinkingIndicator';
 import InterviewMessageBubble from './InterviewMessageBubble';
 
 interface Message {
@@ -11,6 +12,8 @@ interface Message {
   category?: string | null;
   questionId?: string;
 }
+
+type ChatItem = Message | { type: 'thinking' };
 
 interface InterviewChatPanelProps {
   title: string;
@@ -45,6 +48,10 @@ export default function InterviewChatPanel({
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const chatItems = useMemo<ChatItem[]>(
+    () => isSubmitting ? [...messages, { type: 'thinking' }] : messages,
+    [isSubmitting, messages],
+  );
 
   const progress = useMemo(() => {
     if (!session) return 0;
@@ -70,9 +77,9 @@ export default function InterviewChatPanel({
   };
 
   const scrollToLatest = () => {
-    if (messages.length === 0) return;
+    if (chatItems.length === 0) return;
     virtuosoRef.current?.scrollToIndex({
-      index: messages.length - 1,
+      index: chatItems.length - 1,
       align: 'end',
       behavior: 'smooth',
     });
@@ -134,19 +141,27 @@ export default function InterviewChatPanel({
       <div className="relative min-h-0 flex-1 bg-white dark:bg-slate-900" data-testid="interview-message-list">
         <Virtuoso
           ref={virtuosoRef}
-          data={messages}
-          initialTopMostItemIndex={messages.length - 1}
+          data={chatItems}
+          initialTopMostItemIndex={chatItems.length - 1}
           followOutput="smooth"
           atBottomStateChange={setIsAtBottom}
           className="h-full w-full scrollbar-thin"
           itemContent={(index, msg) => (
             <div className={`mx-auto max-w-4xl px-4 pb-7 sm:px-8 ${index === 0 ? 'pt-8' : ''}`}>
-              <InterviewMessageBubble
-                role={msg.type === 'interviewer' ? 'interviewer' : 'user'}
-                text={msg.content}
-                category={msg.category ?? undefined}
-                appearance="conversation"
-              />
+              {msg.type === 'thinking' ? (
+                <AiThinkingIndicator
+                  label="面试官"
+                  message="正在理解你的回答并准备下一步"
+                  slowMessage="正在生成追问或下一题，请稍候，不需要重复提交"
+                />
+              ) : (
+                <InterviewMessageBubble
+                  role={msg.type === 'interviewer' ? 'interviewer' : 'user'}
+                  text={msg.content}
+                  category={msg.category ?? undefined}
+                  appearance="conversation"
+                />
+              )}
             </div>
           )}
         />

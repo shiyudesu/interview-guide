@@ -7,6 +7,7 @@ import {knowledgeBaseApi, type KnowledgeBaseItem, type SortOption} from '../api/
 import {ragChatApi, type RagChatSessionListItem} from '../api/ragChat';
 import {formatDateOnly} from '../utils/date';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
+import AiThinkingIndicator from '../components/AiThinkingIndicator';
 import CodeBlock from '../components/CodeBlock';
 import ResponsiveDialog from '../components/ResponsiveDialog';
 import {BookOpen, ChevronLeft, ChevronRight, Edit, History, MessageSquare, Pin, Plus, Trash2, X,} from 'lucide-react';
@@ -589,8 +590,20 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
                       initialTopMostItemIndex={messages.length - 1}
                       followOutput="smooth"
                       className="h-full w-full"
-                      itemContent={(index, msg) => (
+                      itemContent={(index, msg) => {
+                        const showThinking = loading
+                          && index === messages.length - 1
+                          && msg.type === 'assistant'
+                          && !msg.content;
+                        return (
                           <div className="pb-4 px-4 first:pt-4 dark:bg-slate-800">
+                          {showThinking ? (
+                            <AiThinkingIndicator
+                              label="知识库助手"
+                              message="正在检索知识库并组织回答"
+                              slowMessage="知识库内容较多，AI 仍在整理回答，请稍候"
+                            />
+                          ) : (
                           <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -643,8 +656,10 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
                               )}
                             </div>
                           </motion.div>
+                          )}
                         </div>
-                      )}
+                        );
+                      }}
                     />
                   )}
                 </div>
