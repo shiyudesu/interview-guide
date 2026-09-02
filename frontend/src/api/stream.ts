@@ -1,9 +1,11 @@
 import {
   API_BASE_URL,
   getApiProblemError,
+  getCsrfToken,
   getErrorMessage,
   parseProblemPayload,
 } from './request';
+import { authenticatedStreamInit } from './streamSecurity';
 
 type SseParseMode = 'line' | 'event';
 
@@ -274,7 +276,10 @@ async function readStream(response: Response, options: StreamSseOptions): Promis
 
 export async function streamSse(options: StreamSseOptions): Promise<void> {
   try {
-    const response = await fetch(toApiUrl(options.url), options.init);
+    const response = await fetch(
+      toApiUrl(options.url),
+      authenticatedStreamInit(options.init, getCsrfToken()),
+    );
     await assertStreamResponse(response);
     await readStream(response, options);
     options.onComplete();
