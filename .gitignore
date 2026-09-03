@@ -30,3 +30,8 @@ __pycache__/
 .venv/
 /.agents
 skills-lock.json
+
+# Local project proposal sources and export
+/项目策划书.md
+/项目策划书.typ
+/项目策划书.pdf
