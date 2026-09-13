@@ -28,7 +28,8 @@ CI 辅助脚本：
 | 模型诊断代理 | Model Proxy 测试、`CI gate` |
 | Compose、Docker、锁文件或工作流 | 全量 CI |
 
-工作流文件和变更分类脚本本身的修改始终强制全量运行。手动触发和每日定时任务执行全量 CI。
+CI 定时触发已关闭，仅保留推送到 `main`、向 `main` 提交 PR 和手动触发。
+工作流文件和变更分类脚本本身的修改始终强制全量运行，手动触发也执行全量 CI。
 前端 Job 运行不依赖真实后端的 Playwright；生产 Compose 集成只执行 `@real-backend` 用例。
 仓库 API 清单同时比较 REST 路径和 HTTP 方法，任何 frontend-only 调用都会使检查失败。
 

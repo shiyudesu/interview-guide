@@ -155,6 +155,7 @@ docker compose logs migrate app worker scheduler frontend gateway
 - Commit subject 使用 Conventional Commits。
 - 不提交 API Key、Token、数据库密码或用户文件。
 - `ci.yml` 必须验证生产 Compose 和 Python-only 镜像。
+- CI 定时触发已关闭，仅保留 `main` 分支的 push、PR 和手动触发。
 - CI 使用 `tools/scripts/detect_ci_changes.py` 选择必要 Job；工作流或分类脚本变化必须全量运行。
 - 前端 CI 必须运行不依赖真实后端的 Playwright；生产 Compose 集成运行标记为
   `@real-backend` 的浏览器用例。

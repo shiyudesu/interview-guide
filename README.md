@@ -87,6 +87,9 @@ docker compose -f docker-compose.dev.yml up -d --wait
 - [前端开发](frontend/README.md)：pnpm、Vite、Vitest、Playwright、lint 和构建
 - [仓库工具](tools/README.md)：仓库清单、文档检查、模型诊断和真实模型验收
 
+CI 仅在推送到 `main`、向 `main` 提交 PR 或手动触发时运行，定时触发已关闭；
+检查范围见 [CI 变更选择](tools/README.md#ci-变更选择)。
+
 完整环境变量只在 [配置说明](docs/CONFIGURATION.md) 维护，避免 README 与实际配置漂移。
 
 ## 运行架构
